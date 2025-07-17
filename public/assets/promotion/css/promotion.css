@@ -1,0 +1,941 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    background-color: #fff;
+}
+/* Font Style */
+.lato-thin {
+    font-family: "Lato", sans-serif;
+    font-weight: 100;
+    font-style: normal;
+  }
+  
+  .lato-light {
+    font-family: "Lato", sans-serif;
+    font-weight: 300;
+    font-style: normal;
+  }
+  
+  .lato-regular {
+    font-family: "Lato", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  .lato-bold {
+    font-family: "Lato", sans-serif;
+    font-weight: 700;
+    font-style: normal;
+  }
+  
+  .lato-black {
+    font-family: "Lato", sans-serif;
+    font-weight: 900;
+    font-style: normal;
+  }
+  
+  .lato-thin-italic {
+    font-family: "Lato", sans-serif;
+    font-weight: 100;
+    font-style: italic;
+  }
+  
+  .lato-light-italic {
+    font-family: "Lato", sans-serif;
+    font-weight: 300;
+    font-style: italic;
+  }
+  
+  .lato-regular-italic {
+    font-family: "Lato", sans-serif;
+    font-weight: 400;
+    font-style: italic;
+  }
+  
+  .lato-bold-italic {
+    font-family: "Lato", sans-serif;
+    font-weight: 700;
+    font-style: italic;
+  }
+  
+  .lato-black-italic {
+    font-family: "Lato", sans-serif;
+    font-weight: 900;
+    font-style: italic;
+  }
+  
+  .raleway-thin {
+    font-family: "Raleway", sans-serif;
+    font-weight: 100;
+    font-style: normal;
+  }
+  
+  .raleway-light {
+    font-family: "Raleway", sans-serif;
+    font-weight: 300;
+    font-style: normal;
+  }
+  
+  .raleway-regular {
+    font-family: "Raleway", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  .raleway-bold {
+    font-family: "Raleway", sans-serif;
+    font-weight: 700;
+    font-style: normal;
+  }
+  
+  .raleway-black {
+    font-family: "Raleway", sans-serif;
+    font-weight: 900;
+    font-style: normal;
+  }
+  
+  .raleway-thin-italic {
+    font-family: "Raleway", sans-serif;
+    font-weight: 100;
+    font-style: italic;
+  }
+  
+  .raleway-light-italic {
+    font-family: "Raleway", sans-serif;
+    font-weight: 300;
+    font-style: italic;
+  }
+  
+  .raleway-regular-italic {
+    font-family: "Raleway", sans-serif;
+    font-weight: 400;
+    font-style: italic;
+  }
+  
+  .raleway-bold-italic {
+    font-family: "Raleway", sans-serif;
+    font-weight: 700;
+    font-style: italic;
+  }
+  
+  .raleway-black-italic {
+    font-family: "Raleway", sans-serif;
+    font-weight: 900;
+    font-style: italic;
+  }
+
+  /* end font style */
+
+  /* Hero Section */
+
+  .hero__section{
+    background-image: url('/assets/frontend/assets/img/hero-background.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    height: auto;
+    padding-bottom: 265px;
+    width: 100%;
+  }
+
+  .hero__section p{
+    font-size: 14px;
+    color: #fff;
+  }
+
+  .hero__section .hero__content h1{
+    font-size: 105px;
+    color: #ffffff; 
+  }
+
+  .hero__section .hero__content h3{
+    color: #ffffff;
+    background-color: #091235;
+    font-size: 42px;
+    -webkit-box-shadow: 0px 15px 25px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 0px 15px 25px 0px rgba(0,0,0,0.75);
+    box-shadow: 0px 15px 25px 0px rgba(0,0,0,0.75);
+  }
+
+  .hero__section .hero__content p{
+    font-size: 24px;
+  }
+
+  .hero__section .hero__content button{
+    background-color: #88A9C4;
+    color: #fff;
+    font-size: 24px;
+    padding: 15px 30px;
+    border-radius: 12px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    margin-top: 30px;
+    -webkit-box-shadow: 0px 15px 25px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 0px 15px 25px 0px rgba(0,0,0,0.75);
+    box-shadow: 0px 15px 25px 0px rgba(0,0,0,0.75);
+  }
+
+  /* End Hero section */
+
+  /* Achievement Section */
+
+  .achievement__section{
+    background-color: #ffffff;
+    width: 100%;
+    z-index: 2;
+  }
+
+  .achievement__section .achievement__box{
+    padding: 30px;
+    background-color: #ffffff;
+    height: 30vh;
+    position: relative;
+    top: -110px;
+    -webkit-box-shadow: 0px 15px 25px 0px rgba(0,0,0,0.6);
+    -moz-box-shadow: 0px 15px 25px 0px rgba(0,0,0,0.6);
+    box-shadow: 0px 15px 25px 0px rgba(0,0,0,0.6);
+  }
+
+  .achievemnet_section .achievement__box .achievement__conten::before{
+    content: "";
+    position: absolute;
+    top: -110px; /* Tinggi tumpang tindih yang diinginkan */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: white; /* Atur warna sesuai kebutuhan */
+    z-index: 3;
+  }
+
+  .achievement__section .achievement__box p{
+    font-size: 20px;
+    color: #091235;
+    width: 75%;
+    margin: auto;
+  }
+
+  .achievement__section .achievement__box p .highlight{
+    font-size: 28px;
+    color: #091235;
+  }
+
+  /* End Achievement section */
+
+  /* Temperature Section */
+
+  .temperature__section h1{
+    color: #091235;
+  }
+
+  .temperature__section .col-6 img{
+    width: 100%;
+    height: auto;
+  }
+
+  .temperature__section p{
+    font-size: 24px;
+    color: #091235;
+  }
+
+  /* End Temperature Section */
+  
+  /* Why Section */
+  
+  .why__section{
+    position: relative; 
+    margin-top: 12rem;
+  }
+
+  .why__section .overlay__image{
+    position: absolute;
+    background-image: url('/assets/img/wave.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    top: -55rem;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    z-index: -1;
+  }
+
+  .why__section h1{
+    color: #091235;
+  }
+
+  .why__section p{
+    font-size: 24px;
+    color: #091235;
+    margin-bottom: 15rem;
+  }
+
+  .why__section .col-lg-4{
+    border-left: 1px solid #091235;
+    margin-bottom: 10rem;
+  }
+
+
+  .why__section .number-list{
+    color:#88A9C4;
+    font-size: 90px;
+  }
+  
+  .why__section .col-4 > .row > .col-12:first-child {
+    margin-bottom: 4rem; /* Atur jarak sesuai kebutuhan, contoh 16px */
+  }
+
+  .why__section .col-12 .caption-number{
+    width: 70%;
+    font-size: 24px;
+    margin-bottom: 0 !important;
+    color: #002645;
+  }
+  /* End Why Section */
+
+  /* Free Consult section */
+  .free__consult{
+    background-image: url('/assets/img/background-consult.png');
+
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    height: auto;
+    width: 100%;
+    padding: 120px 0px;
+  }
+
+  .free__consult img{
+    width: 100%;
+    height: auto;
+  }
+
+  .free__consult button{
+    width: 70%;
+    background-color: #39BF4C;
+    padding: 10px;
+    color: #ffffff;
+    border: none;
+    text-align: start;
+    margin-top: 50px;
+  }
+
+  .free__consult h1{
+    color: #ffffff;
+    font-size: 2.5rem;
+  }
+
+
+  .free__consult button span{
+    font-size: 24px;
+    margin: 0 !important;
+  }
+  /* End Free Consult Section */
+
+  /* Client Section */
+
+  .client__section{
+    margin-top: 15rem;
+    color: #002645;
+  }
+
+  /* End Client Section */
+
+  /* Review Section */
+  .review-card {
+    position: relative; /* Dibutuhkan untuk positioning gambar */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border: 1px solid #007BFF;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 20px auto;
+    overflow: visible; /* Membiarkan elemen keluar dari kartu */
+  }
+  
+  .review-content {
+    flex: 1;
+    margin-right: 20px;
+  }
+  
+  .review-content p {
+    font-size: 16px;
+    color: #333;
+    margin: 0 0 10px;
+  }
+  
+  .rating {
+    color: #FFD700;
+    font-size: 20px;
+  }
+  
+  .reviewer {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .reviewer-image {
+    position: absolute;
+    top: -30px; /* Mengatur posisi gambar sedikit keluar */
+    right: -30px; /* Gambar keluar ke kanan */
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .reviewer-info {
+    margin-top: 50px; /* Memberi ruang di bawah gambar */
+    text-align: center;
+  }
+  
+  .reviewer-name {
+    font-weight: bold;
+    font-size: 14px;
+  }
+  
+  .reviewer-role {
+    font-size: 12px;
+    color: #666;
+    background-color: #333;
+    color: #fff;
+    border-radius: 20px;
+    padding: 2px 10px;
+    display: inline-block;
+  }
+  /* End Review Section */
+
+  /* Spesification Section */
+  .spesification__section{
+    position: relative;
+    margin-top: 12rem;
+    margin-bottom: 12rem;
+  }
+
+  .spesification__section .overlay__image{
+    position: absolute;
+    background-image: url('/assets/img/wave.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    top: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .spesification__section h2{
+    color: #002645;
+  }
+
+
+  .spesification__section .card {
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .spesification__section .card__flex__oneway{
+    background: rgb(136,169,196);
+    background: linear-gradient(180deg, rgba(136,169,196,1) 0%, rgba(0,38,69,1) 100%);
+  }
+
+  .spesification__section .card__black__master{
+    background: rgb(63,63,63);
+background: linear-gradient(180deg, rgba(63,63,63,1) 0%, rgba(0,0,0,1) 100%);
+  }
+
+  .spesification__section .card__notch__uv{
+    background: rgb(43,61,134);
+background: linear-gradient(180deg, rgba(43,61,134,1) 0%, rgba(9,19,55,1) 100%);
+  }
+
+  .spesification__section .card__alpha__pro{
+    background: rgb(255,255,255);
+    background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(241,241,241,1) 100%);
+    width: 110%;
+    height: 600px;
+    
+  }
+
+  .spesification__section h1{
+    margin-top: 60px;
+    margin-bottom: 30px;
+  }
+
+  .spesification__section .card__alpha__pro h1{
+    margin-top: 100px;
+    margin-bottom: 30px;
+    color: #1F1F1F;
+  }
+
+  .card-header:first-child{
+    border-radius: 25px !important;
+  }
+
+  .spesification__section .card__flex__oneway .card-header {
+    font-size: 12px;
+    padding: 0 1rem;
+    text-transform: uppercase;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #002645;
+    border-radius: 25px !important;
+  }
+
+  .spesification__section .card__black__master .card-header {
+    font-size: 12px;
+    padding: 0 1rem;
+    text-transform: uppercase;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #070707;
+    border-radius: 25px !important;
+  }
+
+  .spesification__section .card__notch__uv .card-header {
+    font-size: 12px;
+    padding: 0 1rem;
+    text-transform: uppercase;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #516BCF;
+    border-radius: 25px;
+  }
+
+  .spesification__section .card__alpha__pro .card-header {
+    font-size: 12px;
+    padding: 0 1rem;
+    text-transform: uppercase;
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    background-color: #070707;
+    border-radius: 25px;
+  }
+
+  .spesification__section .price {
+    font-size: 32px;
+    color: #ffffff;
+  }
+
+  .spesification__section .price span{
+    font-size: 12px;
+    text-align: end;
+  }
+
+  .spesification__section .price-strike {
+    text-decoration: line-through;
+    font-size: 18px;
+    color: #999;
+  }
+
+  .spesification__section .spec-bar {
+    height: 12px;
+    background: #ddd;
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .spesification__section .spec-bar-flex div {
+    height: 100%;
+    background: #1F4463;
+    border-radius: 10px;
+    transition: width 0.2s ease-in-out;
+  } 
+
+  .spesification__section .card__black__master .spec-bar-flex div {
+    height: 100%;
+    background: #0A0A0A;
+    border: none;
+    border-radius: 10px;
+    transition: width 0.2s ease-in-out;
+  } 
+
+  .spesification__section .card__notch__uv .spec-bar-flex div {
+    height: 100%;
+    background: #516BCF ;
+    border: none;
+    border-radius: 10px;
+    transition: width 0.2s ease-in-out;
+  }
+  
+  .spesification__section .card__alpha__pro .spec-bar-flex div {
+    height: 100%;
+    background: #333333 ;
+    border: none;
+    border-radius: 10px;
+    transition: width 0.2s ease-in-out;
+  }
+
+  .spesification__section .row .spec__type{
+    font-size: 13px;
+    margin: 0 !important;
+  }
+
+  .spesification__section .card__alpha__pro .spec__star{
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+  }
+
+  .spesification__section .row .spec__percentage{
+    font-size: 13px;
+    margin: 0 !important;
+  }
+
+  .spesification__section .pr-0{
+    padding-right: 0 !important;
+  }
+
+  .spesification__section .price-box{
+    margin-top: 5rem;
+  }
+
+  .spesification__section .card__alpha__pro p{
+    color: #1F1F1F;
+  }
+
+  /* End Spesification Section */
+
+  /* Discount Section */
+  .discount__section{
+    background-image: url('/assets/img/discount-background.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    height: auto;
+    width: 100%;
+    color: #ffffff;
+  }
+
+  .discount__section h1{
+    font-size: 5rem;
+
+  }
+
+  .glass {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 5px;
+    padding: 10px 15px;
+    display: inline-block;
+  }
+
+  .countdown {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .countdown .time__number {
+    font-size: 4.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 10px 15px;
+    border-radius: 10px;
+    min-width: 80px;
+    text-align: center;
+  }
+
+  .countdown .colon__number{
+    font-size: 4.5rem;
+  }
+
+  .discount__section h5{
+    font-size: 1.5rem;
+  }
+
+  .discount__section > .container > .row{
+    padding: 5rem;
+  }
+
+  /* End Discount Section */
+
+  /* Promo Section */
+  .promo__section{
+    margin: 8rem 0;
+  }
+
+  .promo-text {
+    color: #000;
+    font-size: 3rem;
+  }
+
+  .promo-text span {
+    color: black;
+  }
+
+  .promo-subtext {
+    font-size: 1.5rem;
+    color: #000000;
+  }
+
+  .arrow-icon {
+    background-color: #dde7f2;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #003d73;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .whatsapp-btn {
+    background-color: #25d366;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 2rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .whatsapp-btn i {
+    font-size: 3rem;
+    margin-right: 30px;
+  }
+
+  .whatsapp-btn:hover {
+    background-color: #1ebe57;
+    text-decoration: none;
+  }
+  /* End Promo Section */
+
+  /* FAQ Section */
+  .faq__section{
+    margin-top: 20rem;
+  }
+
+  .faq__section h1{
+    width: 75%;
+    font-size: 3.5rem;
+    color: #002645;
+  }
+
+  
+  .faq__section p{
+    font-size: 1.5rem;
+    width: 75%;
+    margin-top: 3.5rem;
+    color: #002645;
+  }
+
+  .custom-accordion .accordion-item {
+    border: none;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .custom-accordion .accordion-button {
+    background: none;
+    font-size: 1.5rem;
+    color: #070707;
+    padding-left: 0;
+    box-shadow: none;
+    position: relative;
+  }
+
+  .custom-accordion .accordion-button::after {
+    content: ""; /* Hapus ikon default */
+  }
+
+  .custom-accordion .accordion-button:not(.collapsed)::after {
+    background-image: none !important;
+    content: "-";
+    position: absolute;
+    right: 0;
+    font-size: 1.5rem;
+    color: #003d73;
+  }
+
+  .custom-accordion .accordion-button.collapsed::after {
+    content: "+";
+    background-image: none !important;
+
+    position: absolute;
+    right: 0;
+    font-size: 1.5rem;
+    color: #003d73;
+  }
+
+  .custom-accordion .accordion-body {
+    padding-left: 0 !important;
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+  .custom-accordion .accordion-button span{
+    width: 75%;
+  }
+  /* End FAQ Section */
+
+  /* Rating Section */
+  .rating__section{
+    margin-top: 10rem;
+  }
+
+  .rating__section .rating__header{
+    color: #002645;
+    font-size: 2rem !important;
+  }
+
+  .rating__section .rating__point{
+    color: #002645;
+    font-size: 8.5rem;
+  }
+
+  .rating__section .rating__point svg{
+    width: auto;
+    height: 50%;
+    color: #FFBB00;
+  }
+
+  .rating__section .rating__place{
+    color: #002645;
+    font-size: 2rem;
+  }
+
+  .rating__section .rating__sub{
+    color: #002645;
+    font-size: 1rem;
+  }
+
+  .rating__section .rating__body{
+    background-image: url('/assets/img/rating-bg.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    height: auto;
+    width: 100%;
+    color: #ffffff;
+    margin-top: 4rem;
+  }
+
+  .rating__section .rating__body img{
+
+  }
+
+  /* End Rating Section */
+
+  /* They Said Section */
+
+  .they__said__section{
+    margin-top: 10rem;
+  }
+
+  .jedar__review img{
+    width: 100%;
+    height: auto;
+  }
+
+  .they__said__section h1{
+    color: #002645;
+    font-size: 3rem;
+  }
+
+  .they__said__section .card{
+    -webkit-box-shadow: 0px 15px 25px 0px rgba(0,0,0,0.6);
+    -moz-box-shadow: 0px 15px 25px 0px rgba(0,0,0,0.6);
+    box-shadow: 0px 15px 25px 0px rgba(0,0,0,0.6);
+  }
+
+
+  
+  .they__said__section .card p{
+    width: 70%;
+    border-radius: 1rem !important;
+    margin: 0;
+  }
+
+
+  /* End They Said Section */
+
+  /* Footer Section */
+  footer{
+    margin-top: 10rem;
+  }
+
+  footer .logo__footer img{
+    width: 100%;
+    height: auto;
+  }
+
+  footer ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0
+  }
+
+  footer ul>li {
+      padding: 4px;
+      color: #002645;
+  }
+
+  footer ul>li:hover {
+      color:  #007BFF;
+      cursor: pointer
+  }
+
+  footer hr {
+      border-width: 3px
+  }
+
+  footer .card {
+      padding: 2% 7%
+  }
+
+  footer .social>i {
+      padding: 1%;
+      font-size: 15px
+  }
+
+  footer .social>i:hover {
+      color: #957bda;
+      cursor: pointer
+  }
+
+  footer .policy>div {
+      padding: 4px
+  }
+
+  footer .heading {
+      font-family: 'Titillium Web', sans-serif;
+      color: black
+  }
+
+  footer .divider {
+      border-top: 2px solid
+  }
+
+  footer a{
+    text-decoration: none;
+    color: #000000;
+  }
+
+  footer iframe{
+    width: 100%;
+    height: auto;
+}
+  /* End Footer Section */
