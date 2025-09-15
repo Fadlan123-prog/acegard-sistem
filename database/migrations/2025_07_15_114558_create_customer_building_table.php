@@ -18,15 +18,12 @@ return new class extends Migration
             $table->integer('card_number');
             $table->string('name');
             $table->string('email')->unique();
-            $table->integer('phone_number');
+            $table->string('phone_number');
             $table->string('address');
             $table->string('dealer_name');
             $table->string('applicator');
             $table->string('city');
             $table->string('country');
-            $table->date('warranty_start');
-            $table->date('warranty_end');
-            $table->date('warranty_duration');
             $table->timestamps();
         });
     }

@@ -51,8 +51,7 @@
                                 class="hidden dark:block"
                             >
                             <p class="font-weight-bold">
-                                Jl. Tanjung Barat No.2B Jagakarsa,<br>
-                                Jakarta Selatan 12530 - Indonesia
+                                Jl. KH. Hasyim Ashari, RT.007/RW.002,<br> Nerogtog, Kec. Cipondoh, Kota Tangerang, Banten 15146
                             </p>
                         </th>
                         <th style="text-align: right;">
@@ -164,7 +163,7 @@
                             </div>
 
                             <div class="card border-solid border-2 border-black">
-                                <div class="card-body border-solid border-2 border-black">
+                                 <div class="card-body border-solid border-2 border-black">
                                     <p class="text-center fw-bold text-uppercase mb-0">TYPE OF TRANSACTION : {{ $invoice->type }}</p>
                                 </div>
                             </div>
@@ -250,7 +249,6 @@
                 <p class="text-gray-500"><br />To obtain service and handling, please contact the authorized dealer where you purchased.<br /><br />Customer service E-mail :&nbsp;acegardindonesia@gmail.com<br />Jl. Tanjung Barat No.2B, Lenteng Agung, Jagakarsa, Jakarta Selatan - 12530. Indonesia<br /><br /><strong>Important Notice : Window Film Maintenance</strong><br />After installing the window film, a haze-like appearance may occur, this is temporary and is caused by the humidity of the water used when applying the window film. Acegard Nano Ceramic Film can be cleaned with certain liquids that are not acidic and can be wiped using a microfiber cloth after 4 weeks of installation. do not operate the window until the installed window film is completely dry. Abrasive type cleaning agents, bristle brushes, which can scratch the window film should not be used.<br /><br /><strong>Disclaimer :</strong>&nbsp;All Acegard Nano Ceramic Film users are expected to comply with applicable laws and regulations in Indonesia. All official Acegard dealers are not responsible for violations of user non-compliance with Indonesian traffic laws and regulations.</p>
             </div>
         </div>
-
     </div>
 </div>
 @endsection

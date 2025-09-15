@@ -89,6 +89,7 @@
     }
     .adventage img, .adventage .col-12{
         width: 80%;
+        height: 40%;
         padding: 0 !important;
     }
 
@@ -115,6 +116,18 @@
 
     .promo-subtext{
         font-size: 9px;
+    }
+
+    .promo-container{
+        margin:0 auto;
+    }
+
+    .slot-section .slot-line{
+        margin-top: 1rem;
+    }
+
+    .free-home-service .home-service{
+        font-size: 12px;
     }
 
     .warranty{
@@ -407,7 +420,7 @@
     }
 
     .hero img {
-        width: 60%;
+        width: 40%;
         height: auto;
         z-index: 1;
     }
@@ -599,7 +612,7 @@
 
 @media screen and (min-width: 1025px) {
     .review-coment .center-image img{
-        width: 100%;
+        width: 60%;
     }
 }
 
@@ -610,11 +623,11 @@
     }
 
     .hero img {
-        width: 65%;
+        width: 30%;
     }
 
     .hero h1 {
-        font-size: 4.5rem !important;
+        font-size: 4rem !important;
     }
 
     .hero p{

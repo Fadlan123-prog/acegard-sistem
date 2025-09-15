@@ -22,13 +22,36 @@
 
         {{-- Search & Bulk Delete --}}
         <div class="d-flex justify-content-between align-items-center flex-wrap mb-3 gap-2">
-            {{-- Search --}}
-            <form method="GET" action="{{ route('customer.index') }}" class="d-flex align-items-center gap-2 flex-wrap">
+
+            {{-- Search + Filter Cabang --}}
+            <form method="GET" action="{{ route('customer.index') }}" id="filterForm"
+                class="d-flex align-items-center gap-2 flex-wrap">
+
+                {{-- Input pencarian --}}
                 <input type="text" name="search" value="{{ request('search') }}"
                     class="form-control" placeholder="Cari nama customer..." style="max-width: 250px;">
-                <button type="submit" class="btn btn-outline-primary">
-                     Search
-                </button>
+
+                {{-- Tombol cari --}}
+                <button type="submit" class="btn btn-outline-primary">Search</button>
+
+                {{-- Dropdown filter cabang --}}
+                <div class="col-md-3">
+                    <select name="branch_id" class="form-select"
+                            onchange="document.getElementById('filterForm').submit()">
+                        <option value="">-- Semua Cabang --</option>
+                        @foreach($branches as $branch)
+                            <option value="{{ $branch->id }}"
+                                    {{ request('branch_id') == $branch->id ? 'selected' : '' }}>
+                                {{ $branch->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Tombol reset jika filter aktif --}}
+                @if(request('branch_id') || request('search'))
+                    <a href="{{ route('customer.index') }}" class="btn btn-outline-secondary">Reset</a>
+                @endif
             </form>
 
             {{-- Bulk Delete --}}
@@ -37,22 +60,11 @@
                 @csrf
                 @method('DELETE')
                 <input type="hidden" name="selected_ids" id="selected_ids">
-                <button type="submit" class="btn btn-danger btn-sm">
-                    Hapus Terpilih
-                </button>
+                <button type="submit" class="btn btn-danger btn-sm">Hapus Terpilih</button>
             </form>
 
-            <div class="col-md-3">
-                <select name="branch_id" class="form-select">
-                    <option value="">-- Semua Cabang --</option>
-                    @foreach($branches as $branch)
-                        <option value="{{ $branch->id }}" {{ request('branch_id') == $branch->id ? 'selected' : '' }}>
-                            {{ $branch->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
         </div>
+
 
         <table class="table bordered-table mb-0">
             <thead>
@@ -83,6 +95,13 @@
                     </td>
                     <td>
                         <div class="d-flex gap-1">
+                            <a href="javascript:void(0)"
+                                class="w-32-px h-32-px bg-warning-focus text-warning-600 rounded-circle d-inline-flex align-items-center justify-content-center"
+                                data-bs-toggle="modal"
+                                data-bs-target="#warrantyCardModal{{ $customer->id }}"
+                                >
+                                <iconify-icon icon="ion:card-outline"></iconify-icon>
+                            </a>
                             {{-- View --}}
                             <a href="javascript:void(0)"
                                 class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center"
@@ -137,6 +156,7 @@
     </div>
 </div>
 
+{{-- Modal View Customer --}}
 @foreach ($customers as $customer)
 <div class="modal fade" id="viewCustomerModal{{ $customer->id }}" tabindex="-1" aria-labelledby="viewCustomerModalLabel{{ $customer->id }}" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -176,7 +196,60 @@
     </div>
   </div>
 </div>
+{{-- Modal View Customer End --}}
 @endforeach
+
+{{-- Modal Warranty Card --}}
+@foreach ($customers as $customer)
+  @php
+    // ambil item + relasi untuk label tombol
+    $items = $customer->customerProducts()
+              ->with(['product', 'categoryProduct']) // sesuaikan nama relasi di model
+              ->get();
+  @endphp
+
+  <div class="modal fade" id="warrantyCardModal{{ $customer->id }}" tabindex="-1" aria-labelledby="warrantyCardModalLabel{{ $customer->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Print Card</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <h6 class="text-center mb-3">Download Card</h6>
+
+          @forelse ($items as $item)
+            @php
+              $prodName = strtoupper($item->product->name ?? 'PRODUCT');
+              $catName  = strtoupper($item->categoryProduct->name ?? 'CAT');
+              // Kalau punya field khusus (mis. shade/vlt), tampilkan; kalau tidak, hapus bagian ini.
+              $shade    = $item->product->code ?? null;   // contoh kalau ada kolom code
+              $vlt      = $item->product->vlt  ?? null;   // contoh kalau ada kolom vlt (%)
+            @endphp
+
+            <a
+              href="{{ route('warranty.card.download.cp', ['cardNumber' => $customer->card_number, 'cp' => $item->id]) }}"
+              class="btn btn-success w-100 mb-2"
+            >
+              {{-- Bentuk label seperti screenshot: "download NOTCH UV400 | NV05 | 80%" --}}
+              download {{ $prodName }}
+              @if($shade) | {{ strtoupper($shade) }} @endif
+              @if(!is_null($vlt)) | {{ $vlt }}% @endif
+            </a>
+          @empty
+            <div class="alert alert-warning">Belum ada item pada customer ini.</div>
+          @endforelse
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+@endforeach
+{{-- Modal Warranty Card End --}}
 
 {{-- Script --}}
 <script>

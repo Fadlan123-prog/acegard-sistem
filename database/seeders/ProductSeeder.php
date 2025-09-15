@@ -66,5 +66,25 @@ class ProductSeeder extends Seeder
         $product->name = 'NV05';
         $product->description = '80%';
         $product->save();
+
+        $product = new Product();
+        $product->category_id = 3;
+        $product->name = 'BM40';
+        $product->description = '40%';
+        $product->save();
+
+        $product = new Product();
+        $product->category_id = 3;
+        $product->name = 'BM15';
+        $product->description = '60%';
+        $product->save();
+
+        $product = new Product();
+        $product->category_id = 3;
+        $product->name = 'BM05';
+        $product->description = '80%';
+        $product->save();
+
+
     }
 }

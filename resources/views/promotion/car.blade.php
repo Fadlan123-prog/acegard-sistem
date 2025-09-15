@@ -4,19 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Dapatkan kaca film mobil premium dari Acegard dengan teknologi nano ceramic, perlindungan UV hingga 99%, dan Night Vision. Promo terbatas hari ini!">
-<meta name="keywords" content="kaca film mobil, kaca film nano ceramic, kaca film anti panas, kaca film tolak UV, kaca film Acegard, promo kaca film mobil Jakarta, kaca film mobil terbaik">
-<meta property="og:title" content="Promo Kaca Film Mobil Acegard – Nano Ceramic & Night Vision">
-<meta property="og:description" content="Promo kaca film mobil Acegard terbaik! Anti panas, anti UV, Night Vision, bergaransi hingga 7 tahun.">
-<meta property="og:image" content="{{ asset('assets/promotion/images/promotion-car/og-image.jpg') }}">
-<meta property="og:url" content="{{ url()->current() }}">
-<meta property="og:type" content="website">
+    <meta name="keywords" content="kaca film mobil, kaca film nano ceramic, kaca film anti panas, kaca film tolak UV, kaca film Acegard, promo kaca film mobil Jakarta, kaca film mobil terbaik, kaca film tolak panas, kaca film Night Vision">
+    <meta property="og:title" content="Promo Kaca Film Mobil Acegard – Nano Ceramic & Night Vision">
+    <meta property="og:description" content="Promo kaca film mobil Acegard terbaik! Anti panas, anti UV, Night Vision, bergaransi hingga 7 tahun.">
+    <meta property="og:image" content="{{ asset('assets/promotion/images/promotion-car/og-image.jpg') }}">
+    <link rel="canonical" href="https://acegard.id/promo/kaca-film-mobil">
+    <meta property="og:type" content="website">
 
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Kaca Film Mobil Terbaik – Acegard">
-<meta name="twitter:description" content="Promo kaca film mobil Acegard. Tolak panas, Night Vision, garansi 5 tahun.">
-<meta name="twitter:image" content="{{ asset('assets/promotion/images/promotion-car/og-image.jpg') }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Kaca Film Mobil Terbaik – Acegard">
+    <meta name="twitter:description" content="Promo kaca film mobil Acegard. Tolak panas, Night Vision, garansi 5 tahun.">
+    <meta name="twitter:image" content="{{ asset('assets/promotion/images/promotion-car/og-image.jpg') }}">
+
+    <script type="application/ld+json">
+    {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Kaca Film Mobil Acegard",
+    "brand": {
+        "@type": "Brand",
+        "name": "Acegard"
+    },
+    "description": "Promo kaca film mobil premium Acegard dengan teknologi nano ceramic, perlindungan UV hingga 99%, dan Night Vision. Garansi resmi 5–7 tahun.",
+    "image": "{{ asset('assets/promotion/images/promotion-car/og-image.jpg') }}",
+    "offers": {
+        "@type": "Offer",
+        "priceCurrency": "IDR",
+        "price": "2100000",
+        "availability": "https://schema.org/InStock",
+        "url": "{{ url()->current() }}"
+    }
+    }
+    </script>
     <title>Promo Kaca Film Mobil Acegard - Tolak Panas, UV Protection, Night Vision</title>
 
+    <link rel="canonical" href="{{ url()->current() }}">
     <link rel="stylesheet" href="{{asset('assets/promotion/css/promotion-car.css?v=')}}">
     <link rel="stylesheet" href="{{asset('assets/promotion/css/responsive-car.css?v=')}}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
@@ -40,27 +62,27 @@
         <div class="container-fluid hero d-flex flex-column justify-content-center p-0">
             <div class="container px-5 w-full h-auto">
                 <div class="d-flex flex-column justify-content-center py-5">
-                    <img src="{{asset('assets/promotion/images/promotion-car/acegard-logo.png')}}" alt="" class="mb-5">
+                    <img src="{{asset('assets/promotion/images/promotion-car/acegard-logo.webp')}}" alt="" class="mb-5">
                     <h1 class="plus-jakarta-sans-600">Kaca Film Mobil Terbaik – Tolak Panas, Anti UV & Night Vision</h1>
                     <p class="plus-jakarta-sans-400">
                         Jaga kenyamanan berkendara dengan kaca film berkualitas tinggi
                     </p>
-                    <a href="https://wa.me/6282321217772" class="btn btn-primary">Konsultasi Sekarang</a>
+                    <a href="https://wa.me/6282121212093?text=Halo%20Acegard%2C%20saya%20ingin%20tanya%20promo%20kaca%20film%20mobil" class="btn btn-primary">Konsultasi Sekarang</a>
                     <div class="feature-list plus-jakarta-sans-400">
                         <div class="feature-item">
-                            <img src="{{asset('assets/promotion/images/promotion-car/checkbox.png')}}" alt="Icon" class="icon">
+                            <img src="{{asset('assets/promotion/images/promotion-car/checkbox.webp')}}" alt="Icon" class="icon">
                             <span><strong><span class="highlight">1700+</span> </strong> Pelanggan Puas</span>
                         </div>
                         <div class="feature-item">
-                            <img src="{{asset('assets/promotion/images/promotion-car/checkbox.png')}}" alt="Icon" class="icon">
+                            <img src="{{asset('assets/promotion/images/promotion-car/checkbox.webp')}}" alt="Icon" class="icon">
                             <span><strong><span class="highlight">99,9%</span></strong> Menolak Panas</span>
                         </div>
                         <div class="feature-item">
-                            <img src="{{asset('assets/promotion/images/promotion-car/checkbox.png')}}" alt="Icon" class="icon">
+                            <img src="{{asset('assets/promotion/images/promotion-car/checkbox.webp')}}" alt="Icon" class="icon">
                             <span><strong><span class="highlight">4,9 Rating</span></strong> di Tokopedia</span>
                         </div>
                         <div class="feature-item">
-                            <img src="{{asset('assets/promotion/images/promotion-car/checkbox.png')}}" alt="Icon" class="icon">
+                            <img src="{{asset('assets/promotion/images/promotion-car/checkbox.webp')}}" alt="Icon" class="icon">
                             <span><strong><span class="highlight">5 Tahun</span></strong> Jaminan Garansi</span>
                         </div>
                     </div>
@@ -69,11 +91,11 @@
 
         </div>
         <div class="container-fluid adventage my-5">
-            <h1 class="text-center">Keunggulan Kaca Film Acegard</h1>
+            <h2 class="text-center mb-5">Keunggulan Kaca Film Acegard</h2>
 
             <div class="row justify-content-center align-items-stretch text-center">
-                <div class="col-12 col-lg-6 ps-0">
-                    <img src="{{asset('assets/promotion/images/promotion-car/adventage-image-1.png')}}" alt="Kaca Film Tolak Panas">
+                <div class="col-12 col-lg-6 col-md-6 col-sm-6 ps-0">
+                    <img src="{{asset('assets/promotion/images/promotion-car/adventage-image-1.webp')}}" alt="Kaca Film Tolak Panas">
                     <h4>
                         Tolak Panas & Night Vision Terbaik
                     </h4>
@@ -81,8 +103,8 @@
                         Kaca film mobil Acegard mampu menolak panas secara efisien, dengan tingkat penolakan sinar inframerah hingga 99% dan perlindungan sinar UV hingga 99%. Menggunakan 7 layer chemical, termasuk 2 lapisan ceramic, kaca film ini memastikan kenyamanan berkendara tanpa rasa panas berlebih.
                     </p>
                 </div>
-                <div class="col-12 col-lg-6 pe-0">
-                    <img src="{{asset('assets/promotion/images/promotion-car/adventage-image-3.png')}}" alt="Kaca Film Nano Ceramic">
+                <div class="col-12 col-lg-6 col-md-6 col-sm-6 pe-0">
+                    <img src="{{asset('assets/promotion/images/promotion-car/adventage-image-3.webp')}}" alt="Kaca Film Nano Ceramic">
                     <h4>
                         Material Ceramic Yang Kuat & Tahan Lama
                     </h4>
@@ -90,17 +112,17 @@
                         Berbeda dengan kaca film ceramic biasa yang hanya menggunakan silica, kaca film Acegard menggabungkan mineral tin dan tungsten untuk ketahanan lebih lama. Kaca film tidak mudah pudar, menjaga kualitas tampilan dan perlindungan kaca mobil Anda.
                     </p>
                 </div>
-                <div class="col-12 col-lg-6 ps-0">
-                    <img src="{{asset('assets/promotion/images/promotion-car/adventage-image-2.png')}}" alt="Kaca Film Night Vision">
+                <div class="col-12 col-lg-6 col-md-6 col-sm-6 ps-0">
+                    <img src="{{asset('assets/promotion/images/promotion-car/adventage-image-2.webp')}}" alt="Kaca Film Night Vision">
                     <h4>
-                    Teknologi Night Vision – Jernih di Malam Hari
+                    Teknologi Night Vision
                     </h4>
                     <p>
                         Dengan teknologi Night Vision, kaca film Acegard tetap bening dan anti buram di malam hari. Memberikan visibilitas tinggi dalam kondisi minim cahaya, sehingga pandangan tetap jernih tanpa silau saat berkendara di malam hari.
                     </p>
                 </div>
-                <div class="col-12 col-lg-6 pe-0">
-                    <img src="{{asset('assets/promotion/images/promotion-car/adventage-image-4.png')}}" alt="Garansi Kaca Film">
+                <div class="col-12 col-lg-6 col-md-6 col-sm-6 pe-0">
+                    <img src="{{asset('assets/promotion/images/promotion-car/adventage-image-4.webp')}}" alt="Garansi Kaca Film">
                     <h4>
                         Bergaransi Resmi hingga 7 Tahun
                     </h4>
@@ -117,7 +139,7 @@
                     <h1>Fitur Kaca Film Acegard</h1>
                 </div>
                 <div class="col-12 col-lg-6 pe-0 d-flex justify-content-center justify-content-lg-end">
-                    <img src="{{asset('assets/promotion/images/promotion-car/acegard-logo-black.png')}}" alt="Logo Acegard">
+                    <img src="{{asset('assets/promotion/images/logo-dark.png')}}" alt="Logo Acegard">
                 </div>
             </div>
 
@@ -125,49 +147,49 @@
                 <div class="row row-cols-1 row-cols-md-4 g-0 container-features">
                     <div class="col">
                         <div class="feature-box border-custom">
-                            <img src="{{asset('assets/promotion/images/promotion-car/south-korea-icon.png')}}" alt="Icon 1">
+                            <img src="{{asset('assets/promotion/images/promotion-car/south-korea-icon.webp')}}" alt="Terbuat di Korea Selatan Ikon">
                             <p>Made in South Korea</p>
                         </div>
                     </div>
                     <div class="col">
                         <div class="feature-box border-custom">
-                            <img src="{{asset('assets/promotion/images/promotion-car/sun-icon.png')}}" alt="Icon 2">
+                            <img src="{{asset('assets/promotion/images/promotion-car/sun-icon.webp')}}" alt="Ikon Tolak Panas">
                             <p>Tolak Panas hingga 100%</p>
                         </div>
                     </div>
                     <div class="col">
                         <div class="feature-box border-custom">
-                            <img src="{{asset('assets/promotion/images/promotion-car/bar-icon.png')}}" alt="Icon 3">
+                            <img src="{{asset('assets/promotion/images/promotion-car/bar-icon.webp')}}" alt="Ikon Tidak Menghalau Sinyal">
                             <p>Tidak Menghalau Sinyal</p>
                         </div>
                     </div>
                     <div class="col">
                         <div class="feature-box border-custom">
-                            <img src="{{asset('assets/promotion/images/promotion-car/eye-icon.png')}}" alt="Icon 4">
+                            <img src="{{asset('assets/promotion/images/promotion-car/eye-icon.webp')}}" alt="Ikon Teknologi Night Vision">
                             <p>Teknologi Night Vision</p>
                         </div>
                     </div>
                     <div class="col">
                         <div class="feature-box border-custom">
-                            <img src="{{asset('assets/promotion/images/promotion-car/shield-icon.png')}}" alt="Icon 5">
+                            <img src="{{asset('assets/promotion/images/promotion-car/shield-icon.webp')}}" alt="Ikon Warna Stabil dan Tidak Turun">
                             <p>Warna Stabil dan tidak turun</p>
                         </div>
                     </div>
                     <div class="col">
                         <div class="feature-box border-custom">
-                            <img src="{{asset('assets/promotion/images/promotion-car/clock-bar-icon.png')}}" alt="Icon 6">
+                            <img src="{{asset('assets/promotion/images/promotion-car/clock-bar-icon.webp')}}" alt="Ikon TSER Tertinggi">
                             <p>TSER tertinggi di kelasnya</p>
                         </div>
                     </div>
                     <div class="col">
                         <div class="feature-box border-custom">
-                            <img src="{{asset('assets/promotion/images/promotion-car/technition-icon.png')}}" alt="Icon 7">
+                            <img src="{{asset('assets/promotion/images/promotion-car/technition-icon.webp')}}" alt="Ikon Teknisi Profesional">
                             <p>Teknisi Profesional</p>
                         </div>
                     </div>
                     <div class="col">
                         <div class="feature-box border-custom">
-                            <img src="{{asset('assets/promotion/images/promotion-car/like-icon.png')}}" alt="Icon 8">
+                            <img src="{{asset('assets/promotion/images/promotion-car/like-icon.webp')}}" alt="Ikon Customer Service Fast Response">
                             <p>Customer Service Fast Response</p>
                         </div>
                     </div>
@@ -180,13 +202,13 @@
 
             <div class="row justify-content-center align-center">
                 <div class="col-12 col-lg-6 center-image">
-                    <img src="{{asset('assets/promotion/images/promotion-car/dindra-kirana-pic.png')}}" alt="Testimoni Dinda Kirana ">
+                    <img src="{{asset('assets/promotion/images/promotion-car/dindra-kirana-pic.webp')}}" alt="Testimoni Dinda Kirana ">
                     <p class="review-text align-start plus-jakarta-sans-200">
                     “Mobilitas tinggi menuntut kenyamanan dan privasi yang maksimal. Itulah sebabnya aku memilih kaca film Acegard, yang mampu menolak panas, menjaga kejernihan, dan memberikan perlindungan optimal setiap saat”
                     </p>
                 </div>
                 <div class="col-12 col-lg-6 center-image">
-                <img src="{{asset('assets/promotion/images/promotion-car/jessica-iskandar-pic.png')}}" alt="Testimoni Jessica Iskandar">
+                <img src="{{asset('assets/promotion/images/promotion-car/jessica-iskandar-pic.webp')}}" alt="Testimoni Jessica Iskandar">
                     <p class="review-text text-end plus-jakarta-sans-200">
                     “Dari banyaknya pilihan kaca film, Acegard adalah yang terbaik! Dengan kualitas premium dan teknisi profesional, kaca film ini secara efektif mengurangi panas dalam mobil, memberikan kenyamanan tanpa kompromi”                    </p>
                 </div>
@@ -195,32 +217,32 @@
         </div>
 
         <div class="tokopedia-review mt-5">
-            <img src="{{asset('assets/promotion/images/promotion-car/tokopedia-review.png')}}" alt="Review Tokopedia">
+            <img src="{{asset('assets/promotion/images/promotion-car/tokopedia-review.webp')}}" alt="Review Tokopedia">
         <!-- <div class="container h-100">
                 <div class="row h-100">
                     <div class="col-8 align-self-center text-center">
                         <h1 class="text-start align-self-center">
                             Dipercaya Lebih dari 1700+ Konsumen Se-Jabodetabek
                         </h1>
-                        <img src="{{asset('assets/promotion/images/promotion-car/Review.png')}}" alt="">
+                        <img src="{{asset('assets/promotion/images/promotion-car/Review.webp')}}" alt="">
                         <h1 class="text-start align-self-center">Rating 4.9</h1>
-                        <img src="{{asset('assets/promotion/assets/images/promotion-car/star-review.png')}}" class="image-star-tokopedia" alt="">
+                        <img src="{{asset('assets/promotion/assets/images/promotion-car/star-review.webp')}}" class="image-star-tokopedia" alt="">
                     </div>
                     <div class="col-4">
-                        <img src="{{asset('assets/promotion/images/promotion-car/acegard-logo.png')}}" class="mt-5" class="review-logo" alt="">
-                        <img src="<{{asset('assets/promotion/images/promotion-car/phone-hold-review.png')}}" class="phone-hold-image" alt="">
+                        <img src="{{asset('assets/promotion/images/promotion-car/acegard-logo.webp')}}" class="mt-5" class="review-logo" alt="">
+                        <img src="<{{asset('assets/promotion/images/promotion-car/phone-hold-review.webp')}}" class="phone-hold-image" alt="">
                     </div>
                 </div>
             </div> -->
         </div>
 
         <div class="container-fluid price-spesification">
-            <h1>
+            <h1 class="mt-5">
                 Spesifikasi Produk dan Harga
             </h1>
 
-            <img src="{{asset('assets/promotion/images/promotion-car/notch-uv-spesification.png')}}" alt="Spesifikasi Notch UV">
-            <img src="{{asset('assets/promotion/images/promotion-car/4k-spesification.png')}}" alt="Spesifikasi 4K">
+            <img src="{{asset('assets/promotion/images/promotion-car/notch-uv-spesification.webp')}}" alt="Spesifikasi Notch UV">
+            <img src="{{asset('assets/promotion/images/promotion-car/4k-spesification.webp')}}" alt="Spesifikasi 4K">
         </div>
 
         <div class="container-fluid slot-section d-flex justify-content-center align-items-center flex-column text-center">
@@ -256,13 +278,15 @@
         <div class="container-fluid free-home-service">
             <div class="promo-container">
                 <div class="d-flex justify-content-center align-items-center text-start">
-                    <img src="{{asset('assets/promotion/images/promotion-car/location-icon.png')}}" alt="">
+                    <img src="{{asset('assets/promotion/images/promotion-car/location-icon.webp')}}" alt="">
                     <h2 class="promo-header">FREE HOME SERVICE <br> SE-JABODETABEK</h2>
-                    <img src="{{asset('assets/promotion/images/promotion-car/house-icon.png')}}" class="ms-3" alt="">
+                    <img src="{{asset('assets/promotion/images/promotion-car/house-icon.webp')}}" class="ms-3" alt="">
                     <div class="underline-promo"></div>
                 </div>
                 <p class="promo-subtext">Setiap pemasangan di Workshop <span class="highlight-border"><span class="highlight-text">GRATIS</span> POLISH KACA</span></p>
             </div>
+            <p class="text-center font-medium home-service" >Kami melayani pemasangan kaca film mobil di wilayah Jakarta, Bogor, Depok, Tangerang, Bekasi, dan Bandung. Teknisi kami siap datang ke lokasi Anda.</p>
+
         </div>
 
 
@@ -273,7 +297,8 @@
                     Claim Garansi dimana saja dan kapan saja!
                 </h1>
                 <p>
-                    kami membuat sistem garansi yang memudahkan customer untuk klaim garansi yang tersedia di website resmi Acegard.id
+                    kami membuat sistem garansi yang memudahkan customer untuk klaim garansi yang tersedia di website resmi Acegard.id <br><br>
+                    Hubungi kami hari ini untuk pemasangan kaca film mobil di wilayah Jabodetabek & Bandung — gratis home service & garansi hingga 7 tahun
                 </p>
             </div>
         </div>
@@ -352,8 +377,8 @@
         </div>
 
     </div>
-    <a href="https://wa.me/6282321217772" target="_blank" class="whatsapp-button">
-        <img src="{{asset('assets/promotion/images/promotion-car/whatsapp-btn.png')}}" alt="WhatsApp">
+    <a href="https://wa.me/6282121212093?text=Halo%20Acegard%2C%20saya%20ingin%20tanya%20promo%20kaca%20film%20mobil" target="_blank" class="whatsapp-button">
+        <img src="{{asset('assets/promotion/images/promotion-car/whatsapp-btn.webp')}}" alt="WhatsApp">
     </a>
 
     <script>
@@ -365,10 +390,11 @@
             });
 
             setTimeout(() => {
-                window.location.href = "https://wa.me/6282321217772";
+                window.location.href = "https://wa.me/6282121212093?text=Halo%20Acegard%2C%20saya%20ingin%20tanya%20promo%20kaca%20film%20mobil";
             }, 500); // Delay 0.5 detik agar GTM sempat merekam klik
         });
     </script>
+
 
 
 
@@ -424,6 +450,7 @@
     // Jalankan countdown saat halaman dimuat
     window.onload = startCountdown;
 </script>
+
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
 </body>

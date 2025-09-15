@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Branch;
 use App\Models\CustomerBuilding;
 use App\Models\CategoryProductBuilding;
+use App\Models\CustomerBuildingProduct;
 use App\Models\ProductBuilding;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -20,9 +21,12 @@ class CustomerBuildingController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
+        $user = auth()->user();
+        $branchId = session('active_branch_id');
+
         // Filter berdasarkan cabang
-        if ($request->filled('branch_id')) {
-            $query->where('branch_id', $request->branch_id);
+        if (!$user->hasRole('superadmin')) {
+            $query->where('branch_id', $branchId);
         }
 
         // Ambil semua cabang (jika ingin menyesuaikan bisa pakai cabang user saja)
@@ -43,6 +47,81 @@ class CustomerBuildingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'wsn'          => 'required|string',
+            'card_number'  => 'required|string',
+            'name'         => 'required|string',
+            'phone_number' => 'required|string',
+            'email'        => 'nullable|email',
+            'address'      => 'nullable|string',
+            'dealer_name'  => 'nullable|string',
+            'applicator'   => 'nullable|string',
+            'city'         => 'nullable|string',
+            'country'      => 'nullable|string',
+
+            'products'                                  => 'required|array|min:1',
+            'products.*.category_product_building_id'   => 'required|integer|exists:category_product_building,id',
+            'products.*.product_building_id'            => 'required|integer|exists:product_building,id',
+            'products.*.meters'                         => 'required|numeric|min:0.01', // ← numeric, bukan integer
+            'products.*.warantee_duration'              => 'required|integer|in:3,5,7',
+
+            'admin_password' => 'required|string',
+        ]);
+
+        if (!Hash::check($request->admin_password, auth()->user()->password)) {
+            return back()->withErrors(['admin_password' => 'Password admin salah.'])->withInput();
+        }
+
+        DB::beginTransaction();
+        try {
+            $customer = CustomerBuilding::create([
+                'branch_id'    => auth()->user()->branches->first()->id ?? 1,
+                'wsn'          => $request->wsn,
+                'card_number'  => $request->card_number,
+                'name'         => $request->name,
+                'email'        => $request->email,
+                'phone_number' => $request->phone_number,
+                'address'      => $request->address,
+                'dealer_name'  => $request->dealer_name,
+                'applicator'   => $request->applicator,
+                'city'         => $request->city,
+                'country'      => $request->country,
+            ]);
+
+            foreach ($request->input('products', []) as $row) {
+                $duration = (int) $row['warantee_duration'];
+                CustomerBuildingProduct::create([
+                    'customer_building_id'        => $customer->id,
+                    'category_product_building_id'=> (int)$row['category_product_building_id'],
+                    'product_building_id'         => (int)$row['product_building_id'],
+                    'meters'                      => (float)$row['meters'],
+                    'warantee_duration'           => $duration,
+                    'warantee_start'              => now(),
+                    'warantee_end'                => now()->copy()->addYears($duration),
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('customer.building.index')->with('success', 'Customer berhasil ditambahkan.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
+        }
+    }
+
+    public function edit(CustomerBuilding $customer)
+    {
+        $branches = Branch::all();
+        $categories = CategoryProductBuilding::all();
+        $products = ProductBuilding::all();
+        $customer->load('products.category', 'products.product');
+
+        return view('customer.building.edit', compact('customer', 'branches', 'categories', 'products'));
+    }
+
+
+    public function update(Request $request, CustomerBuilding $customer)
+    {
+        $request->validate([
             'wsn' => 'required|string',
             'card_number' => 'required|string',
             'name' => 'required|string',
@@ -53,20 +132,23 @@ class CustomerBuildingController extends Controller
             'applicator' => 'nullable|string',
             'city' => 'nullable|string',
             'country' => 'nullable|string',
-            'warantee_duration' => 'required|integer',
+            'products' => 'required|array|min:1',
+            'products.*.id' => 'nullable|exists:customer_building_product,id',
+            'products.*.category_product_building_id' => 'required|exists:category_product_building,id',
+            'products.*.product_building_id' => 'required|exists:product_building,id',
+            'products.*.meters' => 'required|numeric',
+            'products.*.warantee_duration' => 'required|integer',
             'admin_password' => 'required|string',
         ]);
 
-        // Verifikasi password admin
         if (!Hash::check($request->admin_password, auth()->user()->password)) {
             return back()->with('error', 'Password admin salah.');
         }
 
         DB::beginTransaction();
         try {
-            // Simpan Customer Gedung
-            $customer = CustomerBuilding::create([
-                'branch_id' => auth()->user()->branches->first()->id ?? 1,
+            // Update data customer
+            $customer->update([
                 'wsn' => $request->wsn,
                 'card_number' => $request->card_number,
                 'name' => $request->name,
@@ -77,28 +159,43 @@ class CustomerBuildingController extends Controller
                 'applicator' => $request->applicator,
                 'city' => $request->city,
                 'country' => $request->country,
-                'warantee_duration' => $request->warantee_duration,
-                'warantee_start' => now(),
-                'warantee_end' => now()->addYears($request->warantee_duration),
             ]);
 
-            // Simpan Produk-produk yang dipilih
-            foreach ($request->input('products', []) as $index => $product) {
-                CustomerBuildingProduct::create([
+            // Update data produk
+            $existingIds = [];
+            foreach ($request->products as $product) {
+                $duration = (int) $product['warantee_duration'];
+                $data = [
                     'customer_building_id' => $customer->id,
-                    'category_building_id' => $product['category_product_id'],
-                    'product_building_id' => $product['product_id'],
+                    'category_product_building_id' => $product['category_product_building_id'],
+                    'product_building_id' => $product['product_building_id'],
                     'meters' => $product['meters'],
-                ]);
+                    'warantee_duration' => $duration,
+                    'warantee_start' => now(),
+                    'warantee_end' => now()->addYears($duration),
+                ];
+
+                if (!empty($product['id'])) {
+                    $cbProduct = CustomerBuildingProduct::find($product['id']);
+                    $cbProduct->update($data);
+                    $existingIds[] = $cbProduct->id;
+                } else {
+                    $new = CustomerBuildingProduct::create($data);
+                    $existingIds[] = $new->id;
+                }
             }
 
+            // Hapus produk yang dihapus dari form
+            $customer->products()->whereNotIn('id', $existingIds)->delete();
+
             DB::commit();
-            return redirect()->route('customer.building.index')->with('success', 'Customer berhasil ditambahkan.');
+            return redirect()->route('customer.building.index')->with('success', 'Customer berhasil diperbarui.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
 
     public function getProductsByCategory($id)
     {

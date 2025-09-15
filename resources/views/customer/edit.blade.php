@@ -113,37 +113,44 @@
             <hr class="mt-5">
             <h5 class="mt-5 mb-5 text-center">Produk Customer</h5>
             <div id="product-container">
+
                 @foreach ($customer->products as $index => $productItem)
-                <div class="row align-items-end mb-3 product-item">
-                    <div class="col-md-4">
-                        <label>Part</label>
-                        <select name="products[{{ $index }}][part_id]" class="form-select" required>
-                            <option value="">Pilih Part</option>
-                            @foreach($parts as $part)
-                                <option value="{{ $part->id }}" {{ $part->id == $productItem->pivot->part_id ? 'selected' : '' }}>{{ $part->name }}</option>
-                            @endforeach
-                        </select>
+                    <div class="row product-item">
+                        <input type="hidden" name="products[{{ $index }}][id]" value="{{ $productItem->pivot->id }}">
+
+                        <div class="col-md-4">
+                            <label>Part</label>
+                            <select name="products[{{ $index }}][part_id]" class="form-select">
+                                <option value="">Pilih Part</option>
+                                @foreach($parts as $part)
+                                    <option value="{{ $part->id }}" {{ $part->id == $productItem->pivot->part_id ? 'selected' : '' }}>
+                                        {{ $part->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Kategori Produk</label>
+                            <select name="products[{{ $index }}][category_product_id]" class="form-select category-select" data-index="{{ $index }}">
+                                <option value="">Pilih Kategori</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->id }}" {{ $cat->id == $productItem->pivot->category_product_id ? 'selected' : '' }}>
+                                        {{ $cat->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>Produk</label>
+                            <select name="products[{{ $index }}][product_id]" class="form-select product-select" data-index="{{ $index }}">
+                                <option value="{{ $productItem->id }}">{{ $productItem->name }}</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <label>Kategori Produk</label>
-                        <select name="products[{{ $index }}][category_product_id]" class="form-select category-select" data-index="{{ $index }}" required>
-                            <option value="">Pilih Kategori</option>
-                            @foreach($categories as $cat)
-                                <option value="{{ $cat->id }}" {{ $cat->id == $productItem->pivot->category_product_id ? 'selected' : '' }}>{{ $cat->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label>Nama Produk</label>
-                        <select name="products[{{ $index }}][product_id]" class="form-select product-select" data-index="{{ $index }}" required>
-                            <option value="{{ $productItem->id }}">{{ $productItem->name }}</option>
-                        </select>
-                    </div>
-                    <div class="col-md-1">
-                        <button type="button" class="btn btn-danger btn-sm remove-product">×</button>
-                    </div>
-                </div>
                 @endforeach
+
             </div>
             <button type="button" class="btn btn-sm btn-outline-primary" id="add-product">+ Tambah Produk</button>
 
@@ -172,5 +179,71 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+let productIndex = 1;
+
+document.getElementById('add-product').addEventListener('click', function () {
+    const container = document.getElementById('product-container');
+    const newItem = container.querySelector('.product-item').cloneNode(true);
+
+    // Update name and data-index
+    newItem.querySelectorAll('select').forEach(select => {
+        const name = select.getAttribute('name');
+        const newName = name.replace(/\[\d+\]/, `[${productIndex}]`);
+        select.setAttribute('name', newName);
+
+        // Update data-index jika ada
+        if (select.classList.contains('category-select') || select.classList.contains('product-select')) {
+            select.setAttribute('data-index', productIndex);
+        }
+
+        select.selectedIndex = 0; // reset selection
+    });
+
+    container.appendChild(newItem);
+    productIndex++;
+});
+
+// Remove row
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('remove-product')) {
+        const item = e.target.closest('.product-item');
+        if (document.querySelectorAll('.product-item').length > 1) {
+            item.remove();
+        }
+    }
+});
+</script>
+
+<script>
+    $(document).on('change', '.category-select', function () {
+        let categoryId = $(this).val();
+        let index = $(this).data('index');
+        let $productSelect = $(`select[name="products[${index}][product_id]"]`);
+
+        $productSelect.html('<option value="">Memuat...</option>');
+
+        if (categoryId) {
+            $.ajax({
+                url: '{{ url("products-by-category") }}/' + categoryId,
+                type: 'GET',
+                success: function (data) {
+                    let options = '<option value="">Pilih Produk</option>';
+                    data.forEach(product => {
+                        options += `<option value="${product.id}">${product.name}</option>`;
+                    });
+                    $productSelect.html(options);
+                },
+                error: function () {
+                    alert('Gagal mengambil produk.');
+                    $productSelect.html('<option value="">Pilih Produk</option>');
+                }
+            });
+        } else {
+            $productSelect.html('<option value="">Pilih Produk</option>');
+        }
+    });
+</script>
 
 @endsection

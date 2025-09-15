@@ -1,0 +1,765 @@
+@media only screen and (max-width: 425px) {
+    .container-custom{
+        width: 100%;
+    }
+
+    .hero img {
+        width: 60%;
+        height: auto;
+        z-index: 1;
+    }
+
+    .hero h1 {
+        width: 70%;
+        color: #fff;
+        font-size: 1.2rem !important;
+    }
+
+    .hero .px-5{
+        padding-right: 0!important;
+        padding-left: 2rem!important;
+    }
+
+    .hero p{
+        font-size: 0.7rem;
+        width: 65%;
+        margin-top: 15px;
+    }
+
+    .hero a {
+        font-size: 0.7rem;
+        width: 45%;
+        margin-top: 15px;
+    }
+
+    .oval-text {
+        position: relative;
+        display: inline-block;
+        max-width: fit-content;
+        max-height: 175px;
+        border-radius: 50%;
+        border: 4px solid #00D0FF;
+        padding: 10px;
+        color: #fff;
+        animation: fadeInOut 2slinear infinite;
+        font-size: 12px;
+    }
+
+    .feature-item{
+        font-size: 12px;
+    }
+
+    .feature-list{
+        margin-top: 5rem;
+    }
+    
+    .review-coment img{
+        width: 80%;
+    }
+    .center-image .review-text{
+        width: 100%;
+        text-align: center !important;
+        margin: 2rem;
+    }
+
+    .tokopedia-review{
+        text-align: center;
+    }
+
+    .tokopedia-review img{
+        height: auto;
+        width: 90%;
+    }
+
+    .free-home-service{
+        margin-top: 2rem;
+    }
+
+    .adventage h1{
+        margin: 40px 0;
+    }
+
+    .adventage h4 {
+        margin-top: 35px;
+        margin-bottom: 35px;
+    }
+
+    .adventage p{
+        margin:45px 0;
+    }
+    .adventage img, .adventage .col-12{
+        width: 80%;
+        padding: 0 !important;
+    }
+
+    .features{
+        text-align: center;
+        display: flex;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .features .col-12{
+        padding: 0 !important;
+    }
+
+    .free-home-service img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .promo-header{
+        font-size: 1rem;
+    }
+
+    .promo-subtext{
+        font-size: 9px;
+    }
+
+    .warranty{
+        height: 55vh;
+    }
+
+    .warranty .text-warranty {
+        width: 82%;
+        margin-left: 16px;
+        padding-top: 60px;
+        padding-right: 12px;
+        color: #fff;
+    }
+
+    .warranty .text-warranty h1 {
+        font-size: 24px;
+    }
+
+    .warranty .text-warranty p {
+        margin-top: 1.5rem;
+        font-size: 14px;
+    }
+
+    .slot-section .slot-title {
+        font-size: 28px !important;
+    }
+    .slot-section .slot-subtitle {
+        font-size: 22px !important;
+        white-space: normal !important;
+    }
+
+    .slot-section .slot-desc {
+        font-size: 12px;
+    }
+
+    .slot-section .slot-remaining {
+        font-size: 42px;
+        font-weight: bold;
+    }
+
+    .slot-section .slot-remaining-subtitle {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .promo-form {
+        background: black;
+        color: white;
+        padding: 35px 28px;
+        margin-top: 4rem;
+        border-radius: 40px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .promo-form h1, .promo-form hr {
+        width: 100%;
+    }
+
+    .promo-form h1 {
+        font-size: 20px;
+        margin-bottom: 30px;
+    }
+
+    .faq__section h1{
+        width: 100%;
+        text-align: center;
+    }
+
+    .faq__section p{
+        width: 100%;
+        margin-bottom: 5rem;
+        text-align: center;
+    }
+
+    .custom-accordion .accordion-button span {
+        width: 90%;
+        font-size: 0.8rem !important;
+        font-weight: bold;
+    }
+
+    .custom-accordion h5{
+        font-size: 0.75rem;
+    }
+
+    .whatsapp-button img{
+        width: 30%;
+    }
+
+    .button-sub-whatsapp .btn-success{
+        width: 100%;
+        font-size: 0.7rem !important;
+    }
+}
+
+@media only screen and (min-width: 426px) and (max-width: 768px) {
+    .container-custom{
+        width: 80%;
+    }
+
+    .hero img {
+        width: 60%;
+        height: auto;
+        z-index: 1;
+    }
+
+    .hero h1 {
+        width: 70%;
+        color: #fff;
+        font-size: 2rem !important;
+    }
+
+    .hero p{
+        font-size: 1rem;
+        width: 65%;
+        margin-top: 15px;
+    }
+
+    .hero a {
+        font-size: 1rem;
+        width: 45%;
+        margin-top: 15px;
+    }
+
+    .oval-text {
+        position: relative;
+        display: inline-block;
+        max-width: fit-content;
+        max-height: 175px;
+        border-radius: 50%;
+        border: 4px solid #00D0FF;
+        padding: 10px;
+        color: #fff;
+        animation: fadeInOut 2slinear infinite;
+        font-size: 12px;
+    }
+
+    .feature-item{
+        font-size: 12px;
+    }
+
+    .feature-list{
+        margin-top: 5rem;
+    }
+
+    .review-coment img{
+        width: 50%;
+    }
+
+    .center-image .review-text{
+        width: 100%;
+        text-align: center !important;
+        margin: 2rem;
+    }
+
+    .tokopedia-review img{
+        height: auto;
+    }
+
+    .free-home-service{
+        margin-top: 2rem;
+    }
+
+    .adventage img, .adventage .col-12{
+        width: 80%;
+        padding: 0 !important;
+    }
+
+    .features{
+        text-align: center;
+        display: flex;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .features .col-12{
+        padding: 0 !important;
+    }
+
+    .free-home-service img {
+        width: 70px;
+        height: 70px;
+    }
+
+    .promo-header{
+        font-size: 2rem;
+    }
+
+    .promo-subtext{
+        font-size: 20px;
+    }
+
+    .underline-promo{
+        left: 57%;
+    }
+
+    .warranty .text-warranty {
+        width: 82%;
+        margin-left: 16px;
+        padding-top: 60px;
+        padding-right: 12px;
+        color: #fff;
+    }
+
+    .warranty .text-warranty h1 {
+        font-size: 24px;
+    }
+
+    .warranty .text-warranty p {
+        margin-top: 1.5rem;
+        font-size: 14px;
+    }
+
+    .slot-section .slot-title {
+        font-size: 28px !important;
+    }
+
+    .slot-section .slot-subtitle {
+        font-size: 22px !important;
+        white-space: normal !important;
+    }
+
+    .slot-section .slot-desc {
+        font-size: 12px;
+    }
+
+    .slot-section .slot-remaining {
+        font-size: 42px;
+        font-weight: bold;
+    }
+
+    .slot-section .slot-remaining-subtitle {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .promo-form {
+        background: black;
+        color: white;
+        padding: 35px 28px;
+        margin-top: 4rem;
+        border-radius: 40px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .promo-form h1, .promo-form hr {
+        width: 100%;
+    }
+
+    .promo-form h1 {
+        font-size: 20px;
+        margin-bottom: 30px;
+    }
+
+    .faq__section h1{
+        width: 100%;
+        text-align: center;
+    }
+
+    .faq__section p{
+        width: 100%;
+        margin-bottom: 5rem;
+        text-align: center;
+    }
+
+    .custom-accordion .accordion-button span {
+        width: 90%;
+        font-size: 0.8rem !important;
+        font-weight: bold;
+    }
+
+    .custom-accordion h5{
+        font-size: 0.75rem;
+    }
+
+    .button-sub-whatsapp .btn-success{
+        width: 100%;
+        font-size: 1rem !important;
+    }
+
+    .whatsapp-button img {
+        width: 35%;
+        height: auto;
+    }
+}
+
+@media only screen and (min-width: 769px) and (max-width: 1024px) {
+    .container-custom{
+        width: 60%;
+    }
+
+    .hero img {
+        width: 60%;
+        height: auto;
+        z-index: 1;
+    }
+
+    .hero h1 {
+        width: 70%;
+        color: #fff;
+        font-size: 2.3rem !important;
+    }
+
+    .hero p{
+        font-size: 1.2rem;
+        width: 65%;
+        margin-top: 30px;
+    }
+
+    .hero a {
+        font-size: 1rem;
+        width: 40%;
+        margin-top: 40px;
+    }
+
+    .oval-text {
+        position: relative;
+        display: inline-block;
+        max-width: fit-content;
+        max-height: 175px;
+        border-radius: 50%;
+        border: 4px solid #00D0FF;
+        padding: 10px;
+        color: #fff;
+        animation: fadeInOut 2slinear infinite;
+        font-size: 12px;
+    }
+
+    .features h1{
+        text-align: start !important;
+    }
+
+    .feature-item{
+        font-size: 12px;
+    }
+
+    .feature-list{
+        margin-top: 5rem;
+    }
+
+    .review-coment img{
+        width: 75%;
+    }
+
+    .center-image .review-text{
+        width: 100%;
+        text-align: center !important;
+        margin: 2rem;
+    }
+
+    .tokopedia-review img{
+        height: auto;
+    }
+
+    .free-home-service{
+        margin-top: 2rem;
+    }
+
+    .adventage img, .adventage .col-12{
+        width: 80%;
+        padding: 0 !important;
+    }
+
+    .features{
+        text-align: center;
+        display: flex;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .features .col-12{
+        padding: 0 !important;
+    }
+
+    .free-home-service img {
+        width: 70px;
+        height: 70px;
+    }
+
+    .promo-header{
+        font-size: 2rem;
+    }
+
+    .promo-subtext{
+        font-size: 20px;
+    }
+
+    .underline-promo{
+        left: 57%;
+    }
+
+    .warranty .text-warranty {
+        width: 82%;
+        margin-left: 16px;
+        padding-top: 60px;
+        padding-right: 12px;
+        color: #fff;
+    }
+
+    .warranty .text-warranty h1 {
+        font-size: 24px;
+    }
+
+    .warranty .text-warranty p {
+        margin-top: 1.5rem;
+        font-size: 14px;
+    }
+
+    .slot-section .slot-title {
+        font-size: 28px !important;
+    }
+
+    .slot-section .slot-subtitle {
+        font-size: 22px !important;
+        white-space: normal !important;
+    }
+
+    .slot-section .slot-desc {
+        font-size: 12px;
+    }
+
+    .slot-section .slot-remaining {
+        font-size: 42px;
+        font-weight: bold;
+    }
+
+    .slot-section .slot-remaining-subtitle {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .promo-form {
+        background: black;
+        color: white;
+        padding: 35px 28px;
+        margin-top: 4rem;
+        border-radius: 40px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .promo-form h1, .promo-form hr {
+        width: 100%;
+    }
+
+    .promo-form h1 {
+        font-size: 20px;
+        margin-bottom: 30px;
+    }
+
+    .faq__section h1{
+        width: 100%;
+        text-align: center;
+    }
+
+    .faq__section p{
+        width: 100%;
+        margin-bottom: 5rem;
+        text-align: center;
+    }
+
+    .custom-accordion .accordion-button span {
+        width: 90%;
+        font-size: 0.8rem !important;
+        font-weight: bold;
+    }
+
+    .custom-accordion h5{
+        font-size: 0.75rem;
+    }
+
+    .button-sub-whatsapp .btn-success{
+        width: 100%;
+        font-size: 1.5rem !important;
+    }
+
+    .whatsapp-button img {
+        width: 35%;
+        height: auto;
+    }
+}
+
+
+@media screen and (min-width: 1441px) {
+    .container-custom {
+        width: 45%;
+    }
+
+    .hero img {
+        width: 65%;
+    }
+
+    .hero h1 {
+        font-size: 4.5rem !important;
+    }
+
+    .hero p{
+        font-size: 2rem;
+        width: 65%;
+        margin-top: 40px;
+    }
+
+    .hero a {
+        font-size: 2rem;
+        width: 45%;
+        margin-top: 60px;
+    }
+
+    .center-image .review-text{
+        font-size: 1.5rem;
+    }
+
+    .icon {
+        width: 2rem !important;
+        height: 2rem !important;
+    }
+
+    .oval-text {
+        font-size: 2.5rem;
+        padding: 12px;
+        border: 5px solid #00D0FF;
+    }
+
+    .feature-item {
+        font-size: 2rem;
+    }
+
+    .review-coment img {
+        width: 80%;
+    }
+
+    .tokopedia-review img{
+        height: auto;
+    }
+
+    .promo-header {
+        font-size: 4.5rem;
+    }
+
+    .free-home-service img{
+        width: 150px;
+        height: 150px;
+    }
+
+    .promo-subtext {
+        font-size: 2.5rem;
+        border-radius: 50px;
+    }
+
+    .highlight-border{
+        border-radius: 50px;
+    }
+
+    .adventage h1{
+        margin: 3rem 0;
+    }
+
+    .adventage h4{
+        font-size: 2rem;
+    }
+
+    .adventage p{
+        font-size: 1.5rem;
+    }
+
+    .feature-box img{
+        width: 4rem;
+        height: 4rem;
+        
+    }
+
+    .features p{
+        font-size: 1.5rem;
+    }
+
+    .warranty .text-warranty h1 {
+        font-size: 4rem;
+    }
+
+    .warranty .text-warranty p {
+        font-size: 2rem;
+    }
+
+    .underline-promo {
+        width: 37%;
+        left: 58%;
+    }
+
+    .slot-section .slot-title {
+        font-size: 4.5rem !important;
+    }
+
+    .slot-section .slot-subtitle {
+        font-size: 3rem !important;
+    }
+
+    .slot-section .slot-desc {
+        font-size: 2.5rem;
+    }
+
+    .slot-section .slot-remaining {
+        font-size: 10rem;
+    }
+
+    .slot-section .slot-remaining-subtitle {
+        font-size: 2rem;
+    }
+
+    .promo-form h1 {
+        font-size: 3.5rem;
+    }
+
+    .form-label{
+        font-size: 2rem;
+    }
+
+    .form-control {
+        font-size: 1.5rem !important;
+    }
+
+    .promo-form button{
+        font-size: 2.5rem;
+    }
+
+    .custom-accordion .accordion-button span {
+        font-size: 1.5rem !important;
+    }
+
+    .custom-accordion h5 {
+        font-size: 1.5rem;
+    }
+
+    .faq__section h1 {
+        font-size: 3rem;
+    }
+
+    .faq__section p{
+        font-size: 1.5rem;
+    }
+
+    .faq__section .accordion-button {
+        font-size: 1.5rem;
+    }
+
+    .faq__section .accordion-body {
+        font-size: 1.5rem;
+    }
+}

@@ -28,4 +28,13 @@ class CustomerBuilding extends Model
     {
         return $this->hasMany(CustomerBuildingProduct::class);
     }
+
+    public function part(){
+        return $this->hasManyThrough(Part::class, ProductBuilding::class);
+    }
+
+    public function categoryProductBuildings(){
+        return $this->hasMany(CategoryProductBuilding::class);
+    }
+
 }

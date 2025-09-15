@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('meters');
             $table->date('warantee_start');
             $table->date('warantee_end');
-            $table->date('warantee_duration');
+            $table->integer('warantee_duration');
             $table->timestamps();
         });
     }

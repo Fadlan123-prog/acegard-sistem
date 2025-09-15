@@ -16,6 +16,10 @@
                     <iconify-icon icon="solar:home-smile-angle-outline" class="menu-icon"></iconify-icon>
                     <span>Dashboard</span>
                 </a>
+                <a  href="{{ route('employee.index') }}">
+                    <iconify-icon icon="healthicons:factory-worker-outline" class="menu-icon"></iconify-icon>
+                    <span>Employees</span>
+                </a>
                 {{-- <ul class="sidebar-submenu">
 
                     <li>
@@ -61,6 +65,18 @@
                         <a href="{{ route('customer.building.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Customers Buildings</a>
                     </li>
                 </ul>
+            </li>
+            <li>
+                <a href="{{ route('commission.index') }}">
+                    <iconify-icon icon="fluent-emoji-high-contrast:money-bag" class="menu-icon"></iconify-icon>
+                    <span>Commission</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('gallery.index') }}">
+                    <iconify-icon icon="ph:images" class="menu-icon"></iconify-icon>
+                    <span>Gallery</span>
+                </a>
             </li>
         </ul>
     </div>

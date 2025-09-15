@@ -1,5 +1,22 @@
 @extends('frontend.layout.index')
 
+@once
+    @push('styles')
+        <link rel="stylesheet" href="{{asset('assets/frontend/css/bootstrap.min.css')}}">
+		<link rel="stylesheet" href="{{asset('assets/frontend/css/meanmenu.css')}}">
+		<link rel="stylesheet" href="{{asset('assets/frontend/css/owl.theme.default.min.css')}}">
+		<link rel="stylesheet" href="{{asset('assets/frontend/css/owl.carousel.min.css')}}">
+		<link rel="stylesheet" href="{{asset('assets/frontend/css/icofont.min.css')}}">
+		<link rel="stylesheet" href="{{asset('assets/frontend/css/font-awesome-pro.css')}}">
+		<link rel="stylesheet" href="{{asset('assets/frontend/css/scrollcue.css')}}">
+		<link rel="stylesheet" href="{{asset('assets/frontend/css/magnific-popup.min.css')}}">
+		<link rel="stylesheet" href="{{asset('assets/frontend/css/style.css')}}">
+		<link rel="stylesheet" href="{{asset('assets/frontend/css/responsive.css')}}">
+		<!-- Favicon -->
+		<link rel="icon" type="image/png" href="{{asset('assets/frontend/images/acegard-favicon.png')}}">
+    @endpush
+@endonce
+
 @section('content')
 <div class="banner-area bg-black bg-img" data-background="./assets/frontend/images/banner-bg-shape.png">
 			<div class="container mw-1680">
@@ -95,7 +112,7 @@
 				<div class="row align-items-center">
 					<div class="col-lg-6">
 						<div class="about-us-img" data-cues="slideInUp">
-							<img src="{{asset('assets/frontend/images/about-us.png')}}" alt="about-us">
+							<img src="{{asset('assets/frontend/images/home1.webp')}}" alt="about-us">
 						</div>
 					</div>
 
@@ -285,7 +302,7 @@
 					</div>
 					<div class="col-lg-6">
 						<div class="who-we-are-img" data-cues="slideInUp">
-							<img src="{{asset('assets/frontend/images/who-we-are-img.png')}}" alt="who-we-are-img">
+							<img src="{{asset('assets/frontend/images/home2.webp')}}" alt="who-we-are-img">
 						</div>
 					</div>
 				</div>
@@ -299,7 +316,7 @@
 				<div class="testimonial-slide owl-carousel owl-theme">
 					<div class="d-md-flex align-items-center testimonial-single-item">
 						<div class="flex-shrink-0">
-							<img src="{{('assets/frontend/images/testimonial-1.jpg')}}" class="testimonial-img" alt="testimonial">
+							<img src="{{('assets/frontend/images/profile1.webp')}}" class="testimonial-img" alt="testimonial">
 						</div>
 						<div class="flex-grow-1 ms-md-4 mt-3 mt-md-0">
 							<p>Gedung kantor kami jauh lebih nyaman dan hemat listrik setelah menggunakan Acegard Crystal Series.</p>
@@ -309,11 +326,11 @@
 					</div>
 					<div class="d-md-flex align-items-center testimonial-single-item">
 						<div class="flex-shrink-0">
-							<img src="{{asset('assets/frontend/images/testimonial-2.jpg')}}" class="testimonial-img" alt="testimonial">
+							<img src="{{asset('assets/frontend/images/profile2.webp')}}" class="testimonial-img" alt="testimonial">
 						</div>
 						<div class="flex-grow-1 ms-md-4 mt-3 mt-md-0">
 							<p>Kaca film Acegard benar-benar menurunkan suhu kabin mobil saya. Hasil pemasangannya juga sangat rapi.</p>
-							<h4>Clara Tan / <span>Pelanggan</span></h4>
+							<h4>Zulfikri / <span>Pelanggan</span></h4>
 						</div>
 						<img src="{{asset('assets/frontend/images/quat.svg')}}" class="quat" alt="quat">
 					</div>
@@ -332,7 +349,7 @@
 
 				<div class="case-study-content-wrap">
 					<ul class="slider" data-cues="slideInUp">
-						<li class="bg-img" data-background="./assets/frontend/images/case-study-1.jpg">
+						<li class="bg-img" data-background="{{ asset('assets/frontend/images/bd1.webp')}}">
 							<h1>01</h1>
 							<a href="cases-study-details.html">
 								<div class="case-study-content">
@@ -342,7 +359,7 @@
 								</div>
 							</a>
 						</li>
-						<li class="bg-img" data-background="./assets/frontend/images/case-study-2.jpg">
+						<li class="bg-img" data-background="{{ asset('assets/frontend/images/car1.webp')}}">
 							<h1>02</h1>
 							<a href="cases-study-details.html">
 								<div class="case-study-content">
@@ -352,7 +369,7 @@
 								</div>
 							</a>
 						</li>
-						<li class="bg-img" data-background="./assets/frontend/images/case-study-3.jpg">
+						<li class="bg-img" data-background="{{ asset('assets/frontend/images/bd2.webp')}}">
 							<h1>03</h1>
 							<a href="cases-study-details.html">
 								<div class="case-study-content">
@@ -362,7 +379,7 @@
 								</div>
 							</a>
 						</li>
-						<li class="bg-img" data-background="./assets/frontend/images/case-study-4.jpg">
+						<li class="bg-img" data-background="{{ asset('assets/frontend/images/car2.webp')}}">
 							<h1>04</h1>
 							<a href="cases-study-details.html">
 								<div class="case-study-content">
@@ -372,7 +389,7 @@
 								</div>
 							</a>
 						</li>
-						<li class="bg-img" data-background="./assets/frontend/images/case-study-5.jpg">
+						<li class="bg-img" data-background="{{ asset('assets/frontend/images/bd3.webp')}}">
 							<h1>05</h1>
 							<a href="cases-study-details.html">
 								<div class="case-study-content">
@@ -406,7 +423,7 @@
 				</div>
 
 				<div class="faq-img" data-cues="slideInUp">
-					<img src="{{asset('assets/frontend/images/faq-img.jpg')}}" alt="faq-img">
+					<img src="{{asset('assets/frontend/images/banner.webp')}}" alt="faq-img">
 				</div>
 
 				<div class="accordion accordion-content" id="accordionExample" data-cues="slideInUp">

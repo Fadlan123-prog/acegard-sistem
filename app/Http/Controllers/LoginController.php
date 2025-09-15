@@ -22,22 +22,16 @@ class LoginController extends Controller
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
 
-            if ($user->hasRole('superadmin')) {
-                return redirect()->route('dashboard'); // Dashboard Admin
+            if ($user->hasAnyRole(['superadmin', 'admin'])) {
+                return redirect()->route('dashboard');
             }
 
-            if ($user->hasRole('admin')) {
-                return redirect()->route('mitra.dashboard'); // Dashboard Mitra
-            }
-
-            // Jika login berhasil tapi role tidak valid
             Auth::logout();
             return redirect()->route('login')->withErrors([
-                'role' => 'Akun Anda tidak memiliki role yang sesuai.',
+                'role' => 'Akun Anda tidak memiliki akses yang sesuai.',
             ]);
         }
 
-        // Jika email/password salah
         return back()->withErrors([
             'email' => 'Login gagal: email atau password salah.',
         ]);

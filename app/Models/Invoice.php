@@ -10,7 +10,7 @@ class Invoice extends Model
 
     protected $fillable = [
         'customer_id',
-        'type',
+        'payment_method',
         'price',
         'discount',
         'downpayment',
@@ -24,5 +24,10 @@ class Invoice extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function commissions()
+    {
+        return $this->hasMany(\App\Models\Commission::class);
     }
 }

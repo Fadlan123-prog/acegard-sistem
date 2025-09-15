@@ -1,0 +1,342 @@
+@import url('style.css');
+
+@media (max-width: 576px) {
+    .hero__section .navbar-brand img{
+        width: 50%;
+    }
+
+    .hero__section .hero__content h1{
+        font-size: 2.25rem
+    }
+
+    .hero__section .hero__content h3{
+        font-size: 1.25rem;
+    }
+
+    .hero__section .hero__content p{
+        font-size: 1.25rem;
+    }
+
+    .achievement__section .achievement__box {
+        height: auto;
+    }
+
+    .achievement__section .achievement__gap{
+        gap : 3rem;
+    }
+
+    .temperature__section img{
+        width: 100%;
+        height: auto;
+
+    }
+
+    .client__section h1{
+
+    }
+
+    .why__section{
+        margin-bottom: 10rem;
+    }
+
+    .why__section .phone__center{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .why__section p{
+        margin-bottom: 6rem;
+    }
+
+    .why__section .why__gap{
+        gap: 4rem;
+    }
+
+    .why__section .col-12 .caption-number{
+        width: 100%;
+        margin: auto;
+        font-size: 1.25rem;
+    }
+
+    .why__section .row{
+        text-align: center;
+    }
+
+    .why__section .col-lg-4{
+        margin-bottom: 4rem;
+    }
+
+    .free__consult h1{
+        text-align: center;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .free__consult button{
+        margin: auto;
+        text-align: center;
+    }
+
+    .rating__section .rating__header{
+        font-size: 1.3rem !important;
+    }
+
+    .rating__section .rating__point{
+        font-size: 6rem !important;
+    }
+
+    .rating__section .rating__place{
+        font-size: 1.3rem;
+    }
+
+    .rating__section .rating__body img{
+        width: 100%;
+        height: auto;
+    }
+
+    .they__said__section img{
+        width: 100%;
+        height: auto;
+    }
+
+    .they__said__section .card {
+        width: 80%;
+        margin: 15px auto;
+
+    }
+
+    .they__said__section .card p{
+        width: 70%;
+        margin: 15px auto;
+        text-align: center;
+        font-size: 0.75rem;
+    }
+
+    .spesification__section .card__flex__oneway{
+        width: 80%;
+        margin: auto;
+        margin-top: 2.5rem;
+    }
+
+    .spesification__section .card__black__master{
+        width: 80%;
+        margin: auto;
+        margin-top: 2.5rem;
+    }
+
+    .spesification__section .card__notch__uv{
+        width: 80%;
+        margin: auto;
+        margin-top: 2.5rem;
+    }
+
+    .spesification__section .card__alpha__pro{
+        width: 80%;
+        margin: auto;
+        margin-top: 2.5rem;
+    }
+
+    .discount__section .disc__text{
+        text-align: center;
+    }
+
+    .discount__section h1{
+        font-size: 4rem;
+    }
+    
+    .countdown .time__number {
+        font-size: 2.7rem;
+    }
+
+    .countdown .colon__number{
+        font-size: 2.7rem;
+    }
+
+    .promo__section .promo-text{
+        text-align: center;
+    }
+
+    .promo__section .promo-subtext{
+        text-align: center;
+    }
+
+    .faq__section h1{
+        width: 100%;
+    }
+
+    .faq__section p{
+        width: 100%;
+        margin-bottom: 10rem;
+    }
+
+
+
+  }
+  
+  @media (min-width: 577px) and (max-width: 768px) {
+    .hero__section .hero__content h1{
+        font-size: 2.75rem
+    }
+
+    .hero__section .hero__content h3{
+        font-size: 1.2rem;
+    }
+
+    .hero__section .hero__content p{
+        font-size: 1rem;
+    }
+
+    .achievement__section .achievement__box {
+        height: auto;
+    }
+
+    .achievement__section .achievement__gap{
+        gap : 3rem;
+    }
+
+    .temperature__section img{
+        width: 100%;
+        height: auto;
+
+    }
+
+    .discount__section h1{
+        text-align: center;
+    }
+
+    .rating__section .rating__body img {
+        width: 100%;
+    }
+
+    .promo__section .promo-text{
+        text-align: center !important;
+    }
+
+    .promo__section .promo-subtext{
+        text-align: center;
+    }
+
+    .faq__section h1{
+        width: 100%;
+    }
+
+    .faq__section p{
+        width: 100%;
+        margin-bottom: 5rem;
+    }
+
+    footer iframe{
+        width: 100%;
+        height: auto;
+    }
+
+    .margin-card{
+        margin-top: 3rem;
+    }
+
+    .center-position{
+        text-align: center !important;
+    }
+
+    .center-position h1{
+        margin-top: 3rem;
+    }
+
+    .center-position button{
+        margin: 2rem auto;
+    }
+
+    .spesification__section .card__alpha__pro{
+        width: 100%;
+    }
+
+    .they__said__section .card img{
+        width: 100%;
+        height: auto;
+    } 
+
+    .they__said__section .card{
+        min-height: 25rem;
+    }
+
+    .they__said__section .card p{
+        width: 90%;
+        text-align: center;
+        margin: 5rem auto;
+        font-size: 0.8rem;
+    }
+  }
+  
+  @media (min-width: 1024px) and (max-width: 1200px) {
+    .hero__section .hero__content h1{
+        font-size: 3.5rem
+    }
+
+    .hero__section .hero__content h3{
+        font-size: 1.5rem;
+    }
+
+    .achievement__section .achievement__box {
+        height: auto;
+    }
+
+    .temperature__section img{
+        width: 100%;
+        height: auto;
+    }
+
+    .whatsapp-button-center{
+        text-align: center;
+    }
+
+    .margin-card{
+        margin-top: 3rem;
+    }
+
+    .spesification__section .card__flex__oneway{
+        width: 75%;
+        margin: auto;
+    }
+
+    .spesification__section .card__black__master{
+        width: 75%;
+        margin: auto;
+    }
+
+    .spesification__section .card__notch__uv{
+        width: 75%;
+        margin: auto;
+    }
+
+    .spesification__section .card__alpha__pro{
+        width: 80%;
+        margin: auto;
+    }
+
+
+}
+  
+  @media (min-width: 1201px) and (max-width: 1600px) {
+    .they__said__section .card p{
+        width: 90%;
+    }
+
+    .countdown .time__number {
+        font-size: 3.5rem;
+    }
+
+
+    .countdown .colon__number{
+        font-size: 4rem !important;
+    }
+
+    .faq__section .headline__faq{
+        text-align: start !important;
+    }
+  }
+  
+  @media (min-width: 1601px) {
+    /* Gaya untuk layar besar */
+  }

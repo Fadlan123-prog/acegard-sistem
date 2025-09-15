@@ -66,5 +66,80 @@ class ProductBuildingSeeder extends Seeder
         $product->name = 'NV05';
         $product->description = '80%';
         $product->save();
+
+        $product = new ProductBuilding();
+        $product->category_product_building_id = 3;
+        $product->name = 'BM35';
+        $product->description = '40%';
+        $product->save();
+
+
+        $product = new ProductBuilding();
+        $product->category_product_building_id = 3;
+        $product->name = 'BM15';
+        $product->description = '60%';
+        $product->save();
+
+
+        $product = new ProductBuilding();
+        $product->category_product_building_id = 3;
+        $product->name = 'BM05';
+        $product->description = '80%';
+        $product->save();
+
+        $product = new ProductBuilding();
+        $product->category_product_building_id = 4;
+        $product->name = 'Silver Grey';
+        $product->description = '80%';
+        $product->save();
+
+
+        $product = new ProductBuilding();
+        $product->category_product_building_id = 4;
+        $product->name = 'Silver Black';
+        $product->description = '80%';
+        $product->save();
+
+
+        $product = new ProductBuilding();
+        $product->category_product_building_id = 4;
+        $product->name = 'Gold Silver ';
+        $product->description = '80%';
+        $product->save();
+
+
+        $product = new ProductBuilding();
+        $product->category_product_building_id = 4;
+        $product->name = 'Green Silver';
+        $product->description = '80%';
+        $product->save();
+
+
+        $product = new ProductBuilding();
+        $product->category_product_building_id = 4;
+        $product->name = 'Blue Silver';
+        $product->description = '80%';
+        $product->save();
+
+
+        $product = new ProductBuilding();
+        $product->category_product_building_id = 4;
+        $product->name = 'Red Silver';
+        $product->description = '80%';
+        $product->save();
+
+
+        $product = new ProductBuilding();
+        $product->category_product_building_id = 4;
+        $product->name = 'Purple Silver';
+        $product->description = '80%';
+        $product->save();
+
+
+        $product = new ProductBuilding();
+        $product->category_product_building_id = 4;
+        $product->name = 'Double Silver ';
+        $product->description = '80%';
+        $product->save();
     }
 }

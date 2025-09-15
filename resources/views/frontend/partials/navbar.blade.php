@@ -4,7 +4,7 @@
 				<div class="container mw-1680">
 					<nav class="navbar navbar-expand-md navbar-light">
 						<a class="navbar-brand" href="index.html">
-							<img src="{{asset('assets/frontend/images/white-logo.svg')}}" alt="logo">
+							<img src="{{asset('assets/images/acegard-logo.svg')}}" alt="logo">
 						</a>
 
 						<div class="collapse navbar-collapse for-mobile-menu" id="navbarSupportedContent">
@@ -55,7 +55,7 @@
 							</ul>
 
 							<div class="nav-right-options d-flex align-items-center">
-
+                                    <a href="{{route('frontend.warranty')}}" class="btn btn-primary">Warranty Claim</a>
 							</div>
 						</div>
 					</nav>

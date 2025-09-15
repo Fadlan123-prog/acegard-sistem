@@ -29,7 +29,7 @@
         </a>
     </div>
     <div class="card-body">
-        <form action="{{ route('customer.store') }}" method="POST">
+        <form action="{{ route('customer.building.store') }}" method="POST">
             @csrf
             <div class="row g-3">
                 <div class="col-md-6">
@@ -95,48 +95,47 @@
             <hr class="mt-5">
 
             <h5 class="mt-5 mb-5 text-center">Produk Customer</h5>
-<div id="product-container">
-
-    <div class="row align-items-end mb-3 product-item">
-        <div class="col-md-3">
-            <label>Kategory Produk</label>
-            <select name="products[0][category_product_building_id]" class="form-select category-select" data-index="0" required>
-                <option value="">Pilih Kategori</option>
-                @foreach($categories as $category)
+            <div id="product-container">
+            <div class="row align-items-end mb-3 product-item">
+                <div class="col-md-3">
+                <label>Kategori Produk</label>
+                <select name="products[0][category_product_building_id]" class="form-select category-select" data-index="0" required>
+                    <option value="">Pilih Kategori</option>
+                    @foreach($categories as $category)
                     <option value="{{ $category->id }}">{{ $category->name }}</option>
-                @endforeach
-            </select>
-        </div>
+                    @endforeach
+                </select>
+                </div>
 
-        <div class="col-md-3">
-            <label>Produk</label>
-            <select name="products[0][product_building_id]" class="form-select" data-index="0" required>
-                <option value="">Pilih Produk</option>
-                {{-- akan diisi secara dinamis --}}
-            </select>
-        </div>
+                <div class="col-md-3">
+                <label>Produk</label>
+                <select name="products[0][product_building_id]" class="form-select product-select" data-index="0" required>
+                    <option value="">Pilih Produk</option>
+                </select>
+                </div>
 
-        <div class="col-md-3">
-            <label class="form-label">Durasi Garansi</label>
-                    <select name="warantee_duration" class="form-select" required>
-                        <option value="">Pilih Durasi</option>
-                        <option value="5">5 Tahun</option>
-                        <option value="7">7 Tahun</option>
-                    </select>
-        </div>
+                <div class="col-md-3">
+                <label class="form-label">Durasi Garansi</label>
+                <select name="products[0][warantee_duration]" class="form-select duration-select" required>
+                    <option value="">Pilih Durasi</option>
+                    <option value="3">3 Tahun</option>
+                    <option value="5">5 Tahun</option>
+                    <option value="7">7 Tahun</option>
+                </select>
+                </div>
 
-        <div class="col-md-2">
-            <label>Ukuran</label>
-            <input type="text" name="products[0][meters]" class="form-control">
-        </div>
-        <div class="col-md-1 ">
-            <button type="button" class="btn btn-danger btn-sm remove-product text-center">×</button>
-        </div>
-    </div>
+                <div class="col-md-2">
+                <label>Ukuran (m²)</label>
+                <input type="number" step="0.01" min="0.01" name="products[0][meters]" class="form-control meters-input" required>
+                </div>
 
-</div>
+                <div class="col-md-1">
+                <button type="button" class="btn btn-danger btn-sm remove-product">×</button>
+                </div>
+            </div>
+            </div>
 
-<button type="button" class="btn btn-sm btn-outline-primary" id="add-product">+ Tambah Produk</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="add-product">+ Tambah Produk</button>
 
 <hr class="mt-5">
 
@@ -165,66 +164,64 @@
 let productIndex = 1;
 
 document.getElementById('add-product').addEventListener('click', function () {
-    const container = document.getElementById('product-container');
-    const newItem = container.querySelector('.product-item').cloneNode(true);
+  const container = document.getElementById('product-container');
+  const template  = container.querySelector('.product-item');
+  const clone     = template.cloneNode(true);
 
-    // Update name and data-index
-    newItem.querySelectorAll('select').forEach(select => {
-        const name = select.getAttribute('name');
-        const newName = name.replace(/\[\d+\]/, `[${productIndex}]`);
-        select.setAttribute('name', newName);
+  // Update semua name + data-index
+  clone.querySelectorAll('select, input').forEach(el => {
+    const name = el.getAttribute('name');              // contoh: products[0][meters]
+    if (name) el.setAttribute('name', name.replace(/\[\d+\]/, `[${productIndex}]`));
 
-        // Update data-index jika ada
-        if (select.classList.contains('category-select') || select.classList.contains('product-select')) {
-            select.setAttribute('data-index', productIndex);
-        }
+    // set data-index untuk select yang butuh ajax
+    if (el.classList.contains('category-select') || el.classList.contains('product-select')) {
+      el.setAttribute('data-index', productIndex);
+    }
 
-        select.selectedIndex = 0; // reset selection
-    });
+    // reset nilai
+    if (el.tagName === 'SELECT') {
+      el.selectedIndex = 0;
+      if (el.classList.contains('product-select')) {
+        el.innerHTML = '<option value="">Pilih Produk</option>';
+      }
+    } else {
+      el.value = '';
+    }
+  });
 
-    container.appendChild(newItem);
-    productIndex++;
+  container.appendChild(clone);
+  productIndex++;
 });
 
 // Remove row
 document.addEventListener('click', function (e) {
-    if (e.target.classList.contains('remove-product')) {
-        const item = e.target.closest('.product-item');
-        if (document.querySelectorAll('.product-item').length > 1) {
-            item.remove();
-        }
-    }
+  if (e.target.classList.contains('remove-product')) {
+    const item = e.target.closest('.product-item');
+    if (document.querySelectorAll('.product-item').length > 1) item.remove();
+  }
+});
+
+// AJAX isi produk sesuai kategori
+$(document).on('change', '.category-select', function () {
+  const categoryId = $(this).val();
+  const index = $(this).data('index');
+  const $productSelect = $(`select[name="products[${index}][product_building_id]"]`);
+  $productSelect.html('<option value="">Memuat...</option>');
+
+  if (!categoryId) return $productSelect.html('<option value="">Pilih Produk</option>');
+
+  $.get(`{{ url('products-by-category-building') }}/${categoryId}`)
+    .done(function (data) {
+      let options = '<option value="">Pilih Produk</option>';
+      data.forEach(p => options += `<option value="${p.id}">${p.name}</option>`);
+      $productSelect.html(options);
+    })
+    .fail(function () {
+      alert('Gagal mengambil produk.');
+      $productSelect.html('<option value="">Pilih Produk</option>');
+    });
 });
 </script>
 
-<script>
-    $(document).on('change', '.category-select', function () {
-        let categoryId = $(this).val();
-        let index = $(this).data('index');
-        let $productSelect = $(`select[name="products[${index}][product_building_id]"]`);
-
-        $productSelect.html('<option value="">Memuat...</option>');
-
-        if (categoryId) {
-            $.ajax({
-                url: '{{ url("products-by-category-building") }}/' + categoryId,
-                type: 'GET',
-                success: function (data) {
-                    let options = '<option value="">Pilih Produk</option>';
-                    data.forEach(product => {
-                        options += `<option value="${product.id}">${product.name}</option>`;
-                    });
-                    $productSelect.html(options);
-                },
-                error: function () {
-                    alert('Gagal mengambil produk.');
-                    $productSelect.html('<option value="">Pilih Produk</option>');
-                }
-            });
-        } else {
-            $productSelect.html('<option value="">Pilih Produk</option>');
-        }
-    });
-</script>
 
 @endsection

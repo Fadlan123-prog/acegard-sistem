@@ -1,10 +1,10 @@
 <div class="footer-area pt-100 pb-75">
 			<div class="container">
 				<div class="row" data-cues="slideInUp">
-					<div class="col-lg-3 col-sm-6">
+					<div class="col-lg-4 col-sm-6">
 						<div class="footer-single-item">
 							<a href="index.html" class="logo">
-								<img src="{{asset('assets/frontend/images/logo.svg')}}" alt="logo">
+								<img src="{{asset('assets/images/acegard-dark.svg')}}" alt="logo">
 							</a>
 							<p>Bergabunglah bersama kami dalam menghadirkan solusi kaca film terbaik untuk kendaraan dan properti Anda. Hubungi Acegard sekarang juga.</p>
 							<ul class="social-link ps-0 mb-0 list-unstyled">
@@ -31,7 +31,7 @@
 							</ul>
 						</div>
 					</div>
-					<div class="col-lg-3 col-sm-6">
+					<div class="col-lg-4 col-sm-6">
 						<div class="footer-single-item ms-lg-5">
 							<h3>Useful Links</h3>
 
@@ -54,10 +54,10 @@
 							</ul>
 						</div>
 					</div>
-					<div class="col-lg-3 col-sm-6">
+					<div class="col-lg-4 col-sm-6">
 						<div class="footer-single-item">
 							<h3>Contact Us</h3>
-							<p class="mb-3">Samwell Street, Trankturt 2589 New York.</p>
+							<p class="mb-3">Jl. KH. Hasyim Ashari, RT.007/RW.002, Nerogtog, Kec. Cipondoh, Kota Tangerang, Banten 15146</p>
 
 							<ul class="contact-info ms-0">
 								<li>
@@ -69,19 +69,7 @@
 							</ul>
 						</div>
 					</div>
-					<div class="col-lg-3 col-sm-6">
-						<div class="footer-single-item">
-							<h3>Subscribe Us</h3>
-							<p>Subscribe to our newsletter for future updates. don’t worry we don’t spam your email address</p>
 
-							<form class="position-relative z-1">
-								<input type="text" class="form-control" placeholder="Enter your email">
-								<button type="submit" class="p-0 bg-transparent border-0 send-btn position-absolute top-50 end-0 translate-middle-y">
-									<i class="fa-light fa-paper-plane-top"></i>
-								</button>
-							</form>
-						</div>
-					</div>
 				</div>
 			</div>
 		</div>

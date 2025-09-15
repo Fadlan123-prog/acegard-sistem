@@ -20,6 +20,12 @@ class BranchSeeder extends Seeder
         $branch->save();
 
         $branch = new Branch;
+        $branch->name = 'Acegard Bandung';
+        $branch->city = 'Bandung';
+        $branch->address = 'Jl. KH. Hasyim Ashari, RT.007/RW.002, Nerogtog, Kec. Cipondoh, Kota Tangerang, Banten 15146';
+        $branch->save();
+
+        $branch = new Branch;
         $branch->name = 'Acegard Jambi';
         $branch->city = 'Jambi';
         $branch->address = 'Jl. KH. Hasyim Ashari, RT.007/RW.002, Nerogtog, Kec. Cipondoh, Kota Tangerang, Banten 15146';

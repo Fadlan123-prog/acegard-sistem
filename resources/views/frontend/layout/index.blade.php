@@ -6,18 +6,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
 		<!--=== CSS Link ===-->
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/bootstrap.min.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/meanmenu.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/owl.theme.default.min.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/owl.carousel.min.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/icofont.min.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/font-awesome-pro.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/scrollcue.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/magnific-popup.min.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/style.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/responsive.css')}}">
-		<!-- Favicon -->
-		<link rel="icon" type="image/png" href="{{asset('assets/frontend/images/favicon.png')}}">
+        @stack('styles')
+
 
 		<title>Acegard - Spesialis Kaca Film Mobil & Gedung</title>
     </head>
@@ -62,7 +52,7 @@
 		<!--=== End CopyRight Area ===-->
 
 		<div class="back-to-top text-center">
-			<i class="icofont-simple-up"></i>
+			<i class="fa-solid fa-chevron-up" style="color: #ffffff;"></i>
 		</div>
 
         <!--=== JS Link ===-->

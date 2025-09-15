@@ -171,8 +171,7 @@
             <th style="text-align: left;">
                 <img style="width: 15rem;" src="{{ public_path('assets/images/logo.png') }}" alt="Logo Light">
                 <p style="font-weight: bold;">
-                    Jl. Tanjung Barat No.2B Jagakarsa,<br>
-                    Jakarta Selatan 12530 - Indonesia
+                    Jl. KH. Hasyim Ashari, RT.007/RW.002,<br> Nerogtog, Kec. Cipondoh, Kota Tangerang, Banten 15146
                 </p>
             </th>
             <th style="text-align: right;">

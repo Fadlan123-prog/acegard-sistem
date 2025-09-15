@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained()->onDelete('cascade');
-            $table->string('type'); // cash or credit
+            $table->string('payment_method'); // cash or credit
             $table->integer('price');
             $table->integer('discount')->default(0);
             $table->integer('downpayment')->default(0);

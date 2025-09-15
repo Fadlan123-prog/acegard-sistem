@@ -61,7 +61,6 @@
                     <th>Nomor Kartu</th>
                     <th>Nama</th>
                     <th>Email</th>
-                    <th>Garansi</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -74,13 +73,6 @@
                     <td>{{ $customer->name }}</td>
                     <td>{{ $customer->email }}</td>
                     <td>
-                        @if ($customer->warantee_end >= now()->format('Y-m-d'))
-                        <span class="badge bg-success">Aktif</span>
-                        @else
-                        <span class="badge bg-danger">Kadaluarsa</span>
-                        @endif
-                    </td>
-                    <td>
                         <div class="d-flex gap-1">
                             {{-- View --}}
                             <a href="javascript:void(0)"
@@ -91,13 +83,13 @@
                             </a>
 
                             {{-- Edit --}}
-                            <a href="{{ route('customer.edit', $customer->id) }}"
+                            <a href="{{ route('customer.building.edit', $customer->id) }}"
                                 class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
                                 <iconify-icon icon="lucide:edit"></iconify-icon>
                             </a>
 
                             {{-- Delete --}}
-                            <form action="{{ route('customer.destroy', $customer->id) }}" method="POST"
+                            <form action="{{ route('customer.building.destroy', $customer->id) }}" method="POST"
                                 onsubmit="return confirm('Hapus data ini?')" class="d-inline">
                                 @csrf
                                 @method('DELETE')
@@ -107,21 +99,22 @@
                                 </button>
                             </form>
 
-                             @if ($customer->invoice)
+                             @if ($customer->invoices->isNotEmpty())
                                 {{-- Lihat Invoice --}}
-                                <a href="{{ route('invoice.show', $customer->invoice->id) }}"
-                                    class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center ms-1"
-                                    title="Lihat Invoice">
+                                <a href="{{ route('invoice.building.show', $customer->invoices->last()->id) }}"
+                                class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center ms-1"
+                                title="Lihat Invoice">
                                     <iconify-icon icon="mdi:paper-outline"></iconify-icon>
                                 </a>
                             @else
                                 {{-- Buat Invoice --}}
-                                <a href="{{ route('invoice.create', $customer->id) }}"
-                                    class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center ms-1"
-                                    title="Buat Invoice">
+                                <a href="{{ route('invoice.building.create', $customer->id) }}"
+                                class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center ms-1"
+                                title="Buat Invoice">
                                     <iconify-icon icon="ic:baseline-add-circle-outline"></iconify-icon>
                                 </a>
                             @endif
+
                         </div>
                     </td>
 
@@ -154,18 +147,6 @@
 
           <dt class="col-sm-4">WSN</dt>
           <dd class="col-sm-8">{{ $customer->wsn }}</dd>
-
-          <dt class="col-sm-4">No Kartu</dt>
-          <dd class="col-sm-8">{{ $customer->card_number }}</dd>
-
-          <dt class="col-sm-4">Plat Nomor</dt>
-          <dd class="col-sm-8">{{ $customer->plat_number }}</dd>
-
-          <dt class="col-sm-4">Merek Kendaraan</dt>
-          <dd class="col-sm-8">{{ $customer->vehicle_brand }}</dd>
-
-          <dt class="col-sm-4">Model Kendaraan</dt>
-          <dd class="col-sm-8">{{ $customer->vehicle_model }}</dd>
 
           <dt class="col-sm-4">Garansi</dt>
           <dd class="col-sm-8">{{ $customer->warantee_duration }} tahun (sampai {{ $customer->warantee_end }})</dd>
