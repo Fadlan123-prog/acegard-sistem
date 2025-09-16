@@ -171,63 +171,84 @@
 				</div>
 
 				<div class="row justify-content-center" data-cues="slideInUp">
-					<div class="col-xl-4 col-sm-4">
-						<div class="services-single-item">
-							<div class="icon">
-								<img src="{{asset('assets/frontend/images/services-icon-1.svg')}}" alt="services-icon">
-							</div>
-							<h3>
-								<a href="service-details.html">Black Master</a>
-							</h3>
-							<p>Expert guidance in formulating and growth plans.</p>
-							<ul class="ps-0 mb-0 list-unstyled">
-								<li>Product Management</li>
-								<li>Financial Advisory</li>
-								<li>Product Strategy</li>
-							</ul>
-						</div>
-					</div>
-					<div class="col-xl-4 col-sm-4">
-						<div class="services-single-item">
-							<div class="icon">
-								<img src="{{asset('assets/frontend/images/services-icon-2.svg')}}" alt="services-icon">
-							</div>
-							<h3>
-								<a href="service-details.html">Notch UV 400</a>
-							</h3>
-							<p>Expert guidance in formulating and growth plans.</p>
-							<ul class="ps-0 mb-0 list-unstyled">
-								<li>Marketing Strategies</li>
-								<li>Business Development</li>
-								<li>Financial Advisory</li>
-							</ul>
-						</div>
-					</div>
-					<div class="col-xl-4 col-sm-4">
-						<div class="services-single-item">
-							<div class="icon">
-								<img src="{{asset('assets/frontend/images/services-icon-3.svg')}}" alt="services-icon">
-							</div>
-							<h3>
-								<a href="service-details.html">4K Alpha Pro</a>
-							</h3>
-							<p>Expert guidance in formulating and growth plans.</p>
-							<ul class="ps-0 mb-0 list-unstyled">
-								<li>Technology Solutions</li>
-								<li>Market Research Analysis</li>
-								<li>Project Management</li>
-							</ul>
-						</div>
-					</div>
-					<div class="col-lg-12 text-center">
-						<div class="text-center services-btn d-inline-block m-auto mt-lg-4">
-							<a href="services.html" class="circle-btn text-decoration-none d-flex align-items-center justify-content-center">
-								<span>Hubungi Sekarang</span>
-								<i class="fa-solid fa-arrow-up-right"></i>
-							</a>
-						</div>
-					</div>
-				</div>
+
+                    <!-- Black Master -->
+                    <div class="col-xl-4 col-sm-4">
+                        <div class="services-single-item">
+                            <div class="icon">
+                                <img src="{{asset('assets/frontend/images/services-icon-1.svg')}}" alt="Black Master">
+                            </div>
+                            <h3>
+                                <a href="service-details.html">Black Master</a>
+                            </h3>
+                            <p>
+                                Pure Black mewah dengan teknologi nano carbon + nano ceramic.
+                                Menahan panas <strong>IR hingga 97%</strong> dan <strong>UV 99,9%</strong>,
+                                memberikan privasi tinggi namun tetap jernih berkat Night-Vision.
+                            </p>
+                            <ul class="ps-0 mb-0 list-unstyled">
+                                <li>VLT: 37% • 20% • 8%</li>
+                                <li>TSER: 75% – 82%</li>
+                                <li>Look Pure Black elegan</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Notch UV 400 -->
+                    <div class="col-xl-4 col-sm-4">
+                        <div class="services-single-item">
+                            <div class="icon">
+                                <img src="{{asset('assets/frontend/images/services-icon-2.svg')}}" alt="Notch UV 400">
+                            </div>
+                            <h3>
+                                <a href="service-details.html">Notch UV 400</a>
+                            </h3>
+                            <p>
+                                Kaca film nano ceramic + PET film, menyaring sinar UV sampai
+                                <strong>99,9%</strong> dan IR <strong>hingga 98%</strong>.
+                                Teknologi Night-Vision memastikan pandangan tetap jernih di malam hari.
+                            </p>
+                            <ul class="ps-0 mb-0 list-unstyled">
+                                <li>VLT: 75% • 69% • 42% • 18% • 5%</li>
+                                <li>TSER: 75% – 90%</li>
+                                <li>Proteksi total UVA, UVB, UVC</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 4K Alpha Pro -->
+                    <div class="col-xl-4 col-sm-4">
+                        <div class="services-single-item">
+                            <div class="icon">
+                                <img src="{{asset('assets/frontend/images/services-icon-3.svg')}}" alt="4K Alpha Pro">
+                            </div>
+                            <h3>
+                                <a href="service-details.html">4K Alpha Pro</a>
+                            </h3>
+                            <p>
+                                Nano ceramic matrix (titanium + silica) menahan spektrum panas
+                                <strong>hingga 2500 nm</strong>, IR <strong>99,9%</strong> dan UV <strong>99,9%</strong>.
+                                Memberi performa pendinginan maksimum.
+                            </p>
+                            <ul class="ps-0 mb-0 list-unstyled">
+                                <li>VLT: 53% • 34% • 18% • 4%</li>
+                                <li>TSER: 93% – 98%</li>
+                                <li>Tahan cuaca ekstrem</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12 text-center">
+                        <div class="text-center services-btn d-inline-block m-auto mt-lg-4">
+                            <a href="services.html" class="circle-btn text-decoration-none d-flex align-items-center justify-content-center">
+                                <span>Hubungi Sekarang</span>
+                                <i class="fa-solid fa-arrow-up-right"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+
 			</div>
 		</div>
 		<!--=== End Services Area ===-->
@@ -351,9 +372,9 @@
 					<ul class="slider" data-cues="slideInUp">
 						<li class="bg-img" data-background="{{ asset('assets/frontend/images/bd1.webp')}}">
 							<h1>01</h1>
-							<a href="cases-study-details.html">
+							<a href="#">
 								<div class="case-study-content">
-									<span>Financial Advisory</span>
+									<span>Gedung</span>
 									<div></div>
 									<h4>Assistance in Financial Planning</h4>
 								</div>
@@ -361,9 +382,9 @@
 						</li>
 						<li class="bg-img" data-background="{{ asset('assets/frontend/images/car1.webp')}}">
 							<h1>02</h1>
-							<a href="cases-study-details.html">
+							<a href="#">
 								<div class="case-study-content">
-									<span>Financial Advisory</span>
+									<span>Mobil</span>
 									<div></div>
 									<h4>Assistance in Financial Planning</h4>
 								</div>
@@ -371,9 +392,9 @@
 						</li>
 						<li class="bg-img" data-background="{{ asset('assets/frontend/images/bd2.webp')}}">
 							<h1>03</h1>
-							<a href="cases-study-details.html">
+							<a href="#">
 								<div class="case-study-content">
-									<span>Financial Advisory</span>
+									<span>Gedung</span>
 									<div></div>
 									<h4>Assistance in Financial Planning</h4>
 								</div>
@@ -381,9 +402,9 @@
 						</li>
 						<li class="bg-img" data-background="{{ asset('assets/frontend/images/car2.webp')}}">
 							<h1>04</h1>
-							<a href="cases-study-details.html">
+							<a href="#">
 								<div class="case-study-content">
-									<span>Financial Advisory</span>
+									<span>Mobil</span>
 									<div></div>
 									<h4>Assistance in Financial Planning</h4>
 								</div>
@@ -391,9 +412,9 @@
 						</li>
 						<li class="bg-img" data-background="{{ asset('assets/frontend/images/bd3.webp')}}">
 							<h1>05</h1>
-							<a href="cases-study-details.html">
+							<a href="#">
 								<div class="case-study-content">
-									<span>Financial Advisory</span>
+									<span>Apartemen</span>
 									<div></div>
 									<h4>Assistance in Financial Planning</h4>
 								</div>
@@ -531,46 +552,10 @@
 		<div class="contact-us-area bg-color-030303 ptb-100">
 			<div class="container">
 				<div class="section-title white-title" data-cues="slideInUp">
-					<span class="top-title">Appointment</span>
-					<h2>Love to Hear from You Get in Touch!</h2>
+					<span class="top-title">Lokasi Kami</span>
+					<h2>Jl. KH. Hasyim Ashari, RT.007/RW.002, Nerogtog, Kec. Cipondoh, Kota Tangerang, Banten 15146</h2>
 				</div>
-				<form class="appointment-form">
-					<div class="row" data-cues="slideInUp">
-						<div class="col-lg-6">
-							<div class="form-group">
-								<input type="text" class="form-control" placeholder="Your Name *">
-							</div>
-						</div>
-						<div class="col-lg-6">
-							<div class="form-group">
-								<input type="email" class="form-control" placeholder="Your Email *">
-							</div>
-						</div>
-						<div class="col-lg-6">
-							<div class="form-group">
-								<input type="text" class="form-control" placeholder="What you are interested *">
-							</div>
-						</div>
-						<div class="col-lg-6">
-							<div class="form-group">
-								<input type="text" class="form-control" placeholder="Project Budget *">
-							</div>
-						</div>
-						<div class="col-lg-12">
-							<div class="form-group">
-								<textarea cols="30" rows="5" class="form-control" placeholder="Message *"></textarea>
-							</div>
-						</div>
-						<div class="col-lg-12">
-							<div class="services-btn d-inline-block">
-								<button type="submit" class="circle-btn text-decoration-none d-flex align-items-center bg-transparent">
-									<span>Send Message</span>
-									<i class="fa-solid fa-arrow-up-right"></i>
-								</button>
-							</div>
-						</div>
-					</div>
-				</form>
+				<iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d7932.866895562227!2d106.6881984!3d-6.2064166!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69ed2a0d3377ef%3A0x49dc44beb8c49b02!2sAcegard%20Indonesia!5e0!3m2!1sid!2sid!4v1757998682482!5m2!1sid!2sid" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
 			</div>
 		</div>
 		<!--=== End Contact Us Area ===-->
