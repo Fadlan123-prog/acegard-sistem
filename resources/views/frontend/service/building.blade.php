@@ -52,24 +52,9 @@
     <div class="mil-top-panel">
       <div class="container-fluid">
         <div class="mil-top-panel-content">
-          <a href="{{ route('frontend.home') }}" class="mil-logo"><img src="{{ asset('assets/images/acegard-logo.svg')}}" alt="Acegard" style="width:130px" /></a>
+          <a href="{{ route('frontend.service.building') }}" class="mil-logo"><img src="{{ asset('assets/images/acegard-logo.svg')}}" alt="Acegard" style="width:130px" /></a>
 
-          <div class="mil-navigation">
-            <nav>
-              <ul>
-                <li><a href="{{ route('frontend.home') }}">Home</a></li>
-                <li class="mil-has-children mil-active">
-                  <a href="#promo">Service</a>
-                  <ul>
-                    <li class="mil-active"><a href="{{ route('frontend.service.car') }}">Car</a></li>
-                    <li><a href="{{ route('frontend.service.building') }}">Building</a></li>
-                  </ul>
-                </li>
-                <li><a href="{{ route('frontend.about') }}">Tentang Kami</a></li>
-                <li><a href="{{ route('frontend.contact') }}">Kontak Kami</a></li>
-              </ul>
-            </nav>
-          </div>
+
 
           {{-- <div class="mil-top-panel-buttons">
             <a href="#cta" class="mil-button mil-sm">Ambil Promo</a>
@@ -469,16 +454,7 @@
             <div class="col-lg-8">
               <div class="row">
                 <div class="col-12">
-                  <div class="mil-footer-navigation mil-up mil-mb-60">
-                    <nav>
-                      <ul>
-                        <li><a href="{{ route('frontend.home')}}">Home</a></li>
-                        <li class="mil-active"><a href="#promo">Service</a></li>
-                        <li><a href="{{ route('frontend.about')}}">Tentang Kami</a></li>
-                        <li><a href="{{ route('frontend.contact')}}">Kontak Kami</a></li>
-                      </ul>
-                    </nav>
-                  </div>
+
                 </div>
                 <div class="col-md-6 col-lg-4">
                   <span class="mil-suptitle mil-light mil-upper mil-up mil-mb-20">Workshop</span>

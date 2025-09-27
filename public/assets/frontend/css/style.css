@@ -1745,6 +1745,13 @@ textarea.form-control {
   border-radius: 100px;
   transition: all ease 0.5s;
 }
+
+.services-single-item .icon img{
+    width: 50px;
+    height: auto;
+    color: black;
+}
+
 .services-single-item h3 {
   font-size: 20px;
   margin-bottom: 15px;
@@ -1810,7 +1817,7 @@ textarea.form-control {
   margin: auto;
   margin-bottom: 30px;
   margin-top: -45px;
-  background-color: #ffffff;
+  background-color: #38C0FF;
 }
 .services-single-item.style-three ul li {
   display: inline-block;
@@ -1836,16 +1843,16 @@ textarea.form-control {
   margin-top: 35px;
 }
 .services-btn .circle-btn {
-  color: #ffffff;
-}
-.services-btn .circle-btn i {
-  border-color: #ffffff;
-}
-.services-btn .circle-btn:hover {
   color: #38C0FF;
 }
-.services-btn .circle-btn:hover i {
+.services-btn .circle-btn i {
   border-color: #38C0FF;
+}
+.services-btn .circle-btn:hover {
+  color: #f5f5f5;
+}
+.services-btn .circle-btn:hover i {
+  border-color: #f5f5f5;
 }
 
 /*
