@@ -1,0 +1,284 @@
+@extends('dashboard.index')
+
+@section('title', 'Customers PPF')
+@section('route-breadcrumb', )
+@section('breadcrumb', 'Customers PPF')
+
+@section('content')
+    <div class="card basic-data-table">
+
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="card-title mb-0">Daftar Pelanggan</h5>
+
+        <div class="d-flex gap-2">
+            <a href="{{ route('customer.export') }}" class="btn btn-outline-success btn-sm">
+                Export Excel
+            </a>
+            <a href="{{ route('customer.create') }}" class="btn btn-primary btn-sm">+ Add Customer</a>
+        </div>
+    </div>
+
+    <div class="card-body">
+
+        {{-- Search & Bulk Delete --}}
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3 gap-2">
+
+            {{-- Search + Filter Cabang --}}
+            <form method="GET" action="{{ route('customer.index') }}" id="filterForm"
+                class="d-flex align-items-center gap-2 flex-wrap">
+
+                {{-- Input pencarian --}}
+                <input type="text" name="search" value="{{ request('search') }}"
+                    class="form-control" placeholder="Cari nama customer..." style="max-width: 250px;">
+
+                {{-- Tombol cari --}}
+                <button type="submit" class="btn btn-outline-primary">Search</button>
+
+                {{-- Dropdown filter cabang --}}
+                <div class="col-md-3">
+                    <select name="branch_id" class="form-select"
+                            onchange="document.getElementById('filterForm').submit()">
+                        <option value="">-- Semua Cabang --</option>
+                        @foreach($branches as $branch)
+                            <option value="{{ $branch->id }}"
+                                    {{ request('branch_id') == $branch->id ? 'selected' : '' }}>
+                                {{ $branch->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Tombol reset jika filter aktif --}}
+                @if(request('branch_id') || request('search'))
+                    <a href="{{ route('customer.index') }}" class="btn btn-outline-secondary">Reset</a>
+                @endif
+            </form>
+
+            {{-- Bulk Delete --}}
+            <form id="bulkDeleteForm" action="{{ route('customer.bulkDelete') }}" method="POST" class="d-none"
+                onsubmit="return confirm('Yakin hapus data terpilih?')">
+                @csrf
+                @method('DELETE')
+                <input type="hidden" name="selected_ids" id="selected_ids">
+                <button type="submit" class="btn btn-danger btn-sm">Hapus Terpilih</button>
+            </form>
+
+        </div>
+
+
+        <table class="table bordered-table mb-0">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="checkAll" class="form-check-input"></th>
+                    <th>WSN</th>
+                    <th>Nomor Kartu</th>
+                    <th>Nama</th>
+                    <th>Email</th>
+                    <th>Garansi</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($customers as $customer)
+                <tr>
+                    <td><input type="checkbox" class="check-item form-check-input" value="{{ $customer->id }}"></td>
+                    <td>{{ $customer->wsn }}</td>
+                    <td>{{ $customer->card_number }}</td>
+                    <td>{{ $customer->name }}</td>
+                    <td>{{ $customer->email }}</td>
+                    <td>
+                        @if ($customer->warantee_end >= now()->format('Y-m-d'))
+                        <span class="badge bg-success">Aktif</span>
+                        @else
+                        <span class="badge bg-danger">Kadaluarsa</span>
+                        @endif
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="javascript:void(0)"
+                                class="w-32-px h-32-px bg-warning-focus text-warning-600 rounded-circle d-inline-flex align-items-center justify-content-center"
+                                data-bs-toggle="modal"
+                                data-bs-target="#warrantyCardModal{{ $customer->id }}"
+                                >
+                                <iconify-icon icon="ion:card-outline"></iconify-icon>
+                            </a>
+                            {{-- View --}}
+                            <a href="javascript:void(0)"
+                                class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center"
+                                data-bs-toggle="modal"
+                                data-bs-target="#viewCustomerModal{{ $customer->id }}">
+                                <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
+                            </a>
+
+                            {{-- Edit --}}
+                            <a href="{{ route('customer.edit', $customer->id) }}"
+                                class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
+                                <iconify-icon icon="lucide:edit"></iconify-icon>
+                            </a>
+
+                            {{-- Delete --}}
+                            <form action="{{ route('customer.destroy', $customer->id) }}" method="POST"
+                                onsubmit="return confirm('Hapus data ini?')" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                    class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center border-0">
+                                    <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
+                                </button>
+                            </form>
+
+                             @if ($customer->invoice)
+                                {{-- Lihat Invoice --}}
+                                <a href="{{ route('invoice.show', $customer->invoice->id) }}"
+                                    class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center ms-1"
+                                    title="Lihat Invoice">
+                                    <iconify-icon icon="mdi:paper-outline"></iconify-icon>
+                                </a>
+                            @else
+                                {{-- Buat Invoice --}}
+                                <a href="{{ route('invoice.create', $customer->id) }}"
+                                    class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center ms-1"
+                                    title="Buat Invoice">
+                                    <iconify-icon icon="ic:baseline-add-circle-outline"></iconify-icon>
+                                </a>
+                            @endif
+                        </div>
+                    </td>
+
+                </tr>
+                @empty
+                <tr><td colspan="6" class="text-center">Data tidak ditemukan.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <div class="mt-3">{{ $customers->withQueryString()->links() }}</div>
+    </div>
+</div>
+
+{{-- Modal View Customer --}}
+@foreach ($customers as $customer)
+<div class="modal fade" id="viewCustomerModal{{ $customer->id }}" tabindex="-1" aria-labelledby="viewCustomerModalLabel{{ $customer->id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detail Customer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <dl class="row">
+          <dt class="col-sm-4">Nama</dt>
+          <dd class="col-sm-8">{{ $customer->name }}</dd>
+
+          <dt class="col-sm-4">Email</dt>
+          <dd class="col-sm-8">{{ $customer->email }}</dd>
+
+          <dt class="col-sm-4">WSN</dt>
+          <dd class="col-sm-8">{{ $customer->wsn }}</dd>
+
+          <dt class="col-sm-4">No Kartu</dt>
+          <dd class="col-sm-8">{{ $customer->card_number }}</dd>
+
+          <dt class="col-sm-4">Plat Nomor</dt>
+          <dd class="col-sm-8">{{ $customer->plat_number }}</dd>
+
+          <dt class="col-sm-4">Merek Kendaraan</dt>
+          <dd class="col-sm-8">{{ $customer->vehicle_brand }}</dd>
+
+          <dt class="col-sm-4">Model Kendaraan</dt>
+          <dd class="col-sm-8">{{ $customer->vehicle_model }}</dd>
+
+          <dt class="col-sm-4">Garansi</dt>
+          <dd class="col-sm-8">{{ $customer->warantee_duration }} tahun (sampai {{ $customer->warantee_end }})</dd>
+
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+{{-- Modal View Customer End --}}
+@endforeach
+
+{{-- Modal Warranty Card --}}
+@foreach ($customers as $customer)
+  @php
+    // ambil item + relasi untuk label tombol
+    $items = $customer->customerProducts()
+              ->with(['product', 'categoryProduct']) // sesuaikan nama relasi di model
+              ->get();
+  @endphp
+
+  <div class="modal fade" id="warrantyCardModal{{ $customer->id }}" tabindex="-1" aria-labelledby="warrantyCardModalLabel{{ $customer->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Print Card</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <h6 class="text-center mb-3">Download Card</h6>
+
+          @forelse ($items as $item)
+            @php
+              $prodName = strtoupper($item->product->name ?? 'PRODUCT');
+              $catName  = strtoupper($item->categoryProduct->name ?? 'CAT');
+              // Kalau punya field khusus (mis. shade/vlt), tampilkan; kalau tidak, hapus bagian ini.
+              $shade    = $item->product->code ?? null;   // contoh kalau ada kolom code
+              $vlt      = $item->product->vlt  ?? null;   // contoh kalau ada kolom vlt (%)
+            @endphp
+
+            <a
+              href="{{ route('warranty.card.download.cp', ['cardNumber' => $customer->card_number, 'cp' => $item->id]) }}"
+              class="btn btn-success w-100 mb-2"
+            >
+              {{-- Bentuk label seperti screenshot: "download NOTCH UV400 | NV05 | 80%" --}}
+              download {{ $prodName }}
+              @if($shade) | {{ strtoupper($shade) }} @endif
+              @if(!is_null($vlt)) | {{ $vlt }}% @endif
+            </a>
+          @empty
+            <div class="alert alert-warning">Belum ada item pada customer ini.</div>
+          @endforelse
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+@endforeach
+{{-- Modal Warranty Card End --}}
+
+{{-- Script --}}
+<script>
+    const checkAll = document.getElementById('checkAll');
+    const checkboxes = document.querySelectorAll('.check-item');
+    const bulkForm = document.getElementById('bulkDeleteForm');
+    const selectedIdsInput = document.getElementById('selected_ids');
+
+    checkAll.addEventListener('change', function () {
+        checkboxes.forEach(cb => cb.checked = this.checked);
+        toggleBulkButton();
+    });
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', toggleBulkButton);
+    });
+
+    function toggleBulkButton() {
+        const selected = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+
+        if (selected.length > 0) {
+            bulkForm.classList.remove('d-none');
+            selectedIdsInput.value = selected.join(',');
+        } else {
+            bulkForm.classList.add('d-none');
+            selectedIdsInput.value = '';
+        }
+    }
+</script>
+@endsection

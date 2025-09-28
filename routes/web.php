@@ -14,6 +14,7 @@ use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\WarrantyController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\PpfController;
 
 Route::get('/', [FrontendController::class,'home'])->name('frontend.home');
 Route::get('/service/car', [FrontendController::class,'serviceCar'])->name('frontend.service.car');
@@ -81,8 +82,12 @@ Route::middleware(['auth', 'branch.access'])->group(function () {
     Route::get('/invoice-building/{invoice}/download', [InvoiceBuildingController::class, 'download'])->name('invoice.building.download');
     Route::delete('/invoice-building/{invoice}', [InvoiceBuildingController::class, 'destroy'])->name('invoice.building.destroy');
 
+    Route::get('/customers/ppf', [Ppfcontroller::class, 'index'])->name('customer.ppf.index');
+
     Route::get('/commission', [CommissionController::class, 'index'])->name('commission.index');
     Route::get('/commissions/export', [CommissionController::class, 'exportByEmployee'])->name('commission.export');
+    Route::get('/commission/preview', [CustomerController::class, 'previewCommission'])
+        ->name('commission.preview');
 
     Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
 
