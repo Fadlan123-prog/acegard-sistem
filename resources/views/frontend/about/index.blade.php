@@ -137,7 +137,7 @@
 
             <div class="d-flex align-items-center info">
               <div class="flex-shrink-0">
-                <img src="{{ asset('assets/frontend/building/img/photo/testimonial-1.jpg') }}" class="rounded-circle" alt="Pelanggan 1">
+
               </div>
               <div class="flex-grow-1 ms-3">
                 <h3>Bapak Andi</h3>
@@ -161,8 +161,7 @@
 
             <div class="d-flex align-items-center info">
               <div class="flex-shrink-0">
-                <img src="{{ asset('assets/frontend/building/img/photo/testimonial-2.jpg') }}" class="rounded-circle" alt="Pelanggan 2">
-              </div>
+
               <div class="flex-grow-1 ms-3">
                 <h3>Ibu Rina</h3>
                 <span>Pengguna Mobil, Bandung</span>
@@ -175,7 +174,7 @@
       <!-- Gambar Testimonial -->
       <div class="col-lg-4">
         <div class="testimonial-img-three mt-4 mt-lg-0">
-          <img src="{{ asset('assets/frontend/building/img/photo/testimonial-banner.jpg') }}" alt="Testimonial Acegard">
+
         </div>
       </div>
     </div>

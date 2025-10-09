@@ -25,7 +25,7 @@
 						<h1 class="mb-0">Hallo <span>Auto & Property Owner</span></h1>
 						<h1 class="mb-0">Kami adalah Acegard, Spesialis Kaca Film</h1>
 						<h1>Terpercaya di <span>Indonesia</span></h1>
-						<a href="services.html" class="banner-btn">
+						<a href="https://wa.me/6282121212093?text=Halo%20Acegard%2C%20saya%20tertarik%20dengan%20promo%20kaca%20filmnya" class="banner-btn">
 							<span>
 								Hubungi Sekarang
 								<i class="fa-solid fa-arrow-up-right"></i>
@@ -150,7 +150,7 @@
 								</div>
 							</div>
 							<div class="d-inline-block">
-								<a href="about-us.html" class="circle-btn d-inline-block text-decoration-none d-flex align-items-center">
+								<a href="https://wa.me/6282121212093?text=Halo%20Acegard%2C%20saya%20tertarik%20dengan%20promo%20kaca%20filmnya" class="circle-btn d-inline-block text-decoration-none d-flex align-items-center">
 									<span>Hubungi Sekarang</span>
 									<i class="fa-solid fa-arrow-up-right"></i>
 								</a>
@@ -179,7 +179,7 @@
                                 <img src="{{asset('assets/frontend/images/services-icon-1.svg')}}" alt="Black Master">
                             </div>
                             <h3>
-                                <a href="service-details.html">Black Master</a>
+                                <a href="#">Black Master</a>
                             </h3>
                             <p>
                                 Pure Black mewah dengan teknologi nano carbon + nano ceramic.
@@ -201,7 +201,7 @@
                                 <img src="{{asset('assets/frontend/images/services-icon-2.svg')}}" alt="Notch UV 400">
                             </div>
                             <h3>
-                                <a href="service-details.html">Notch UV 400</a>
+                                <a href="#">Notch UV 400</a>
                             </h3>
                             <p>
                                 Kaca film nano ceramic + PET film, menyaring sinar UV sampai
@@ -223,7 +223,7 @@
                                 <img src="{{asset('assets/frontend/images/services-icon-3.svg')}}" alt="4K Alpha Pro">
                             </div>
                             <h3>
-                                <a href="service-details.html">4K Alpha Pro</a>
+                                <a href="#">4K Alpha Pro</a>
                             </h3>
                             <p>
                                 Nano ceramic matrix (titanium + silica) menahan spektrum panas
@@ -240,7 +240,7 @@
 
                     <div class="col-lg-12 text-center">
                         <div class="text-center services-btn d-inline-block m-auto mt-lg-4">
-                            <a href="services.html" class="circle-btn text-decoration-none d-flex align-items-center justify-content-center">
+                            <a href="https://wa.me/6282121212093?text=Halo%20Acegard%2C%20saya%20tertarik%20dengan%20promo%20kaca%20filmnya" class="circle-btn text-decoration-none d-flex align-items-center justify-content-center">
                                 <span>Hubungi Sekarang</span>
                                 <i class="fa-solid fa-arrow-up-right"></i>
                             </a>
@@ -314,7 +314,7 @@
 							</div>
 
 							<div class="d-inline-block">
-								<a href="about-us.html" class="circle-btn d-inline-block text-decoration-none mt-4 mt-xl-5 d-flex align-items-center">
+								<a href="https://wa.me/6282121212093?text=Halo%20Acegard%2C%20saya%20tertarik%20dengan%20promo%20kaca%20filmnya" class="circle-btn d-inline-block text-decoration-none mt-4 mt-xl-5 d-flex align-items-center">
 									<span>Hubungi Sekarang</span>
 									<i class="fa-solid fa-arrow-up-right"></i>
 								</a>
@@ -376,7 +376,7 @@
 								<div class="case-study-content">
 									<span>Gedung</span>
 									<div></div>
-									<h4>Assistance in Financial Planning</h4>
+									<h4>Notch UV400</h4>
 								</div>
 							</a>
 						</li>
@@ -386,7 +386,7 @@
 								<div class="case-study-content">
 									<span>Mobil</span>
 									<div></div>
-									<h4>Assistance in Financial Planning</h4>
+									<h4>Notch UV400</h4>
 								</div>
 							</a>
 						</li>
@@ -396,7 +396,7 @@
 								<div class="case-study-content">
 									<span>Gedung</span>
 									<div></div>
-									<h4>Assistance in Financial Planning</h4>
+									<h4>Black Master</h4>
 								</div>
 							</a>
 						</li>
@@ -406,7 +406,7 @@
 								<div class="case-study-content">
 									<span>Mobil</span>
 									<div></div>
-									<h4>Assistance in Financial Planning</h4>
+									<h4>4K Alpha Pro</h4>
 								</div>
 							</a>
 						</li>
@@ -416,7 +416,7 @@
 								<div class="case-study-content">
 									<span>Apartemen</span>
 									<div></div>
-									<h4>Assistance in Financial Planning</h4>
+									<h4>Flex One Way</h4>
 								</div>
 							</a>
 						</li>
@@ -425,7 +425,7 @@
 
 				<div class="text-center" data-cues="slideInUp">
 					<div class="d-inline-block">
-						<a href="case-study.html" class="circle-btn d-inline-block text-decoration-none mt-4 mt-xl-5 d-flex align-items-center justify-content-center">
+						<a href="https://wa.me/6282121212093?text=Halo%20Acegard%2C%20saya%20tertarik%20dengan%20promo%20kaca%20filmnya" class="circle-btn d-inline-block text-decoration-none mt-4 mt-xl-5 d-flex align-items-center justify-content-center">
 							<span>Konsultasi Sekarang</span>
 							<i class="fa-solid fa-arrow-up-right"></i>
 						</a>
