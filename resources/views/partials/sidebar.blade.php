@@ -64,6 +64,9 @@
                     <li>
                         <a href="{{ route('customer.building.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Customers Buildings</a>
                     </li>
+                    {{-- <li>
+                        <a href="{{ route('customer.ppf.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Customers PPF</a>
+                    </li> --}}
                 </ul>
             </li>
             <li>

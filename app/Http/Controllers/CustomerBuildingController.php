@@ -48,7 +48,7 @@ class CustomerBuildingController extends Controller
     {
         $request->validate([
             'wsn'          => 'required|string',
-            'card_number'  => 'required|string',
+            // 'card_number'  => 'required|string', // ❌ HAPUS: diisi otomatis
             'name'         => 'required|string',
             'phone_number' => 'required|string',
             'email'        => 'nullable|email',
@@ -61,7 +61,7 @@ class CustomerBuildingController extends Controller
             'products'                                  => 'required|array|min:1',
             'products.*.category_product_building_id'   => 'required|integer|exists:category_product_building,id',
             'products.*.product_building_id'            => 'required|integer|exists:product_building,id',
-            'products.*.meters'                         => 'required|numeric|min:0.01', // ← numeric, bukan integer
+            'products.*.meters'                         => 'required|numeric|min:0.01',
             'products.*.warantee_duration'              => 'required|integer|in:3,5,7',
 
             'admin_password' => 'required|string',
@@ -73,10 +73,28 @@ class CustomerBuildingController extends Controller
 
         DB::beginTransaction();
         try {
-            $customer = CustomerBuilding::create([
+            // ====== Generate card_number: BD + YYYY + 5 digit urut per tahun ======
+            $year   = now()->year;
+            $prefix = 'BD' . $year; // contoh: BD2025
+
+            // Ambil nomor terakhir (lock untuk cegah race condition)
+            $lastCard = \App\Models\CustomerBuilding::query()
+                ->where('card_number', 'like', $prefix.'%')
+                ->lockForUpdate()
+                ->orderByDesc('card_number')   // aman karena suffix zero-padded 5 digit
+                ->value('card_number');
+
+            $seq = 1;
+            if ($lastCard && preg_match('/^' . preg_quote($prefix, '/') . '(\d{5})$/', $lastCard, $m)) {
+                $seq = (int)$m[1] + 1;
+            }
+            $cardNumber = $prefix . str_pad($seq, 5, '0', STR_PAD_LEFT); // contoh: BD202500001
+            // =====================================================================
+
+            $customer = \App\Models\CustomerBuilding::create([
                 'branch_id'    => auth()->user()->branches->first()->id ?? 1,
                 'wsn'          => $request->wsn,
-                'card_number'  => $request->card_number,
+                'card_number'  => $cardNumber, // ✅ pakai hasil generate
                 'name'         => $request->name,
                 'email'        => $request->email,
                 'phone_number' => $request->phone_number,
@@ -89,24 +107,26 @@ class CustomerBuildingController extends Controller
 
             foreach ($request->input('products', []) as $row) {
                 $duration = (int) $row['warantee_duration'];
-                CustomerBuildingProduct::create([
-                    'customer_building_id'        => $customer->id,
-                    'category_product_building_id'=> (int)$row['category_product_building_id'],
-                    'product_building_id'         => (int)$row['product_building_id'],
-                    'meters'                      => (float)$row['meters'],
-                    'warantee_duration'           => $duration,
-                    'warantee_start'              => now(),
-                    'warantee_end'                => now()->copy()->addYears($duration),
+                \App\Models\CustomerBuildingProduct::create([
+                    'customer_building_id'         => $customer->id,
+                    'category_product_building_id' => (int)$row['category_product_building_id'],
+                    'product_building_id'          => (int)$row['product_building_id'],
+                    'meters'                       => (float)$row['meters'],
+                    'warantee_duration'            => $duration,
+                    'warantee_start'               => now(),
+                    'warantee_end'                 => now()->copy()->addYears($duration),
                 ]);
             }
 
             DB::commit();
-            return redirect()->route('customer.building.index')->with('success', 'Customer berhasil ditambahkan.');
+            return redirect()->route('customer.building.index')
+                ->with('success', "Customer berhasil ditambahkan. Card Number: {$cardNumber}");
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->withInput()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
+
 
     public function edit(CustomerBuilding $customer)
     {

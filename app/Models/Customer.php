@@ -57,4 +57,14 @@ class Customer extends Model
     {
         return $this->hasOne(Invoice::class);
     }
+
+    public function tukang()
+    {
+        return $this->belongsTo(\App\Models\Employee::class, 'tukang_id');
+    }
+
+    public function kenek()
+    {
+        return $this->belongsTo(\App\Models\Employee::class, 'kenek_id');
+    }
 }

@@ -50,6 +50,7 @@
                     <option value="">Pilih</option>
                     <option value="cash">Cash</option>
                     <option value="credit">Credit</option>
+                    <option value="transfer">Transfer</option>
                 </select>
             </div>
 

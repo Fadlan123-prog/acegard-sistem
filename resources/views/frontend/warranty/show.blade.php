@@ -149,6 +149,24 @@
                         </tbody>
                     </table>
 
+                    <h6 class="bg-gray-100 dark:bg-gray-950 text-center text-gray-800 dark:text-white font-bold text-xl my-4" style="background-color:black; color:white; padding: 5px 0;">
+                    VALIDATE WARRANTY CARD
+                </h6>
+
+                <table class="table">
+                    <tbody style="border-style: none !important;">
+                        <tr style="border-style: none !important;">
+                            <td style="width: 15rem; border-style: none !important;">INSTALATION DATE</td>
+                            <td style="border-style: none !important;">: {{ $customer->products->first()->warantee_start }}</td>
+                        </tr>
+                        <tr style="border-style: none !important;">
+                            <td style="width: 15rem; border-style: none !important;">VALID UNTIL</td>
+                            <td style="border-style: none !important;">: {{ $customer->products->first()->warantee_end }}</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
                     <!-- Transaction Details Section -->
                     <div class="row g-4">
                         <!-- Kolom Transfer -->

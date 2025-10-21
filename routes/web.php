@@ -14,6 +14,7 @@ use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\WarrantyController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\EmployeeController;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 Route::get('/', [FrontendController::class,'home'])->name('frontend.home');
 Route::get('/service/car', [FrontendController::class,'serviceCar'])->name('frontend.service.car');
@@ -87,7 +88,23 @@ Route::middleware(['auth', 'branch.access'])->group(function () {
     Route::get('/commissions/export', [CommissionController::class, 'exportByEmployee'])->name('commission.export');
 
     Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
+    Route::get('/_debug-public', fn () => public_path());
+    Route::get('/_pdf-ping', function () {
+        // (opsional) paksa lagi saat runtime
+        app()->usePublicPath('/home/acegardi/public_html');
+        app()->instance('path.public', '/home/acegardi/public_html');
 
+        \Config::set('dompdf.public_path', '/home/acegardi/public_html');
+        \Config::set('dompdf.chroot', '/home/acegardi/public_html');
+
+        return Pdf::setOptions([
+            'chroot'          => '/home/acegardi/public_html',
+            'isRemoteEnabled' => true,
+        ])->loadHtml('<h1>OK</h1>')->stream('ping.pdf');
+    });
+    Route::get('/_debug-binding', function () {
+        return "helper=" . public_path() . " | binding=" . app('path.public');
+    });
 
 });
 

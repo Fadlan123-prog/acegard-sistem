@@ -134,6 +134,27 @@
                     </tbody>
                 </table>
 
+                <h6 class="text-center font-bold text-xl my-4"
+                    style="background-color:black; color:white; padding:5px 0;">
+                    INSTALLATION TEAM
+                </h6>
+                <table class="table">
+                    <tbody style="border-style:none!important;">
+                        <tr style="border-style:none!important;">
+                            <td style="width:15rem; border-style:none!important;">Technician</td>
+                            <td style="border-style:none!important;">
+                                : {{ optional($customer->tukang)->name ?? '-' }}
+                            </td>
+                        </tr>
+                        <tr style="border-style:none!important;">
+                            <td style="width:15rem; border-style:none!important;">Helper</td>
+                            <td style="border-style:none!important;">
+                                : {{ optional($customer->kenek)->name ?? '-' }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
                 <!-- Transaction Details Section -->
                 <div class="row g-4">
                     <!-- Kolom Transfer -->
@@ -164,7 +185,7 @@
 
                             <div class="card border-solid border-2 border-black">
                                  <div class="card-body border-solid border-2 border-black">
-                                    <p class="text-center fw-bold text-uppercase mb-0">TYPE OF TRANSACTION : {{ $invoice->type }}</p>
+                                    <p class="text-center fw-bold text-uppercase mb-0">TYPE OF TRANSACTION : {{ $invoice->payment_method }}</p>
                                 </div>
                             </div>
                         </div>

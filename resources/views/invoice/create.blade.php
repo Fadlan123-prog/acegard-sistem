@@ -52,6 +52,8 @@
           <option value="">Pilih</option>
           <option value="cash" {{ old('payment_method')==='cash' ? 'selected' : '' }}>Cash</option>
           <option value="credit" {{ old('payment_method')==='credit' ? 'selected' : '' }}>Credit</option>
+          <option value="transfer" {{ old('payment_method')==='transfer' ? 'selected' : '' }}>Transfer</option>
+          <option value="tokopedia" {{ old('payment_method')==='tokopedia' ? 'selected' : '' }}>Tokopedia</option>
         </select>
         <small class="text-muted">Field ini opsional; kolom tersimpan terpisah dari tipe pemasangan.</small>
       </div>

@@ -171,7 +171,7 @@
             <th style="text-align: left;">
                 <img style="width: 15rem;" src="{{ public_path('assets/images/logo.png') }}" alt="Logo Light">
                 <p style="font-weight: bold;">
-                    Jl. KH. Hasyim Ashari, RT.007/RW.002,<br> Nerogtog, Kec. Cipondoh, Kota Tangerang, Banten 15146
+                    JL. Kampar Raya No.43, Lempuing, Kec. Ratu Agung <br> Kota Bengkulu, Bengkulu 38225, Indonesia
                 </p>
             </th>
             <th style="text-align: right;">
@@ -221,17 +221,17 @@
 
     <table style="width: 100%;">
         <tbody>
-            @foreach ($customer->customerProducts as $product)
+            @foreach ($customer->products as $product)
             <tr>
-                <td style="width: 17rem; text-align: left; margin: 0.5rem 0;">{{ $product->part->name }}</td>
-                <td>: {{ $product->categoryProduct->name }} | {{ $product->product->name }} | {{ $product->product->description }}</td>
+                <td style="width: 17rem; text-align: left; margin: 0.5rem 0;">{{ $product->category->name }}</td>
+                <td>:   {{ $product->meters }} | {{ $product->product->name }} | {{ $product->product->description }}</td>
             </tr>
             @endforeach
         </tbody>
     </table>
 
     <h6 style="text-align: center; font-weight: bold; font-size: 1.25rem; margin: 1.5rem 0; background-color: black; color: white; padding: 5px 0;">
-        VEHICLE DESCRIPTION
+        VALIDATE WARRANTY CARD
     </h6>
 
     <table style="width: 100%;">
@@ -243,14 +243,6 @@
             <tr>
                 <td>Model</td>
                 <td>: {{ $customer->vehicle_model }}</td>
-            </tr>
-            <tr>
-                <td>Police Number</td>
-                <td>: {{ $customer->plat_number }}</td>
-            </tr>
-            <tr>
-                <td>Year</td>
-                <td>: {{ $customer->vehicle_year }}</td>
             </tr>
         </tbody>
     </table>
@@ -264,21 +256,35 @@
                         <tbody>
                             <tr>
                                 <th style="text-align: left;">Bank Company</th>
-                                <td>: Bank Central Asia (BCA)</td>
+                                <td>: BNI </td>
                             </tr>
                             <tr>
                                 <th style="text-align: left;">Account Bank Name</th>
-                                <td>: Hendy Tanpratama</td>
+                                <td>: Andriansyah </td>
                             </tr>
                             <tr>
                                 <th style="text-align: left;">Account Number</th>
-                                <td>: 8900140747</td>
+                                <td>: 1277106265</td>
+                            </tr>
+                        </tbody>
+                        <tbody>
+                            <tr>
+                                <th style="text-align: left;">Bank Company</th>
+                                <td>: BRI </td>
+                            </tr>
+                            <tr>
+                                <th style="text-align: left;">Account Bank Name</th>
+                                <td>: Andriansyah </td>
+                            </tr>
+                            <tr>
+                                <th style="text-align: left;">Account Number</th>
+                                <td>: 011501035876504</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
                 <div style="border: 1px solid #000; padding: 1rem; margin-top: 1rem; text-align: center; font-weight: bold; text-transform:uppercase;">
-                    TYPE OF TRANSACTION : {{ $invoice->payment_method }}
+                    TYPE OF TRANSACTION : {{ $invoice->type }}
                 </div>
                 <div style="margin-top: 1rem;">
                     <p>All Transactions are not refundable</p>

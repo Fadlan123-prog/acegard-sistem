@@ -31,4 +31,5 @@ return [
     ],
 
     'marketing_category_priority' => [2, 1], // 2: Notch UV 400, 1: 4K Alpha Pro
+    'auto_split' => ['tukang' => 70, 'kenek' => 30],
 ];
