@@ -24,6 +24,8 @@ Route::get('/contact', [FrontendController::class,'contact'])->name('frontend.co
 Route::get('/warranty', [WarrantyController::class,'index'])->name('frontend.warranty');
 Route::get('/warranty/invoice/{invoice}', [WarrantyController::class,'showInvoice'])->name('frontend.warranty.invoice');
 
+Route::get('/kaca-film-mobil', [FrontendController::class,'kacaFilmMobil'])->name('frontend.kaca.film.mobil');
+
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');

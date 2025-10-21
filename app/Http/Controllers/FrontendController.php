@@ -30,4 +30,8 @@ class FrontendController extends Controller
         return view('frontend.contact.index');
     }
 
+    public function kacaFilmMobil(){
+        return view('promotion.car');
+    }
+
 }
