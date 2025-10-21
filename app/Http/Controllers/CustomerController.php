@@ -327,109 +327,285 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
 
 
 
-    public function edit(Customer $customer)
-    {
-        if (
-            !auth()->user()->hasRole('superadmin') &&
-            $customer->branch_id != session('active_branch_id')
-        ) {
-            abort(403, 'Kamu tidak memiliki akses ke data ini.');
-        }
+    public function update(
+    Request $request,
+    Customer $customer,
+    InstallTypeResolver $resolver,
+    CommissionService $commission
+) {
+    // 1) Validasi input
+    $request->validate([
+        'wsn'               => ['required','string'],
+        'name'              => ['required','string','max:255'],
+        'email'             => ['required','email'],
+        'phone_number'      => ['required','string'],
+        'address'           => ['required','string'],
+        'vehicle_brand'     => ['required','string'],
+        'vehicle_model'     => ['required','string'],
+        'plat_number'       => ['required','string'],
+        'vehicle_year'      => ['required','integer'],
+        'dealer_name'       => ['required','string'],
+        'city'              => ['required','string'],
+        'country'           => ['required','string'],
 
-        $customer->load(['products']);
-        return view('customer.edit', [
-            'customer' => $customer,
-            'categories' => CategoryProduct::all(),
-            'parts' => Part::all(),
-            'products' => Product::all(),
-        ]);
+        'install_type'      => ['required', Rule::in(['fullset','skkb','dsp'])],
+        'has_panoramic'     => ['nullable','boolean'],
 
+        'share_mode'                 => ['required', Rule::in(['auto','custom'])],
+        'installer_share'            => ['nullable','array'],
+        'installer_share.tukang'     => ['nullable','integer','min:0','max:100'],
+        'installer_share.kenek'      => ['nullable','integer','min:0','max:100'],
+        'normalize_100'              => ['nullable','boolean'],
+
+        'tukang_id'         => ['required','exists:employees,id'],
+        'kenek_id'          => ['nullable','exists:employees,id'],
+        'marketing_id'      => ['nullable','exists:employees,id'],
+
+        'warantee_duration' => ['required', Rule::in([5,7])],
+
+        'products'                          => ['required','array','min:1'],
+        'products.*.id'                     => ['nullable','integer','exists:customer_product,id'],
+        'products.*.product_id'             => ['required','exists:products,id'],
+        'products.*.category_product_id'    => ['required','exists:category_products,id'],
+        'products.*.part_id'                => ['required','exists:parts,id'],
+
+        'admin_password'     => ['required','string'],
+    ]);
+
+    // 2) Konfirmasi admin
+    $admin = Auth::user();
+    if (!Hash::check($request->admin_password, $admin->password)) {
+        return back()->withErrors(['admin_password' => 'Password salah.'])->withInput();
     }
 
-    public function update(Request $request, Customer $customer)
-    {
-        if (
-            !auth()->user()->hasRole('superadmin') &&
-            $customer->branch_id != session('active_branch_id')
-        ) {
-            abort(403, 'Kamu tidak memiliki akses ke data ini.');
-        }
+    // 3) Hitung ulang masa garansi (mengikuti pola di store)
+    $start = Carbon::now();
+    $end   = $start->copy()->addYears((int)$request->warantee_duration);
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
-            'phone_number' => 'required|string',
-            'wsn' => 'required|string',
-            'card_number' => 'required|numeric',
-            'warrantee_duration' => 'required|in:5,7',
+    DB::beginTransaction();
+    try {
+        // === Update master customer (card_number TIDAK diubah) ===
+        $customer->update([
+            'wsn'               => $request->wsn,
+            'name'              => $request->name,
+            'email'             => $request->email,
+            'phone_number'      => $request->phone_number,
+            'address'           => $request->address,
+            'vehicle_brand'     => $request->vehicle_brand,
+            'vehicle_model'     => $request->vehicle_model,
+            'plat_number'       => $request->plat_number,
+            'vehicle_year'      => $request->vehicle_year,
+            'dealer_name'       => $request->dealer_name,
+            'city'              => $request->city,
+            'country'           => $request->country,
 
-            'products' => 'required|array|min:1',
-            'products.*.product_id' => 'required|exists:products,id',
-            'products.*.category_product_id' => 'required|exists:category_products,id',
-            'products.*.part_id' => 'required|exists:parts,id',
+            'warantee_start'    => $start->toDateString(),
+            'warantee_end'      => $end->toDateString(),
+            'warantee_duration' => (int)$request->warantee_duration,
 
-            'admin_password' => 'required',
+            'install_type'      => $request->install_type,
+            'tukang_id'         => (int)$request->tukang_id,
+            'kenek_id'          => $request->filled('kenek_id') ? (int)$request->kenek_id : null,
+            'marketing_id'      => $request->filled('marketing_id') ? (int)$request->marketing_id : null,
         ]);
 
-        // Verifikasi password admin
-        if (!Hash::check($request->admin_password, Auth::user()->password)) {
-            return back()->withErrors(['admin_password' => 'Password tidak valid.'])->withInput();
+        // === Sinkronisasi produk (create/update/delete) ===
+        $existingIds = CustomerProduct::where('customer_id', $customer->id)->pluck('id')->all();
+        $keepIds = [];
+
+        foreach ($request->products as $row) {
+            $rowId = $row['id'] ?? null;
+
+            if ($rowId) {
+                // update
+                CustomerProduct::where('id', $rowId)
+                    ->where('customer_id', $customer->id)
+                    ->update([
+                        'product_id'          => (int)$row['product_id'],
+                        'category_product_id' => (int)$row['category_product_id'],
+                        'part_id'             => (int)$row['part_id'],
+                    ]);
+                $keepIds[] = (int)$rowId;
+            } else {
+                // create
+                $created = CustomerProduct::create([
+                    'customer_id'         => $customer->id,
+                    'product_id'          => (int)$row['product_id'],
+                    'category_product_id' => (int)$row['category_product_id'],
+                    'part_id'             => (int)$row['part_id'],
+                ]);
+                $keepIds[] = $created->id;
+            }
         }
 
-        DB::beginTransaction();
-        try {
-            // Update data customer
-            $customer->update([
-                'name' => $request->name,
-                'email' => $request->email,
-                'phone_number' => $request->phone_number,
-                'wsn' => $request->wsn,
-                'card_number' => $request->card_number,
-                'warantee_start' => now()->toDateString(),
-                'warantee_end' => now()->addYears((int) $request->warranty_duration)->toDateString(),
-                'warantee_duration' => (int) $request->warranty_duration,
-            ]);
+        $toDelete = array_diff($existingIds, $keepIds);
+        if (!empty($toDelete)) {
+            CustomerProduct::whereIn('id', $toDelete)->delete();
+        }
 
-            // Ambil semua ID customer_product lama
-            $existingIds = CustomerProduct::where('customer_id', $customer->id)->pluck('id')->toArray();
-            $newIds = [];
+        // === Re-evaluasi final type (menggunakan rule resolver yang sama) ===
+        $finalType = $resolver->decideAfterInsert(
+            (int)$request->tukang_id,
+            $request->install_type,
+            $request->boolean('has_panoramic'),
+            $customer->id
+        );
 
-            // Loop produk dari form
-            foreach ($request->products as $prod) {
-                if (!empty($prod['id'])) {
-                    // Update jika ID ada
-                    CustomerProduct::where('id', $prod['id'])
-                        ->where('customer_id', $customer->id)
-                        ->update([
-                            'product_id' => $prod['product_id'],
-                            'part_id' => $prod['part_id'],
-                            'category_product_id' => $prod['category_product_id'],
-                        ]);
-                    $newIds[] = $prod['id'];
+        // === Pool komisi teknisi/kenek dari config ===
+        $map = config('commission.fixed', []);
+        $rowCfg = $map[$finalType] ?? null;
+        if (!$rowCfg) {
+            DB::rollBack();
+            return back()->withInput()->with('error', "Tipe komisi '$finalType' tidak ditemukan di config/commission.php");
+        }
+        $amtTukangCfg = (int)($rowCfg['Teknisi'] ?? $rowCfg['tukang'] ?? 0);
+        $amtKenekCfg  = (int)($rowCfg['Kenek']   ?? $rowCfg['kenek']  ?? 0);
+        $pool         = $amtTukangCfg + $amtKenekCfg;
+
+        // === Reset komisi installer lama untuk customer ini (invoice_id null) ===
+        DB::table('commissions')
+            ->where('customer_id', $customer->id)
+            ->whereNull('invoice_id')
+            ->where('role', 'installer')
+            ->delete();
+
+        // === Hitung & insert ulang komisi installer ===
+        if ($pool > 0) {
+            $now       = now();
+            $hasTukang = (bool)$customer->tukang_id;
+            $hasKenek  = (bool)$customer->kenek_id;
+            $mode      = $request->input('share_mode', 'auto');
+            $rowsToInsert = [];
+
+            if ($mode === 'custom' && ($hasTukang || $hasKenek)) {
+                $pT = (int)$request->input('installer_share.tukang', 0);
+                $pK = (int)$request->input('installer_share.kenek',  0);
+
+                $pairs = [];
+                if ($hasTukang) $pairs[] = ['id'=>(int)$customer->tukang_id, 'p'=>$pT];
+                if ($hasKenek)  $pairs[] = ['id'=>(int)$customer->kenek_id,  'p'=>$pK];
+
+                $sumP = array_sum(array_column($pairs, 'p'));
+                if ($sumP <= 0) {
+                    $mode = 'auto';
                 } else {
-                    // Create jika ID tidak ada
-                    $created = CustomerProduct::create([
-                        'customer_id' => $customer->id,
-                        'product_id' => $prod['product_id'],
-                        'part_id' => $prod['part_id'],
-                        'category_product_id' => $prod['category_product_id'],
-                    ]);
-                    $newIds[] = $created->id;
+                    if ($request->boolean('normalize_100')) {
+                        foreach ($pairs as $i => $pr) {
+                            $pairs[$i]['p'] = (int) round($pr['p'] * 100 / $sumP);
+                        }
+                        $deltaPct = 100 - array_sum(array_column($pairs,'p'));
+                        if ($deltaPct !== 0) $pairs[0]['p'] += $deltaPct;
+                    }
+
+                    $sumAmt = 0;
+                    foreach ($pairs as $pr) {
+                        $pct = max(0, (int)$pr['p']);
+                        if ($pct <= 0) continue;
+                        $amount = (int) floor($pool * $pct / 100);
+                        if ($amount > 0) {
+                            $rowsToInsert[] = [
+                                'employees_id' => $pr['id'],
+                                'customer_id'  => (int)$customer->id,
+                                'invoice_id'   => null,
+                                'amount'       => $amount,
+                                'role'         => 'installer',
+                                'created_at'   => $now,
+                                'updated_at'   => $now,
+                            ];
+                            $sumAmt += $amount;
+                        }
+                    }
+
+                    if ($request->boolean('normalize_100')) {
+                        $deltaAmt = $pool - $sumAmt;
+                        if ($deltaAmt !== 0) {
+                            foreach ($rowsToInsert as &$r) {
+                                if ($hasTukang && $r['employees_id'] === (int)$customer->tukang_id) { $r['amount'] += $deltaAmt; break; }
+                                if (!$hasTukang && $hasKenek && $r['employees_id'] === (int)$customer->kenek_id) { $r['amount'] += $deltaAmt; break; }
+                            }
+                            unset($r);
+                        }
+                    }
+                }
+            }
+            elseif ($mode === 'auto') {
+                $autoT = (int)config('commission.auto_split.tukang', 70);
+                if ($hasTukang && $hasKenek) {
+                    $tAmt = (int) floor($pool * $autoT / 100);
+                    $kAmt = $pool - $tAmt;
+                    $rowsToInsert[] = [
+                        'employees_id' => (int)$customer->tukang_id,
+                        'customer_id'  => (int)$customer->id,
+                        'invoice_id'   => null,
+                        'amount'       => $tAmt,
+                        'role'         => 'installer',
+                        'created_at'   => $now,
+                        'updated_at'   => $now,
+                    ];
+                    $rowsToInsert[] = [
+                        'employees_id' => (int)$customer->kenek_id,
+                        'customer_id'  => (int)$customer->id,
+                        'invoice_id'   => null,
+                        'amount'       => $kAmt,
+                        'role'         => 'installer',
+                        'created_at'   => $now,
+                        'updated_at'   => $now,
+                    ];
+                } elseif ($hasTukang) {
+                    $rowsToInsert[] = [
+                        'employees_id' => (int)$customer->tukang_id,
+                        'customer_id'  => (int)$customer->id,
+                        'invoice_id'   => null,
+                        'amount'       => $pool,
+                        'role'         => 'installer',
+                        'created_at'   => $now,
+                        'updated_at'   => $now,
+                    ];
+                } elseif ($hasKenek) {
+                    $rowsToInsert[] = [
+                        'employees_id' => (int)$customer->kenek_id,
+                        'customer_id'  => (int)$customer->id,
+                        'invoice_id'   => null,
+                        'amount'       => $pool,
+                        'role'         => 'installer',
+                        'created_at'   => $now,
+                        'updated_at'   => $now,
+                    ];
                 }
             }
 
-            // Hapus yang tidak lagi ada
-            $toDelete = array_diff($existingIds, $newIds);
-            CustomerProduct::whereIn('id', $toDelete)->delete();
-
-            DB::commit();
-
-            return redirect()->route('customer.index')->with('success', 'Customer berhasil diperbarui.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
+            if (!empty($rowsToInsert)) {
+                DB::table('commissions')->insert($rowsToInsert);
+            }
         }
+
+        // === Reset & set komisi marketing (jika perlu) ===
+        DB::table('commissions')
+            ->where('customer_id', $customer->id)
+            ->whereNull('invoice_id')
+            ->where('role', 'marketing')
+            ->delete();
+
+        if ($request->filled('marketing_id')) {
+            $commission->createMarketingForCustomerAutoCategory(
+                (int)$request->marketing_id,
+                $customer->id,
+                null,
+                $finalType
+            );
+        }
+
+        DB::commit();
+
+        return redirect()
+            ->route('customer.index')
+            ->with('success', "Customer {$customer->card_number} berhasil diperbarui.");
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        return back()->withInput()->with('error', 'Gagal memperbarui data: '.$e->getMessage());
     }
+}
+
 
 
     public function destroy(Customer $customer)

@@ -105,17 +105,26 @@ class InvoiceController extends Controller
 
     public function show(Invoice $invoice)
     {
-        // muat relasi yang dibutuhkan
-        $invoice->load('customer');
-        $customer = Customer::with([
-            'products',
-            'customerProducts.part',
-            'customerProducts.product',
-            'customerProducts.categoryProduct',
-        ])->findOrFail($invoice->customer_id);
+        // Eager-load semua yang dibutuhkan lewat relasi customer,
+        // jadi tidak perlu query Customer::findOrFail(...) terpisah.
+        $invoice->load([
+            'customer.customerProducts.part',
+            'customer.customerProducts.product',
+            'customer.customerProducts.categoryProduct',
+            'customer.tukang:id,name',
+            'customer.kenek:id,name',
+        ]);
+
+        // Guard: kalau invoice tidak punya customer (harusnya tidak terjadi)
+        if (!$invoice->customer) {
+            abort(404, 'Customer untuk invoice ini tidak ditemukan.');
+        }
+
+        $customer = $invoice->customer;
 
         return view('invoice.show', compact('invoice', 'customer'));
     }
+
 
     public function edit(Invoice $invoice)
     {
@@ -195,13 +204,73 @@ class InvoiceController extends Controller
     // Download PDF
     public function download(Invoice $invoice)
     {
-        $customer = Customer::with(['customerProducts.part', 'customerProducts.product', 'customerProducts.categoryProduct'])
-            ->findOrFail($invoice->customer_id);
+        // Ambil relasi yang diperlukan + cabang
+        $invoice->load([
+            'customer.branch',                       // <— penting
+            'customer.customerProducts.part',
+            'customer.customerProducts.product',
+            'customer.customerProducts.categoryProduct',
+            'customer.tukang:id,name',
+            'customer.kenek:id,name',
+        ]);
 
-        $customerProduct = $customer->customerProducts;
+        $customer = $invoice->customer;
+        if (!$customer) {
+            abort(404, 'Customer untuk invoice ini tidak ditemukan.');
+        }
 
-        $pdf = PDF::loadView('invoice.pdf', compact('invoice', 'customer', 'customerProduct'));
-        return $pdf->stream();
+        // Tentukan view berdasarkan cabang
+        $branch     = $customer->branch;
+        $branchKey  = $branch ? Str::slug($branch->name) : 'default';
+
+        // Urutan kandidat view: branches/{slug} → pdf_{slug} → pdf
+        $view = $this->resolveInvoiceViewForBranch($branchKey);
+
+        // ——— (opsional) set public path seperti yang sudah kamu lakukan ———
+        $publicPath = '/home/acegardi/public_html';
+        app()->usePublicPath($publicPath);
+        app()->instance('path.public', $publicPath);
+        config([
+            'dompdf.public_path'     => $publicPath,
+            'dompdf.chroot'          => $publicPath,
+            'dompdf.isRemoteEnabled' => true,
+        ]);
+        // -------------------------------------------------------------------
+
+        $pdf = Pdf::setPaper('A4', 'portrait')
+            ->setOptions([
+                'chroot'          => $publicPath,
+                'isRemoteEnabled' => true,
+            ])
+            ->loadView($view, [
+                'invoice'         => $invoice,
+                'customer'        => $customer,
+                'customerProduct' => $customer->customerProducts,
+                'branch'          => $branch, // bisa dipakai untuk logo/alamat cabang di view
+            ]);
+
+        return $pdf->stream('invoice-'.$invoice->invoice_number.'.pdf');
+    }
+
+    /**
+     * Pilih view invoice berdasarkan cabang dengan fallback yang aman.
+     */
+    protected function resolveInvoiceViewForBranch(string $branchKey): string
+    {
+        // 1) resources/views/invoice/branches/{slug}.blade.php
+        $candidate1 = "invoice.branches.$branchKey";
+        if (view()->exists($candidate1)) {
+            return $candidate1;
+        }
+
+        // 2) resources/views/invoice/pdf_{slug}.blade.php (opsional alternatif)
+        $candidate2 = "invoice.pdf_{$branchKey}";
+        if (view()->exists($candidate2)) {
+            return $candidate2;
+        }
+
+        // 3) fallback umum: resources/views/invoice/pdf.blade.php
+        return 'invoice.pdf';
     }
 
 

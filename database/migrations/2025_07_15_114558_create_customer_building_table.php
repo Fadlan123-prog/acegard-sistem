@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('branch_id')->constrained('branches')->cascadeOnDelete();
             $table->string('wsn');
-            $table->integer('card_number');
+            $table->string('card_number')->unique();
             $table->string('name');
-            $table->string('email')->unique();
+            $table->string('email');
             $table->string('phone_number');
             $table->string('address');
             $table->string('dealer_name');
