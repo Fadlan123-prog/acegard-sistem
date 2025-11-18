@@ -1,0 +1,33 @@
+:root {
+      --primary:#0c1a3d;
+      --dark:#0b152f;
+      --accent:#0c4cf5;
+    }
+    body{font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;}
+    .navbar-brand img{height:34px}
+    .btn-pill{border-radius:999px}
+    /* Hero */
+    .hero {
+      position: relative;
+      background: radial-gradient(90% 120% at 10% 10%, #eef5ff 0%, #f7fbff 45%, #ecf2fb 100%);
+      overflow: hidden;
+    }
+    .hero::after{
+      content:"";
+      position:absolute; inset:auto -10% -35% -10%;
+      height:55%; background:linear-gradient(180deg, rgba(12,76,245,.08), rgba(12,26,61,0));
+      filter: blur(60px);
+    }
+    .hero-title{color:var(--dark); font-weight:800; line-height:1.05; letter-spacing:.2px}
+    .hero-subtitle{color:#13224d; font-weight:800}
+    .hero-lead{color:#263a6a}
+    .badge-soft{background:#e7efff; color:#0d3dc2}
+    .hero-img{
+      max-width: 720px;
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 16px 40px rgba(16,33,80,.25));
+    }
+    @media (max-width: 991.98px){
+      .hero-title{font-size: clamp(28px, 6vw, 46px);}
+    }

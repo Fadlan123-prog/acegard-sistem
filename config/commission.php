@@ -13,7 +13,7 @@ return [
 
     'marketing' => [
         1 => [ // 4K ALPHA PRO
-            'fullset' => 100000,
+            'fullset' => 120000,
             'dsp'     => 70000,
             'skkb'    => 100000,
         ],

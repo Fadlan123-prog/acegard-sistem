@@ -38,4 +38,5 @@ class WarrantyController extends Controller
 
         return view('frontend.warranty.show', compact('invoice', 'customer'));
     }
+
 }

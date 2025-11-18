@@ -224,7 +224,7 @@
             @foreach ($customer->products as $product)
             <tr>
                 <td style="width: 17rem; text-align: left; margin: 0.5rem 0;">{{ $product->category->name }}</td>
-                <td>:   {{ $product->meters }} | {{ $product->product->name }} | {{ $product->product->description }}</td>
+                <td>:   {{ $product->meters }} | {{ $product->product->name }} | {{ $product->product->description }} | {{$product->category->price}}</td>
             </tr>
             @endforeach
         </tbody>
