@@ -12,10 +12,16 @@
     <div class="sidebar-menu-area">
         <ul class="sidebar-menu" id="sidebar-menu">
             <li>
-                <a  href="{{ route('dashboard') }}">
+                <a href="{{ route('dashboard') }}">
                     <iconify-icon icon="solar:home-smile-angle-outline" class="menu-icon"></iconify-icon>
                     <span>Dashboard</span>
                 </a>
+
+                <a href="{{ route('users.index') }}">
+                    <iconify-icon icon="proicons:branch" class="menu-icon"></iconify-icon>
+                    <span>Branch</span>
+                </a>
+
                 <a  href="{{ route('employee.index') }}">
                     <iconify-icon icon="healthicons:factory-worker-outline" class="menu-icon"></iconify-icon>
                     <span>Employees</span>

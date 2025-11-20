@@ -14,6 +14,8 @@ use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\WarrantyController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\UserController;
+
 use Barryvdh\DomPDF\Facade\Pdf;
 
 Route::get('/', [FrontendController::class,'home'])->name('frontend.home');
@@ -30,6 +32,18 @@ Route::get('/kaca-film-mobil', [FrontendController::class,'kacaFilmMobil'])->nam
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::middleware(['auth', 'role:superadmin'])->group(function () {
+
+    // Master Cabang
+    Route::resource('branches', BranchController::class)->except(['show']);
+
+    // Manajemen User
+    Route::resource('users', UserController::class)->except(['show']);
+
+    Route::delete('users/bulk-delete', [UserController::class, 'bulkDelete'])
+        ->name('users.bulkDelete');
+});
 
 Route::middleware(['auth', 'branch.access'])->group(function () {
     Route::post('/switch-branch', [BranchController::class, 'switch'])->name('switch-branch');

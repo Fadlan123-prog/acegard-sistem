@@ -31,7 +31,7 @@
                         </div>
 
                         <div class="max-h-400-px overflow-y-auto scroll-sm pe-4">
-  @foreach(auth()->user()->branches as $branch)
+  @foreach(optional(auth()->user())->branches ?? [] as $branch)
     <form method="POST" action="{{ route('switch-branch') }}">
       @csrf
       <input type="hidden" name="branch_id" value="{{ $branch->id }}">
@@ -71,7 +71,11 @@
                     <div class="dropdown-menu to-top dropdown-menu-sm">
                         <div class="py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
                             <div>
-                                <h6 class="text-lg text-primary-light fw-semibold mb-2">{{ auth()->user()->name }}</h6>
+                                @auth
+                                    <h6 class="text-lg text-primary-light fw-semibold mb-2">
+                                        {{ auth()->user()->name }}
+                                    </h6>
+                                @endauth
                                 <span class="text-secondary-light fw-medium text-sm">Admin</span>
                             </div>
                             <button type="button" class="hover-text-danger">
