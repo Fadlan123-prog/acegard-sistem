@@ -20,6 +20,10 @@ class EnsureBranchAccess
             return $next($request);
         }
 
+        if ($request->routeIs('notifications.open')) {
+            return $next($request);
+        }
+
         // Cek apakah user punya cabang
         $branches = $user->branches;
         if ($branches->isEmpty()) {

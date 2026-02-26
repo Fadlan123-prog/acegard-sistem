@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Branch;
 
 class BranchController extends Controller
 {
@@ -17,6 +18,39 @@ class BranchController extends Controller
 
         session(['active_branch_id' => $branchId]);
         return back()->with('success', 'Cabang aktif diubah.');
+    }
+
+    public function index(Request $request)
+    {
+        $query = Branch::withCount(['customers', 'customerBuildings', 'employees']);
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhere('city', 'like', "%{$search}%")
+                ->orWhere('address', 'like', "%{$search}%");
+            });
+        }
+
+        $branches = $query->orderBy('name')->paginate(10);
+
+        return view('branches.index', compact('branches'));
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $ids = collect(explode(',', $request->input('selected_ids')))
+                ->filter()
+                ->all();
+
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada cabang yang dipilih.');
+        }
+
+        // Optional: bisa tambahkan pengecekan relasi sebelum hapus
+        Branch::whereIn('id', $ids)->delete();
+
+        return redirect()->route('branches.index')->with('success', 'Cabang terpilih berhasil dihapus.');
     }
 
     public function create(){

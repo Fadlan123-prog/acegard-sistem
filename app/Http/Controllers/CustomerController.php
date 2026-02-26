@@ -53,7 +53,7 @@ class CustomerController extends Controller
             }
         } else {
             // Admin biasa hanya bisa melihat cabang aktifnya
-            $query->where('branch_id', $activeBranchId);
+            $query->where('branch_id', $branchId);
         }
 
         // Ambil semua cabang (hanya jika perlu tampil di filter UI)

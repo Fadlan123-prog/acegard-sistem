@@ -1,75 +1,45 @@
-<div class="footer-area pt-100 pb-75">
-			<div class="container">
-				<div class="row" data-cues="slideInUp">
-					<div class="col-lg-4 col-sm-6">
-						<div class="footer-single-item">
-							<a href="index.html" class="logo">
-								<img src="{{asset('assets/images/acegard-dark.svg')}}" alt="logo">
-							</a>
-							<p>Bergabunglah bersama kami dalam menghadirkan solusi kaca film terbaik untuk kendaraan dan properti Anda. Hubungi Acegard sekarang juga.</p>
-							<ul class="social-link ps-0 mb-0 list-unstyled">
-								<li>
-									<a href="https://facebook.com/" target="_blank">
-										<i class="fa-brands fa-facebook-f"></i>
-									</a>
-								</li>
-								<li>
-									<a href="https://twitter.com/" target="_blank">
-										<i class="fa-brands fa-twitter"></i>
-									</a>
-								</li>
-								<li>
-									<a href="https://instagram.com/" target="_blank">
-										<i class="fa-brands fa-instagram"></i>
-									</a>
-								</li>
-								<li>
-									<a href="https://linkedin.com/" target="_blank">
-										<i class="fa-brands fa-linkedin-in"></i>
-									</a>
-								</li>
-							</ul>
-						</div>
-					</div>
-					<div class="col-lg-4 col-sm-6">
-						<div class="footer-single-item ms-lg-5">
-							<h3>Useful Links</h3>
+<footer class="pt-5 pb-4 mt-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <img src="{{ asset('assets/img/logo.png') }}" alt="Acegard" style="height:34px;">
+          <span class="fw-bold">ACEGARD</span>
+        </div>
+        <p class="mb-0 small">
+          Kaca film nano ceramic dengan solar reject tinggi. Konsultasi & pemasangan profesional.
+        </p>
+      </div>
 
-							<ul class="useful-link">
-								<li>
-									<a href="about-us.html">About Us</a>
-								</li>
-								<li>
-									<a href="case-study.html">Case Study</a>
-								</li>
-								<li>
-									<a href="services.html">Our Service</a>
-								</li>
-								<li>
-									<a href="contact-us.html">Contact Us</a>
-								</li>
-								<li>
-									<a href="faq.html">FAQs</a>
-								</li>
-							</ul>
-						</div>
-					</div>
-					<div class="col-lg-4 col-sm-6">
-						<div class="footer-single-item">
-							<h3>Contact Us</h3>
-							<p class="mb-3">Jl. KH. Hasyim Ashari, RT.007/RW.002, Nerogtog, Kec. Cipondoh, Kota Tangerang, Banten 15146</p>
+      <div class="col-lg-4">
+        <h6 class="fw-bold">Useful Links</h6>
+        <ul class="list-unstyled small mb-0">
+          <li><a href="#product">Product</a></li>
+          <li><a href="#gallery">Gallery</a></li>
+          <li><a href="#partner">Partner</a></li>
+          <li><a href="{{ route('warranty.form') }}">Warranty Claim</a></li>
+        </ul>
+      </div>
 
-							<ul class="contact-info ms-0">
-								<li>
-									<a href="mailto:acegardindonesia@gmail.com">acegardindonesia@gmail.com</a>
-								</li>
-								<li>
-									<a href="tel:+6282121212093">+6282121212093</a>
-								</li>
-							</ul>
-						</div>
-					</div>
+      <div class="col-lg-4">
+        <h6 class="fw-bold">Contact</h6>
+        <div class="small">
+          <div class="mb-2">📍 Jl. KH Hasyim Ashari, Kota Tangerang</div>
+          <div class="mb-2">📞 08xx-xxxx-xxxx</div>
+          <div>✉️ admin@acegard.example</div>
+        </div>
+      </div>
+    </div>
 
-				</div>
-			</div>
-		</div>
+    <hr class="border-light opacity-25 my-4">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between small">
+      <div>© {{ date('Y') }} Acegard. All rights reserved.</div>
+      <div class="d-flex gap-3">
+        <a href="#">Instagram</a>
+        <a href="#">WhatsApp</a>
+        <a href="#">Maps</a>
+      </div>
+    </div>
+  </div>
+</footer>

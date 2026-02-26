@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             CategoryProductBuildingSeeder::class,
             ProductBuildingSeeder::class,
             EmployeeSeeder::class,
+            PpfProductSeeder::class,
         ]);
     }
 }

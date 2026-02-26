@@ -36,6 +36,28 @@
     <link rel="stylesheet"  href="{{ asset('assets/css/lib/audioplayer.css') }}">
     <!-- main css -->
     <link rel="stylesheet"  href="{{ asset('assets/css/style.css') }}">
+    <style>
+    .ppf-table-responsive{
+        overflow-x:auto;
+        -webkit-overflow-scrolling:touch;
+    }
+
+    /* biar tabel tetap rapih dan tidak “pecah” layout */
+    .ppf-table-responsive table{
+        min-width: 980px; /* sesuaikan, tapi ini bikin aman di mobile */
+    }
+
+    .ppf-table-responsive th,
+    .ppf-table-responsive td{
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    /* kolom tertentu boleh wrap (optional) */
+    .ppf-table-responsive td.wrap{
+        white-space: normal;
+    }
+    </style>
 </head>
 
 <body>

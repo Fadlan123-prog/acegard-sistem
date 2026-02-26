@@ -19,4 +19,23 @@ class Branch extends Model
         return $this->belongsToMany(User::class, 'branch_user', 'branch_id', 'user_id')->withTimestamps();
     }
 
+    public function customers()
+    {
+        return $this->hasMany(Customer::class);
+    }
+
+    public function customerBuildings()
+    {
+        return $this->hasMany(CustomerBuilding::class);
+    }
+
+    public function employees()
+    {
+        return $this->hasMany(Employee::class);
+    }
+
+    public function invoiceBuildings()
+    {
+        return $this->hasMany(InvoiceBuilding::class);
+    }
 }

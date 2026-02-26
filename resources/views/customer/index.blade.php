@@ -35,6 +35,7 @@
                 <button type="submit" class="btn btn-outline-primary">Search</button>
 
                 {{-- Dropdown filter cabang --}}
+                @if(auth()->user()->hasRole('superadmin'))
                 <div class="col-md-3">
                     <select name="branch_id" class="form-select"
                             onchange="document.getElementById('filterForm').submit()">
@@ -47,6 +48,7 @@
                         @endforeach
                     </select>
                 </div>
+                @endif
 
                 {{-- Tombol reset jika filter aktif --}}
                 @if(request('branch_id') || request('search'))

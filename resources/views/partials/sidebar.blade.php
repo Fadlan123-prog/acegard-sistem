@@ -16,12 +16,17 @@
                     <iconify-icon icon="solar:home-smile-angle-outline" class="menu-icon"></iconify-icon>
                     <span>Dashboard</span>
                 </a>
-
-                <a href="{{ route('users.index') }}">
+                @if(auth()->user()->hasRole('superadmin'))
+                <a href="{{ route('branches.index') }}">
                     <iconify-icon icon="proicons:branch" class="menu-icon"></iconify-icon>
                     <span>Branch</span>
                 </a>
 
+                <a href="{{ route('users.index') }}">
+                    <iconify-icon icon="mdi:users" class="menu-icon"></iconify-icon>
+                    <span>Users</span>
+                </a>
+                @endif
                 <a  href="{{ route('employee.index') }}">
                     <iconify-icon icon="healthicons:factory-worker-outline" class="menu-icon"></iconify-icon>
                     <span>Employees</span>
@@ -70,10 +75,16 @@
                     <li>
                         <a href="{{ route('customer.building.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Customers Buildings</a>
                     </li>
-                    {{-- <li>
-                        <a href="{{ route('customer.ppf.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Customers PPF</a>
-                    </li> --}}
+                    <li>
+                        <a href="{{ route('ppf-customers.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Customers PPF</a>
+                    </li>
                 </ul>
+            </li>
+            <li>
+                <a href="{{ route('admin.claims.index') }}">
+                    <iconify-icon icon="streamline-flex:warranty-badge-highlight" class="menu-icon"></iconify-icon>
+                    <span>Warranty Claims</span>
+                </a>
             </li>
             <li>
                 <a href="{{ route('commission.index') }}">

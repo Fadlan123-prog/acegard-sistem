@@ -80,6 +80,21 @@ class EmployeeSeeder extends Seeder
         $data->save();
 
         $data = new Employee();
+        $data->name = 'Iman';
+        $data->job_position = 'Teknisi';
+        $data->save();
+
+        $data = new Employee();
+        $data->name = 'Yadi';
+        $data->job_position = 'Teknisi';
+        $data->save();
+
+        $data = new Employee();
+        $data->name = 'Wayan';
+        $data->job_position = 'Teknisi';
+        $data->save();
+
+        $data = new Employee();
         $data->name = 'Dinda';
         $data->job_position = 'Marketing';
         $data->save();

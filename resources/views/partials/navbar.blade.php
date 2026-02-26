@@ -31,29 +31,29 @@
                         </div>
 
                         <div class="max-h-400-px overflow-y-auto scroll-sm pe-4">
-  @foreach(optional(auth()->user())->branches ?? [] as $branch)
-    <form method="POST" action="{{ route('switch-branch') }}">
-      @csrf
-      <input type="hidden" name="branch_id" value="{{ $branch->id }}">
+                        @foreach(optional(auth()->user())->branches ?? [] as $branch)
+                            <form method="POST" action="{{ route('switch-branch') }}">
+                            @csrf
+                            <input type="hidden" name="branch_id" value="{{ $branch->id }}">
 
-      <button type="submit"
-        class="w-100 text-start px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between {{ session('active_branch_id') == $branch->id ? 'bg-neutral-50' : '' }}">
-        <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-          <span class="w-44-px h-44-px bg-primary-subtle text-primary-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-            {{ strtoupper(substr($branch->name, 0, 2)) }}
-          </span>
-          <div>
-            <h6 class="text-md fw-semibold mb-1">{{ $branch->name }}</h6>
-            <p class="mb-0 text-sm text-secondary-light">{{ $branch->city }}</p>
-          </div>
-        </div>
-        @if(session('active_branch_id') == $branch->id)
-          <span class="text-sm text-success-main flex-shrink-0">Aktif</span>
-        @endif
-      </button>
-    </form>
-  @endforeach
-</div>
+                            <button type="submit"
+                                class="w-100 text-start px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between {{ session('active_branch_id') == $branch->id ? 'bg-neutral-50' : '' }}">
+                                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
+                                <span class="w-44-px h-44-px bg-primary-subtle text-primary-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
+                                    {{ strtoupper(substr($branch->name, 0, 2)) }}
+                                </span>
+                                <div>
+                                    <h6 class="text-md fw-semibold mb-1">{{ $branch->name }}</h6>
+                                    <p class="mb-0 text-sm text-secondary-light">{{ $branch->city }}</p>
+                                </div>
+                                </div>
+                                @if(session('active_branch_id') == $branch->id)
+                                <span class="text-sm text-success-main flex-shrink-0">Aktif</span>
+                                @endif
+                            </button>
+                            </form>
+                        @endforeach
+                        </div>
 
 
                         <div class="text-center py-12 px-16">
@@ -61,7 +61,57 @@
                         </div>
 
                     </div>
-                </div><!-- Notification dropdown end -->
+                </div>
+
+                @php
+                $unreadCount = auth()->user()->unreadNotifications()->count();
+                $latestNotifs = auth()->user()->unreadNotifications()->latest()->take(8)->get();
+                @endphp
+
+                <div class="dropdown">
+                <button class="btn btn-light position-relative" data-bs-toggle="dropdown" aria-expanded="false">
+                    <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+
+                    @if($unreadCount > 0)
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {{ $unreadCount }}
+                    </span>
+                    @endif
+                </button>
+
+                <div class="dropdown-menu dropdown-menu-end p-0" style="width: 360px;">
+                    <div class="px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
+                    <strong>Notifikasi</strong>
+                    <a href="{{ route('notifications.readAll') }}" class="btn btn-sm btn-outline-secondary">Baca semua</a>
+                    </div>
+
+                    <div class="list-group list-group-flush" style="max-height: 360px; overflow:auto;">
+                    @forelse($latestNotifs as $n)
+                        @php
+                        $d = $n->data;
+                        @endphp
+                        <a href="{{ route('notifications.open', $n->id, false) }}"
+                        class="list-group-item list-group-item-action">
+                        <div class="d-flex justify-content-between">
+                            <div class="fw-semibold">Claim Baru: {{ $d['claim_number'] ?? '-' }}</div>
+                            <small class="text-muted">{{ $n->created_at->diffForHumans() }}</small>
+                        </div>
+                        <div class="text-muted small">
+                            Tipe: {{ strtoupper($d['warranty_type'] ?? '-') }} • {{ $d['complaint'] ?? '' }}
+                        </div>
+                        </a>
+                    @empty
+                        <div class="p-3 text-muted">Tidak ada notifikasi baru.</div>
+                    @endforelse
+                    </div>
+
+                    <div class="px-3 py-2 border-top text-center">
+                    <a href="{{ route('notifications.index') }}">Lihat semua</a>
+                    </div>
+                </div>
+                </div>
+
+                <!-- Notification dropdown end -->
 
                 <div class="dropdown">
                     <button class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" type="button" data-bs-toggle="dropdown">
