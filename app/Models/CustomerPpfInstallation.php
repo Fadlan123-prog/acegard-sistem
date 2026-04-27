@@ -20,8 +20,8 @@ class CustomerPpfInstallation extends Model
         'warranty_end',
         'warranty_status',
         'panels',
-        'coverage_override',
-        'exclusions_override',
+        'checklist_image',
+        'job_order_image',
         'notes',
     ];
 
