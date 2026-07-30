@@ -97,27 +97,75 @@ class PublicWarrantyController extends Controller
     public function result(Request $request)
     {
         $request->validate([
-            'type' => ['required','in:car_film,building_film,ppf'],
-            'id'   => ['required','integer'],
-            'card_number' => ['required','string','max:255'],
+            'type' => ['required', 'in:car_film,building_film,ppf'],
+            'id'   => ['required', 'integer'],
+            'card_number' => ['required', 'string', 'max:255'],
         ]);
 
         $type = $request->type;
-        $id   = (int)$request->id;
+        $id   = (int) $request->id;
         $card = trim($request->card_number);
 
         if ($type === 'car_film') {
-            $data = Customer::with(['branch','customerProducts.part','customerProducts.product','customerProducts.categoryProduct'])
-                ->where('id',$id)->where('card_number',$card)->firstOrFail();
+            $data = Customer::with([
+                    'branch',
+                    'customerProducts.part',
+                    'customerProducts.product',
+                    'customerProducts.categoryProduct'
+                ])
+                ->where('id', $id)
+                ->where('card_number', $card)
+                ->firstOrFail();
+
         } elseif ($type === 'building_film') {
-            $data = CustomerBuilding::with(['branch'])
-                ->where('id',$id)->where('card_number',$card)->firstOrFail();
-        } else { // ppf
-            $data = CustomerPpf::with(['branch','installations.ppfProduct','installations.technicians:id,name'])
-                ->where('id',$id)->where('card_number',$card)->firstOrFail();
+            $data = CustomerBuilding::with([
+                'branch',
+                'customerBuildingProducts.product',
+                'customerBuildingProducts.categoryProductBuilding',
+            ])
+            ->where('id', $id)
+            ->where('card_number', $card)
+            ->firstOrFail();
+
+            $buildingProduct = $data->customerBuildingProduct;
+
+            if ($buildingProduct instanceof \Illuminate\Database\Eloquent\Collection) {
+                $buildingProduct = $buildingProduct
+                    ->sortByDesc('warantee_start')
+                    ->first();
+            }
+
+            if ($buildingProduct) {
+                $data->setAttribute('warantee_start', $buildingProduct->warantee_start);
+                $data->setAttribute('warantee_end', $buildingProduct->warantee_end);
+                $data->setAttribute('warantee_duration', $buildingProduct->warantee_duration);
+
+                if (
+                    empty($data->warantee_end) &&
+                    !empty($data->warantee_start) &&
+                    !empty($data->warantee_duration)
+                ) {
+                    $data->setAttribute(
+                        'warantee_end',
+                        \Carbon\Carbon::parse($data->warantee_start)
+                            ->addYears((int) $data->warantee_duration)
+                            ->toDateString()
+                    );
+                }
+            }
+
+        } else {
+            $data = CustomerPpf::with([
+                    'branch',
+                    'installations.ppfProduct',
+                    'installations.technicians:id,name'
+                ])
+                ->where('id', $id)
+                ->where('card_number', $card)
+                ->firstOrFail();
         }
 
-        return view('public.warranty.result', compact('type','data','card'));
+        return view('public.warranty.result', compact('type', 'data', 'card'));
     }
 
     public function storeClaim(Request $request)

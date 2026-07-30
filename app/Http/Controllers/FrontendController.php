@@ -34,4 +34,8 @@ class FrontendController extends Controller
         return view('promotion.car');
     }
 
+    public function ppfAds(){
+        return view('frontend.landing.ppf-ads');
+    }
+
 }

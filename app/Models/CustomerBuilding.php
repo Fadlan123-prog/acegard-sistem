@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class CustomerBuilding extends Model
 {
+    use HasFactory;
+
     protected $table = 'customer_building';
 
     protected $fillable = [
@@ -35,6 +38,11 @@ class CustomerBuilding extends Model
 
     public function categoryProductBuildings(){
         return $this->hasMany(CategoryProductBuilding::class);
+    }
+
+    public function customerBuildingProducts()
+    {
+        return $this->hasMany(CustomerBuildingProduct::class, 'customer_building_id', 'id');
     }
 
 }

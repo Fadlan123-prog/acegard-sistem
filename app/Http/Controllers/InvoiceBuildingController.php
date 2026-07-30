@@ -2,249 +2,482 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\CustomerBuilding;
 use App\Models\InvoiceBuilding;
-use App\Models\CustomerBuildingProduct;
+use App\Services\FilmStockPoolService;
+use App\Services\InvoiceCalculationService;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use PDF;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class InvoiceBuildingController extends Controller
 {
+    public function __construct(
+        private InvoiceCalculationService $calc,
+        private FilmStockPoolService $filmStock,
+    ) {}
+
     public function create(CustomerBuilding $customer)
     {
-        $customerProducts = $customer->products()->with('product', 'category')->get();
-
-        return view('invoice.building.create', [
-            'customer' => $customer,
-            'customerProducts' => $customerProducts
+        $customer->load([
+            'products.category',
+            'products.product',
+            'branch',
         ]);
+
+        return view('invoice.building.create', compact('customer'));
     }
+
     public function store(Request $request)
     {
-        $request->validate([
-            // ✅ pastikan nama tabel sesuai konvensi (plural)
-            'customer_building_id' => 'required|exists:customer_building,id',
-            'branch_id'            => 'required|exists:branches,id',
-            'user_id'              => 'required|exists:users,id',
-            'invoice_date'         => 'required|date',
-            'type'                 => 'required|string',
-            'products'             => 'required|array',
-            // ✅ plural
-            'products.*.customer_building_product_id' => 'required|exists:customer_building_product,id',
-            'products.*.price'     => 'required|integer|min:0',
-            'discount'             => 'nullable|integer|min:0',
-            // input dari form tetap down_payment (snake_case)
-            'down_payment'         => 'nullable|integer|min:0',
+        $data = $request->validate([
+            'customer_building_id' => [
+                'required',
+                'integer',
+                'exists:customer_building,id',
+            ],
+
+            'invoice_number' => [
+                'nullable',
+                'string',
+                'max:255',
+                'unique:invoice_building,invoice_number',
+            ],
+
+            'invoice_date' => [
+                'required',
+                'date',
+            ],
+
+            'type' => [
+                'required',
+                'in:cash,credit,transfer',
+            ],
+
+            'discount' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
+            'down_payment' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
+            'status' => [
+                'required',
+                'in:unpaid,partial,paid',
+            ],
+
+            'products' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+
+            'products.*.customer_building_product_id' => [
+                'required',
+                'integer',
+                'exists:customer_building_product,id',
+            ],
+
+            'products.*.price' => [
+                'required',
+                'numeric',
+                'min:0',
+            ],
         ]);
 
+        $customer = CustomerBuilding::findOrFail($data['customer_building_id']);
+
+        $invoiceDate = Carbon::parse($data['invoice_date'])->format('Y-m-d H:i:s');
+
+        $priceCalc        = $this->calc->calculateFromProducts($data['products'], (float) ($data['discount'] ?? 0), (float) ($data['down_payment'] ?? 0));
+        $price            = $priceCalc['price'];
+        $discount         = $priceCalc['discount'];
+        $downPayment      = $priceCalc['downpayment'];
+        $totalPrice       = $priceCalc['total_price'];
+        $remainingPayment = $priceCalc['remaining_payment'];
+
+        $invoiceNumber = !empty($data['invoice_number'])
+            ? $data['invoice_number']
+            : $this->generateInvoiceNumber();
+
         DB::beginTransaction();
+
         try {
-            $totalPrice = collect($request->products)->sum('price');
-
-            $discount     = (int) ($request->discount ?? 0);
-            $downPayment  = (int) ($request->down_payment ?? 0);
-            $subTotal     = $totalPrice - $discount;
-            $remaining    = $subTotal - $downPayment;
-
             $invoice = InvoiceBuilding::create([
-                'customer_building_id' => $request->customer_building_id,
-                'branch_id'            => $request->branch_id,
-                'user_id'              => $request->user_id,
-                'type'                 => $request->type,
-                'price'                => $totalPrice,
+                'customer_building_id' => $customer->id,
+                'branch_id'            => $customer->branch_id ?? null,
+                'user_id'              => auth()->id(),
+                'type'                 => $data['type'],
+                'price'                => $price,
                 'discount'             => $discount,
-                // ✅ konsisten: kolom di DB bernama downpayment (tanpa underscore)
-                'down_payment'          => $downPayment,
-                'total_price'          => $subTotal,
-                'remaining_payment'    => $remaining,
-                'status'               => 'draft',
-                'invoice_number'       => 'INV-' . now()->format('YmdHis'),
-                'invoice_date'         => $request->invoice_date,
+                'down_payment'         => $downPayment,
+                'total_price'          => $totalPrice,
+                'remaining_payment'    => $remainingPayment,
+                'status'               => $data['status'],
+                'invoice_number'       => $invoiceNumber,
+                'invoice_date'         => $invoiceDate,
+                'waste_percent'        => (float) ($data['waste_percent'] ?? 10),
             ]);
 
-            foreach ($request->products as $item) {
-                $invoice->products()->attach(
-                    $item['customer_building_product_id'],
-                    ['price' => (int) $item['price']]
-                );
+            $syncData = [];
+
+            foreach ($data['products'] as $product) {
+                $syncData[(int) $product['customer_building_product_id']] = [
+                    'price'      => (float) $product['price'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
             }
 
+            $invoice->products()->sync($syncData);
+
             DB::commit();
+
             return redirect()
-                ->route('customer.building.index')
-                ->with('success', 'Invoice berhasil dibuat.');
-        } catch (\Exception $e) {
+                ->route('invoice.building.show', $invoice->id)
+                ->with('success', 'Invoice building berhasil dibuat.');
+
+        } catch (\Throwable $e) {
             DB::rollBack();
-            return back()->with('error', 'Gagal menyimpan invoice: ' . $e->getMessage());
+
+            Log::error('[Invoice Building Store] gagal', [
+                'message' => $e->getMessage(),
+                'data'    => $data,
+            ]);
+
+            return back()
+                ->with('error', 'Gagal menyimpan invoice building: ' . $e->getMessage())
+                ->withInput();
         }
     }
 
-    public function show(InvoiceBuilding $invoice)
+    public function show($id)
     {
-        $customer = CustomerBuilding::with([
-            'products',
-            'products.product',
+        $invoice = InvoiceBuilding::with([
+            'customer.branch',
             'products.category',
-            'products.categoryProductBuilding'
-        ])->findOrFail($invoice->customer_building_id);
-        $invoice = InvoiceBuilding::with('customer')->findOrFail($invoice->id);
+            'products.product',
+            'branch',
+            'user',
+        ])->findOrFail($id);
+
+        $customer = $invoice->customer;
+
+        if (!$customer) {
+            abort(404, 'Customer building untuk invoice ini tidak ditemukan.');
+        }
+
         return view('invoice.building.show', compact('invoice', 'customer'));
     }
 
     public function edit($id)
     {
         $invoice = InvoiceBuilding::with([
-            'products', // relasi pivot
-            'products.product',
-            'products.category',
-            'customer' // agar bisa ambil data customer
+            'customer.branch',
+            'customer.products.category',
+            'customer.products.product',
+            'products',
+            'branch',
+            'user',
         ])->findOrFail($id);
 
         $customer = $invoice->customer;
 
-        // Ambil semua product milik customer ini
-        $customerProducts = CustomerBuildingProduct::with(['product', 'category'])
-            ->where('customer_building_id', $customer->id)
-            ->get();
-
-        // Inject harga (pivot price) dari invoice ke dalam collection customerProducts
-        foreach ($customerProducts as $prod) {
-            $pivot = $invoice->products->firstWhere('id', $prod->id);
-            if ($pivot) {
-                $prod->pivot = $pivot->pivot; // inject pivot jika ada
-            }
+        if (!$customer) {
+            abort(404, 'Customer building untuk invoice ini tidak ditemukan.');
         }
 
-        return view('invoice.building.edit', compact('invoice', 'customer', 'customerProducts'));
+        return view('invoice.building.edit', compact('invoice', 'customer'));
     }
-
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'invoice_number' => 'required',
-            'invoice_date'   => 'required|date',
-            'type'           => 'required|in:cash,credit',
-            'discount'       => 'nullable|numeric',
-            'down_payment'   => 'nullable|numeric', // input form
-            'status'         => 'required|in:unpaid,partial,paid',
-            'products'       => 'required|array',
-            // ✅ plural
-            'products.*.customer_building_product_id' => 'required|exists:customer_building_products,id',
-            'products.*.price' => 'required|numeric',
+        $invoice = InvoiceBuilding::with('customer')->findOrFail($id);
+
+        $data = $request->validate([
+            'invoice_number' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('invoice_building', 'invoice_number')->ignore($invoice->id),
+            ],
+
+            'invoice_date' => [
+                'required',
+                'date',
+            ],
+
+            'type' => [
+                'required',
+                'in:cash,credit,debit,transfer',
+            ],
+
+            'discount' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
+            'down_payment' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
+            'status' => [
+                'required',
+                'in:unpaid,partial,paid',
+            ],
+
+            'products' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+
+            'products.*.customer_building_product_id' => [
+                'required',
+                'integer',
+                'exists:customer_building_product,id',
+            ],
+
+            'products.*.price' => [
+                'required',
+                'numeric',
+                'min:0',
+            ],
         ]);
 
-        try {
-            DB::beginTransaction();
+        $invoiceDate = Carbon::parse($data['invoice_date'])->format('Y-m-d H:i:s');
 
-            $invoice = InvoiceBuilding::findOrFail($id);
+        $priceCalc        = $this->calc->calculateFromProducts($data['products'], (float) ($data['discount'] ?? 0), (float) ($data['down_payment'] ?? 0));
+        $price            = $priceCalc['price'];
+        $discount         = $priceCalc['discount'];
+        $downPayment      = $priceCalc['downpayment'];
+        $totalPrice       = $priceCalc['total_price'];
+        $remainingPayment = $priceCalc['remaining_payment'];
+
+        $invoiceNumber = !empty($data['invoice_number'])
+            ? $data['invoice_number']
+            : $invoice->invoice_number;
+
+        if (empty($invoiceNumber)) {
+            $invoiceNumber = $this->generateInvoiceNumber();
+        }
+
+        DB::beginTransaction();
+
+        try {
             $invoice->update([
-                'invoice_number' => $request->invoice_number,
-                'invoice_date'   => $request->invoice_date,
-                'type'           => $request->type,
-                'discount'       => $request->discount ?? 0,
-                // ✅ simpan ke kolom `downpayment`
-                'down_payment'    => $request->down_payment ?? 0,
-                'status'         => $request->status,
+                'type'              => $data['type'],
+                'price'             => $price,
+                'discount'          => $discount,
+                'down_payment'      => $downPayment,
+                'total_price'       => $totalPrice,
+                'remaining_payment' => $remainingPayment,
+                'status'            => $data['status'],
+                'invoice_number'    => $invoiceNumber,
+                'invoice_date'      => $invoiceDate,
             ]);
 
-            // Sync ulang produk dengan harga
             $syncData = [];
-            foreach ($request->products as $prod) {
-                $syncData[$prod['customer_building_product_id']] = ['price' => (int) $prod['price']];
+
+            foreach ($data['products'] as $product) {
+                $syncData[(int) $product['customer_building_product_id']] = [
+                    'price'      => (float) $product['price'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
             }
+
             $invoice->products()->sync($syncData);
 
-            // (opsional) hitung ulang total/remaining jika ingin konsisten setelah update:
-            $totalPrice = $invoice->products()->sum('customer_building_product_invoice.price');
-            $discount   = (int) ($invoice->discount ?? 0);
-            $downPay    = (int) ($invoice->downpayment ?? 0);
+            DB::commit();
 
-            $invoice->update([
-                'price'             => $totalPrice,
-                'total_price'       => $totalPrice - $discount,
-                'remaining_payment' => ($totalPrice - $discount) - $downPay,
+            return redirect()
+                ->route('invoice.building.show', $invoice->id)
+                ->with('success', 'Invoice building berhasil diperbarui.');
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            Log::error('[Invoice Building Update] gagal', [
+                'message'    => $e->getMessage(),
+                'invoice_id' => $invoice->id,
+                'data'       => $data,
             ]);
 
-            DB::commit();
-            return redirect()->route('invoice.building.index')->with('success', 'Invoice berhasil diperbarui.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Gagal mengupdate invoice: ' . $e->getMessage())->withInput();
+            return back()
+                ->with('error', 'Gagal memperbarui invoice building: ' . $e->getMessage())
+                ->withInput();
         }
     }
 
-    public function destroy(Request $request, InvoiceBuilding $invoice)
+    public function recordPelunasan(Request $request, $id)
     {
-        // Opsional: batasi penghapusan saat status tertentu
-        if (in_array($invoice->status, ['paid'])) {
-            return back()->with('error', 'Invoice yang sudah "paid" tidak boleh dihapus.');
+        $invoice = InvoiceBuilding::with(['customer.products'])->findOrFail($id);
+
+        if ($invoice->isStep2Done()) {
+            return back()->with('error', 'Pelunasan sudah pernah dicatat sebelumnya.');
         }
 
-        $force = (bool) $request->query('force', false);
+        $request->validate([
+            'type'         => ['nullable', 'in:cash,credit,transfer'],
+            'waste_percent'=> ['nullable', 'numeric', 'min:0', 'max:100'],
+        ]);
+
+        $now          = now();
+        $wastePercent = (float) ($request->input('waste_percent') ?? $invoice->waste_percent ?? 10);
+        $customer     = $invoice->customer;
+
+        DB::beginTransaction();
 
         try {
-            DB::beginTransaction();
+            // Step 2: catat pelunasan
+            $invoice->update([
+                'remaining_payment' => 0,
+                'status'            => 'paid',
+                'pelunasan_at'      => $now,
+                'pelunasan_by'      => auth()->id(),
+                'type'              => $request->input('type') ?? $invoice->type,
+                'waste_percent'     => $wastePercent,
+            ]);
 
-            // Lepas relasi pivot (invoice <-> customer_building_products)
-            // aman walau tidak ada data pivot
-            $invoice->products()->detach();
+            // Potong stok saat pelunasan
+            if ($customer && $customer->products->isNotEmpty()) {
+                $buildingProducts = $customer->products->map(fn ($p) => [
+                    'customer_building_product' => $p,
+                    'data' => [
+                        'meters'                       => $p->meters,
+                        'category_product_building_id' => $p->category_product_building_id,
+                        'product_building_id'          => $p->product_building_id,
+                    ],
+                ])->toArray();
 
-            // Soft delete (default) atau force delete (opsional)
-            if ($force && method_exists($invoice, 'forceDelete')) {
-                $invoice->forceDelete();
-            } else {
-                $invoice->delete();
+                $this->filmStock->consumeForBuilding($customer, $buildingProducts, $wastePercent);
+
+                $invoice->update([
+                    'stock_deducted_at' => $now,
+                    'stock_deducted_by' => auth()->id(),
+                ]);
             }
 
             DB::commit();
-            return redirect()
-                ->route('invoice.building.index')
-                ->with('success', 'Invoice berhasil dihapus.');
+
+            return back()->with('success', 'Pelunasan berhasil dicatat dan stok bahan telah dikurangi.');
+
         } catch (\Throwable $e) {
             DB::rollBack();
-            return back()->with('error', 'Gagal menghapus invoice: ' . $e->getMessage());
+
+            Log::error('[InvoiceBuilding Pelunasan] gagal', [
+                'message'    => $e->getMessage(),
+                'invoice_id' => $id,
+            ]);
+
+            return back()->with('error', 'Gagal mencatat pelunasan: ' . $e->getMessage());
         }
     }
 
-    public function download(InvoiceBuilding $invoice)
+    public function destroy($id)
     {
-        // Muat customer + tree produk (gedung)
-        $customer = CustomerBuilding::with([
-            'products.product',
+        $invoice = InvoiceBuilding::findOrFail($id);
+
+        DB::beginTransaction();
+
+        try {
+            $invoice->products()->detach();
+
+            $invoice->delete();
+
+            DB::commit();
+
+            return redirect()
+                ->route('customer.building.index')
+                ->with('success', 'Invoice building berhasil dihapus.');
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return back()
+                ->with('error', 'Gagal menghapus invoice building: ' . $e->getMessage());
+        }
+    }
+
+    public function download($id)
+    {
+        $invoice = InvoiceBuilding::with([
+            'customer.branch',
             'products.category',
-        ])->findOrFail($invoice->customer_building_id);
+            'products.product',
+            'branch',
+            'user',
+        ])->findOrFail($id);
 
-        $customerProduct = $customer->products ?? collect();
+        $customer = $invoice->customer;
 
-        // ---- Hard-bind public path (aman untuk shared hosting) ----
-        $publicPath = '/home/acegardi/public_html';
-        app()->usePublicPath($publicPath);
-        app()->instance('path.public', $publicPath);
+        if (!$customer) {
+            abort(404, 'Customer building untuk invoice ini tidak ditemukan.');
+        }
+
+        $branch = $customer->branch;
+        $branchKey = $branch ? Str::slug($branch->name) : 'default';
+
+        $view = $this->resolveInvoiceViewForBranch($branchKey);
+
+        $publicPath = public_path();
+
         config([
             'dompdf.public_path'     => $publicPath,
             'dompdf.chroot'          => $publicPath,
             'dompdf.isRemoteEnabled' => true,
         ]);
-        // -----------------------------------------------------------
 
-        // Render PDF
         $pdf = Pdf::setPaper('A4', 'portrait')
             ->setOptions([
                 'chroot'          => $publicPath,
                 'isRemoteEnabled' => true,
-                // 'dpi' => 120,              // opsional
-                // 'defaultFont' => 'DejaVu Sans', // opsional, kalau ada karakter spesial
             ])
-            ->loadView('invoice.building.pdf', [
-                'invoice'         => $invoice,
-                'customer'        => $customer,
-                'customerProduct' => $customerProduct,
+            ->loadView($view, [
+                'invoice'  => $invoice,
+                'customer' => $customer,
+                'branch'   => $branch,
             ]);
 
-        $filename = 'invoice-building-' . ($invoice->invoice_number ?? $invoice->number ?? $invoice->id) . '.pdf';
+        return $pdf->stream('invoice-building-' . $invoice->invoice_number . '.pdf');
+    }
 
-        return $pdf->stream($filename);
+    protected function generateInvoiceNumber(): string
+    {
+        do {
+            $invoiceNumber = 'INVB-' . now()->format('YmdHis') . '-' . rand(100, 999);
+        } while (InvoiceBuilding::where('invoice_number', $invoiceNumber)->exists());
+
+        return $invoiceNumber;
+    }
+
+    protected function resolveInvoiceViewForBranch(string $branchKey): string
+    {
+        $candidate1 = "invoice.building.branches.$branchKey";
+
+        if (view()->exists($candidate1)) {
+            return $candidate1;
+        }
+
+        $candidate2 = "invoice.building.pdf_{$branchKey}";
+
+        if (view()->exists($candidate2)) {
+            return $candidate2;
+        }
+
+        return 'invoice.building.pdf';
     }
 }

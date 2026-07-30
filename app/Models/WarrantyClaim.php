@@ -3,9 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\Auditable;
 
 class WarrantyClaim extends Model
 {
+    use Auditable, HasFactory;
+
     protected $fillable = [
         'claim_number','claim_date','warranty_type',
         'warrantable_type','warrantable_id',

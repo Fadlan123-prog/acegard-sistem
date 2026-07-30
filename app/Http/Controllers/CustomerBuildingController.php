@@ -4,15 +4,24 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Branch;
+use App\Models\SalesOrder;
 use App\Models\CustomerBuilding;
 use App\Models\CategoryProductBuilding;
 use App\Models\CustomerBuildingProduct;
 use App\Models\ProductBuilding;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Services\BranchContext;
+use App\Services\CardNumberService;
+use App\Services\FilmStockPoolService;
 
 class CustomerBuildingController extends Controller
 {
+    public function __construct(
+        private CardNumberService $cardNumbers,
+        private BranchContext $branch,
+    ) {}
+
     public function index(Request $request){
          $query = CustomerBuilding::query();
 
@@ -22,7 +31,7 @@ class CustomerBuildingController extends Controller
         }
 
         $user = auth()->user();
-        $branchId = session('active_branch_id');
+        $branchId = $this->branch->idOrNull();
 
         // Filter berdasarkan cabang
         if (!$user->hasRole('superadmin')) {
@@ -33,18 +42,24 @@ class CustomerBuildingController extends Controller
         $branches = Branch::all();
 
         // Ambil data customer dengan paginasi
-        $customerBuildings = $query->latest()->paginate(10);
+        $customerBuildings = $query->with('invoices')->latest()->paginate(10);
         return view('customer.building.index', compact('customerBuildings', 'branches'));
     }
 
-    public function create(){
-        $branches = Branch::all();
+    public function create(Request $request)
+    {
+        $branches   = Branch::all();
         $categories = CategoryProductBuilding::all();
-        $products = ProductBuilding::all();
-        return view('customer.building.create', compact('branches', 'categories', 'products'));
+        $products   = ProductBuilding::all();
+
+        $fromSo = $request->filled('from_so')
+            ? SalesOrder::find($request->integer('from_so'))
+            : null;
+
+        return view('customer.building.create', compact('branches', 'categories', 'products', 'fromSo'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, FilmStockPoolService $filmStock)
     {
         $request->validate([
             'wsn'          => 'required|string',
@@ -62,7 +77,11 @@ class CustomerBuildingController extends Controller
             'products.*.category_product_building_id'   => 'required|integer|exists:category_product_building,id',
             'products.*.product_building_id'            => 'required|integer|exists:product_building,id',
             'products.*.meters'                         => 'required|numeric|min:0.01',
-            'products.*.warantee_duration'              => 'required|integer|in:3,5,7',
+            'products.*.warantee_duration'              => 'required|integer|in:0,3,5,7',
+
+            'products.*.used_length_meter' => 'nullable|numeric|min:0',
+            'deduct_roll_stock' => 'nullable|boolean',
+            'building_waste_percent' => 'nullable|numeric|min:0|max:100',
 
             'admin_password' => 'required|string',
         ]);
@@ -73,23 +92,7 @@ class CustomerBuildingController extends Controller
 
         DB::beginTransaction();
         try {
-            // ====== Generate card_number: BD + YYYY + 5 digit urut per tahun ======
-            $year   = now()->year;
-            $prefix = 'BD' . $year; // contoh: BD2025
-
-            // Ambil nomor terakhir (lock untuk cegah race condition)
-            $lastCard = \App\Models\CustomerBuilding::query()
-                ->where('card_number', 'like', $prefix.'%')
-                ->lockForUpdate()
-                ->orderByDesc('card_number')   // aman karena suffix zero-padded 5 digit
-                ->value('card_number');
-
-            $seq = 1;
-            if ($lastCard && preg_match('/^' . preg_quote($prefix, '/') . '(\d{5})$/', $lastCard, $m)) {
-                $seq = (int)$m[1] + 1;
-            }
-            $cardNumber = $prefix . str_pad($seq, 5, '0', STR_PAD_LEFT); // contoh: BD202500001
-            // =====================================================================
+            $cardNumber = $this->cardNumbers->generateBuildingCardNumber();
 
             $customer = \App\Models\CustomerBuilding::create([
                 'branch_id'    => auth()->user()->branches->first()->id ?? 1,
@@ -105,20 +108,42 @@ class CustomerBuildingController extends Controller
                 'country'      => $request->country,
             ]);
 
+            $createdBuildingProducts = [];
+
             foreach ($request->input('products', []) as $row) {
                 $duration = (int) $row['warantee_duration'];
-                \App\Models\CustomerBuildingProduct::create([
+
+                $customerBuildingProduct = \App\Models\CustomerBuildingProduct::create([
                     'customer_building_id'         => $customer->id,
-                    'category_product_building_id' => (int)$row['category_product_building_id'],
-                    'product_building_id'          => (int)$row['product_building_id'],
-                    'meters'                       => (float)$row['meters'],
+                    'category_product_building_id' => (int) $row['category_product_building_id'],
+                    'product_building_id'          => (int) $row['product_building_id'],
+                    'meters'                       => (float) $row['meters'],
                     'warantee_duration'            => $duration,
                     'warantee_start'               => now(),
                     'warantee_end'                 => now()->copy()->addYears($duration),
                 ]);
+
+                $createdBuildingProducts[] = [
+                    'customer_building_product' => $customerBuildingProduct,
+                    'data' => $row,
+                ];
             }
 
+            // Stock deduction dipindah ke saat pelunasan invoice (InvoiceBuildingController::recordPelunasan)
+
             DB::commit();
+
+            if ($request->filled('from_so')) {
+                $so = SalesOrder::find($request->integer('from_so'));
+                if ($so && $so->isCompleted() && !$so->isConverted()) {
+                    $so->update([
+                        'converted_to_type' => \App\Models\CustomerBuilding::class,
+                        'converted_to_id'   => $customer->id,
+                        'converted_at'      => now(),
+                    ]);
+                }
+            }
+
             return redirect()->route('customer.building.index')
                 ->with('success', "Customer berhasil ditambahkan. Card Number: {$cardNumber}");
         } catch (\Throwable $e) {
@@ -130,6 +155,15 @@ class CustomerBuildingController extends Controller
 
     public function edit(CustomerBuilding $customer)
     {
+        $user = auth()->user();
+        if (!$user->hasRole('superadmin')) {
+            $activeBranchId = $this->branch->id();
+
+            if ((int) $customer->branch_id !== $activeBranchId) {
+                abort(403, 'Tidak boleh mengakses customer dari cabang lain.');
+            }
+        }
+
         $branches = Branch::all();
         $categories = CategoryProductBuilding::all();
         $products = ProductBuilding::all();
@@ -141,6 +175,15 @@ class CustomerBuildingController extends Controller
 
     public function update(Request $request, CustomerBuilding $customer)
     {
+        $user = auth()->user();
+        if (!$user->hasRole('superadmin')) {
+            $activeBranchId = $this->branch->id();
+
+            if ((int) $customer->branch_id !== $activeBranchId) {
+                abort(403, 'Tidak boleh mengubah customer dari cabang lain.');
+            }
+        }
+
         $request->validate([
             'wsn' => 'required|string',
             'card_number' => 'required|string',
@@ -216,6 +259,39 @@ class CustomerBuildingController extends Controller
         }
     }
 
+    public function destroy(CustomerBuilding $customer)
+    {
+        $user = auth()->user();
+
+        if (!$user->hasRole('superadmin')) {
+            $activeBranchId = $this->branch->id();
+
+            if ((int) $customer->branch_id !== $activeBranchId) {
+                abort(403, 'Tidak boleh menghapus data dari cabang lain.');
+            }
+        }
+
+        DB::beginTransaction();
+
+        try {
+            CustomerBuildingProduct::where('customer_building_id', $customer->id)->delete();
+
+            $customer->delete();
+
+            DB::commit();
+
+            return redirect()
+                ->route('customer.building.index')
+                ->with('success', 'Customer building berhasil dihapus.');
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return back()
+                ->with('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+        }
+    }
+
 
     public function getProductsByCategory($id)
     {
@@ -225,7 +301,14 @@ class CustomerBuildingController extends Controller
 
     public function bulkDelete(Request $request)
     {
-        CustomerBuilding::whereIn('id', $request->selected ?? [])->delete();
+        $query = CustomerBuilding::whereIn('id', $request->selected ?? []);
+
+        if (!auth()->user()->hasRole('superadmin')) {
+            $query->where('branch_id', $this->branch->id());
+        }
+
+        $query->delete();
+
         return redirect()->route('customer.index')->with('success', 'Data berhasil dihapus.');
     }
 }

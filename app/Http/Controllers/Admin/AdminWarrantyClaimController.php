@@ -86,6 +86,12 @@ class AdminWarrantyClaimController extends Controller
 
     public function inspect(Request $request, WarrantyClaim $claim)
     {
+        $user = auth()->user();
+        if (!$user->hasRole('superadmin')) {
+            $allowed = $user->branches()->pluck('branches.id')->toArray();
+            abort_unless(in_array($claim->branch_id, $allowed), 403);
+        }
+
         $data = $request->validate([
             'cause' => ['required','in:workmanship,product,user,unknown'],
             'inspection_notes' => ['nullable','string','max:5000'],
@@ -136,6 +142,12 @@ class AdminWarrantyClaimController extends Controller
 
     public function updateStatus(Request $request, WarrantyClaim $claim)
     {
+        $user = auth()->user();
+        if (!$user->hasRole('superadmin')) {
+            $allowed = $user->branches()->pluck('branches.id')->toArray();
+            abort_unless(in_array($claim->branch_id, $allowed), 403);
+        }
+
         $data = $request->validate([
             'status' => ['required','in:approved,rejected,in_progress,completed,closed'],
             'resolution_notes' => ['nullable','string','max:5000'],

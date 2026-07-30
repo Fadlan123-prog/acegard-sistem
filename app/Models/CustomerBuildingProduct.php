@@ -45,4 +45,5 @@ class CustomerBuildingProduct extends Model
         return $this->belongsTo(CategoryProductBuilding::class, 'category_product_building_id');
     }
 
+
 }

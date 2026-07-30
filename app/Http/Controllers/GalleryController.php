@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Gallery;
 use App\Models\Branch;
+use App\Services\BranchContext;
+use Illuminate\Http\Request;
 
 class GalleryController extends Controller
 {
+    public function __construct(private BranchContext $branch) {}
+
     public function index(Request $request){
         $query = Gallery::query();
 
@@ -18,7 +21,6 @@ class GalleryController extends Controller
 
         // Ambil user & session cabang
         $user = auth()->user();
-        $branchId = session('active_branch_id');
 
         // Filter cabang HANYA jika bukan superadmin
         if ($user->hasRole('superadmin')) {
@@ -27,7 +29,7 @@ class GalleryController extends Controller
             }
         } else {
             // Admin biasa hanya bisa melihat cabang aktifnya
-            $query->where('branch_id', $activeBranchId);
+            $query->where('branch_id', $this->branch->id());
         }
 
         // Ambil semua cabang (hanya jika perlu tampil di filter UI)
