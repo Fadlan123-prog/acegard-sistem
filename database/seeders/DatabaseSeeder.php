@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             ProductBuildingSeeder::class,
             EmployeeSeeder::class,
             PpfProductSeeder::class,
+            TeknisiSeeder::class,
         ]);
     }
 }
