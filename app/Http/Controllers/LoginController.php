@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
+use App\Services\AuditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,32 +16,159 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        $credentials = $request->validate(
+            [
+                'email'    => ['required', 'email'],
+                'password' => ['required'],
+            ],
+            [
+                'email.required'    => 'Email wajib diisi.',
+                'email.email'       => 'Format email tidak valid.',
+                'password.required' => 'Password wajib diisi.',
+            ]
+        );
 
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
+        $remember = $request->boolean('remember');
 
-            if ($user->hasAnyRole(['superadmin', 'admin'])) {
-                return redirect()->route('dashboard');
-            }
-
-            Auth::logout();
-            return redirect()->route('login')->withErrors([
-                'role' => 'Akun Anda tidak memiliki akses yang sesuai.',
-            ]);
+        if (!Auth::attempt($credentials, $remember)) {
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors([
+                    'email' => 'Login gagal: email atau password salah.',
+                ]);
         }
 
-        return back()->withErrors([
-            'email' => 'Login gagal: email atau password salah.',
-        ]);
+        $request->session()->regenerate();
+
+        $user = Auth::user();
+
+        $allowedRoles = [
+            'superadmin', 'owner', 'admin',
+            'manager_operasional', 'manager_marketing',
+            'marketing', 'finance', 'purchasing',
+            'customer_service', 'teknisi', 'kenek',
+        ];
+
+        if (!$user->hasAnyRole($allowedRoles)) {
+            return $this->logoutWithError(
+                $request,
+                'role',
+                'Akun Anda tidak memiliki akses yang sesuai.'
+            );
+        }
+
+        $request->session()->forget('active_branch_id');
+
+        // Superadmin
+        if ($user->hasRole('superadmin')) {
+            $this->setDefaultBranchForSuperadmin();
+            AuditService::logLogin($user, $request);
+            return redirect()->intended(route('dashboard'));
+        }
+
+        // Teknisi / kenek bypass branch access middleware
+        if ($user->hasAnyRole(['teknisi', 'kenek'])) {
+            AuditService::logLogin($user, $request);
+            return redirect()->intended(route('teknisi.dashboard'));
+        }
+
+        // All other staff roles — require at least one assigned branch
+        $adminBranch = $this->getDefaultBranchForStaff($user);
+
+        if (!$adminBranch) {
+            return $this->logoutWithError(
+                $request,
+                'branch',
+                'Akun Anda belum memiliki akses cabang. Hubungi administrator.'
+            );
+        }
+
+        session(['active_branch_id' => $adminBranch->id]);
+        AuditService::logLogin($user, $request);
+
+        // Role-specific dashboard redirects
+        if ($user->hasRole('owner')) {
+            return redirect()->intended(route('owner.dashboard'));
+        }
+
+        if ($user->hasAnyRole(['marketing', 'manager_marketing'])) {
+            return redirect()->intended(route('marketing.dashboard'));
+        }
+
+        if ($user->hasRole('customer_service')) {
+            return redirect()->intended(route('cs.dashboard'));
+        }
+
+        if ($user->hasRole('manager_operasional')) {
+            return redirect()->intended(route('manager-ops.dashboard'));
+        }
+
+        if ($user->hasRole('finance')) {
+            return redirect()->intended(route('finance.dashboard'));
+        }
+
+        if ($user->hasRole('purchasing')) {
+            return redirect()->intended(route('purchasing.dashboard'));
+        }
+
+        return redirect()->intended(route('dashboard'));
     }
 
-    public function logout()
+    public function logout(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user) {
+            AuditService::logLogout($user, $request);
+        }
+
+        Auth::logout();
+
+        $request->session()->forget('active_branch_id');
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
+    }
+
+    private function setDefaultBranchForSuperadmin(): void
+    {
+        $defaultBranch = Branch::query()
+            ->where('name', 'like', '%pusat%')
+            ->orWhere('city', 'like', '%pusat%')
+            ->orderBy('id')
+            ->first();
+
+        if (!$defaultBranch) {
+            $defaultBranch = Branch::query()
+                ->orderBy('id')
+                ->first();
+        }
+
+        if ($defaultBranch) {
+            session(['active_branch_id' => $defaultBranch->id]);
+        }
+    }
+
+    private function getDefaultBranchForStaff($user): ?Branch
+    {
+        return $user->branches()
+            ->orderBy('branches.id')
+            ->first();
+    }
+
+    private function logoutWithError(Request $request, string $key, string $message)
     {
         Auth::logout();
-        return redirect()->route('login');
+
+        $request->session()->forget('active_branch_id');
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()
+            ->route('login')
+            ->withErrors([
+                $key => $message,
+            ]);
     }
 }

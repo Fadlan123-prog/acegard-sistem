@@ -22,6 +22,7 @@ class CustomerPpfInstallationController extends Controller
                 'tukang',
                 'kenek',
                 'technicians:id,name',
+                'invoice:id,customer_ppf_installation_id',
             ])
             ->latest()
             ->paginate(20);
@@ -34,7 +35,7 @@ class CustomerPpfInstallationController extends Controller
         $customers = CustomerPpf::orderBy('name')->get();
         $products  = PpfProduct::orderBy('brand')->orderBy('name')->get();
         $branches  = Branch::orderBy('name')->get();
-        $employees = Employee::orderBy('name')->get();
+        $employees = Employee::where('is_active', true)->orderBy('name')->get();
 
         return view('ppf.installations.create', compact(
             'customers', 'products', 'branches', 'employees'
@@ -113,7 +114,7 @@ class CustomerPpfInstallationController extends Controller
         $customers = CustomerPpf::orderBy('name')->get();
         $products  = PpfProduct::orderBy('brand')->orderBy('name')->get();
         $branches  = Branch::orderBy('name')->get();
-        $employees = Employee::orderBy('name')->get();
+        $employees = Employee::where('is_active', true)->orderBy('name')->get();
 
         return view('ppf.installations.edit', [
             'installation' => $ppf_installation->load('technicians:id,name'),

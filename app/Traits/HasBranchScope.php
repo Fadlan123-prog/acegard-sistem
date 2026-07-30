@@ -17,7 +17,7 @@ trait HasBranchScope
         }
 
         // Kalau user biasa, tampilkan sesuai cabang aktif
-        $activeBranchId = session('active_branch_id');
+        $activeBranchId = app(\App\Services\BranchContext::class)->idOrNull();
 
         if ($activeBranchId) {
             return $query->where('branch_id', $activeBranchId);

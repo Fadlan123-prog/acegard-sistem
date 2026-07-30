@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\Employee;
 
 class User extends Authenticatable
 {
@@ -22,6 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'employee_id',
     ];
 
     /**
@@ -50,5 +52,10 @@ class User extends Authenticatable
     public function branches()
     {
         return $this->belongsToMany(Branch::class, 'branch_user', 'user_id', 'branch_id')->withTimestamps();
+    }
+
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class);
     }
 }

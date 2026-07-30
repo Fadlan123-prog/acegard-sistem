@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\PpfInvoice;
 use App\Models\CustomerPpfInstallation;
+use App\Services\CommissionService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 
 class PpfInvoiceController extends Controller
 {
+    public function __construct(private CommissionService $commissionService) {}
+
     public function create($installationId)
     {
         $installation = CustomerPpfInstallation::with(['customerPpf','ppfProduct','technicians'])
@@ -225,6 +229,42 @@ class PpfInvoiceController extends Controller
             ]);
 
         return $pdf->stream('ppf-invoice-'.$invoice->invoice_number.'.pdf');
+    }
+
+    public function releaseCommission(PpfInvoice $invoice)
+    {
+        $user = auth()->user();
+
+        // Branch access guard
+        if (!$user->hasRole('superadmin')) {
+            $allowed = $user->branches()->pluck('branches.id')->all();
+            abort_unless(in_array($invoice->branch_id, $allowed), 403);
+        }
+
+        if ($invoice->commission_released_at) {
+            return back()->with('error', 'Komisi PPF untuk invoice ini sudah pernah dirilis.');
+        }
+
+        if ($invoice->status === 'void') {
+            return back()->with('error', 'Invoice void tidak bisa dirilis komisinya.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $this->commissionService->createPpfCommissions($invoice);
+
+            $invoice->update([
+                'commission_released_at' => now(),
+                'commission_released_by' => auth()->id(),
+            ]);
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal merilis komisi PPF: ' . $e->getMessage());
+        }
+
+        return back()->with('success', 'Komisi PPF berhasil dirilis.');
     }
 
     protected function resolvePpfInvoiceViewForBranch(string $branchKey): string

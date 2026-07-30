@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Branch;
 use App\Models\CustomerPpf;
+use App\Models\SalesOrder;
 use App\Models\CustomerPpfInstallation;
 use App\Models\Employee;
 use App\Models\PpfProduct;
@@ -31,6 +32,7 @@ class CustomerPpfController extends Controller
                 'branch:id,name',
                 'installations.ppfProduct:id,name',
                 'installations.technicians:id,name',
+                'installations.invoice',
             ]);
 
         if (!$user->hasRole('superadmin')) {
@@ -57,7 +59,7 @@ class CustomerPpfController extends Controller
         return view('customer.ppf.index', compact('customers', 'branches'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $user = auth()->user();
 
@@ -78,12 +80,17 @@ class CustomerPpfController extends Controller
         $employees = Employee::orderBy('name')->get();
         $ppfProducts = PpfProduct::orderBy('name')->get();
 
+        $fromSo = $request->filled('from_so')
+            ? SalesOrder::find($request->integer('from_so'))
+            : null;
+
         return view('customer.ppf.create', compact(
             'branches',
             'employees',
             'ppfProducts',
             'lockBranch',
-            'defaultBranchId'
+            'defaultBranchId',
+            'fromSo',
         ));
     }
 
@@ -131,7 +138,7 @@ class CustomerPpfController extends Controller
             // ✅ ini yang sebelumnya bikin error karena field belum ada di blade
             'installations.*.install_type'   => ['required', Rule::in(['fullbody','partial'])],
 
-            'installations.*.warranty_years' => ['required','integer', Rule::in([5,7])],
+            'installations.*.warranty_years' => ['required','integer', Rule::in([5,7,8])],
 
             // teknisi max 4
             'installations.*.technicians'    => ['required','array','min:1','max:4'],
@@ -234,6 +241,17 @@ class CustomerPpfController extends Controller
             }
         });
 
+        if ($request->filled('from_so')) {
+            $so = SalesOrder::find($request->integer('from_so'));
+            if ($so && $so->isCompleted() && !$so->isConverted()) {
+                $so->update([
+                    'converted_to_type' => CustomerPpf::class,
+                    'converted_to_id'   => $customer->id,
+                    'converted_at'      => now(),
+                ]);
+            }
+        }
+
         return redirect()
             ->route('ppf-customers.index')
             ->with('success', 'Customer PPF berhasil ditambahkan.');
@@ -335,7 +353,7 @@ class CustomerPpfController extends Controller
             'installations.*.ppf_product_id' => ['required','exists:ppf_products,id'],
             'installations.*.install_date'   => ['required','date'],
             'installations.*.install_type'   => ['required', Rule::in(['fullbody','partial'])],
-            'installations.*.warranty_years' => ['required','integer', Rule::in([5,7])],
+            'installations.*.warranty_years' => ['required','integer', Rule::in([5,7,8])],
 
             'installations.*.technicians'    => ['required','array','min:1','max:4'],
             'installations.*.technicians.*'  => ['required','exists:employees,id'],
@@ -496,6 +514,12 @@ class CustomerPpfController extends Controller
 
     public function destroy(CustomerPpf $ppfCustomer)
     {
+        $user = auth()->user();
+        if (!$user->hasRole('superadmin')) {
+            $allowedBranchIds = $user->branches()->pluck('branches.id')->all();
+            abort_unless(in_array($ppfCustomer->branch_id, $allowedBranchIds), 403);
+        }
+
         try {
             DB::transaction(function () use ($ppfCustomer) {
                 // aman untuk case tanpa cascade / butuh trigger event

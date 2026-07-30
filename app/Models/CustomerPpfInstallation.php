@@ -14,6 +14,8 @@ class CustomerPpfInstallation extends Model
         'branch_id',
         'install_type',
         'install_date',
+        'tukang_id',
+        'kenek_id',
         'warranty_code',
         'warranty_start',
         'warranty_years',
@@ -67,5 +69,15 @@ class CustomerPpfInstallation extends Model
     public function branch()
     {
         return $this->belongsTo(\App\Models\Branch::class, 'branch_id');
+    }
+
+    public function tukang()
+    {
+        return $this->belongsTo(Employee::class, 'tukang_id');
+    }
+
+    public function kenek()
+    {
+        return $this->belongsTo(Employee::class, 'kenek_id');
     }
 }

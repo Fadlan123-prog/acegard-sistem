@@ -24,16 +24,18 @@ class WarrantyClaimSubmitted extends Notification implements ShouldQueue
         $complaint = (string)($this->claim->complaint ?? '');
         $complaintShort = mb_strlen($complaint) > 80 ? mb_substr($complaint, 0, 80).'…' : $complaint;
 
+        $warrantyLabel = strtoupper((string)$this->claim->warranty_type);
+
         return [
+            'type'          => 'warranty_claim_submitted',
             'claim_id'      => $this->claim->id,
             'claim_number'  => $this->claim->claim_number,
             'warranty_type' => $this->claim->warranty_type,
             'status'        => $this->claim->status,
             'branch_id'     => $this->claim->branch_id,
             'complaint'     => $complaintShort,
-
-            // ✅ gunakan route yang bisa diakses branch user + superadmin
-            'url' => route('admin.claims.show', $this->claim->id, false),
+            'url'           => route('admin.claims.show', $this->claim->id, false),
+            'message'       => "Klaim garansi baru #{$this->claim->claim_number} ({$warrantyLabel})" . ($complaintShort ? ": {$complaintShort}" : '.'),
         ];
     }
 
