@@ -1,8 +1,8 @@
 <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
   <div class="container">
     <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('frontend.home') }}">
-      <img src="{{ asset('assets/img/logo.png') }}" alt="Acegard" style="height:34px;">
-      <span class="fw-bold text-dark">ACEGARD</span>
+      <img src="{{ asset('assets/images/logo.png') }}" alt="Acegard" style="height:34px;">
+
     </a>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topnav">

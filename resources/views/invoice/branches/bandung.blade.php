@@ -221,12 +221,28 @@
 
     <table style="width: 100%;">
         <tbody>
-            @foreach ($customer->products as $product)
-            <tr>
-                <td style="width: 17rem; text-align: left; margin: 0.5rem 0;">{{ $product->category->name }}</td>
-                <td>:   {{ $product->meters }} | {{ $product->product->name }} | {{ $product->product->description }}</td>
-            </tr>
-            @endforeach
+            @forelse ($customer->customerProducts as $item)
+                <tr>
+                    <td style="width: 17rem; text-align: left; margin: 0.5rem 0;">
+                        {{ $item->categoryProduct->name ?? '-' }}
+                    </td>
+                    <td>
+                        :
+                        {{ $item->part->name ?? '-' }}
+                        |
+                        {{ $item->product->name ?? '-' }}
+                        |
+                        {{ $item->product->description ?? '-' }}
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td style="width: 17rem; text-align: left; margin: 0.5rem 0;">
+                        Product
+                    </td>
+                    <td>: -</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
 

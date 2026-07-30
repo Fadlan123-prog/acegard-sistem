@@ -230,22 +230,6 @@
         </tbody>
     </table>
 
-    <h6 style="text-align: center; font-weight: bold; font-size: 1.25rem; margin: 1.5rem 0; background-color: black; color: white; padding: 5px 0;">
-        VALIDATE WARRANTY CARD
-    </h6>
-
-    <table style="width: 100%;">
-        <tbody>
-            <tr>
-                <td style="width: 15rem;">Brand</td>
-                <td>: {{ $customer->vehicle_brand }}</td>
-            </tr>
-            <tr>
-                <td>Model</td>
-                <td>: {{ $customer->vehicle_model }}</td>
-            </tr>
-        </tbody>
-    </table>
 
     <table style="width: 100%; table-layout: fixed; ">
         <tr>
@@ -300,7 +284,7 @@
                         <tbody>
                             <tr>
                                 <th style="text-align: left;">Down Payment</th>
-                                <td>: Rp. {{ number_format($invoice->downpayment, 0, ',', '.') }}</td>
+                                <td>: Rp. {{ number_format($invoice->down_payment, 0, ',', '.') }}</td>
                             </tr>
                             <tr>
                                 <th style="text-align: left;">Remaining Payment</th>

@@ -5,101 +5,249 @@
 @section('breadcrumb', 'Customers Building')
 
 @section('content')
+
 @if ($errors->any())
-<div class="alert alert-danger">
-    <ul class="mb-0">
-        @foreach ($errors->all() as $error)
-        <li>{{ $error }}</li>
-        @endforeach
-    </ul>
-</div>
+    <x-ui.alert type="danger" class="mb-3">
+        <strong>Terjadi kesalahan.</strong>
+        <ul class="mb-0 mt-2">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </x-ui.alert>
 @endif
 
 @if (session('error'))
-<div class="alert alert-danger">{{ session('error') }}</div>
+    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
 @endif
 
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="card-title mb-0">Edit Invoice</h5>
-        <a href="{{ route('customer.building.index') }}" class="btn btn-sm btn-secondary">Kembali</a>
-    </div>
+@if (session('success'))
+    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
+@endif
 
-    <div class="card-body">
+<x-ui.card>
+    @slot('header')
+        <div class="ui-card-title">Edit Invoice Building</div>
+        <x-ui.button variant="secondary" size="sm" href="{{ route('customer.building.index') }}">Kembali</x-ui.button>
+    @endslot
+
+        @php
+            $invoiceDate = $invoice->invoice_date
+                ? \Carbon\Carbon::parse($invoice->invoice_date)->format('Y-m-d\TH:i')
+                : now()->format('Y-m-d\TH:i');
+
+            $selectedType = old('type', $invoice->type);
+            $selectedStatus = old('status', $invoice->status);
+
+            /*
+                Ambil produk yang sudah tersimpan di invoice.
+                Key-nya adalah id dari customer_building_product.
+                Ini digunakan untuk mengambil harga dari pivot invoice_building_product.
+            */
+            $invoiceProducts = $invoice->products->keyBy('id');
+
+            /*
+                Jika controller mengirim $customerProducts, pakai itu.
+                Jika tidak, fallback ke $customer->products.
+            */
+            $items = $customerProducts ?? $customer->products;
+        @endphp
+
         <form action="{{ route('invoice.building.update', $invoice->id) }}" method="POST">
             @csrf
             @method('PUT')
 
             <input type="hidden" name="customer_building_id" value="{{ $customer->id }}">
-            <input type="hidden" name="branch_id" value="{{ $invoice->branch_id }}">
-            <input type="hidden" name="user_id" value="{{ $invoice->user_id }}">
 
-            <div class="mb-3">
-                <label class="form-label">No Invoice</label>
-                <input type="text" name="invoice_number" class="form-control" value="{{ old('invoice_number', $invoice->invoice_number) }}" required>
+            {{-- Nomor Invoice & Tanggal --}}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">No Invoice</label>
+                    <input type="text"
+                           name="invoice_number"
+                           class="form-control @error('invoice_number') is-invalid @enderror"
+                           value="{{ old('invoice_number', $invoice->invoice_number) }}">
+
+                    @error('invoice_number')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
+                    @enderror
+
+                    <small class="text-muted">
+                        Kosongkan juga boleh, sistem akan menggunakan nomor invoice lama atau membuat otomatis jika kosong.
+                    </small>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Tanggal Invoice</label>
+                    <input type="datetime-local"
+                           name="invoice_date"
+                           class="form-control @error('invoice_date') is-invalid @enderror"
+                           value="{{ old('invoice_date', $invoiceDate) }}"
+                           required>
+
+                    @error('invoice_date')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
+                    @enderror
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Tanggal Invoice</label>
-                <input type="datetime-local" name="invoice_date" class="form-control" value="{{ old('invoice_date', \Carbon\Carbon::parse($invoice->invoice_date)->format('Y-m-d\TH:i')) }}" required>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Tipe Pembayaran</label>
-                <select name="type" class="form-select" required>
-                    <option value="cash" {{ $invoice->type == 'cash' ? 'selected' : '' }}>Cash</option>
-                    <option value="credit" {{ $invoice->type == 'credit' ? 'selected' : '' }}>Credit</option>
+            {{-- Tipe Pembayaran --}}
+            <x-ui.form-field label="Tipe Pembayaran" name="type">
+                <select name="type"
+                        class="form-select @error('type') is-invalid @enderror"
+                        required>
+                    <option value="">-- Pilih Tipe Pembayaran --</option>
+                    <option value="transfer" {{ $selectedType === 'transfer' ? 'selected' : '' }}>
+                        Transfer
+                    </option>
+                    <option value="debit" {{ $selectedType === 'debit' ? 'selected' : '' }}>
+                        Debit
+                    </option>
+                    <option value="cash" {{ $selectedType === 'cash' ? 'selected' : '' }}>
+                        Cash
+                    </option>
+                    <option value="credit" {{ $selectedType === 'credit' ? 'selected' : '' }}>
+                        Credit
+                    </option>
                 </select>
-            </div>
 
+                @error('type')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </x-ui.form-field>
+
+            {{-- Produk Customer --}}
             <h5 class="mt-4 mb-2">Produk Customer & Harga</h5>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Produk</th>
-                        <th>Kategori</th>
-                        <th>Ukuran (m²)</th>
-                        <th>Harga</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($customerProducts as $item)
-                    <tr>
-                        <td>
-                            {{ $item->product->name ?? '-' }}
-                            <input type="hidden" name="products[{{ $loop->index }}][customer_building_product_id]" value="{{ $item->id }}">
-                        </td>
-                        <td>{{ $item->category->name ?? '-' }}</td>
-                        <td>{{ $item->meters }}</td>
-                        <td>
-                            <input type="number" name="products[{{ $loop->index }}][price]" class="form-control" value="{{ old("products.$loop->index.price", $item->pivot->price ?? '') }}" required>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
 
-            <div class="mb-3 mt-4">
-                <label class="form-label">Diskon</label>
-                <input type="number" name="discount" class="form-control" value="{{ old('discount', $invoice->discount) }}">
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%;">Produk</th>
+                            <th style="width: 25%;">Kategori</th>
+                            <th style="width: 15%;">Ukuran (m²)</th>
+                            <th style="width: 30%;">Harga</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @forelse($items as $item)
+                            @php
+                                $index = $loop->index;
+                                $savedProduct = $invoiceProducts->get($item->id);
+                                $savedPrice = $savedProduct ? $savedProduct->pivot->price : 0;
+                            @endphp
+
+                            <tr>
+                                <td>
+                                    {{ $item->product->name ?? '-' }}
+
+                                    <input type="hidden"
+                                           name="products[{{ $index }}][customer_building_product_id]"
+                                           value="{{ $item->id }}">
+                                </td>
+
+                                <td>
+                                    {{ $item->category->name ?? '-' }}
+                                </td>
+
+                                <td>
+                                    {{ $item->meters ?? 0 }}
+                                </td>
+
+                                <td>
+                                    <input type="number"
+                                           name="products[{{ $index }}][price]"
+                                           class="form-control @error("products.$index.price") is-invalid @enderror"
+                                           min="0"
+                                           value="{{ old("products.$index.price", $savedPrice) }}"
+                                           required>
+
+                                    @error("products.$index.price")
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="py-5">
+                                    <x-ui.empty-state title="Belum ada produk pada customer building ini." />
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Uang Muka (Downpayment)</label>
-                <input type="number" name="down_payment" class="form-control" value="{{ old('down_payment', $invoice->downpayment) }}">
+            {{-- Diskon, DP, Status --}}
+            <div class="row mt-4">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Diskon</label>
+                    <input type="number"
+                           name="discount"
+                           class="form-control @error('discount') is-invalid @enderror"
+                           min="0"
+                           value="{{ old('discount', $invoice->discount ?? 0) }}">
+
+                    @error('discount')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
+                    @enderror
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Uang Muka (Downpayment)</label>
+                    <input type="number"
+                           name="down_payment"
+                           class="form-control @error('down_payment') is-invalid @enderror"
+                           min="0"
+                           value="{{ old('down_payment', $invoice->down_payment ?? 0) }}">
+
+                    @error('down_payment')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
+                    @enderror
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Status Pembayaran</label>
+                    <select name="status"
+                            class="form-select @error('status') is-invalid @enderror"
+                            required>
+                        <option value="unpaid" {{ $selectedStatus === 'unpaid' ? 'selected' : '' }}>
+                            Belum Lunas
+                        </option>
+                        <option value="partial" {{ $selectedStatus === 'partial' ? 'selected' : '' }}>
+                            Sebagian
+                        </option>
+                        <option value="paid" {{ $selectedStatus === 'paid' ? 'selected' : '' }}>
+                            Lunas
+                        </option>
+                    </select>
+
+                    @error('status')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
+                    @enderror
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Status Pembayaran</label>
-                <select name="status" class="form-select" required>
-                    <option value="unpaid" {{ $invoice->status == 'unpaid' ? 'selected' : '' }}>Belum Lunas</option>
-                    <option value="partial" {{ $invoice->status == 'partial' ? 'selected' : '' }}>Sebagian</option>
-                    <option value="paid" {{ $invoice->status == 'paid' ? 'selected' : '' }}>Lunas</option>
-                </select>
-            </div>
+            {{-- Button --}}
+            <div class="d-flex gap-2 mt-3">
+                <x-ui.button type="submit" variant="primary">Update Invoice</x-ui.button>
 
-            <button type="submit" class="btn btn-primary mt-3">Update Invoice</button>
+                <x-ui.button variant="outline" href="{{ route('customer.building.index') }}">Batal</x-ui.button>
+            </div>
         </form>
-    </div>
-</div>
+</x-ui.card>
+
 @endsection

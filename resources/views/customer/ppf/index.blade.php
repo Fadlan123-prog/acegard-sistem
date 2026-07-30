@@ -5,19 +5,22 @@
 @section('breadcrumb', 'Customers PPF')
 
 @section('content')
-<div class="card basic-data-table">
-
-  <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <h5 class="card-title mb-0">Daftar Customer PPF</h5>
-    <div class="d-flex gap-2">
-      <a href="{{ route('ppf-customers.create') }}" class="btn btn-primary btn-sm">+ Add Customer PPF</a>
+<x-ui.card>
+    @slot('header')
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="mb-0">Daftar Customer PPF</h5>
+        <div class="d-flex gap-2">
+            <x-ui.button href="{{ route('ppf-customers.create') }}" variant="primary" size="sm">+ Add Customer PPF</x-ui.button>
+        </div>
     </div>
-  </div>
+    @endslot
 
-  <div class="card-body">
-
-    @if(session('success')) <div class="alert alert-success">{{ session('success') }}</div> @endif
-    @if(session('error')) <div class="alert alert-danger">{{ session('error') }}</div> @endif
+    @if(session('success'))
+        <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
+    @endif
+    @if(session('error'))
+        <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
+    @endif
 
     <div class="d-flex justify-content-between align-items-center flex-wrap mb-3 gap-2">
       <form method="GET" action="{{ route('ppf-customers.index') }}" id="filterForm"
@@ -26,7 +29,7 @@
         <input type="text" name="search" value="{{ request('search') }}"
                class="form-control" placeholder="Cari nama / WSN / card..." style="max-width: 250px;">
 
-        <button type="submit" class="btn btn-outline-primary">Search</button>
+        <x-ui.button type="submit" variant="outline">Search</x-ui.button>
 
         @if(auth()->user()->hasRole('superadmin'))
           <div class="col-md-3">
@@ -43,7 +46,7 @@
         @endif
 
         @if(request('branch_id') || request('search'))
-          <a href="{{ route('ppf-customers.index') }}" class="btn btn-outline-secondary">Reset</a>
+          <x-ui.button href="{{ route('ppf-customers.index') }}" variant="outline">Reset</x-ui.button>
         @endif
       </form>
     </div>
@@ -82,9 +85,9 @@
                 <td>{{ $customer->email }}</td>
                 <td>
                 @if($hasActive)
-                    <span class="badge bg-success">Aktif</span>
+                    <x-ui.badge variant="success">Aktif</x-ui.badge>
                 @else
-                    <span class="badge bg-danger">Kadaluarsa</span>
+                    <x-ui.badge variant="danger">Kadaluarsa</x-ui.badge>
                 @endif
 
                 @if($latest && $latest->warranty_end)
@@ -153,15 +156,14 @@
                 </td>
             </tr>
             @empty
-            <tr><td colspan="6" class="text-center">Data tidak ditemukan.</td></tr>
+            <tr><td colspan="6" class="py-5"><x-ui.empty-state title="Data tidak ditemukan." /></td></tr>
             @endforelse
         </tbody>
         </table>
     </div>
 
     <div class="mt-3">{{ $customers->withQueryString()->links() }}</div>
-  </div>
-</div>
+</x-ui.card>
 
 {{-- MODAL VIEW + MODAL CARD (biar singkat, tetap pakai punyamu yang sudah bagus) --}}
 {{-- Pastikan di controller index() kamu eager load: installations.ppfProduct dan installations.technicians --}}
@@ -231,9 +233,9 @@
                         Tanggal: {{ $ins->install_date }} • End: {{ $ins->warranty_end ?? '-' }}
                       </div>
                     </div>
-                    <span class="badge {{ ($ins->warranty_status ?? 'active') === 'active' ? 'bg-success' : 'bg-danger' }}">
+                    <x-ui.badge variant="{{ ($ins->warranty_status ?? 'active') === 'active' ? 'success' : 'danger' }}">
                       {{ strtoupper($ins->warranty_status ?? '-') }}
-                    </span>
+                    </x-ui.badge>
                   </div>
                 @empty
                   <div class="text-muted small">Belum ada instalasi.</div>
@@ -245,7 +247,7 @@
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+          <x-ui.button variant="secondary" data-bs-dismiss="modal">Tutup</x-ui.button>
         </div>
       </div>
     </div>
@@ -262,12 +264,16 @@
       </div>
 
       <div class="modal-body">
-        @php $insId = optional($latest)->id; @endphp
+        @php
+          $installs2 = ($customer->installations ?? collect())->sortByDesc('install_date')->values();
+          $latest2   = $installs2->first();
+          $insId     = optional($latest2)->id;
+        @endphp
 
         @if(!$insId)
-          <div class="alert alert-warning mb-0">
+          <x-ui.alert type="warning" class="mb-0">
             No installation found for this customer.
-          </div>
+          </x-ui.alert>
         @else
           <div class="text-muted small mb-3">
             Preview the warranty card (Front/Back) and download if needed.
@@ -303,19 +309,17 @@
           </div>
 
           <div class="d-flex flex-wrap gap-2 mt-3">
-            <a href="{{ route('public.warranty.ppf.download', $insId) }}?side=front"
-               class="btn btn-primary btn-sm">
+            <x-ui.button href="{{ route('public.warranty.ppf.download', $insId) }}?side=front" variant="primary" size="sm">
               Download Front
-            </a>
+            </x-ui.button>
 
-            <a href="{{ route('public.warranty.ppf.download', $insId) }}?side=back"
-               class="btn btn-outline-primary btn-sm">
+            <x-ui.button href="{{ route('public.warranty.ppf.download', $insId) }}?side=back" variant="outline" size="sm">
               Download Back
-            </a>
+            </x-ui.button>
 
-            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+            <x-ui.button variant="outline" size="sm" data-bs-dismiss="modal">
               Close
-            </button>
+            </x-ui.button>
           </div>
         @endif
       </div>
