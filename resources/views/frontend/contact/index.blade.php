@@ -91,7 +91,7 @@
               </li>
               <li>
                 <span>Telepon / WhatsApp:</span>
-                <a href="https://wa.me/6282121212093" target="_blank">0821-2121-2093</a>
+                <a href="https://wa.me/6282121212093" target="_blank" class="whatsapp-btn">0821-2121-2093</a>
               </li>
               <li>
                 <span>Email:</span>

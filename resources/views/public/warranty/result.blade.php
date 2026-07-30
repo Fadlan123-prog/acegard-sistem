@@ -238,9 +238,9 @@
                       <td>{{ $it->part->name ?? '-' }}</td>
                       <td>
                         {{ $it->categoryProduct->name ?? '-' }}
-                        @if(!empty($it->categoryProduct?->duration))
+                        {{-- @if(!empty($it->categoryProduct?->duration))
                           <span class="text-muted">({{ $it->categoryProduct->duration }} yr)</span>
-                        @endif
+                        @endif --}}
                       </td>
                       <td>{{ $it->product->name ?? '-' }}</td>
                       <td class="text-end">
@@ -453,23 +453,50 @@
   ========================= --}}
   @if($type === 'building_film')
     @php
-      /** @var \App\Models\CustomerBuilding $b */
-      $b = $data;
+    /** @var \App\Models\CustomerBuilding $b */
+    $b = $data;
 
-      $start = !empty($b->warantee_start) ? \Carbon\Carbon::parse($b->warantee_start) : null;
-      $end   = !empty($b->warantee_end) ? \Carbon\Carbon::parse($b->warantee_end) : null;
+    $items = $b->customerBuildingProducts ?? collect();
 
-      $isActive = $end && $end->toDateString() >= $today;
-      $statusText = $isActive ? 'ACTIVE' : 'EXPIRED';
-      $statusClass = $isActive ? 'bg-success' : 'bg-danger';
+    $getStart = function ($row) {
+        return !empty($row->warantee_start)
+            ? \Carbon\Carbon::parse($row->warantee_start)
+            : null;
+    };
 
-      $basePrev = route('public.warranty.card.preview', $card);
-      $baseDl   = route('public.warranty.card.download', $card);
+    $getEnd = function ($row) use ($getStart) {
+        $start = $getStart($row);
 
-      $frontPreview  = $basePrev.'?side=front';
-      $backPreview   = $basePrev.'?side=back';
-      $frontDownload = $baseDl.'?side=front';
-      $backDownload  = $baseDl.'?side=back';
+        $end = !empty($row->warantee_end)
+            ? \Carbon\Carbon::parse($row->warantee_end)
+            : null;
+
+        if (!$end && $start && !empty($row->warantee_duration)) {
+            $end = $start->copy()->addYears((int) $row->warantee_duration);
+        }
+
+        return $end;
+    };
+
+    $activeItems = $items->filter(function ($row) use ($getEnd) {
+        $end = $getEnd($row);
+        return $end && $end->copy()->endOfDay()->gte(now());
+    });
+
+    $validStarts = $items->map(fn($row) => $getStart($row))->filter();
+    $validEnds   = $items->map(fn($row) => $getEnd($row))->filter();
+
+    $start = $validStarts->isNotEmpty()
+        ? $validStarts->sortBy(fn($date) => $date->timestamp)->first()
+        : null;
+
+    $end = $validEnds->isNotEmpty()
+        ? $validEnds->sortByDesc(fn($date) => $date->timestamp)->first()
+        : null;
+
+    $isActive = $activeItems->isNotEmpty();
+    $statusText = $isActive ? 'ACTIVE' : 'EXPIRED';
+    $statusClass = $isActive ? 'bg-success' : 'bg-danger';
     @endphp
 
     <div class="row g-3">
@@ -501,14 +528,96 @@
             </div>
           </div>
 
-          <div class="mt-3 d-flex flex-wrap gap-2">
+          {{-- <div class="mt-3 d-flex flex-wrap gap-2">
             <span class="badge badge-soft">Valid From: <b>{{ $start ? $start->format('d M Y') : '-' }}</b></span>
             <span class="badge badge-soft">Valid Until: <b>{{ $end ? $end->format('d M Y') : '-' }}</b></span>
-          </div>
+          </div> --}}
         </div>
       </div>
 
       <div class="col-lg-6">
+        <div class="soft-card p-3 p-md-4 h-100">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+            <div>
+                <h6 class="fw-bold mb-1">Specification</h6>
+                <div class="text-muted small">Used Window Film</div>
+            </div>
+            <span class="badge badge-soft">Total: <b>{{ $items->count() }}</b></span>
+            </div>
+
+            <hr class="my-3">
+
+            @if($items->isEmpty())
+            <div class="alert alert-warning mb-0">
+                No building film specification found for this card number.
+            </div>
+            @else
+            <div class="d-flex flex-column gap-2">
+                @foreach($items as $i => $item)
+                @php
+                    $itemStart = $getStart($item);
+                    $itemEnd   = $getEnd($item);
+
+                    $itemActive = $itemEnd && $itemEnd->copy()->endOfDay()->gte(now());
+                    $itemStatusText = $itemActive ? 'ACTIVE' : 'EXPIRED';
+                    $itemStatusClass = $itemActive ? 'bg-success' : 'bg-danger';
+
+                    $typeName = $item->categoryProductBuilding->name
+                        ?? $item->category->name
+                        ?? '-';
+
+                    $productName = $item->product->name ?? '-';
+
+                    $meters = !empty($item->meters)
+                        ? number_format((float) $item->meters, 2) . ' m²'
+                        : '-';
+                @endphp
+
+                <div class="border rounded-3 p-3">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div>
+                        <div class="small text-muted">Type</div>
+                        <div class="fw-bold">{{ $typeName }}</div>
+                    </div>
+
+                    <span class="badge {{ $itemStatusClass }}">
+                        {{ $itemStatusText }}
+                    </span>
+                    </div>
+
+                    <div class="row g-2 mt-2">
+                    <div class="col-md-6">
+                        <div class="meta-k">Product</div>
+                        <div class="meta-v">{{ $productName }}</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="meta-k">Size</div>
+                        <div class="meta-v">{{ $meters }}</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="meta-k">Valid From</div>
+                        <div class="meta-v">
+                        {{ $itemStart ? $itemStart->format('d M Y') : '-' }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="meta-k">Valid Until</div>
+                        <div class="meta-v">
+                        {{ $itemEnd ? $itemEnd->format('d M Y') : '-' }}
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @endif
+        </div>
+        </div>
+
+      {{-- <div class="col-lg-6">
         <div class="soft-card p-3 p-md-4 h-100">
           <h6 class="fw-bold mb-1">Warranty Card</h6>
           <div class="text-muted small">Preview & download warranty card (front & back).</div>
@@ -537,7 +646,7 @@
           </div>
 
         </div>
-      </div>
+      </div> --}}
 
       {{-- Terms & Conditions (Building Film) --}}
       <div class="col-12">

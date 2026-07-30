@@ -94,7 +94,7 @@
                                 </span>
                                 <input type="password" name="password" class="form-control h-56-px bg-neutral-50 radius-12" id="your-password" placeholder="Password">
                             </div>
-                            <span class="toggle-password ri-eye-line cursor-pointer position-absolute end-0 top-50 translate-middle-y me-16 text-secondary-light" data-toggle="#your-password"></span>
+                            <iconify-icon icon="mdi:eye-outline" class="toggle-password cursor-pointer position-absolute end-0 top-50 translate-middle-y me-16 text-secondary-light" data-toggle="#your-password"></iconify-icon>
                         </div>
                         <div class="">
                             <div class="d-flex justify-content-between gap-2">
@@ -128,25 +128,6 @@
         </div>
     </section>
 
-    @php
-            $script = '<script>
-                // ================== Password Show Hide Js Start ==========
-                function initializePasswordToggle(toggleSelector) {
-                    $(toggleSelector).on("click", function() {
-                        $(this).toggleClass("ri-eye-off-line");
-                        var input = $($(this).attr("data-toggle"));
-                        if (input.attr("type") === "password") {
-                            input.attr("type", "text");
-                        } else {
-                            input.attr("type", "password");
-                        }
-                    });
-                }
-                // Call the function
-                initializePasswordToggle(".toggle-password");
-                // ========================= Password Show Hide Js End ===========================
-            </script>';
-    @endphp
 
     <!-- jQuery library js -->
     <script src="{{ asset('assets/js/lib/jquery-3.7.1.min.js') }}"></script>
@@ -176,6 +157,15 @@
 
     <!-- main js -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
+
+    <script>
+        $(".toggle-password").on("click", function () {
+            var isHidden = $(this).attr("icon") === "mdi:eye-off-outline";
+            $(this).attr("icon", isHidden ? "mdi:eye-outline" : "mdi:eye-off-outline");
+            var input = $($(this).attr("data-toggle"));
+            input.attr("type", input.attr("type") === "password" ? "text" : "password");
+        });
+    </script>
 
 </body>
 
