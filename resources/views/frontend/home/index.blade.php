@@ -1,43 +1,119 @@
 @extends('frontend.layout.index')
 
+@section('title', 'Acegard Indonesia - Kaca Film Otomotif, Bangunan & PPF')
+
 @section('content')
-<section class="hero py-5 py-lg-5">
-  <div class="container">
-    <div class="row align-items-center g-4 g-lg-5">
-      <div class="col-lg-6">
-        <span class="badge badge-soft rounded-pill px-3 py-2 mb-3 fw-semibold">
-          ACEGARD NANO CERAMIC WINDOW FILM
-        </span>
 
-        <h1 class="hero-title display-4 mb-2">
-          KACA FILM <span class="hero-subtitle">NANO CERAMIC</span><br>
-          DENGAN <span class="hero-subtitle">SOLAR REJECT</span><br>
-          TERBAIK
-        </h1>
-
-        <p class="hero-lead mt-3 mb-4">
-          ACEGARD mengadaptasi teknologi <strong>Nano Ceramic Matrix Composite</strong> yang diperkuat
-          elemen logam tingkat tinggi. Stabil secara optik, tahan lama, dan mampu menolak gelombang
-          energi matahari hingga ke spektrum 2500 nm tanpa mengganggu sinyal elektronik.
-        </p>
-
-        <div class="d-flex gap-3 flex-wrap">
-          <a href="#" class="btn btn-dark btn-pill px-4 py-2">More Information</a>
-          <a href="#" class="btn btn-outline-dark btn-pill px-4 py-2">Produk Kami</a>
-        </div>
-
-        <div class="d-flex gap-4 mt-4 small text-secondary">
-          <div><strong>7+</strong> multi-layer</div>
-          <div><strong>Ti • Ta • W</strong> reinforced</div>
-          <div><strong>2500nm</strong> spectrum block</div>
-        </div>
-      </div>
-
-      <div class="col-lg-6 text-center">
-        {{-- Ganti ke gambar hero kamu (mobil + roll film). Pakai asset() atau storage --}}
-        <img src="{{ asset('img/hero-car.png') }}" alt="Acegard Car" class="hero-img">
-      </div>
+{{-- Hero --}}
+<section class="ace-section-sm pb-0">
+    <div class="container">
+        <x-frontend.image-tile
+            image="{{ asset('assets/frontend/figma/home/hero-otomotif.png') }}"
+            image-alt="Kaca Film Otomotif"
+            title="Kaca Film Otomotif"
+            :href="route('frontend.service.car')"
+            height="480px"
+        />
     </div>
-  </div>
 </section>
+
+{{-- Kaca Film Bangunan + PPF --}}
+<section class="ace-section-sm">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <x-frontend.image-tile
+                    image="{{ asset('assets/frontend/figma/home/tile-bangunan.png') }}"
+                    image-alt="Kaca Film Bangunan"
+                    title="Kaca Film Bangunan"
+                    :href="route('frontend.service.building')"
+                    height="360px"
+                />
+            </div>
+            <div class="col-md-6">
+                <x-frontend.image-tile
+                    image="{{ asset('assets/frontend/figma/home/tile-ppf.png') }}"
+                    image-alt="PPF"
+                    title="PPF"
+                    :href="Route::has('frontend.ppf.catalog') ? route('frontend.ppf.catalog') : '#'"
+                    height="360px"
+                />
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- Kenapa memilih Acegard + Butuh bantuan --}}
+<section class="ace-section-sm">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <x-frontend.feature-card
+                    icon="mdi:tray-arrow-up"
+                    title="Pemasangan Presisi"
+                    desc="consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                />
+            </div>
+            <div class="col-md-6">
+                <x-frontend.feature-card
+                    icon="mdi:headset"
+                    title="Pelayanan Prima"
+                    desc="consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                />
+            </div>
+            <div class="col-md-6">
+                <x-frontend.feature-card
+                    icon="mdi:shield-check"
+                    title="Garansi Terjamin"
+                    desc="consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                />
+            </div>
+            <div class="col-md-6">
+                <div class="ace-card-soft p-4 h-100">
+                    <h5 class="mb-1">Butuh Bantuan?</h5>
+                    <p class="ace-muted small mb-3">Lorem Ipsum Lorem ipsum dolor sit amet consectetur adipiscing elit</p>
+
+                    <form>
+                        <div class="mb-3 border-bottom" style="border-color: var(--ace-border) !important;">
+                            <input type="text" class="form-control border-0 bg-transparent px-0" placeholder="Full Name*">
+                        </div>
+                        <div class="mb-3 border-bottom" style="border-color: var(--ace-border) !important;">
+                            <input type="email" class="form-control border-0 bg-transparent px-0" placeholder="Email*">
+                        </div>
+                        <div class="mb-3 border-bottom" style="border-color: var(--ace-border) !important;">
+                            <input type="text" class="form-control border-0 bg-transparent px-0" placeholder="Phone Number*">
+                        </div>
+                        <div class="mb-3 border-bottom" style="border-color: var(--ace-border) !important;">
+                            <textarea class="form-control border-0 bg-transparent px-0" rows="2" placeholder="Message*"></textarea>
+                        </div>
+                        <x-frontend.button type="submit" variant="gradient">SEND</x-frontend.button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- Google Maps --}}
+<section class="ace-section-sm">
+    <div class="container">
+        <x-frontend.section-heading
+            title="Temukan Kami di"
+            highlight="Google Maps"
+            subtitle="Kunjungi workshop kami untuk mendapatkan layanan terbaik dengan kualitas yang tidak diragukan lagi."
+        />
+
+        <div class="position-relative rounded-4 overflow-hidden">
+            <iframe
+                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d7932.866895562227!2d106.6881984!3d-6.2064166!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69ed2a0d3377ef%3A0x49dc44beb8c49b02!2sAcegard%20Indonesia!5e0!3m2!1sid!2sid!4v1755761775295!5m2!1sid!2sid"
+                width="100%" height="380" style="border:0; display:block;" allowfullscreen=""
+                loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+            <div class="position-absolute bottom-0 start-0 w-100 text-white text-center small fw-semibold py-2 px-3" style="background: var(--ace-navy);">
+                Jl. KH. Hasyim Ashari, RT.007/RW.002, Nerogtog, Kec. Cipondoh, Kota Tangerang, Banten 15146
+            </div>
+        </div>
+    </div>
+</section>
+
 @endsection

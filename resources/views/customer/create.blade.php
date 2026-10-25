@@ -1,786 +1,920 @@
 @extends('dashboard.index')
 
-@section('title', 'Add Customers')
-
+@section('title', 'Tambah Customer')
 @section('route-breadcrumb', 'customer.index')
-
 @section('breadcrumb', 'Customers')
 
+@push('page-styles')
+<style>
+/* ===== Layout ===== */
+.cust-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 768px) {
+  .cust-layout { grid-template-columns: 1fr; }
+  .cust-nav    { display: none; }
+}
+
+/* ===== Sidebar Nav ===== */
+.cust-nav {
+  position: sticky;
+  top: 80px;
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 8px;
+  list-style: none;
+  margin: 0;
+}
+.cust-nav li a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--neutral-600);
+  text-decoration: none;
+  transition: background .15s, color .15s;
+}
+.cust-nav li a .cn-icon {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  background: var(--neutral-100);
+  color: var(--neutral-500);
+  flex-shrink: 0;
+  transition: background .15s, color .15s;
+}
+.cust-nav li a:hover,
+.cust-nav li a.is-active {
+  background: var(--primary-light);
+  color: var(--primary-600);
+}
+.cust-nav li a:hover .cn-icon,
+.cust-nav li a.is-active .cn-icon {
+  background: var(--primary-600);
+  color: #fff;
+}
+
+/* ===== Section Cards ===== */
+.cust-section {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.cust-section-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: var(--neutral-50);
+  border-bottom: 1px solid var(--border-color);
+}
+.cust-section-head .sec-icon {
+  width: 38px; height: 38px;
+  border-radius: 9px;
+  background: var(--primary-light);
+  color: var(--primary-600);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.cust-section-head .sec-icon.sec-icon-danger { background: rgba(239,68,68,.12); color: #ef4444; }
+.cust-section-head .sec-title { font-size: 14px; font-weight: 600; margin: 0; color: var(--neutral-900); }
+.cust-section-head .sec-desc  { font-size: 12px; color: var(--neutral-500); margin: 0; }
+.cust-section-body { padding: 20px; }
+
+/* ===== Unified phone input ===== */
+.fi-wrap {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--input-stroke, var(--neutral-300));
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--input-bg, var(--neutral-50));
+  transition: border-color .15s, box-shadow .15s;
+}
+.fi-wrap:focus-within {
+  border-color: var(--primary-600);
+  box-shadow: 0 0 0 3px rgba(72,127,255,.12);
+}
+.fi-badge {
+  display: flex; align-items: center; gap: 5px;
+  padding: 0 12px;
+  background: var(--neutral-100);
+  border-right: 1px solid var(--input-stroke, var(--neutral-300));
+  font-size: 12px; font-weight: 600;
+  white-space: nowrap; color: var(--neutral-600);
+  flex-shrink: 0; user-select: none;
+}
+.fi-badge .wa-dot { width: 8px; height: 8px; border-radius: 50%; background: #25d366; flex-shrink: 0; }
+.fi-wrap input[type="tel"],
+.fi-wrap input[type="text"].fi-display {
+  flex: 1; border: none; outline: none; background: transparent;
+  padding: 8px 12px; font-size: 14px; color: var(--neutral-900); min-width: 0;
+}
+.fi-wrap input[type="hidden"] { display: none; }
+
+/* ===== Commission mini-card ===== */
+.comm-card {
+  background: var(--neutral-50);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+/* ===== Sticky action bar ===== */
+.cust-action-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  background: var(--white);
+  border-top: 1px solid var(--border-color);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: -1px;
+}
+
+/* ===== Dark mode ===== */
+[data-theme="dark"] .cust-section,
+[data-theme="dark"] .cust-nav,
+[data-theme="dark"] .cust-action-bar { background: var(--dark-2); }
+[data-theme="dark"] .cust-section-head,
+[data-theme="dark"] .comm-card        { background: var(--dark-3); }
+[data-theme="dark"] .cust-nav li a    { color: var(--neutral-400); }
+[data-theme="dark"] .cust-nav li a .cn-icon { background: var(--dark-3); color: var(--neutral-400); }
+[data-theme="dark"] .fi-wrap   { background: var(--dark-3); border-color: var(--dark-1); }
+[data-theme="dark"] .fi-badge  { background: var(--dark-1); border-color: var(--dark-1); color: var(--neutral-300); }
+[data-theme="dark"] .fi-wrap input { color: var(--neutral-100); }
+[data-theme="dark"] .cust-section-head .sec-title { color: var(--neutral-100); }
+</style>
+@endpush
+
 @section('content')
+@include('partials.form-errors')
 
-@if ($errors->any())
-    <div class="alert alert-danger">
-        <ul class="mb-0">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
+@php $commissionFixed = config('commission.fixed', []); @endphp
+
+<div class="cust-layout">
+
+  {{-- ===== Sidebar Nav ===== --}}
+  <ul class="cust-nav" id="custNav">
+    <li><a href="#sec-identitas" class="is-active">
+      <span class="cn-icon"><iconify-icon icon="mdi:account-outline"></iconify-icon></span> Identitas
+    </a></li>
+    <li><a href="#sec-kendaraan">
+      <span class="cn-icon"><iconify-icon icon="mdi:car-outline"></iconify-icon></span> Kendaraan
+    </a></li>
+    <li><a href="#sec-produk">
+      <span class="cn-icon"><iconify-icon icon="mdi:layers-outline"></iconify-icon></span> Produk
+    </a></li>
+    <li><a href="#sec-tim">
+      <span class="cn-icon"><iconify-icon icon="mdi:account-multiple-outline"></iconify-icon></span> Tim Pasang
+    </a></li>
+    <li><a href="#sec-penjualan">
+      <span class="cn-icon"><iconify-icon icon="mdi:store-outline"></iconify-icon></span> Penjualan
+    </a></li>
+    <li><a href="#sec-keamanan">
+      <span class="cn-icon"><iconify-icon icon="mdi:lock-outline"></iconify-icon></span> Keamanan
+    </a></li>
+  </ul>
+
+  {{-- ===== Main Content ===== --}}
+  <div>
+
+    @if(isset($fromSo) && $fromSo)
+    <x-ui.alert type="success" class="mb-3" :dismissible="false">
+        <x-slot name="title">Diisi dari Sales Order <span class="font-monospace">{{ $fromSo->so_number }}</span></x-slot>
+        Data prospek sudah diisi otomatis. Lengkapi data yang masih kosong (WSN, produk, dll.) lalu simpan.
+    </x-ui.alert>
+    @endif
+
+    <form action="{{ route('customer.store') }}" method="POST" id="customerForm">
+      @csrf
+      @if(isset($fromSo) && $fromSo)
+      <input type="hidden" name="from_so" value="{{ $fromSo->id }}">
+      @endif
+      <input type="hidden" name="deduct_roll_stock" value="1">
+
+      {{-- ── Section 1: Identitas ── --}}
+      <div id="sec-identitas" class="cust-section">
+        <div class="cust-section-head">
+          <div class="sec-icon"><iconify-icon icon="mdi:account-outline"></iconify-icon></div>
+          <div>
+            <p class="sec-title">Identitas Customer</p>
+            <p class="sec-desc">Data pribadi dan kontak pemilik kendaraan</p>
+          </div>
+        </div>
+        <div class="cust-section-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Warranty Serial Number <span class="text-danger">*</span></label>
+              <input type="text" name="wsn" class="form-control" required
+                     value="{{ old('wsn') }}" placeholder="WSN-XXXX">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Nomor Kartu</label>
+              <input type="text" class="form-control" value="(digenerate otomatis)" disabled>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
+              <input type="text" name="name" class="form-control" required
+                     value="{{ old('name', $fromSo?->prospect_name) }}" placeholder="Nama pemilik kendaraan">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Nomor WhatsApp <span class="text-danger">*</span></label>
+              <div class="fi-wrap">
+                <span class="fi-badge"><span class="wa-dot"></span>+62</span>
+                <input type="tel" class="fi-display" id="phone_display"
+                       placeholder="812 3456 7890" autocomplete="off">
+                <input type="hidden" name="phone_number" id="phone_hidden"
+                       value="{{ old('phone_number', $fromSo?->prospect_phone) }}">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control"
+                     value="{{ old('email', $fromSo?->prospect_email) }}" placeholder="email@contoh.com">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Alamat</label>
+              <input type="text" name="address" class="form-control"
+                     value="{{ old('address', $fromSo?->prospect_address) }}" placeholder="Alamat lengkap">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Kota</label>
+              <input type="text" name="city" class="form-control"
+                     value="{{ old('city') }}" placeholder="Jakarta">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Negara</label>
+              <input type="text" name="country" class="form-control"
+                     value="{{ old('country', 'Indonesia') }}" placeholder="Indonesia">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {{-- ── Section 2: Kendaraan ── --}}
+      <div id="sec-kendaraan" class="cust-section">
+        <div class="cust-section-head">
+          <div class="sec-icon"><iconify-icon icon="mdi:car-outline"></iconify-icon></div>
+          <div>
+            <p class="sec-title">Data Kendaraan</p>
+            <p class="sec-desc">Informasi kendaraan yang dipasang film</p>
+          </div>
+        </div>
+        <div class="cust-section-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Plat Nomor</label>
+              <input type="text" name="plat_number" class="form-control"
+                     value="{{ old('plat_number', $fromSo?->vehicle_plate) }}" placeholder="B 1234 XYZ">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Merek Kendaraan</label>
+              <input type="text" name="vehicle_brand" class="form-control"
+                     value="{{ old('vehicle_brand', $fromSo?->vehicle_brand) }}" placeholder="Toyota">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Model Kendaraan</label>
+              <input type="text" name="vehicle_model" class="form-control"
+                     value="{{ old('vehicle_model', $fromSo?->vehicle_model) }}" placeholder="Avanza">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Tahun Kendaraan</label>
+              <input type="number" name="vehicle_year" class="form-control"
+                     value="{{ old('vehicle_year', $fromSo?->vehicle_year) }}" placeholder="{{ date('Y') }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Tanggal Pemasangan <span class="text-danger">*</span></label>
+              <input type="date" name="install_date" class="form-control"
+                     value="{{ old('install_date', date('Y-m-d')) }}"
+                     max="{{ date('Y-m-d') }}">
+              <div class="form-text">Tanggal aktual kendaraan dipasang film (bukan tanggal DP/invoice).</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{-- ── Section 3: Produk & Pemasangan ── --}}
+      <div id="sec-produk" class="cust-section">
+        <div class="cust-section-head">
+          <div class="sec-icon"><iconify-icon icon="mdi:layers-outline"></iconify-icon></div>
+          <div>
+            <p class="sec-title">Produk & Pemasangan</p>
+            <p class="sec-desc">Tipe pemasangan, produk yang dipasang, dan durasi garansi</p>
+          </div>
+        </div>
+        <div class="cust-section-body">
+
+          {{-- Tipe pemasangan + panoramic --}}
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label">Tipe Pemasangan <span class="text-danger">*</span></label>
+              <select name="install_type" id="install_type" class="form-select" required>
+                <option value="">— Pilih —</option>
+                <option value="fullset" {{ old('install_type')==='fullset' ? 'selected' : '' }}>Fullset</option>
+                <option value="skkb"    {{ old('install_type')==='skkb'    ? 'selected' : '' }}>SKKB</option>
+                <option value="dsp"     {{ old('install_type')==='dsp'     ? 'selected' : '' }}>D/S/P</option>
+              </select>
+            </div>
+
+            <div class="col-md-6 {{ in_array(old('install_type'), ['fullset','dsp']) ? '' : 'd-none' }}" id="panoramic_wrap">
+              <label class="form-label">Panoramic</label>
+              <div class="d-flex align-items-center gap-3 mt-1">
+                <span id="pano_status_badge" class="badge {{ old('has_panoramic') ? 'bg-primary' : 'bg-secondary' }}">
+                  {{ old('has_panoramic') ? 'AKTIF' : 'NONAKTIF' }}
+                </span>
+                <div class="btn-group" role="group">
+                  <input type="radio" class="btn-check" name="has_panoramic" id="pano_off" value="0"
+                         {{ old('has_panoramic') ? '' : 'checked' }}>
+                  <label class="btn btn-outline-secondary btn-sm" for="pano_off">Tidak</label>
+                  <input type="radio" class="btn-check" name="has_panoramic" id="pano_on" value="1"
+                         {{ old('has_panoramic') ? 'checked' : '' }}>
+                  <label class="btn btn-outline-primary btn-sm" for="pano_on">Ya</label>
+                </div>
+              </div>
+              <small id="pano_hint" class="text-muted d-block mt-1">
+                {{ old('has_panoramic') ? 'Komisi mengikuti aturan panoramic.' : 'Komisi reguler.' }}
+              </small>
+            </div>
+          </div>
+
+          {{-- Product rows --}}
+          @php
+            $oldProducts = old('products', [['part_id'=>'','category_product_id'=>'','product_id'=>'']]);
+          @endphp
+          <div id="product-container" class="mb-3">
+            @foreach($oldProducts as $i => $prod)
+            <div class="row align-items-end mb-3 product-item">
+              <div class="col-md-4">
+                <label class="form-label small">Part</label>
+                <select name="products[{{ $i }}][part_id]" class="form-select" required>
+                  <option value="">Pilih Part</option>
+                  @foreach($parts as $part)
+                    <option value="{{ $part->id }}"
+                      {{ (old("products.$i.part_id", $prod['part_id'] ?? '') == $part->id) ? 'selected' : '' }}>
+                      {{ $part->name }}
+                    </option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small">Kategori</label>
+                <select name="products[{{ $i }}][category_product_id]"
+                        class="form-select category-select" data-index="{{ $i }}" required>
+                  <option value="">Pilih Kategori</option>
+                  @foreach($categories as $cat)
+                    <option value="{{ $cat->id }}"
+                      {{ (old("products.$i.category_product_id", $prod['category_product_id'] ?? '') == $cat->id) ? 'selected' : '' }}>
+                      {{ $cat->name }}
+                    </option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small">Produk</label>
+                <select name="products[{{ $i }}][product_id]"
+                        class="form-select product-select" data-index="{{ $i }}" required>
+                  <option value="">Pilih Produk</option>
+                </select>
+              </div>
+              <div class="col-md-1">
+                <x-ui.button type="button" variant="danger-outline" size="sm" class="remove-product w-100">
+                  <iconify-icon icon="mdi:trash-can-outline"></iconify-icon>
+                </x-ui.button>
+              </div>
+            </div>
             @endforeach
-        </ul>
-    </div>
-@endif
+          </div>
+          <x-ui.button type="button" variant="outline" size="sm" class="mb-4" id="add-product">
+            <iconify-icon icon="mdi:plus"></iconify-icon> Tambah Produk
+          </x-ui.button>
 
-@if (session('error'))
-    <div class="alert alert-danger">{{ session('error') }}</div>
-@endif
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="card-title mb-0">Form Tambah Customer</h5>
-        <a href="{{ route('customer.index') }}" class="btn btn-sm btn-secondary">
-            Kembali
-        </a>
-    </div>
-    <div class="card-body">
-        <form action="{{ route('customer.store') }}" method="POST">
-            @csrf
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label for="wsn" class="form-label">Warranty Serial Number <span class="text-danger">*</span></label>
-                    <input type="text" name="wsn" class="form-control" required value="{{ old('wsn') }}">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Nomor Kartu <span class="text-danger">*</span></label>
-                    <input type="number" name="card_number" class="form-control" disabled >
-                </div>
-
-                <hr class="mt-5">
-
-                <h5 class="text-center">Customer Personal Data</h5>
-
-                <div class="col-md-6">
-                    <label class="form-label">Nama <span class="text-danger">*</span></label>
-                    <input type="text" name="name" class="form-control" required value="{{ old('name') }}">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Nomor Telepon <span class="text-danger">*</span></label>
-                    <input type="text" name="phone_number" class="form-control" required value="{{ old('phone_number') }}">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Email</label>
-                    <input type="email" name="email" class="form-control" value="{{ old('email') }}">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Alamat</label>
-                    <input type="text" name="address" class="form-control" value="{{ old('address') }}">
-                </div>
-
-                <hr class="mt-5">
-
-                <h5 class="text-center">Authorized Dealer</h5>
-
-                <div class="col-md-6">
-                    <div class="row">
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Nama Dealer</label>
-                            <input type="text" name="dealer_name" class="form-control" value="{{ old('dealer_name') }}">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Marketing</label>
-                            <select name="marketing_id" class="form-select">
-                                <option value="">— Tidak ada —</option>
-                                @foreach ($employees as $e)
-                                    @if ($e->job_position === 'Marketing')
-                                        <option value="{{ $e->id }}" {{ old('marketing_id')==$e->id ? 'selected' : '' }}>
-                                        {{ $e->name }}
-                                        </option>
-                                    @endif
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                        <label class="form-label">Tukang <span class="text-danger">*</span></label>
-                        <select name="tukang_id" class="form-select" required>
-                            <option value="">Pilih</option>
-                            @foreach ($employees as $e)
-                            @if ($e->job_position === 'Teknisi')
-                            <option value="{{ $e->id }}" {{ old('tukang_id')==$e->id ? 'selected' : '' }}>
-                                {{ $e->name }}
-                            </option>
-                            @endif
-                            @endforeach
-                        </select>
-
-                        </div>
-                        <div class="col-md-6 mb-3">
-                        <label class="form-label">Kenek (opsional)</label>
-                        <select name="kenek_id" class="form-select">
-                            <option value="">— Tidak ada —</option>
-                            @foreach ($employees as $e)
-                            @if ($e->job_position === 'Kenek')
-
-                            <option value="{{ $e->id }}" {{ old('kenek_id')==$e->id ? 'selected' : '' }}>
-                                {{ $e->name }}
-                            </option>
-                            @endif
-                            @endforeach
-                        </select>
-                        </div>
-                    </div>
-                </div>
-
-                @php
-                // kirim config komisi ke JS agar bisa hitung "pool" (estimasi)
-                $commissionFixed = config('commission.fixed', []);
-                @endphp
-
-                <div class="card mt-3">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">Pembagian Komisi Installer</h6>
-                    <span class="badge bg-light text-dark">Pool = Teknisi + Kenek (estimasi)</span>
-                </div>
-                <div class="card-body">
-
-                    {{-- Mode pilih --}}
-                    <div class="btn-group w-100 mb-3" role="group" aria-label="Mode Pembagian">
-                <input type="radio" class="btn-check" name="share_mode" id="share_auto" value="auto"
-                        autocomplete="off" {{ old('share_mode','auto')==='auto' ? 'checked' : '' }}>
-                <label class="btn btn-outline-primary" for="share_auto">Otomatis (70:30)</label>
-
-                <input type="radio" class="btn-check" name="share_mode" id="share_custom" value="custom"
-                        autocomplete="off" {{ old('share_mode')==='custom' ? 'checked' : '' }}>
-                <label class="btn btn-outline-primary" for="share_custom">Kustom Persen</label>
-                </div>
-
-                <div id="preset-wrap" class="d-flex flex-wrap gap-2 mb-3">
-                <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" data-t="70" data-k="30">70 : 30</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" data-t="60" data-k="40">60 : 40</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" data-t="50" data-k="50">50 : 50</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" data-t="100" data-k="0">100 : 0</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" data-t="0" data-k="100">0 : 100</button>
-                </div>
-
-
-                    {{-- Custom share --}}
-                    <div id="custom-share-wrap" class="{{ old('share_mode')==='custom' ? '' : 'd-none' }}">
-                    <div class="row g-3 align-items-end">
-
-                        <div class="col-md-6">
-                        <label class="form-label">Tukang (%)</label>
-                        <div class="input-group">
-                            <input type="range" min="0" max="100" step="1" class="form-range me-3 flex-grow-1" id="range_tukang">
-                            <input type="number" min="0" max="100" step="1" class="form-control w-25" id="input_tukang"
-                                name="installer_share[tukang]" value="{{ old('installer_share.tukang', 50) }}">
-                            <span class="input-group-text">%</span>
-                        </div>
-                        <div class="form-text">Persentase bagian Tukang dari pool.</div>
-                        </div>
-
-                        <div class="col-md-6 kenek-block">
-                        <label class="form-label">Kenek (%)</label>
-                        <div class="input-group">
-                            <input type="range" min="0" max="100" step="1" class="form-range me-3 flex-grow-1" id="range_kenek">
-                            <input type="number" min="0" max="100" step="1" class="form-control w-25" id="input_kenek"
-                                name="installer_share[kenek]" value="{{ old('installer_share.kenek', 50) }}">
-                            <span class="input-group-text">%</span>
-                        </div>
-                        <div class="form-text">Persentase bagian Kenek dari pool.</div>
-                        </div>
-
-                        <div class="col-12 d-flex align-items-center gap-3">
-                        <div class="progress flex-grow-1" style="height: 10px;">
-                            <div id="bar_tukang" class="progress-bar bg-primary" role="progressbar" style="width: 50%;"></div>
-                            <div id="bar_kenek" class="progress-bar bg-success" role="progressbar" style="width: 50%;"></div>
-                        </div>
-                        <span id="total_badge" class="badge bg-{{ old('share_mode')==='custom' ? 'primary' : 'secondary' }}">Total: 100%</span>
-                        </div>
-
-                        <div class="col-12">
-                        <div class="form-check mt-2">
-                            <input class="form-check-input" type="checkbox" id="normalize_100" name="normalize_100" value="1"
-                                {{ old('normalize_100', 1) ? 'checked' : '' }}>
-                            <label class="form-check-label" for="normalize_100">
-                            Normalisasi hingga total 100% (disarankan)
-                            </label>
-                        </div>
-                        </div>
-
-                    </div>
-                    </div>
-
-                    {{-- Preview nominal (estimasi) --}}
-                    <hr class="my-3">
-                    <div class="d-flex flex-wrap align-items-center gap-3">
-                    <div>
-                        <span class="text-muted">Pool (estimasi):</span>
-                        <span id="pool_nominal" class="fw-bold">Rp0</span>
-                    </div>
-                    <div class="vr" style="height: 20px;"></div>
-                    <div>
-                        <span class="badge bg-primary">Tukang: <span id="preview_t_nom">Rp0</span></span>
-                    </div>
-                    <div class="kenek-block">
-                        <span class="badge bg-success">Kenek: <span id="preview_k_nom">Rp0</span></span>
-                    </div>
-                    <div class="ms-auto">
-                        <small class="text-muted">Estimasi dihitung dari pilihan <em>Tipe Pemasangan</em> &amp; <em>Panoramic</em>.</small>
-                    </div>
-                    </div>
-
-                </div>
-                </div>
-
-
-                <div class="col-md-6">
-                    <label class="form-label">Kota</label>
-                    <input type="text" name="city" class="form-control" value="{{ old('city') }}">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Negara</label>
-                    <input type="text" name="country" class="form-control" value="{{ old('country') }}">
-                </div>
-
-                <hr class="mt-5">
-
-                <h5 class="text-center">Vehicle Description</h5>
-
-                <div class="col-md-6">
-                    <label class="form-label">Plat Nomor</label>
-                    <input type="text" name="plat_number" class="form-control" value="{{ old('plat_number') }}">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Merek Kendaraan</label>
-                    <input type="text" name="vehicle_brand" class="form-control" value="{{ old('vehicle_brand') }}">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Model Kendaraan</label>
-                    <input type="text" name="vehicle_model" class="form-control" value="{{ old('vehicle_model') }}">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Tahun Kendaraan</label>
-                    <input type="number" name="vehicle_year" class="form-control" value="{{ old('vehicle_year') }}">
-                </div>
-
-
-
+          {{-- Warranty --}}
+          <div class="row g-3 pt-3 border-top">
+            <div class="col-md-6">
+              <label class="form-label">Durasi Garansi <span class="text-danger">*</span></label>
+              <select name="warantee_duration" class="form-select" required>
+                <option value="">Pilih Durasi</option>
+                <option value="5" {{ old('warantee_duration')==='5' ? 'selected' : '' }}>5 Tahun</option>
+                <option value="7" {{ old('warantee_duration')==='7' ? 'selected' : '' }}>7 Tahun</option>
+                <option value="7" {{ old('warantee_duration')==='8' ? 'selected' : '' }}>8 Tahun</option>
+              </select>
             </div>
+         </div>
 
-            <hr class="mt-5">
+        </div>
+      </div>
 
-            <h5 class="mt-5 mb-5 text-center">Produk Customer</h5>
-            <div id="product-container">
-                @php
-                    $oldProducts = old('products', [['part_id'=>'','category_product_id'=>'','product_id'=>'']]);
-                @endphp
-                <div class="row">
-                   <div class="col-md-12">
-                    <label class="form-label">Tipe Pemasangan <span class="text-danger">*</span></label>
-                        <select name="install_type" id="install_type" class="form-select mb-2" required>
-                            <option value="">— Pilih —</option>
-                            <option value="fullset" {{ old('install_type')==='fullset' ? 'selected' : '' }}>Fullset</option>
-                            <option value="skkb"    {{ old('install_type')==='skkb' ? 'selected' : '' }}>SKKB</option>
-                            <option value="dsp"     {{ old('install_type')==='dsp' ? 'selected' : '' }}>D/S/P</option>
-                        </select>
-
-                        <div id="panoramic_wrap" class="mt-3 {{ old('install_type','')==='fullset' ? '' : 'd-none' }}">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div class="mt-2 d-flex align-items-center gap-2">
-                                    <span id="pano_status_badge"
-                                            class="badge {{ old('has_panoramic') ? 'bg-primary' : 'bg-secondary' }}">
-                                        {{ old('has_panoramic') ? 'Panoramic: AKTIF' : 'Panoramic: NONAKTIF' }}
-                                    </span>
-                                    <small id="pano_hint" class="text-muted">
-                                        {{ old('has_panoramic')
-                                            ? 'Komisi Fullset hari ini mengikuti aturan panoramic.'
-                                            : 'Komisi mengikuti aturan Fullset reguler (non-panoramic).' }}
-                                    </small>
-                                </div>
-                            {{-- Segmented toggle yang jelas on/off --}}
-                            <div class="btn-group" role="group" aria-label="Has Panoramic toggle">
-                                <input type="radio" class="btn-check" name="has_panoramic" id="pano_off" value="0"
-                                    {{ old('has_panoramic') ? '' : 'checked' }}>
-                                <label class="btn btn-outline-secondary" for="pano_off">Tidak</label>
-
-                                <input type="radio" class="btn-check" name="has_panoramic" id="pano_on" value="1"
-                                    {{ old('has_panoramic') ? 'checked' : '' }}>
-                                <label class="btn btn-outline-primary" for="pano_on">Ya</label>
-                            </div>
-                            </div>
-
-                            {{-- Status badge + hint dinamis --}}
-
-                        </div>
-                    </div>
-                </div>
-
-                @foreach($oldProducts as $i => $prod)
-                    <div class="row align-items-end mb-3 product-item">
-                    <div class="col-md-4">
-                        <label>Part</label>
-                        <select name="products[{{ $i }}][part_id]" class="form-select" required>
-                        <option value="">Pilih Part</option>
-                        @foreach($parts as $part)
-                            <option value="{{ $part->id }}" {{ (old("products.$i.part_id", $prod['part_id'] ?? '') == $part->id) ? 'selected' : '' }}>
-                            {{ $part->name }}
-                            </option>
-                        @endforeach
-                        </select>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label>Kategori Produk</label>
-                        <select name="products[{{ $i }}][category_product_id]"
-                                class="form-select category-select" data-index="{{ $i }}" required>
-                        <option value="">Pilih Kategori</option>
-                        @foreach($categories as $cat)
-                            <option value="{{ $cat->id }}" {{ (old("products.$i.category_product_id", $prod['category_product_id'] ?? '') == $cat->id) ? 'selected' : '' }}>
-                            {{ $cat->name }}
-                            </option>
-                        @endforeach
-                        </select>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label>Nama Produk</label>
-                        <select name="products[{{ $i }}][product_id]"
-                                class="form-select product-select" data-index="{{ $i }}" required>
-                        {{-- akan diisi via AJAX, tapi jika old() ada dan option tersedia, akan diset di JS --}}
-                        <option value="">Pilih Produk</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-1">
-                        <button type="button" class="btn btn-danger btn-sm remove-product text-center">×</button>
-                    </div>
-                    </div>
+      {{-- ── Section 4: Tim Pemasangan ── --}}
+      <div id="sec-tim" class="cust-section">
+        <div class="cust-section-head">
+          <div class="sec-icon"><iconify-icon icon="mdi:account-multiple-outline"></iconify-icon></div>
+          <div>
+            <p class="sec-title">Tim Pemasangan</p>
+            <p class="sec-desc">Teknisi, kenek, dan pembagian komisi instalasi</p>
+          </div>
+        </div>
+        <div class="cust-section-body">
+          @php $soLockedTeam = isset($fromSo) && $fromSo && $fromSo->tukang_id; @endphp
+          @if($soLockedTeam)
+          <div class="alert alert-info py-2 px-3 mb-3" style="font-size:.85rem;">
+            <iconify-icon icon="mdi:information-outline" class="me-1"></iconify-icon>
+            Teknisi/kenek sudah ditugaskan di Sales Order <strong>{{ $fromSo->so_number }}</strong> dan tidak bisa
+            diubah di sini — ganti penugasannya lewat halaman detail SO (sebelum dikonversi) atau menu
+            "Penugasan Pekerjaan" (setelah customer ini dibuat).
+          </div>
+          @endif
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Installer 1 (Teknisi) <span class="text-danger">*</span></label>
+              <select name="tukang_id" class="form-select" id="tukang_select" required
+                      {{ $soLockedTeam ? 'disabled' : '' }}>
+                <option value="">Pilih Teknisi</option>
+                @foreach ($employees->whereIn('job_position', ['Teknisi','Kenek'])->groupBy('job_position') as $pos => $group)
+                  <optgroup label="{{ $pos }}">
+                    @foreach ($group as $e)
+                      <option value="{{ $e->id }}" data-position="{{ $e->job_position }}"
+                        {{ old('tukang_id', $fromSo?->tukang_id)==$e->id ? 'selected' : '' }}>{{ $e->name }}</option>
+                    @endforeach
+                  </optgroup>
                 @endforeach
+              </select>
+              @if($soLockedTeam)
+                <input type="hidden" name="tukang_id" value="{{ $fromSo->tukang_id }}">
+              @endif
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Installer 2 (Kenek) <span class="text-muted fw-normal small">opsional</span></label>
+              <select name="kenek_id" class="form-select" id="kenek_select"
+                      {{ $soLockedTeam ? 'disabled' : '' }}>
+                <option value="">— Tidak ada —</option>
+                @foreach ($employees->whereIn('job_position', ['Teknisi','Kenek'])->groupBy('job_position') as $pos => $group)
+                  <optgroup label="{{ $pos }}">
+                    @foreach ($group as $e)
+                      <option value="{{ $e->id }}" data-position="{{ $e->job_position }}"
+                        {{ old('kenek_id', $fromSo?->kenek_id)==$e->id ? 'selected' : '' }}>{{ $e->name }}</option>
+                    @endforeach
+                  </optgroup>
+                @endforeach
+              </select>
+              @if($soLockedTeam)
+                <input type="hidden" name="kenek_id" value="{{ $fromSo->kenek_id }}">
+              @endif
+            </div>
+          </div>
 
+          <div id="same-pair-banner" class="alert alert-info py-2 px-3 d-none mb-3" style="font-size:.85rem;">
+            <iconify-icon icon="mdi:information-outline" class="me-1"></iconify-icon>
+            <strong>Pasangan Sejenis Terdeteksi</strong> — Komisi otomatis dibagi <strong>50:50</strong>
+          </div>
+
+          {{-- Commission share --}}
+          <div class="comm-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="fw-semibold" style="font-size:13px;">
+                <iconify-icon icon="mdi:chart-pie" class="me-1 text-primary"></iconify-icon>Pembagian Komisi
+              </span>
+              <x-ui.badge variant="neutral">Pool = Teknisi + Kenek</x-ui.badge>
             </div>
 
-<button type="button" class="btn btn-sm btn-outline-primary" id="add-product">+ Tambah Produk</button>
+            <div class="btn-group w-100 mb-3" role="group">
+              <input type="radio" class="btn-check" name="share_mode" id="share_auto" value="auto"
+                     {{ old('share_mode','auto')==='auto' ? 'checked' : '' }}>
+              <label class="btn btn-outline-primary btn-sm" for="share_auto">
+                Otomatis <span id="auto-ratio-label">(70:30)</span>
+              </label>
+              <input type="radio" class="btn-check" name="share_mode" id="share_custom" value="custom"
+                     {{ old('share_mode')==='custom' ? 'checked' : '' }}>
+              <label class="btn btn-outline-primary btn-sm" for="share_custom">Kustom %</label>
+            </div>
 
-<hr class="mt-5">
+            <div id="preset-wrap" class="d-flex flex-wrap gap-2 mb-3 {{ old('share_mode')==='custom' ? '' : 'd-none' }}">
+              <x-ui.button type="button" variant="outline" size="sm" class="preset-btn" data-t="70" data-k="30">70 : 30</x-ui.button>
+              <x-ui.button type="button" variant="outline" size="sm" class="preset-btn" data-t="60" data-k="40">60 : 40</x-ui.button>
+              <x-ui.button type="button" variant="outline" size="sm" class="preset-btn" data-t="50" data-k="50">50 : 50</x-ui.button>
+              <x-ui.button type="button" variant="outline" size="sm" class="preset-btn" data-t="100" data-k="0">100 : 0</x-ui.button>
+              <x-ui.button type="button" variant="outline" size="sm" class="preset-btn" data-t="0" data-k="100">0 : 100</x-ui.button>
+            </div>
 
-<div class="col-md-12 mt-3">
-                    <label class="form-label">Durasi Garansi</label>
-                    <select name="warantee_duration" class="form-select" required>
-                        <option value="">Pilih Durasi</option>
-                        <option value="5">5 Tahun</option>
-                        <option value="7">7 Tahun</option>
-                    </select>
+            <div id="custom-share-wrap" class="{{ old('share_mode')==='custom' ? '' : 'd-none' }}">
+              <div class="row g-3 align-items-end mb-3">
+                <div class="col-md-6">
+                  <label class="form-label small">Teknisi (%)</label>
+                  <div class="input-group">
+                    <input type="range" min="0" max="100" step="1" class="form-range me-3 flex-grow-1" id="range_tukang">
+                    <input type="number" min="0" max="100" step="1" class="form-control w-25" id="input_tukang"
+                           name="installer_share[tukang]" value="{{ old('installer_share.tukang', 70) }}">
+                    <span class="input-group-text">%</span>
+                  </div>
                 </div>
+                <div class="col-md-6 kenek-block">
+                  <label class="form-label small">Kenek (%)</label>
+                  <div class="input-group">
+                    <input type="range" min="0" max="100" step="1" class="form-range me-3 flex-grow-1" id="range_kenek">
+                    <input type="number" min="0" max="100" step="1" class="form-control w-25" id="input_kenek"
+                           name="installer_share[kenek]" value="{{ old('installer_share.kenek', 30) }}">
+                    <span class="input-group-text">%</span>
+                  </div>
+                </div>
+                <div class="col-12 d-flex align-items-center gap-3">
+                  <div class="progress flex-grow-1" style="height:8px;">
+                    <div id="bar_tukang" class="progress-bar bg-primary" style="width:70%"></div>
+                    <div id="bar_kenek" class="progress-bar bg-success" style="width:30%"></div>
+                  </div>
+                  <span id="total_badge" class="badge bg-primary">100%</span>
+                </div>
+                <div class="col-12">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="normalize_100"
+                           name="normalize_100" value="1" {{ old('normalize_100', 1) ? 'checked' : '' }}>
+                    <label class="form-check-label small" for="normalize_100">Normalisasi ke 100%</label>
+                  </div>
+                </div>
+              </div>
+            </div>
 
+            <div class="d-flex flex-wrap align-items-center gap-3 pt-3 border-top">
+              <div>
+                <span class="text-muted small">Pool estimasi:</span>
+                <span id="pool_nominal" class="fw-bold ms-1">Rp0</span>
+              </div>
+              <div class="vr" style="height:16px;"></div>
+              <span class="badge" style="background:var(--primary-light);color:var(--primary-600)">
+                Teknisi: <span id="preview_t_nom">Rp0</span>
+              </span>
+              <span class="badge kenek-block" style="background:rgba(34,197,94,.15);color:#16a34a">
+                Kenek: <span id="preview_k_nom">Rp0</span>
+              </span>
+            </div>
+          </div>
 
+        </div>
+      </div>
 
-<div class="col-md-6 mt-3">
-    <label class="form-label">Konfirmasi Password Anda <span class="text-danger">*</span></label>
-    <input type="password" name="admin_password" class="form-control @error('admin_password') is-invalid @enderror" required>
-    @error('admin_password')
-    <div class="invalid-feedback">{{ $message }}</div>
-    @enderror
+      {{-- ── Section 5: Penjualan ── --}}
+      <div id="sec-penjualan" class="cust-section">
+        <div class="cust-section-head">
+          <div class="sec-icon"><iconify-icon icon="mdi:store-outline"></iconify-icon></div>
+          <div>
+            <p class="sec-title">Informasi Penjualan</p>
+            <p class="sec-desc">Dealer dan marketing yang mereferensikan customer</p>
+          </div>
+        </div>
+        <div class="cust-section-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Nama Dealer</label>
+              <input type="text" name="dealer_name" class="form-control"
+                     value="{{ old('dealer_name') }}" placeholder="Nama dealer / showroom">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Marketing</label>
+              <select name="marketing_id" class="form-select">
+                <option value="">— Tidak ada —</option>
+                @foreach ($employees as $e)
+                  @if ($e->job_position === 'Marketing')
+                    <option value="{{ $e->id }}" {{ old('marketing_id', $fromSo?->marketing_id)==$e->id ? 'selected' : '' }}>
+                      {{ $e->name }}
+                    </option>
+                  @endif
+                @endforeach
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {{-- ── Section 6: Keamanan + Action Bar ── --}}
+      <div id="sec-keamanan" class="cust-section">
+        <div class="cust-section-head">
+          <div class="sec-icon sec-icon-danger"><iconify-icon icon="mdi:lock-outline"></iconify-icon></div>
+          <div>
+            <p class="sec-title">Konfirmasi Keamanan</p>
+            <p class="sec-desc">Masukkan password Anda untuk menyimpan data customer</p>
+          </div>
+        </div>
+        <div class="cust-section-body">
+          <div class="row">
+            <div class="col-md-6">
+              <label class="form-label">Password Anda <span class="text-danger">*</span></label>
+              <input type="password" name="admin_password"
+                     class="form-control @error('admin_password') is-invalid @enderror" required>
+              @error('admin_password')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+            </div>
+          </div>
+        </div>
+        <div class="cust-action-bar">
+          <x-ui.button :href="route('customer.index')" variant="outline">Batal</x-ui.button>
+          <x-ui.button type="submit" variant="primary" class="px-4">
+            <iconify-icon icon="mdi:content-save-outline" class="me-1"></iconify-icon> Simpan Customer
+          </x-ui.button>
+        </div>
+      </div>
+
+    </form>
+  </div>
 </div>
+@endsection
 
-<button type="submit" class="btn btn-primary mt-5">
-    Simpan Customer
-</button>
-</div>
-
-</div>
-</form>
-
+@push('page-scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-{{-- kirim config commission ke JS --}}
+<script>const COMMISSION_FIXED = @json($commissionFixed);</script>
 <script>
-  const COMMISSION_FIXED = @json($commissionFixed);
-</script>
-<script>
+(function () {
+
+  // ── Phone formatting ──
   (function () {
-    const selectType = document.getElementById('install_type');
-    const panoWrap   = document.getElementById('panoramic_wrap');
-    const panoOn     = document.getElementById('pano_on');
-    const panoOff    = document.getElementById('pano_off');
-    const badge      = document.getElementById('pano_status_badge');
-    const hint       = document.getElementById('pano_hint');
+    const display = document.getElementById('phone_display');
+    const hidden  = document.getElementById('phone_hidden');
+    if (!display || !hidden) return;
 
-    function updatePanoVisibility() {
-      const isFullset = selectType.value === 'fullset';
-      panoWrap.classList.toggle('d-none', !isFullset);
-
-      // jika bukan fullset, paksa nonaktif (simpan nilai 0)
-      if (!isFullset) {
-        if (panoOff) panoOff.checked = true;
-        if (badge) badge.className = 'badge bg-secondary';
-        if (badge) badge.textContent = 'Panoramic: NONAKTIF';
-        if (hint)  hint.textContent  = 'Komisi mengikuti aturan Fullset reguler (non-panoramic).';
-      }
+    function strip(v) {
+      v = v.replace(/\D/g, '');
+      if (v.startsWith('62')) v = v.slice(2);
+      if (v.startsWith('0'))  v = v.slice(1);
+      return v;
     }
-
-    function updatePanoStatusText() {
-      const active = panoOn && panoOn.checked;
-      if (badge) {
-        badge.className = 'badge ' + (active ? 'bg-primary' : 'bg-secondary');
-        badge.textContent = active ? 'Panoramic: AKTIF' : 'Panoramic: NONAKTIF';
-      }
-      if (hint) {
-        hint.textContent = active
-          ? 'Komisi Fullset hari ini mengikuti aturan panoramic.'
-          : 'Komisi mengikuti aturan Fullset reguler (non-panoramic).';
-      }
+    function fmt(d) {
+      const a = d.slice(0, 3), b = d.slice(3, 7), c = d.slice(7, 11);
+      return [a, b, c].filter(Boolean).join(' ');
     }
+    const initDigits = strip(hidden.value || '');
+    display.value = fmt(initDigits);
+    if (initDigits) hidden.value = '+62' + initDigits;
 
-    // events
-    if (selectType) selectType.addEventListener('change', updatePanoVisibility);
-    [panoOn, panoOff].forEach(el => {
-      if (el) el.addEventListener('change', updatePanoStatusText);
+    display.addEventListener('input', function () {
+      const raw    = strip(this.value);
+      const pos    = this.selectionStart;
+      const before = (this.value.slice(0, pos).match(/ /g) || []).length;
+      this.value   = fmt(raw);
+      const after  = (this.value.slice(0, pos).match(/ /g) || []).length;
+      const newPos = Math.max(0, pos + after - before);
+      this.setSelectionRange(newPos, newPos);
+      hidden.value = raw ? '+62' + raw : '';
     });
+  })();
 
-    // init
-    updatePanoVisibility();
-    updatePanoStatusText();
+  // ── Panoramic ──
+  const installTypeEl = document.getElementById('install_type');
+  const panoWrap      = document.getElementById('panoramic_wrap');
+  const panoOn        = document.getElementById('pano_on');
+  const panoOff       = document.getElementById('pano_off');
+  const panoBadge     = document.getElementById('pano_status_badge');
+  const panoHint      = document.getElementById('pano_hint');
 
-    // Bootstrap tooltip init (opsional; hapus jika tidak pakai Bootstrap icons/tooltip)
-    if (window.bootstrap && bootstrap.Tooltip) {
-      document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
-        new bootstrap.Tooltip(el);
+  function refreshPanoWrap() {
+    const type = installTypeEl?.value;
+    const showPano = type === 'fullset' || type === 'dsp';
+    panoWrap?.classList.toggle('d-none', !showPano);
+    if (!showPano && panoOff) panoOff.checked = true;
+    refreshPanoText();
+    window._custUpdatePreview?.();
+  }
+  function refreshPanoText() {
+    const active = !!panoOn?.checked;
+    const type   = installTypeEl?.value;
+    if (panoBadge) {
+      panoBadge.className = 'badge ' + (active ? 'bg-primary' : 'bg-secondary');
+      panoBadge.textContent = active ? 'AKTIF' : 'NONAKTIF';
+    }
+    if (panoHint) {
+      if (!active) {
+        panoHint.textContent = type === 'dsp' ? 'Komisi D/S/P reguler.' : 'Komisi Fullset reguler.';
+      } else {
+        panoHint.textContent = type === 'dsp'
+          ? 'Komisi D/S/P + Panoramic (2× rate).'
+          : 'Komisi mengikuti aturan panoramic.';
+      }
+    }
+  }
+  installTypeEl?.addEventListener('change', refreshPanoWrap);
+  [panoOn, panoOff].forEach(el => el?.addEventListener('change', () => { refreshPanoText(); window._custUpdatePreview?.(); }));
+  refreshPanoWrap();
+
+  // ── Commission share ──
+  (function () {
+    const shareAuto   = document.getElementById('share_auto');
+    const shareCustom = document.getElementById('share_custom');
+    const wrapCustom  = document.getElementById('custom-share-wrap');
+    const presetWrap  = document.getElementById('preset-wrap');
+    const normalizeEl = document.getElementById('normalize_100');
+    const tukangSel   = document.getElementById('tukang_select');
+    const kenekSel    = document.getElementById('kenek_select');
+    const kenekBlocks = document.querySelectorAll('.kenek-block');
+    const sameBanner  = document.getElementById('same-pair-banner');
+    const autoLabel   = document.getElementById('auto-ratio-label');
+    const rangeT = document.getElementById('range_tukang');
+    const rangeK = document.getElementById('range_kenek');
+    const inputT = document.getElementById('input_tukang');
+    const inputK = document.getElementById('input_kenek');
+    const barT   = document.getElementById('bar_tukang');
+    const barK   = document.getElementById('bar_kenek');
+    const badge  = document.getElementById('total_badge');
+    const poolNom = document.getElementById('pool_nominal');
+    const tNom    = document.getElementById('preview_t_nom');
+    const kNom    = document.getElementById('preview_k_nom');
+
+    function fmtIdr(n) { return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n||0); }
+    function clamp(v)  { v = parseInt(v||0,10); return isNaN(v) ? 0 : Math.max(0, Math.min(100, v)); }
+    function hasKenek(){ return !!(kenekSel?.value); }
+    function isCustom(){ return !!(shareCustom?.checked); }
+
+    function detectSamePair() {
+      if (!tukangSel || !kenekSel?.value) return false;
+      const tPos = tukangSel.options[tukangSel.selectedIndex]?.dataset?.position ?? '';
+      const kPos = kenekSel.options[kenekSel.selectedIndex]?.dataset?.position ?? '';
+      return tPos !== '' && tPos === kPos;
+    }
+    function updateSamePairUI() {
+      const same = detectSamePair() && hasKenek();
+      sameBanner?.classList.toggle('d-none', !same);
+      if (autoLabel) autoLabel.textContent = same ? '(50:50)' : '(70:30)';
+    }
+    function toggleMode() {
+      wrapCustom?.classList.toggle('d-none', !isCustom());
+      presetWrap?.classList.toggle('d-none', !isCustom());
+      updateAll();
+    }
+    function toggleKenekBlocks() {
+      const hk = hasKenek();
+      kenekBlocks.forEach(el => el.classList.toggle('d-none', !hk));
+      if (!hk && inputK) { inputK.value = 0; if (rangeK) rangeK.value = 0; }
+      updateAll();
+    }
+    function normalize() {
+      if (!normalizeEl?.checked || !hasKenek()) return;
+      let t = clamp(inputT?.value), k = clamp(inputK?.value);
+      const s = t + k;
+      if (s === 0) { t = 100; k = 0; }
+      else { t = Math.round(t * 100 / s); k = 100 - t; }
+      if (inputT) { inputT.value = t; if (rangeT) rangeT.value = t; }
+      if (inputK) { inputK.value = k; if (rangeK) rangeK.value = k; }
+    }
+    function updateBars() {
+      const t = clamp(inputT?.value), k = clamp(inputK?.value), tot = t + k;
+      if (barT) barT.style.width = `${t}%`;
+      if (barK) barK.style.width = `${k}%`;
+      if (badge) {
+        badge.textContent = `${tot}%`;
+        badge.classList.toggle('bg-danger',  tot !== 100);
+        badge.classList.toggle('bg-primary', tot === 100);
+      }
+    }
+    function currentKey() {
+      const it = installTypeEl?.value; if (!it) return null;
+      if (it === 'skkb' || it === 'dsp') return it;
+      return panoOn?.checked ? 'full_panoramic' : 'fullset';
+    }
+    function calcPool() {
+      const row = (COMMISSION_FIXED || {})[currentKey()] || {};
+      const t = parseInt(row.Teknisi ?? row.teknisi ?? row.tukang ?? 0, 10);
+      const k = parseInt(row.Kenek   ?? row.kenek   ?? 0, 10);
+      return (t + k) || 0;
+    }
+    function updatePreview() {
+      const pool = calcPool();
+      if (poolNom) poolNom.textContent = fmtIdr(pool);
+      let tPct, kPct;
+      if (!isCustom()) {
+        const same = detectSamePair() && hasKenek();
+        tPct = hasKenek() ? (same ? 50 : 70) : 100;
+        kPct = hasKenek() ? (same ? 50 : 30) : 0;
+      } else {
+        tPct = clamp(inputT?.value); kPct = clamp(inputK?.value);
+        if (normalizeEl?.checked && hasKenek()) {
+          const s = tPct + kPct; if (s > 0) { tPct = Math.round(tPct * 100 / s); kPct = 100 - tPct; }
+        }
+        if (!hasKenek()) kPct = 0;
+      }
+      if (tNom) tNom.textContent = fmtIdr(Math.floor(pool * tPct / 100));
+      if (kNom) kNom.textContent = fmtIdr(Math.floor(pool * kPct / 100));
+    }
+    function updateAll() { if (isCustom()) normalize(); updateBars(); updatePreview(); }
+
+    window._custUpdatePreview = updatePreview;
+
+    [shareAuto, shareCustom].forEach(el => el?.addEventListener('change', toggleMode));
+    normalizeEl?.addEventListener('change', updateAll);
+    kenekSel?.addEventListener('change', () => { toggleKenekBlocks(); updateSamePairUI(); });
+    tukangSel?.addEventListener('change', () => { updateSamePairUI(); updatePreview(); });
+    [installTypeEl, panoOn].forEach(el => el?.addEventListener('change', updatePreview));
+
+    function bindPair(rangeEl, inputEl, otherInput) {
+      rangeEl?.addEventListener('input', () => {
+        if (inputEl) inputEl.value = rangeEl.value;
+        if (isCustom() && normalizeEl?.checked && hasKenek() && otherInput) {
+          const v = 100 - parseInt(rangeEl.value, 10);
+          otherInput.value = v;
+          (otherInput === inputK ? rangeK : rangeT).value = v;
+        }
+        updateAll();
+      });
+      inputEl?.addEventListener('input', () => {
+        const v = clamp(inputEl.value);
+        inputEl.value = v; if (rangeEl) rangeEl.value = v; updateAll();
       });
     }
-  })();
-</script>
+    bindPair(rangeT, inputT, inputK);
+    bindPair(rangeK, inputK, inputT);
 
-<script>
-(function() {
-  const shareAuto   = document.getElementById('share_auto');
-  const shareCustom = document.getElementById('share_custom');
-  const wrapCustom  = document.getElementById('custom-share-wrap');
-  const normalizeEl = document.getElementById('normalize_100');
-
-  const kenekSelect = document.querySelector('select[name="kenek_id"]');
-  const kenekBlocks = document.querySelectorAll('.kenek-block');
-
-  const rangeT = document.getElementById('range_tukang');
-  const rangeK = document.getElementById('range_kenek');
-  const inputT = document.getElementById('input_tukang');
-  const inputK = document.getElementById('input_kenek');
-
-  const barT   = document.getElementById('bar_tukang');
-  const barK   = document.getElementById('bar_kenek');
-  const badge  = document.getElementById('total_badge');
-
-  const installTypeEl  = document.getElementById('install_type');
-  const panoEl         = document.getElementById('has_panoramic');
-  const poolNom        = document.getElementById('pool_nominal');
-  const previewT       = document.getElementById('preview_t_nom');
-  const previewK       = document.getElementById('preview_k_nom');
-
-  // FIX: opsional, sinkronkan hidden share_mode bila ada
-  const hiddenShareMode = document.querySelector('input[type="hidden"][name="share_mode"]');
-
-  // helpers
-  function fmtIdr(n){
-    return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n||0);
-  }
-  function clamp0100(v){ v=parseInt(v||0,10); return isNaN(v)?0:Math.max(0,Math.min(100,v)); }
-  function isCustomMode(){
-    // FIX: handle jika radio tidak ada → anggap custom jika wrap custom terlihat
-    if (shareCustom) return !!shareCustom.checked;
-    return !wrapCustom?.classList.contains('d-none');
-  }
-  function setShareModeHidden(){
-    if (!hiddenShareMode) return;
-    hiddenShareMode.value = isCustomMode() ? 'custom' : 'auto';
-  }
-  function hasKenekSelected(){ return !!(kenekSelect && kenekSelect.value); }
-  function getPresetWrap(){ return document.getElementById('preset-wrap'); } // may be null
-
-  function toggleMode() {
-    const isCustom = isCustomMode();
-    if (wrapCustom) wrapCustom.classList.toggle('d-none', !isCustom);
-    if (badge) {
-      badge.classList.toggle('bg-primary', isCustom);
-      badge.classList.toggle('bg-secondary', !isCustom);
-    }
-    const presetWrap = getPresetWrap();
-    if (presetWrap) presetWrap.classList.toggle('d-none', !isCustom);
-
-    setShareModeHidden(); // FIX: pastikan nilai terkirim
-    updateUI();
-  }
-
-  function toggleKenekBlocks() {
-    const hasKenek = hasKenekSelected();
-    kenekBlocks.forEach(el => el.classList.toggle('d-none', !hasKenek));
-    if (!hasKenek) {
-      // force 100% ke tukang jika tidak ada kenek
-      if (inputK) inputK.value = 0;
-      if (rangeK) rangeK.value = 0;
-      if (isCustomMode() && inputT && rangeT) {
-        const t = 100;
-        inputT.value = t;
-        rangeT.value = t;
-      }
-    }
-    updateUI();
-  }
-
-  function normalize() {
-    // FIX: guard normalizeEl exist
-    if (!normalizeEl || !normalizeEl.checked) return;
-
-    const hasKenek = hasKenekSelected();
-    let t = clamp0100(inputT?.value);
-    let k = hasKenek ? clamp0100(inputK?.value) : 0;
-
-    if (!hasKenek) {
-      if (inputK) inputK.value = 0;
-      if (rangeK) rangeK.value = 0;
-      if (inputT) inputT.value = t;
-      if (rangeT) rangeT.value = t;
-      return;
-    }
-
-    const s = t + k;
-    if (s === 0) { t = 100; k = 0; }
-    else {
-      t = Math.round(t * 100 / s);
-      k = 100 - t;
-    }
-    if (inputT) inputT.value = t;
-    if (rangeT) rangeT.value = t;
-    if (inputK) inputK.value = k;
-    if (rangeK) rangeK.value = k;
-  }
-
-  function updateBarsAndBadge() {
-    const t = clamp0100(inputT?.value);
-    const k = clamp0100(inputK?.value);
-    const total = t + k;
-    if (barT) barT.style.width = `${t}%`;
-    if (barK) barK.style.width = `${k}%`;
-    if (badge) {
-      badge.textContent = `Total: ${total}%`;
-      if (total === 100) {
-        badge.classList.remove('bg-danger');
-        badge.classList.add('bg-primary');
-      } else {
-        badge.classList.remove('bg-primary');
-        badge.classList.add('bg-danger');
-      }
-    }
-  }
-
-  // hitung pool estimasi dari config
-  function currentFinalKey() {
-    const it = installTypeEl?.value; // 'fullset' | 'skkb' | 'dsp'
-    if (!it) return null;
-    if (it === 'skkb' || it === 'dsp') return it;
-    const pano = !!(panoEl && panoEl.checked);
-    return pano ? 'full_panoramic' : 'fullset';
-  }
-
-  function calcPool() {
-    // FIX: guard COMMISSION_FIXED
-    if (typeof COMMISSION_FIXED === 'undefined') return 0;
-    const key = currentFinalKey();
-    if (!key) return 0;
-    const row = COMMISSION_FIXED[key] || {};
-    const t = parseInt(row.Teknisi ?? row.teknisi ?? row.tukang ?? 0, 10);
-    const k = parseInt(row.Kenek   ?? row.kenek   ?? 0, 10);
-    return (t + k) || 0;
-  }
-
-  function updatePreview() {
-    const pool = calcPool();
-    if (poolNom) poolNom.textContent = fmtIdr(pool);
-
-    let tPct, kPct;
-    const hasKenek = hasKenekSelected();
-
-    if (!isCustomMode()) {
-      // AUTO = 70:30 jika tukang & kenek ada; 100:0 jika hanya satu
-      if (hasKenek) { tPct = 70; kPct = 30; }
-      else { tPct = 100; kPct = 0; }
-    } else {
-      tPct = clamp0100(inputT?.value);
-      kPct = clamp0100(inputK?.value);
-      if (normalizeEl && normalizeEl.checked && hasKenek) {
-        const s = tPct + kPct;
-        if (s > 0) { tPct = Math.round(tPct * 100 / s); kPct = 100 - tPct; }
-      }
-      if (!hasKenek) { kPct = 0; }
-    }
-
-    if (previewT) previewT.textContent = fmtIdr(Math.floor(pool * tPct / 100));
-    if (previewK) previewK.textContent = fmtIdr(Math.floor(pool * kPct / 100));
-  }
-
-  function updateUI() {
-    if (isCustomMode()) normalize();
-    updateBarsAndBadge();
-    updatePreview();
-  }
-
-  // events (FIX: guard null sebelum addEventListener)
-  [shareAuto, shareCustom].forEach(el => {
-    if (el) el.addEventListener('change', toggleMode);
-  });
-  if (normalizeEl) normalizeEl.addEventListener('change', updateUI);
-  if (kenekSelect) kenekSelect.addEventListener('change', toggleKenekBlocks);
-
-  // sync slider <-> number
-  function bindPair(rangeEl, inputEl, otherEl) {
-    if (!rangeEl || !inputEl) return;
-    rangeEl.addEventListener('input', () => {
-      inputEl.value = rangeEl.value;
-      if (isCustomMode() && normalizeEl?.checked && hasKenekSelected() && otherEl) {
-        const v = 100 - parseInt(rangeEl.value,10);
-        otherEl.value = v;
-        const otherRange = (otherEl === inputK ? rangeK : rangeT);
-        if (otherRange) otherRange.value = v;
-      }
-      updateUI();
-    });
-    inputEl.addEventListener('input', () => {
-      let v = clamp0100(inputEl.value);
-      inputEl.value = v;
-      if (rangeEl) rangeEl.value = v;
-      updateUI();
-    });
-  }
-  bindPair(rangeT, inputT, inputK);
-  bindPair(rangeK, inputK, inputT);
-
-  // preset buttons (FIX: guard preset-wrap existence)
-  const presetWrap = getPresetWrap();
-  if (presetWrap) {
-    presetWrap.querySelectorAll('.preset-btn').forEach(btn => {
+    document.querySelectorAll('.preset-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        if (!isCustomMode() && shareCustom) { shareCustom.checked = true; toggleMode(); }
-        const t = parseInt(btn.dataset.t,10);
-        const k = parseInt(btn.dataset.k,10);
+        if (!isCustom() && shareCustom) { shareCustom.checked = true; toggleMode(); }
+        const t = parseInt(btn.dataset.t, 10), k = parseInt(btn.dataset.k, 10);
         if (inputT && rangeT) { inputT.value = t; rangeT.value = t; }
         if (inputK && rangeK) { inputK.value = k; rangeK.value = k; }
-        updateUI();
+        updateAll();
       });
     });
-  }
 
-  // update bila sumber data lain berubah
-  if (installTypeEl) installTypeEl.addEventListener('change', updatePreview);
-  if (panoEl) panoEl.addEventListener('change', updatePreview);
-
-  // initial
-  toggleKenekBlocks(); // juga memanggil updateUI() lewat dalam
-  // set default pair
-  if (isCustomMode()) {
-    const tOld = clamp0100(inputT?.value ?? 50);
-    const kOld = clamp0100(inputK?.value ?? 50);
-    if (rangeT) rangeT.value = tOld;
-    if (rangeK) rangeK.value = kOld;
-  } else {
-    if (rangeT && rangeK && inputT && inputK) {
-      rangeT.value = 50; rangeK.value = 50; inputT.value = 50; inputK.value = 50;
+    toggleKenekBlocks();
+    updateSamePairUI();
+    if (!isCustom() && rangeT && rangeK && inputT && inputK) {
+      rangeT.value = 70; rangeK.value = 30; inputT.value = 70; inputK.value = 30;
     }
-  }
-  toggleMode(); // set badge, preset visibility, hidden share_mode
+    toggleMode();
+  })();
+
+  // ── Product AJAX ──
+  let productIndex = {{ count($oldProducts) }};
+
+  $(document).on('change', '.category-select', function () {
+    const catId = $(this).val();
+    const index = $(this).data('index');
+    const $prod = $(`select[name="products[${index}][product_id]"]`);
+    $prod.html('<option value="">Memuat...</option>');
+    if (!catId) { $prod.html('<option value="">Pilih Produk</option>'); return; }
+    $.get('{{ url("products-by-category") }}/' + catId, function (data) {
+      let opts = '<option value="">Pilih Produk</option>';
+      data.forEach(p => opts += `<option value="${p.id}">${p.name}</option>`);
+      $prod.html(opts);
+      const oldVal = @json(old('products', []));
+      if (oldVal[index]?.product_id) $prod.val(oldVal[index].product_id);
+    }).fail(function () { $prod.html('<option value="">Pilih Produk</option>'); });
+  });
+
+  $(function () {
+    @json(old('products', [])).forEach((row, i) => {
+      if (row.category_product_id) {
+        $(`select[name="products[${i}][category_product_id]"]`).trigger('change');
+      }
+    });
+  });
+
+  document.getElementById('add-product')?.addEventListener('click', function () {
+    const container = document.getElementById('product-container');
+    const clone     = container.querySelector('.product-item').cloneNode(true);
+    clone.querySelectorAll('select').forEach(el => {
+      el.setAttribute('name', el.getAttribute('name').replace(/\[\d+\]/, `[${productIndex}]`));
+      if (el.classList.contains('category-select') || el.classList.contains('product-select')) {
+        el.setAttribute('data-index', productIndex);
+      }
+      if (el.classList.contains('product-select')) {
+        el.innerHTML = '<option value="">Pilih Produk</option>';
+      }
+      el.selectedIndex = 0;
+    });
+    container.appendChild(clone);
+    productIndex++;
+  });
+
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('.remove-product')) {
+      const item = e.target.closest('.product-item');
+      if (document.querySelectorAll('.product-item').length > 1) item.remove();
+    }
+  });
+
+  // ── Sidebar scroll spy ──
+  const navLinks = document.querySelectorAll('#custNav a');
+  const sections = document.querySelectorAll('.cust-section[id]');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('is-active'));
+        const link = document.querySelector(`#custNav a[href="#${entry.target.id}"]`);
+        if (link) link.classList.add('is-active');
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(s => obs.observe(s));
+
 })();
 </script>
-
-
-<script>
-  let productIndex = {{ count(old('products', [['part_id'=>'','category_product_id'=>'','product_id'=>'']])) }};
-
-  document.getElementById('add-product').addEventListener('click', function () {
-      const container = document.getElementById('product-container');
-      const template  = container.querySelector('.product-item');
-      const newItem   = template.cloneNode(true);
-
-      // reset values & rename indexes
-      newItem.querySelectorAll('select').forEach(select => {
-          const name = select.getAttribute('name');
-          const newName = name.replace(/\[\d+\]/, `[${productIndex}]`);
-          select.setAttribute('name', newName);
-
-          if (select.classList.contains('category-select') || select.classList.contains('product-select')) {
-              select.setAttribute('data-index', productIndex);
-          }
-
-          // kosongkan pilihan
-          select.selectedIndex = 0;
-          if (select.classList.contains('product-select')) {
-              select.innerHTML = '<option value="">Pilih Produk</option>';
-          }
-      });
-
-      container.appendChild(newItem);
-      productIndex++;
-  });
-
-  // Remove row
-  document.addEventListener('click', function (e) {
-      if (e.target.classList.contains('remove-product')) {
-          const item = e.target.closest('.product-item');
-          if (document.querySelectorAll('.product-item').length > 1) {
-              item.remove();
-          }
-      }
-  });
-
-  // AJAX isi produk sesuai kategori
-  $(document).on('change', '.category-select', function () {
-      let categoryId = $(this).val();
-      let index = $(this).data('index');
-      let $productSelect = $(`select[name="products[${index}][product_id]"]`);
-
-      $productSelect.html('<option value="">Memuat...</option>');
-
-      if (categoryId) {
-          $.ajax({
-              url: '{{ url("products-by-category") }}/' + categoryId,
-              type: 'GET',
-              success: function (data) {
-                  let options = '<option value="">Pilih Produk</option>';
-                  data.forEach(product => {
-                      options += `<option value="${product.id}">${product.name}</option>`;
-                  });
-                  $productSelect.html(options);
-
-                  // SET old product_id jika ada
-                  const oldVal = @json(old('products', []));
-                  if (oldVal[index] && oldVal[index].product_id) {
-                      $productSelect.val(oldVal[index].product_id);
-                  }
-              },
-              error: function () {
-                  alert('Gagal mengambil produk.');
-                  $productSelect.html('<option value="">Pilih Produk</option>');
-              }
-          });
-      } else {
-          $productSelect.html('<option value="">Pilih Produk</option>');
-      }
-  });
-
-  // PRELOAD: trigger change untuk semua baris yang punya kategori lama
-  $(function() {
-      const oldProducts = @json(old('products', []));
-      oldProducts.forEach((row, i) => {
-          if (row.category_product_id) {
-              $(`select[name="products[${i}][category_product_id]"]`).trigger('change');
-          }
-      });
-  });
-</script>
-<script>
-  const selectType = document.getElementById('install_type');
-  const panoWrap   = document.getElementById('panoramic_wrap');
-
-  function togglePano() {
-    panoWrap.classList.toggle('d-none', selectType.value !== 'fullset');
-  }
-  selectType.addEventListener('change', togglePano);
-  // onload (kalau old value bukan fullset, tetap hidden)
-  togglePano();
-</script>
-
-@endsection
+@endpush

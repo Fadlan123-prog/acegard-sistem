@@ -1,75 +1,48 @@
-<div class="footer-area pt-100 pb-75">
-			<div class="container">
-				<div class="row" data-cues="slideInUp">
-					<div class="col-lg-4 col-sm-6">
-						<div class="footer-single-item">
-							<a href="index.html" class="logo">
-								<img src="{{asset('assets/images/acegard-dark.svg')}}" alt="logo">
-							</a>
-							<p>Bergabunglah bersama kami dalam menghadirkan solusi kaca film terbaik untuk kendaraan dan properti Anda. Hubungi Acegard sekarang juga.</p>
-							<ul class="social-link ps-0 mb-0 list-unstyled">
-								<li>
-									<a href="https://facebook.com/" target="_blank">
-										<i class="fa-brands fa-facebook-f"></i>
-									</a>
-								</li>
-								<li>
-									<a href="https://twitter.com/" target="_blank">
-										<i class="fa-brands fa-twitter"></i>
-									</a>
-								</li>
-								<li>
-									<a href="https://instagram.com/" target="_blank">
-										<i class="fa-brands fa-instagram"></i>
-									</a>
-								</li>
-								<li>
-									<a href="https://linkedin.com/" target="_blank">
-										<i class="fa-brands fa-linkedin-in"></i>
-									</a>
-								</li>
-							</ul>
-						</div>
-					</div>
-					<div class="col-lg-4 col-sm-6">
-						<div class="footer-single-item ms-lg-5">
-							<h3>Useful Links</h3>
+@php
+  $faqHref = Route::has('frontend.faq') ? route('frontend.faq') : '#';
+@endphp
+<footer class="ace-footer pt-5 pb-4 mt-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <a href="{{ route('frontend.home') }}" class="d-inline-flex align-items-center gap-2 mb-3 text-decoration-none">
+          <img src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}" alt="Acegard" style="height:32px;">
+        </a>
+        <p class="mb-3 small ace-muted">
+          Bergabunglah bersama kami dalam menghadirkan solusi kaca film terbaik untuk kendaraan dan properti Anda. Hubungi Acegard sekarang juga.
+        </p>
+        <div class="d-flex gap-3 fs-5">
+          <a href="#" aria-label="Facebook"><iconify-icon icon="mdi:facebook"></iconify-icon></a>
+          <a href="#" aria-label="Instagram"><iconify-icon icon="mdi:instagram"></iconify-icon></a>
+          <a href="#" aria-label="TikTok"><iconify-icon icon="mdi:music-note"></iconify-icon></a>
+          <a href="#" aria-label="YouTube"><iconify-icon icon="mdi:youtube"></iconify-icon></a>
+        </div>
+      </div>
 
-							<ul class="useful-link">
-								<li>
-									<a href="about-us.html">About Us</a>
-								</li>
-								<li>
-									<a href="case-study.html">Case Study</a>
-								</li>
-								<li>
-									<a href="services.html">Our Service</a>
-								</li>
-								<li>
-									<a href="contact-us.html">Contact Us</a>
-								</li>
-								<li>
-									<a href="faq.html">FAQs</a>
-								</li>
-							</ul>
-						</div>
-					</div>
-					<div class="col-lg-4 col-sm-6">
-						<div class="footer-single-item">
-							<h3>Contact Us</h3>
-							<p class="mb-3">Jl. KH. Hasyim Ashari, RT.007/RW.002, Nerogtog, Kec. Cipondoh, Kota Tangerang, Banten 15146</p>
+      <div class="col-lg-4">
+        <h6 class="mb-3">Useful Links</h6>
+        <ul class="list-unstyled small mb-0 d-flex flex-column gap-2">
+          <li><a href="{{ route('frontend.about') }}">About Us</a></li>
+          <li><a href="{{ route('frontend.service.car') }}">Our Service</a></li>
+          <li><a href="{{ route('frontend.contact') }}">Contact Us</a></li>
+          <li><a href="{{ $faqHref }}">FAQs</a></li>
+        </ul>
+      </div>
 
-							<ul class="contact-info ms-0">
-								<li>
-									<a href="mailto:acegardindonesia@gmail.com">acegardindonesia@gmail.com</a>
-								</li>
-								<li>
-									<a href="tel:+6282121212093">+6282121212093</a>
-								</li>
-							</ul>
-						</div>
-					</div>
+      <div class="col-lg-4">
+        <h6 class="mb-3">Contact Us</h6>
+        <div class="small d-flex flex-column gap-2">
+          <div class="ace-muted">Jl. KH. Hasyim Ashari, RT.007/RW.002, Nerogtog, Kec. Cipondoh, Kota Tangerang, Banten 15146</div>
+          <div><a href="mailto:acegardindonesia@gmail.com">acegardindonesia@gmail.com</a></div>
+          <div class="ace-muted">+6282121212093</div>
+        </div>
+      </div>
+    </div>
 
-				</div>
-			</div>
-		</div>
+    <hr class="my-4" style="border-color: var(--ace-border);">
+
+    <div class="text-center small ace-muted">
+      Copyright {{ date('Y') }} - ACEGARD, All Rights Reserved
+    </div>
+  </div>
+</footer>

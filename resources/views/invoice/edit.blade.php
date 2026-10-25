@@ -5,76 +5,137 @@
 @section('breadcrumb', 'Customers')
 
 @section('content')
+
 @if ($errors->any())
-<div class="alert alert-danger">
+  <x-ui.alert type="danger" class="mb-3">
     <ul class="mb-0">
-        @foreach ($errors->all() as $error)
+      @foreach ($errors->all() as $error)
         <li>{{ $error }}</li>
-        @endforeach
+      @endforeach
     </ul>
-</div>
+  </x-ui.alert>
 @endif
 
-@if (session('error'))
-<div class="alert alert-danger">{{ session('error') }}</div>
-@endif
+<x-ui.card>
+  @slot('header')
+    <div class="ui-card-title">Form Edit Invoice</div>
+    <x-ui.button :href="route('customer.index')" variant="secondary" size="sm">Kembali</x-ui.button>
+  @endslot
 
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="card-title mb-0">Form Edit Invoice</h5>
-        <a href="{{ route('customer.index') }}" class="btn btn-sm btn-secondary">Kembali</a>
+  <form action="{{ route('invoice.update', $invoice->id) }}" method="POST">
+    @csrf
+    @method('PUT')
+
+    <input type="hidden" name="customer_id" value="{{ old('customer_id', $invoice->customer_id) }}">
+
+    @php
+      $invoiceDate = $invoice->invoice_date
+          ? \Carbon\Carbon::parse($invoice->invoice_date)->format('Y-m-d\TH:i')
+          : now()->format('Y-m-d\TH:i');
+
+      $selectedPaymentMethod = old('payment_method', $invoice->payment_method ?? '');
+      $selectedStatus = old('status', $invoice->status ?? 'unpaid');
+    @endphp
+
+    {{-- Nomor & Tanggal Invoice --}}
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <x-ui.form-field label="No Invoice" name="invoice_number" help="Kosongkan juga boleh—akan dibuat otomatis jika tidak diisi.">
+          <input type="text"
+                 name="invoice_number"
+                 class="form-control"
+                 value="{{ old('invoice_number', $invoice->invoice_number) }}">
+        </x-ui.form-field>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <x-ui.form-field label="Tanggal Invoice" name="invoice_date" help="Tanggal tidak dapat diubah setelah invoice dibuat.">
+          <input type="datetime-local"
+                 class="form-control"
+                 value="{{ $invoiceDate }}"
+                 disabled>
+        </x-ui.form-field>
+      </div>
     </div>
-    <div class="card-body">
-        <form action="{{ route('invoice.update', $invoice->id) }}" method="POST">
-            @csrf
-            @method('PUT')
-            <input type="hidden" name="customer_id" value="{{ $invoice->customer_id }}">
 
-            <div class="mb-3">
-                <label class="form-label">No Invoice</label>
-                <input type="text" name="invoice_number" class="form-control" value="{{ old('invoice_number', $invoice->invoice_number) }}" required>
-            </div>
+    {{-- Metode Pembayaran --}}
+    <x-ui.form-field label="Metode Pembayaran" name="payment_method" help="Field ini opsional; kolom tersimpan terpisah dari tipe pemasangan." class="mb-3">
+      <select name="payment_method" class="form-select">
+        <option value="">Pilih</option>
 
-            <div class="mb-3">
-                <label class="form-label">Tanggal Invoice</label>
-                <input type="datetime-local" name="invoice_date" class="form-control" value="{{ old('invoice_date', \Carbon\Carbon::parse($invoice->invoice_date)->format('Y-m-d\TH:i')) }}" required>
-            </div>
+        <option value="cash" {{ $selectedPaymentMethod === 'cash' ? 'selected' : '' }}>
+          Cash
+        </option>
 
-            <div class="mb-3">
-                <label class="form-label">Tipe Pembayaran</label>
-                <select name="type" class="form-select" required>
-                    <option value="">Pilih</option>
-                    <option value="cash" {{ $invoice->type == 'cash' ? 'selected' : '' }}>Cash</option>
-                    <option value="credit" {{ $invoice->type == 'credit' ? 'selected' : '' }}>Credit</option>
-                </select>
-            </div>
+        <option value="credit" {{ $selectedPaymentMethod === 'credit' ? 'selected' : '' }}>
+          Credit
+        </option>
 
-            <div class="mb-3">
-                <label class="form-label">Harga</label>
-                <input type="number" name="price" class="form-control" value="{{ old('price', $invoice->price) }}" required>
-            </div>
+        <option value="transfer" {{ $selectedPaymentMethod === 'transfer' ? 'selected' : '' }}>
+          Transfer
+        </option>
 
-            <div class="mb-3">
-                <label class="form-label">Diskon</label>
-                <input type="number" name="discount" class="form-control" value="{{ old('discount', $invoice->discount ?? 0) }}">
-            </div>
+        <option value="tokopedia" {{ $selectedPaymentMethod === 'tokopedia' ? 'selected' : '' }}>
+          Tokopedia
+        </option>
+      </select>
+    </x-ui.form-field>
 
-            <div class="mb-3">
-                <label class="form-label">Uang Muka (Downpayment)</label>
-                <input type="number" name="downpayment" class="form-control" value="{{ old('downpayment', $invoice->downpayment ?? 0) }}">
-            </div>
+    {{-- Harga / Diskon / DP --}}
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <x-ui.form-field label="Harga" name="price" :required="true">
+          <input type="number"
+                 name="price"
+                 class="form-control"
+                 min="0"
+                 value="{{ old('price', $invoice->price) }}"
+                 required>
+        </x-ui.form-field>
+      </div>
 
-            <div class="mb-3">
-                <label class="form-label">Status Pembayaran</label>
-                <select name="status" class="form-select" required>
-                    <option value="unpaid" {{ $invoice->status == 'unpaid' ? 'selected' : '' }}>Belum Lunas</option>
-                    <option value="partial" {{ $invoice->status == 'partial' ? 'selected' : '' }}>Sebagian</option>
-                    <option value="paid" {{ $invoice->status == 'paid' ? 'selected' : '' }}>Lunas</option>
-                </select>
-            </div>
+      <div class="col-md-4 mb-3">
+        <x-ui.form-field label="Diskon" name="discount">
+          <input type="number"
+                 name="discount"
+                 class="form-control"
+                 min="0"
+                 value="{{ old('discount', $invoice->discount ?? 0) }}">
+        </x-ui.form-field>
+      </div>
 
-            <button type="submit" class="btn btn-primary mt-3">Update Invoice</button>
-        </form>
+      <div class="col-md-4 mb-3">
+        <x-ui.form-field label="Uang Muka (Downpayment)" name="downpayment">
+          <input type="number"
+                 name="downpayment"
+                 class="form-control"
+                 min="0"
+                 value="{{ old('downpayment', $invoice->downpayment ?? 0) }}">
+        </x-ui.form-field>
+      </div>
     </div>
-</div>
+
+    {{-- Status Pembayaran --}}
+    <x-ui.form-field label="Status Pembayaran" name="status" class="mb-3">
+      <select name="status" class="form-select" required>
+        <option value="unpaid" {{ $selectedStatus === 'unpaid' ? 'selected' : '' }}>
+          Belum Lunas
+        </option>
+
+        <option value="partial" {{ $selectedStatus === 'partial' ? 'selected' : '' }}>
+          Sebagian
+        </option>
+
+        <option value="paid" {{ $selectedStatus === 'paid' ? 'selected' : '' }}>
+          Lunas
+        </option>
+      </select>
+    </x-ui.form-field>
+
+    <x-ui.button type="submit" variant="primary" class="mt-3">
+      Update Invoice
+    </x-ui.button>
+  </form>
+</x-ui.card>
+
 @endsection

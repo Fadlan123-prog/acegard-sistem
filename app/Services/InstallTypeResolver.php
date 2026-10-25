@@ -21,20 +21,20 @@ class InstallTypeResolver
         \DateTimeInterface|string|null $forDate = null
     ): string {
         $date = $forDate ? Carbon::parse($forDate)->toDateString() : Carbon::today()->toDateString();
-        if ($baseType === 'skkb') return 'skkb';
-        if ($baseType === 'dsp')  return 'dsp';
+        if ($baseType === 'skkb') return $hasPanoramic ? 'skkb_panoramic' : 'skkb';
+        if ($baseType === 'dsp')  return $hasPanoramic ? 'dsp_panoramic'  : 'dsp';
 
         $countToday = DB::table('customers')
             ->where('tukang_id', $tukangId)
             ->where('install_type', 'fullset')
-            ->whereDate('created_at', $date)
+            ->whereRaw('COALESCE(install_date, DATE(created_at)) = ?', [$date])
             ->count();
 
         if ($hasPanoramic) {
             return match (true) {
                 $countToday === 0 => 'full_panoramic',
                 $countToday === 1 => 'ekstra_panoramic',
-                default           => 'fullset_ekstra_plus',
+                default           => 'fullset_ekstra_plus_panoramic',
             };
         }
         return match (true) {
@@ -44,7 +44,6 @@ class InstallTypeResolver
         };
     }
 
-    // >>> Tambahan ini <<<
     public function decideAfterInsert(
         int $tukangId,
         string $baseType,
@@ -53,16 +52,18 @@ class InstallTypeResolver
         \DateTimeInterface|string|null $forDate = null
     ): string {
         $date = $forDate ? Carbon::parse($forDate)->toDateString() : Carbon::today()->toDateString();
-        if ($baseType === 'skkb') return 'skkb';
-        if ($baseType === 'dsp')  return 'dsp';
+        if ($baseType === 'skkb') return $hasPanoramic ? 'skkb_panoramic' : 'skkb';
+        if ($baseType === 'dsp')  return $hasPanoramic ? 'dsp_panoramic'  : 'dsp';
 
         $q = DB::table('customers')
             ->where('tukang_id', $tukangId)
             ->where('install_type', 'fullset')
-            ->whereDate('created_at', $date);
+            ->whereRaw('COALESCE(install_date, DATE(created_at)) = ?', [$date]);
 
         if ($excludeCustomerId) {
-            $q->where('id', '!=', $excludeCustomerId);
+            // Count only customers entered BEFORE this one (lower id).
+            // Using != caused both cars to see each other → both upgraded.
+            $q->where('id', '<', $excludeCustomerId);
         }
 
         $countToday = $q->count();
@@ -71,7 +72,7 @@ class InstallTypeResolver
             return match (true) {
                 $countToday === 0 => 'full_panoramic',
                 $countToday === 1 => 'ekstra_panoramic',
-                default           => 'fullset_ekstra_plus',
+                default           => 'fullset_ekstra_plus_panoramic',
             };
         }
         return match (true) {

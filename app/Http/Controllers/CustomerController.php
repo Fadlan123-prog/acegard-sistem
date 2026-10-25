@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\CustomerProduct;
+use App\Models\SalesOrder;
 use App\Models\CategoryProduct;
 use App\Models\Product;
 use App\Models\Part;
@@ -25,11 +26,23 @@ use Illuminate\Support\Facades\Log;
 use App\Exports\CustomerExport;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Intervention\Image\Laravel\Facades\Image;
+use App\Services\BranchContext;
 use App\Services\InstallTypeResolver;
 use App\Services\CommissionService;
+use App\Services\CustomerCommissionSyncService;
+use App\Services\FilmStockPoolService;
+use App\Services\CardNumberService;
+use App\Services\CustomerProductSyncService;
+use App\Services\AditCommissionService;
 
 class CustomerController extends Controller
 {
+    public function __construct(
+        private CardNumberService $cardNumbers,
+        private CustomerProductSyncService $productSync,
+        private BranchContext $branch,
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
@@ -44,7 +57,7 @@ class CustomerController extends Controller
 
         // Ambil user & session cabang
         $user = auth()->user();
-        $branchId = session('active_branch_id');
+        $branchId = $this->branch->idOrNull();
 
         // Filter cabang HANYA jika bukan superadmin
         if ($user->hasRole('superadmin')) {
@@ -53,14 +66,19 @@ class CustomerController extends Controller
             }
         } else {
             // Admin biasa hanya bisa melihat cabang aktifnya
-            $query->where('branch_id', $activeBranchId);
+            $query->where('branch_id', $branchId);
+        }
+
+        // Marketing hanya melihat customer miliknya sendiri
+        if ($user->hasRole('marketing') && $user->employee) {
+            $query->where('marketing_id', $user->employee->id);
         }
 
         // Ambil semua cabang (hanya jika perlu tampil di filter UI)
         $branches = Branch::all();
 
         // Ambil data customer dengan paginasi
-        $customers = $query->latest()->paginate(10);
+        $customers = $query->with(['branch', 'invoice', 'customerProducts.product', 'customerProducts.categoryProduct'])->latest()->paginate(10);
 
         return view('customer.index', compact('customers', 'branches'));
     }
@@ -68,22 +86,33 @@ class CustomerController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
         $categories = CategoryProduct::all();
-        $products = Product::all();
-        $parts = Part::all();
-        $employees = Employee::orderBy('name')->get();
+        $products   = Product::all();
+        $parts      = Part::all();
+        $employees  = Employee::where('is_active', true)->orderBy('name')->get();
 
-        return view('customer.create', compact('categories', 'products', 'parts', 'employees'));
+        $fromSo = $request->filled('from_so')
+            ? SalesOrder::find($request->integer('from_so'))
+            : null;
+
+        return view('customer.create', compact('categories', 'products', 'parts', 'employees', 'fromSo'));
     }
-public function store(Request $request, InstallTypeResolver $resolver, CommissionService $commission)
+public function store(Request $request, InstallTypeResolver $resolver, CommissionService $commission, CustomerCommissionSyncService $commissionSync, FilmStockPoolService $filmStock)
 {
+    // SO yang sudah ditugaskan teknisi/kenek-nya (lewat SalesOrderController::assign())
+    // jadi sumber kebenaran untuk tukang_id/kenek_id/marketing_id Customer ini —
+    // tidak boleh dipilih ulang manual di sini. Lihat juga customer/create.blade.php
+    // yang menampilkannya read-only ketika $fromSo->tukang_id sudah terisi.
+    $fromSo = $request->filled('from_so') ? SalesOrder::find($request->integer('from_so')) : null;
+    $tukangLockedFromSo = (bool) $fromSo?->tukang_id;
+
     // 1) Validasi
     $request->validate([
         'wsn'               => ['required','string'],
         'name'              => ['required','string','max:255'],
-        'email'             => ['required','email'],
+        'email'             => ['nullable','email'],
         'phone_number'      => ['required','string'],
         'address'           => ['required','string'],
         'vehicle_brand'     => ['required','string'],
@@ -96,6 +125,7 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
 
         'install_type'      => ['required', Rule::in(['fullset','skkb','dsp'])],
         'has_panoramic'     => ['nullable','boolean'],
+        'install_date'      => ['required', 'date', 'before_or_equal:today'],
 
         'share_mode'                 => ['required', Rule::in(['auto','custom'])],
         'installer_share'            => ['nullable','array'],
@@ -103,7 +133,9 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
         'installer_share.kenek'      => ['nullable','integer','min:0','max:100'],
         'normalize_100'              => ['nullable','boolean'],
 
-        'tukang_id'         => ['required','exists:employees,id'],
+        // required hanya kalau tidak datang dari SO yang sudah ditugaskan —
+        // nilainya sendiri diambil paksa dari $fromSo di bawah, bukan dari input ini.
+        'tukang_id'         => [$tukangLockedFromSo ? 'nullable' : 'required', 'exists:employees,id'],
         'kenek_id'          => ['nullable','exists:employees,id'],
         'marketing_id'      => ['nullable','exists:employees,id'],
 
@@ -114,8 +146,17 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
         'products.*.category_product_id' => ['required','exists:category_products,id'],
         'products.*.part_id'             => ['required','exists:parts,id'],
 
+        'products.*.used_length_meter' => ['nullable', 'numeric', 'min:0'],
+        'deduct_roll_stock' => ['nullable', 'boolean'],
+
         'admin_password'     => ['required','string'],
     ]);
+
+    $tukangId    = $tukangLockedFromSo ? (int) $fromSo->tukang_id : (int) $request->tukang_id;
+    $kenekId     = $tukangLockedFromSo ? $fromSo->kenek_id : ($request->filled('kenek_id') ? (int) $request->kenek_id : null);
+    $marketingId = $tukangLockedFromSo && $fromSo->marketing_id
+        ? $fromSo->marketing_id
+        : ($request->filled('marketing_id') ? (int) $request->marketing_id : null);
 
     // 2) Konfirmasi admin
     $admin = Auth::user();
@@ -129,12 +170,12 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
     DB::beginTransaction();
     try {
         // 3) Card number & simpan customer
-        $year = now()->year;
-        $seq  = Customer::whereYear('created_at', $year)->lockForUpdate()->count() + 1;
-        $cardNumber = sprintf('%d%04d', $year, $seq);
+        $cardNumber = $this->cardNumbers->generateCustomerCardNumber();
+
+        $branchId = $this->branch->idOrNull() ?? optional($admin->branches()->first())->id;
 
         $customer = Customer::create([
-            'branch_id'         => optional($admin->branches()->first())->id,
+            'branch_id'         => $branchId,
             'wsn'               => $request->wsn,
             'card_number'       => $cardNumber,
             'name'              => $request->name,
@@ -153,167 +194,52 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
             'warantee_duration' => (int)$request->warantee_duration,
 
             'install_type'      => $request->install_type,
-            'tukang_id'         => (int)$request->tukang_id,
-            'kenek_id'          => $request->filled('kenek_id') ? (int)$request->kenek_id : null,
-            'marketing_id'      => $request->filled('marketing_id') ? (int)$request->marketing_id : null,
+            'has_panoramic'     => $request->boolean('has_panoramic'),
+            'tukang_id'         => $tukangId,
+            'kenek_id'          => $kenekId,
+            'marketing_id'      => $marketingId,
+            'install_date'      => $request->install_date,
         ]);
 
         // 4) Simpan produk
+        $createdCustomerProducts = [];
+
         foreach ($request->products as $prod) {
-            CustomerProduct::create([
+            $customerProduct = CustomerProduct::create([
                 'customer_id'         => $customer->id,
-                'product_id'          => (int)$prod['product_id'],
-                'category_product_id' => (int)$prod['category_product_id'],
-                'part_id'             => (int)$prod['part_id'],
+                'product_id'          => (int) $prod['product_id'],
+                'category_product_id' => (int) $prod['category_product_id'],
+                'part_id'             => (int) $prod['part_id'],
             ]);
+
+            $createdCustomerProducts[] = [
+                'customer_product' => $customerProduct,
+                'data' => $prod,
+            ];
         }
 
         // 5) Final type (abaikan row customer yang baru dibuat)
         $finalType = $resolver->decideAfterInsert(
-            (int)$request->tukang_id,
+            $tukangId,
             $request->install_type,
             $request->boolean('has_panoramic'),
-            $customer->id
+            $customer->id,
+            $request->install_date,
         );
 
-        // 6) Ambil nominal teknisi/kenek dari config → pool
-        $map = config('commission.fixed', []);
-        $row = $map[$finalType] ?? null;
-        if (!$row) {
-            DB::rollBack();
-            return back()->withInput()->with('error', "Tipe komisi '$finalType' tidak ditemukan di config/commission.php");
-        }
-        $amtTukangCfg = (int)($row['Teknisi'] ?? $row['tukang'] ?? 0);
-        $amtKenekCfg  = (int)($row['Kenek']   ?? $row['kenek']  ?? 0);
-        $pool         = $amtTukangCfg + $amtKenekCfg;
-
-        // 7) Hitung & insert komisi installer
-        if ($pool > 0) {
-            $now        = now();
-            $hasTukang  = (bool)$customer->tukang_id;
-            $hasKenek   = (bool)$customer->kenek_id;
-            $mode       = $request->input('share_mode','auto');
-            $rowsToInsert = [];
-
-            if ($mode === 'custom' && ($hasTukang || $hasKenek)) {
-                $pT = (int)$request->input('installer_share.tukang', 0);
-                $pK = (int)$request->input('installer_share.kenek',  0);
-
-                // pasangan sesuai yang hadir
-                $pairs = [];
-                if ($hasTukang) $pairs[] = ['id'=>(int)$customer->tukang_id, 'p'=>$pT];
-                if ($hasKenek)  $pairs[] = ['id'=>(int)$customer->kenek_id,  'p'=>$pK];
-
-                $sumP = array_sum(array_column($pairs, 'p'));
-
-                if ($sumP <= 0) {
-                    $mode = 'auto'; // fallback ke auto bila input kosong
-                } else {
-                    // NORMALISASI opsional
-                    if ($request->boolean('normalize_100')) {
-                        foreach ($pairs as $i => $pr) {
-                            $pairs[$i]['p'] = (int) round($pr['p'] * 100 / $sumP);
-                        }
-                        // koreksi delta kecil agar total = 100
-                        $deltaPct = 100 - array_sum(array_column($pairs,'p'));
-                        if ($deltaPct !== 0) $pairs[0]['p'] += $deltaPct;
-                    }
-
-                    // alokasi (tanpa memaksa total = 100 bila normalize OFF)
-                    $sumAmt = 0;
-                    foreach ($pairs as $pr) {
-                        $pct = max(0, (int)$pr['p']);
-                        if ($pct <= 0) continue;
-                        $amount = (int) floor($pool * $pct / 100);
-                        if ($amount > 0) {
-                            $rowsToInsert[] = [
-                                'employees_id' => $pr['id'],
-                                'customer_id'  => (int)$customer->id,
-                                'invoice_id'   => null,
-                                'amount'       => $amount,
-                                'role'         => 'installer',
-                                'created_at'   => $now,
-                                'updated_at'   => $now,
-                            ];
-                            $sumAmt += $amount;
-                        }
-                    }
-
-                    // Jika NORMALIZE ON → tambahkan delta pembulatan ke tukang (agar total = pool)
-                    if ($request->boolean('normalize_100')) {
-                        $deltaAmt = $pool - $sumAmt;
-                        if ($deltaAmt !== 0) {
-                            foreach ($rowsToInsert as &$r) {
-                                if ($hasTukang && $r['employees_id'] === (int)$customer->tukang_id) { $r['amount'] += $deltaAmt; break; }
-                                if (!$hasTukang && $hasKenek && $r['employees_id'] === (int)$customer->kenek_id) { $r['amount'] += $deltaAmt; break; }
-                            }
-                            unset($r);
-                        }
-                    }
-                }
-            }
-            elseif ($mode === 'auto') { // <<<<<< penting: ELSEIF agar tidak override custom
-                $autoT = (int)config('commission.auto_split.tukang', 70);
-                if ($hasTukang && $hasKenek) {
-                    $tAmt = (int) floor($pool * $autoT / 100);
-                    $kAmt = $pool - $tAmt;
-                    $rowsToInsert[] = [
-                        'employees_id' => (int)$customer->tukang_id,
-                        'customer_id'  => (int)$customer->id,
-                        'invoice_id'   => null,
-                        'amount'       => $tAmt,
-                        'role'         => 'installer',
-                        'created_at'   => $now,
-                        'updated_at'   => $now,
-                    ];
-                    $rowsToInsert[] = [
-                        'employees_id' => (int)$customer->kenek_id,
-                        'customer_id'  => (int)$customer->id,
-                        'invoice_id'   => null,
-                        'amount'       => $kAmt,
-                        'role'         => 'installer',
-                        'created_at'   => $now,
-                        'updated_at'   => $now,
-                    ];
-                } elseif ($hasTukang) {
-                    $rowsToInsert[] = [
-                        'employees_id' => (int)$customer->tukang_id,
-                        'customer_id'  => (int)$customer->id,
-                        'invoice_id'   => null,
-                        'amount'       => $pool,
-                        'role'         => 'installer',
-                        'created_at'   => $now,
-                        'updated_at'   => $now,
-                    ];
-                } elseif ($hasKenek) {
-                    $rowsToInsert[] = [
-                        'employees_id' => (int)$customer->kenek_id,
-                        'customer_id'  => (int)$customer->id,
-                        'invoice_id'   => null,
-                        'amount'       => $pool,
-                        'role'         => 'installer',
-                        'created_at'   => $now,
-                        'updated_at'   => $now,
-                    ];
-                }
-            }
-
-            if (!empty($rowsToInsert)) {
-                DB::table('commissions')->insert($rowsToInsert);
-            }
-        }
-
-        // 8) Komisi marketing
-        if ($request->filled('marketing_id')) {
-            $commission->createMarketingForCustomerAutoCategory(
-                (int)$request->marketing_id,
-                $customer->id,
-                null,
-                $finalType
-            );
-        }
+        // Stock deduction dipindah ke saat pelunasan invoice (InvoiceController::recordPelunasan)
+        // Komisi installer & marketing dibuat saat CommissionReleaseService::release() setelah pelunasan
 
         DB::commit();
+
+        if ($fromSo && $fromSo->isCompleted() && !$fromSo->isConverted()) {
+            $fromSo->update([
+                'converted_to_type' => Customer::class,
+                'converted_to_id'   => $customer->id,
+                'converted_at'      => now(),
+            ]);
+        }
+
         return redirect()
             ->route('customer.index')
             ->with('success', "Customer berhasil ditambahkan. Card Number: {$cardNumber}");
@@ -324,20 +250,68 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
     }
 }
 
+public function edit(Customer $customer)
+{
+    $user = auth()->user();
 
+    if (!$user->hasRole('superadmin')) {
+        $activeBranchId = $this->branch->id();
+
+        if ((int) $customer->branch_id !== $activeBranchId) {
+            abort(403, 'Tidak boleh mengakses customer dari cabang lain.');
+        }
+    }
+
+    $customer->load([
+        'customerProducts.part',
+        'customerProducts.categoryProduct',
+        'customerProducts.product',
+        'tukang',
+        'kenek',
+        'marketing',
+        'branch',
+    ]);
+
+    $hasPano = (bool) $customer->has_panoramic;
+
+    $categories = CategoryProduct::orderBy('name')->get();
+    $products   = Product::orderBy('name')->get();
+    $parts      = Part::orderBy('name')->get();
+    $employees  = Employee::where('is_active', true)->orderBy('name')->get();
+
+    return view('customer.edit', compact(
+        'customer',
+        'hasPano',
+        'categories',
+        'products',
+        'parts',
+        'employees'
+    ));
+}
 
 
     public function update(
     Request $request,
     Customer $customer,
     InstallTypeResolver $resolver,
-    CommissionService $commission
+    CommissionService $commission,
+    CustomerCommissionSyncService $commissionSync,
+    AditCommissionService $aditCommission
 ) {
+    $user = auth()->user();
+    if (!$user->hasRole('superadmin')) {
+        $activeBranchId = $this->branch->id();
+
+        if ((int) $customer->branch_id !== $activeBranchId) {
+            abort(403, 'Tidak boleh mengubah customer dari cabang lain.');
+        }
+    }
+
     // 1) Validasi input
     $request->validate([
         'wsn'               => ['required','string'],
         'name'              => ['required','string','max:255'],
-        'email'             => ['required','email'],
+        'email'             => ['nullable','email'],
         'phone_number'      => ['required','string'],
         'address'           => ['required','string'],
         'vehicle_brand'     => ['required','string'],
@@ -350,6 +324,7 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
 
         'install_type'      => ['required', Rule::in(['fullset','skkb','dsp'])],
         'has_panoramic'     => ['nullable','boolean'],
+        'install_date'      => ['required', 'date', 'before_or_equal:today'],
 
         'share_mode'                 => ['required', Rule::in(['auto','custom'])],
         'installer_share'            => ['nullable','array'],
@@ -382,6 +357,9 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
     $start = Carbon::now();
     $end   = $start->copy()->addYears((int)$request->warantee_duration);
 
+    $oldMarketingId = $customer->marketing_id ? (int)$customer->marketing_id : null;
+    $newMarketingId = $request->filled('marketing_id') ? (int)$request->marketing_id : null;
+
     DB::beginTransaction();
     try {
         // === Update master customer (card_number TIDAK diubah) ===
@@ -404,195 +382,59 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
             'warantee_duration' => (int)$request->warantee_duration,
 
             'install_type'      => $request->install_type,
+            'has_panoramic'     => $request->boolean('has_panoramic'),
             'tukang_id'         => (int)$request->tukang_id,
             'kenek_id'          => $request->filled('kenek_id') ? (int)$request->kenek_id : null,
-            'marketing_id'      => $request->filled('marketing_id') ? (int)$request->marketing_id : null,
+            'marketing_id'      => $newMarketingId,
+            'install_date'      => $request->install_date,
         ]);
 
         // === Sinkronisasi produk (create/update/delete) ===
-        $existingIds = CustomerProduct::where('customer_id', $customer->id)->pluck('id')->all();
-        $keepIds = [];
-
-        foreach ($request->products as $row) {
-            $rowId = $row['id'] ?? null;
-
-            if ($rowId) {
-                // update
-                CustomerProduct::where('id', $rowId)
-                    ->where('customer_id', $customer->id)
-                    ->update([
-                        'product_id'          => (int)$row['product_id'],
-                        'category_product_id' => (int)$row['category_product_id'],
-                        'part_id'             => (int)$row['part_id'],
-                    ]);
-                $keepIds[] = (int)$rowId;
-            } else {
-                // create
-                $created = CustomerProduct::create([
-                    'customer_id'         => $customer->id,
-                    'product_id'          => (int)$row['product_id'],
-                    'category_product_id' => (int)$row['category_product_id'],
-                    'part_id'             => (int)$row['part_id'],
-                ]);
-                $keepIds[] = $created->id;
-            }
-        }
-
-        $toDelete = array_diff($existingIds, $keepIds);
-        if (!empty($toDelete)) {
-            CustomerProduct::whereIn('id', $toDelete)->delete();
-        }
+        $this->productSync->syncCarProducts($customer->id, $request->products);
 
         // === Re-evaluasi final type (menggunakan rule resolver yang sama) ===
         $finalType = $resolver->decideAfterInsert(
             (int)$request->tukang_id,
             $request->install_type,
             $request->boolean('has_panoramic'),
-            $customer->id
+            $customer->id,
+            $request->install_date,
         );
 
-        // === Pool komisi teknisi/kenek dari config ===
-        $map = config('commission.fixed', []);
-        $rowCfg = $map[$finalType] ?? null;
-        if (!$rowCfg) {
-            DB::rollBack();
-            return back()->withInput()->with('error', "Tipe komisi '$finalType' tidak ditemukan di config/commission.php");
-        }
-        $amtTukangCfg = (int)($rowCfg['Teknisi'] ?? $rowCfg['tukang'] ?? 0);
-        $amtKenekCfg  = (int)($rowCfg['Kenek']   ?? $rowCfg['kenek']  ?? 0);
-        $pool         = $amtTukangCfg + $amtKenekCfg;
+        // === Sync marketing + Adit override jika sudah dirilis dan marketing berubah ===
+        if ($oldMarketingId !== $newMarketingId) {
+            $invoice = $customer->invoice;
+            if ($invoice && $invoice->commission_released_at) {
+                // Ambil install_type dari komisi marketing lama (sudah dalam format base: fullset/dsp/skkb)
+                $oldRow   = DB::table('commissions')
+                    ->where('invoice_id', $invoice->id)
+                    ->where('role', 'marketing')
+                    ->first();
+                $baseType = $oldRow?->install_type ?? 'fullset';
 
-        // === Reset komisi installer lama untuk customer ini (invoice_id null) ===
-        DB::table('commissions')
-            ->where('customer_id', $customer->id)
-            ->whereNull('invoice_id')
-            ->where('role', 'installer')
-            ->delete();
+                // Hapus komisi marketing lama
+                DB::table('commissions')
+                    ->where('invoice_id', $invoice->id)
+                    ->where('role', 'marketing')
+                    ->delete();
 
-        // === Hitung & insert ulang komisi installer ===
-        if ($pool > 0) {
-            $now       = now();
-            $hasTukang = (bool)$customer->tukang_id;
-            $hasKenek  = (bool)$customer->kenek_id;
-            $mode      = $request->input('share_mode', 'auto');
-            $rowsToInsert = [];
-
-            if ($mode === 'custom' && ($hasTukang || $hasKenek)) {
-                $pT = (int)$request->input('installer_share.tukang', 0);
-                $pK = (int)$request->input('installer_share.kenek',  0);
-
-                $pairs = [];
-                if ($hasTukang) $pairs[] = ['id'=>(int)$customer->tukang_id, 'p'=>$pT];
-                if ($hasKenek)  $pairs[] = ['id'=>(int)$customer->kenek_id,  'p'=>$pK];
-
-                $sumP = array_sum(array_column($pairs, 'p'));
-                if ($sumP <= 0) {
-                    $mode = 'auto';
-                } else {
-                    if ($request->boolean('normalize_100')) {
-                        foreach ($pairs as $i => $pr) {
-                            $pairs[$i]['p'] = (int) round($pr['p'] * 100 / $sumP);
-                        }
-                        $deltaPct = 100 - array_sum(array_column($pairs,'p'));
-                        if ($deltaPct !== 0) $pairs[0]['p'] += $deltaPct;
-                    }
-
-                    $sumAmt = 0;
-                    foreach ($pairs as $pr) {
-                        $pct = max(0, (int)$pr['p']);
-                        if ($pct <= 0) continue;
-                        $amount = (int) floor($pool * $pct / 100);
-                        if ($amount > 0) {
-                            $rowsToInsert[] = [
-                                'employees_id' => $pr['id'],
-                                'customer_id'  => (int)$customer->id,
-                                'invoice_id'   => null,
-                                'amount'       => $amount,
-                                'role'         => 'installer',
-                                'created_at'   => $now,
-                                'updated_at'   => $now,
-                            ];
-                            $sumAmt += $amount;
-                        }
-                    }
-
-                    if ($request->boolean('normalize_100')) {
-                        $deltaAmt = $pool - $sumAmt;
-                        if ($deltaAmt !== 0) {
-                            foreach ($rowsToInsert as &$r) {
-                                if ($hasTukang && $r['employees_id'] === (int)$customer->tukang_id) { $r['amount'] += $deltaAmt; break; }
-                                if (!$hasTukang && $hasKenek && $r['employees_id'] === (int)$customer->kenek_id) { $r['amount'] += $deltaAmt; break; }
-                            }
-                            unset($r);
-                        }
-                    }
+                // Buat komisi marketing baru untuk marketing yang baru
+                if ($newMarketingId) {
+                    $commission->createMarketingForCustomerAutoCategory(
+                        $newMarketingId,
+                        $customer->id,
+                        $invoice->id,
+                        $baseType,
+                        (int) $invoice->price,
+                    );
                 }
-            }
-            elseif ($mode === 'auto') {
-                $autoT = (int)config('commission.auto_split.tukang', 70);
-                if ($hasTukang && $hasKenek) {
-                    $tAmt = (int) floor($pool * $autoT / 100);
-                    $kAmt = $pool - $tAmt;
-                    $rowsToInsert[] = [
-                        'employees_id' => (int)$customer->tukang_id,
-                        'customer_id'  => (int)$customer->id,
-                        'invoice_id'   => null,
-                        'amount'       => $tAmt,
-                        'role'         => 'installer',
-                        'created_at'   => $now,
-                        'updated_at'   => $now,
-                    ];
-                    $rowsToInsert[] = [
-                        'employees_id' => (int)$customer->kenek_id,
-                        'customer_id'  => (int)$customer->id,
-                        'invoice_id'   => null,
-                        'amount'       => $kAmt,
-                        'role'         => 'installer',
-                        'created_at'   => $now,
-                        'updated_at'   => $now,
-                    ];
-                } elseif ($hasTukang) {
-                    $rowsToInsert[] = [
-                        'employees_id' => (int)$customer->tukang_id,
-                        'customer_id'  => (int)$customer->id,
-                        'invoice_id'   => null,
-                        'amount'       => $pool,
-                        'role'         => 'installer',
-                        'created_at'   => $now,
-                        'updated_at'   => $now,
-                    ];
-                } elseif ($hasKenek) {
-                    $rowsToInsert[] = [
-                        'employees_id' => (int)$customer->kenek_id,
-                        'customer_id'  => (int)$customer->id,
-                        'invoice_id'   => null,
-                        'amount'       => $pool,
-                        'role'         => 'installer',
-                        'created_at'   => $now,
-                        'updated_at'   => $now,
-                    ];
-                }
-            }
 
-            if (!empty($rowsToInsert)) {
-                DB::table('commissions')->insert($rowsToInsert);
+                // Sync Adit override — triggernya dari marketing,
+                // jadi harus dijalankan ulang setelah marketing berubah.
+                // Reload relasi supaya AditCommissionService membaca marketing yang baru.
+                $invoice->load('customer.marketing');
+                $aditCommission->sync($invoice, $invoice->price);
             }
-        }
-
-        // === Reset & set komisi marketing (jika perlu) ===
-        DB::table('commissions')
-            ->where('customer_id', $customer->id)
-            ->whereNull('invoice_id')
-            ->where('role', 'marketing')
-            ->delete();
-
-        if ($request->filled('marketing_id')) {
-            $commission->createMarketingForCustomerAutoCategory(
-                (int)$request->marketing_id,
-                $customer->id,
-                null,
-                $finalType
-            );
         }
 
         DB::commit();
@@ -610,6 +452,15 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
 
     public function destroy(Customer $customer)
     {
+        $user = auth()->user();
+        if (!$user->hasRole('superadmin')) {
+            $activeBranchId = $this->branch->id();
+
+            if ((int) $customer->branch_id !== $activeBranchId) {
+                abort(403, 'Tidak boleh menghapus customer dari cabang lain.');
+            }
+        }
+
         $customer->delete();
 
         return redirect()->route('customer.index')->with('success', 'Customer berhasil dihapus.');
@@ -628,7 +479,14 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
 
     public function bulkDelete(Request $request)
     {
-        Customer::whereIn('id', $request->selected ?? [])->delete();
+        $query = Customer::whereIn('id', $request->selected ?? []);
+
+        if (!auth()->user()->hasRole('superadmin')) {
+            $query->where('branch_id', $this->branch->id());
+        }
+
+        $query->delete();
+
         return redirect()->route('customer.index')->with('success', 'Data berhasil dihapus.');
     }
 
@@ -649,6 +507,7 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
             })
             ->select([
                 'c.id as customer_id',
+                'c.branch_id',
                 'c.name',
                 DB::raw('CAST(c.card_number AS CHAR) as card_number'),
                 'c.vehicle_brand',
@@ -673,6 +532,7 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
              ->whereRaw('REPLACE(REPLACE(cb.card_number," ", ""),"-","") = ?', [$normalize])
              ->select([
                 'cb.id as customer_building_id',
+                    'cb.branch_id',
                     'cb.name',
                     'cb.card_number',
                     'cb.address',
@@ -691,6 +551,15 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
         }
         $isBuilding = true;
         $row = $building;
+        }
+
+        // Authenticated route, but not branch-scoped by default — without
+        // this, any logged-in staffer (any branch) could enumerate other
+        // branches' customer warranty cards by card number (audit finding M-5).
+        $user = auth()->user();
+        if (!$user->hasRole('superadmin')) {
+            $allowedBranchIds = $user->branches()->pluck('branches.id')->all();
+            abort_unless(in_array((int) $row->branch_id, $allowedBranchIds), 403);
         }
 
         [$colors, $template] = $this->styleByCategory((int) ($row->cat_id ?? 1));
@@ -813,119 +682,58 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
         return [$colors, $template];
     }
 
-    public function previewCommission(Request $request, InstallTypeResolver $resolver)
-{
-    $data = $request->validate([
-        'install_type'  => ['required', Rule::in(['fullset','skkb','dsp'])],
-        'has_panoramic' => ['nullable','boolean'],
-        'tukang_id'     => ['nullable','exists:employees,id'],
-        'kenek_id'      => ['nullable','exists:employees,id'], // untuk preview pembagian persen
-        'share_mode'    => ['nullable', Rule::in(['auto','custom'])],
-        'p_tukang'      => ['nullable','integer','min:0','max:100'], // custom percent tukang
-        'p_kenek'       => ['nullable','integer','min:0','max:100'], // custom percent kenek
-        'normalize'     => ['nullable','boolean'],
-        'date'          => ['nullable','date'], // opsional: simulasi tanggal
-    ]);
+    public function previewCommission(Request $request, InstallTypeResolver $resolver, CustomerCommissionSyncService $commissionSync)
+    {
+        $data = $request->validate([
+            'install_type'  => ['required', Rule::in(['fullset','skkb','dsp'])],
+            'has_panoramic' => ['nullable','boolean'],
+            'tukang_id'     => ['nullable','exists:employees,id'],
+            'kenek_id'      => ['nullable','exists:employees,id'],
+            'share_mode'    => ['nullable', Rule::in(['auto','custom'])],
+            'p_tukang'      => ['nullable','integer','min:0','max:100'],
+            'p_kenek'       => ['nullable','integer','min:0','max:100'],
+            'normalize'     => ['nullable','boolean'],
+            'date'          => ['nullable','date'],
+        ]);
 
-    $installType  = $data['install_type'];
-    $hasPanoramic = (bool)($data['has_panoramic'] ?? false);
-    $tukangId     = $request->integer('tukang_id') ?: null;
-    $kenekId      = $request->integer('kenek_id') ?: null;
-    $shareMode    = $data['share_mode'] ?? 'auto';
-    $norm         = (bool)($data['normalize'] ?? true);
-    $pTukang      = (int)($data['p_tukang'] ?? 0);
-    $pKenek       = (int)($data['p_kenek']  ?? 0);
-    $forDate      = $request->filled('date') ? Carbon::parse($request->input('date')) : Carbon::today();
+        $installType  = $data['install_type'];
+        $hasPanoramic = (bool) ($data['has_panoramic'] ?? false);
+        $tukangId     = $request->integer('tukang_id') ?: null;
+        $kenekId      = $request->integer('kenek_id')  ?: null;
+        $forDate      = $request->filled('date') ? Carbon::parse($request->input('date')) : Carbon::today();
 
-    // 1) Tentukan final type via resolver PREVIEW (sebelum insert customer)
-    $finalType = $resolver->decideFromBase(
-        $tukangId ?: 0,
-        $installType,
-        $hasPanoramic,
-        $forDate
-    );
+        $finalType = $resolver->decideFromBase($tukangId ?: 0, $installType, $hasPanoramic, $forDate);
 
-    // 2) Ambil config angka teknisi/kenek untuk finalType
-    $row = config("commission.fixed.$finalType");
-    if (!$row) {
+        try {
+            $preview = $commissionSync->previewSplit(
+                finalType: $finalType,
+                tukangId:  $tukangId,
+                kenekId:   $kenekId,
+                shareMode: $data['share_mode'] ?? 'auto',
+                pTukang:   (int) ($data['p_tukang'] ?? 0),
+                pKenek:    (int) ($data['p_kenek']  ?? 0),
+                normalize: (bool) ($data['normalize'] ?? true),
+            );
+        } catch (\RuntimeException $e) {
+            return response()->json(['ok' => false, 'message' => $e->getMessage(), 'final_type' => $finalType], 422);
+        }
+
         return response()->json([
-            'ok'         => false,
-            'message'    => "Config komisi untuk '$finalType' tidak ditemukan.",
+            'ok'         => true,
+            'base_type'  => $installType,
             'final_type' => $finalType,
-        ], 422);
+            'hint'       => $installType === 'fullset'
+                              ? ($hasPanoramic ? 'Aturan panoramic aktif' : 'Aturan fullset harian (bisa ekstra/plus)')
+                              : 'Aturan tetap (SKKB/DSP)',
+            'nominal'    => ['teknisi' => $preview['amtT'], 'kenek' => $preview['amtK'], 'pool' => $preview['pool']],
+            'split'      => [
+                'mode'   => $preview['modeUsed'],
+                'tukang' => $preview['tPct'],
+                'kenek'  => $preview['kPct'],
+                'auto'   => ['tukang' => $preview['autoSplit'], 'kenek' => $preview['autoK']],
+            ],
+            'preview'    => ['tukang' => $preview['tNom'], 'kenek' => $preview['kNom']],
+        ]);
     }
 
-    $amtT = (int)($row['Teknisi'] ?? $row['tukang'] ?? 0);
-    $amtK = (int)($row['Kenek']   ?? $row['kenek']  ?? 0);
-    $pool = $amtT + $amtK;
-
-    // 3) Hitung preview pembagian persen
-    $hasTukang = !empty($tukangId);
-    $hasKenek  = !empty($kenekId);
-    $autoT     = (int)config('commission.auto_split.tukang', 70);
-    $autoK     = 100 - $autoT;
-
-    $tPct = 0; $kPct = 0;
-    $modeUsed = $shareMode;
-
-    if ($shareMode === 'custom' && ($hasTukang || $hasKenek)) {
-        $tPct = $hasTukang ? $pTukang : 0;
-        $kPct = $hasKenek  ? $pKenek  : 0;
-        $sum  = $tPct + $kPct;
-
-        if ($sum <= 0) {
-            // fallback ke AUTO bila input kosong
-            $modeUsed = 'auto';
-        } else if ($norm) {
-            // normalisasi ke 100
-            $tPct = (int) round($tPct * 100 / $sum);
-            $kPct = 100 - $tPct;
-        }
-    }
-
-    if ($modeUsed === 'auto') {
-        if ($hasTukang && $hasKenek) {
-            $tPct = $autoT; $kPct = $autoK; // 70:30 default
-        } elseif ($hasTukang) {
-            $tPct = 100; $kPct = 0;
-        } elseif ($hasKenek) {
-            $tPct = 0;   $kPct = 100;
-        } else {
-            // tidak ada installer terpilih
-            $tPct = 0; $kPct = 0;
-        }
-    }
-
-    // 4) Nominal preview
-    $tNom = (int) floor($pool * $tPct / 100);
-    $kNom = (int) floor($pool * $kPct / 100);
-    $delta = $pool - ($tNom + $kNom);
-    // Tambahkan delta pembulatan ke tukang bila tukang ada
-    if ($delta !== 0 && $hasTukang) $tNom += $delta;
-    elseif ($delta !== 0 && $hasKenek) $kNom += $delta;
-
-    return response()->json([
-        'ok'         => true,
-        'base_type'  => $installType,
-        'final_type' => $finalType,
-        'hint'       => $installType === 'fullset'
-                          ? ($hasPanoramic ? 'Aturan panoramic aktif' : 'Aturan fullset harian (bisa ekstra/plus)')
-                          : 'Aturan tetap (SKKB/DSP)',
-        'nominal'    => [
-            'teknisi' => $amtT,
-            'kenek'   => $amtK,
-            'pool'    => $pool,
-        ],
-        'split'      => [
-            'mode'   => $modeUsed,     // 'auto' atau 'custom' (setelah fallback)
-            'tukang' => $tPct,         // persen
-            'kenek'  => $kPct,         // persen
-            'auto'   => ['tukang'=>$autoT, 'kenek'=>$autoK],
-        ],
-        'preview'    => [
-            'tukang' => $tNom,         // rupiah
-            'kenek'  => $kNom,
-        ],
-    ]);
-}
 }

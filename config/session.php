@@ -169,7 +169,12 @@ return [
     |
     */
 
-    'secure' => env('SESSION_SECURE_COOKIE'),
+    // Fail safe: if SESSION_SECURE_COOKIE isn't explicitly set in .env, default
+    // to true in production rather than sending the session cookie over plain
+    // HTTP (audit finding M-1). Still overridable via the env var either way.
+    // (Deliberately env('APP_ENV') here, not app()->environment() — this file
+    // loads before the container is ready to resolve that.)
+    'secure' => env('SESSION_SECURE_COOKIE', env('APP_ENV') === 'production'),
 
     /*
     |--------------------------------------------------------------------------

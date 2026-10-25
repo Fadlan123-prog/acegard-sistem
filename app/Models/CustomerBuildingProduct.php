@@ -19,6 +19,11 @@ class CustomerBuildingProduct extends Model
 
     ];
 
+    protected $casts = [
+        'warantee_start' => 'date',
+        'warantee_end'   => 'date',
+    ];
+
     public function invoices()
     {
         return $this->belongsToMany(InvoiceBuilding::class, 'invoice_building_product')
@@ -44,5 +49,6 @@ class CustomerBuildingProduct extends Model
     public function categoryProductBuilding(){
         return $this->belongsTo(CategoryProductBuilding::class, 'category_product_building_id');
     }
+
 
 }

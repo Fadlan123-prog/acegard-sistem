@@ -32,6 +32,9 @@ class CommissionExport implements FromCollection, WithHeadings
                 'c.amount',
             ]);
 
+        if (!empty($this->filters['branch_id'])) {
+            $q->where('e.branch_id', (int)$this->filters['branch_id']);
+        }
         if (!empty($this->filters['employee_id'])) {
             $q->where('e.id', (int)$this->filters['employee_id']);
         }

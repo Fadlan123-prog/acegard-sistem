@@ -169,7 +169,7 @@
     <table style="width: 100%;">
         <tr>
             <th style="text-align: left;">
-                <img style="width: 15rem;" src="{{ public_path('assets/images/logo.png') }}" alt="Logo Light">
+                <img style="width: 9.5rem;" src="{{ public_path('assets/frontend/images/new-acegard-logo.webp') }}" alt="Logo Light">
                 <p style="font-weight: bold;">
                     Jl. KH. Hasyim Ashari, RT.007/RW.002,<br> Nerogtog, Kec. Cipondoh, Kota Tangerang, Banten 15146
                 </p>
@@ -230,22 +230,6 @@
         </tbody>
     </table>
 
-    <h6 style="text-align: center; font-weight: bold; font-size: 1.25rem; margin: 1.5rem 0; background-color: black; color: white; padding: 5px 0;">
-        VALIDATE WARRANTY CARD
-    </h6>
-
-    <table style="width: 100%;">
-        <tbody>
-            <tr>
-                <td style="width: 15rem;">Brand</td>
-                <td>: {{ $customer->vehicle_brand }}</td>
-            </tr>
-            <tr>
-                <td>Model</td>
-                <td>: {{ $customer->vehicle_model }}</td>
-            </tr>
-        </tbody>
-    </table>
 
     <table style="width: 100%; table-layout: fixed; ">
         <tr>
@@ -300,7 +284,7 @@
                         <tbody>
                             <tr>
                                 <th style="text-align: left;">Down Payment</th>
-                                <td>: Rp. {{ number_format($invoice->downpayment, 0, ',', '.') }}</td>
+                                <td>: Rp. {{ number_format($invoice->down_payment, 0, ',', '.') }}</td>
                             </tr>
                             <tr>
                                 <th style="text-align: left;">Remaining Payment</th>
@@ -313,7 +297,7 @@
                 </div>
                 <div style="text-align: center; margin-top: 1rem;">
                     <p style="margin: 0;">SINCERELY,</p>
-                    <img src="{{ public_path('assets/images/blue-logo.png') }}" style="width: 15rem; transform: rotate(-5deg); margin: 1rem auto;" alt="cap Acegard">
+                    <img src="{{ public_path('assets/frontend/images/new-acegard-logo.webp') }}" style="width: 9.5rem; transform: rotate(-5deg); margin: 1rem auto;" alt="cap Acegard">
                     <p style="margin: 0;">ACEGARD INDONESIA</p>
                 </div>
             </td>

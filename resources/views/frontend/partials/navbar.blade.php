@@ -1,79 +1,54 @@
-<div class="navbar-area bg-black">
-			<!--=== Start Main Navbar Section ===-->
-			<div class="main-nav">
-				<div class="container mw-1680">
-					<nav class="navbar navbar-expand-md navbar-light">
-						<a class="navbar-brand" href="index.html">
-							<img src="{{asset('assets/images/acegard-logo.svg')}}" alt="logo">
-						</a>
+@php
+  $ppfHref     = Route::has('frontend.ppf.catalog') ? route('frontend.ppf.catalog') : '#';
+  $dealersHref = Route::has('frontend.dealers') ? route('frontend.dealers') : '#';
+  $faqHref     = Route::has('frontend.faq') ? route('frontend.faq') : '#';
+  $artikelHref = Route::has('frontend.artikel') ? route('frontend.artikel') : '#';
+@endphp
+<nav class="navbar navbar-expand-lg ace-navbar bg-white border-bottom sticky-top py-3">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('frontend.home') }}">
+      <img src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}" alt="Acegard" style="height:32px;">
+    </a>
 
-						<div class="collapse navbar-collapse for-mobile-menu" id="navbarSupportedContent">
-							<ul class="navbar-nav me-auto">
-								<li class="nav-item">
-									<a href="{{route('frontend.home')}}" class="nav-link  {{Route::currentRouteName() == 'frontend.home' ? 'active' : ''}}">
-										Home
-									</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topnav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-								</li>
+    <div class="collapse navbar-collapse" id="topnav">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+        <li class="nav-item">
+          <a class="nav-link {{ request()->routeIs('frontend.service.car') ? 'active' : '' }}" href="{{ route('frontend.service.car') }}">Kaca Film Otomotif</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ request()->routeIs('frontend.service.building') ? 'active' : '' }}" href="{{ route('frontend.service.building') }}">Kaca Film Bangunan</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ request()->routeIs('frontend.ppf.catalog') ? 'active' : '' }}" href="{{ $ppfHref }}">PPF</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ request()->routeIs('frontend.about') ? 'active' : '' }}" href="{{ route('frontend.about') }}">Tentang Kami</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ request()->routeIs('frontend.dealers') ? 'active' : '' }}" href="{{ $dealersHref }}">Dealers</a>
+        </li>
 
+        <li class="nav-item ms-lg-2">
+          <a class="btn-ace-outline w-100 w-lg-auto" href="{{ route('warranty.form') }}">
+            Warranty Claim
+          </a>
+        </li>
 
-
-								<li class="nav-item">
-									<a href="#" class="nav-link {{Route::currentRouteName() == 'frontend.service.car' || Route::currentRouteName() == 'frontend.service.building' || Route::currentRouteName() == 'frontend.service.franchise' ? 'active' : ''}}">
-										Services
-									</a>
-
-									<ul class="dropdown-menu">
-										<li class="nav-item">
-											<a href="{{route('frontend.service.car')}}" class="nav-link {{Route::currentRouteName() == 'frontend.service.car' ? 'active' : ''}}">Car</a>
-										</li>
-										<li class="nav-item">
-											<a href="{{route('frontend.service.building')}}" class="nav-link {{Route::currentRouteName() == 'frontend.service.building' ? 'active' : ''}}">Building</a>
-										</li>
-										<li class="nav-item">
-											<a href="{{route('frontend.service.franchise')}}" class="nav-link {{Route::currentRouteName() == 'frontend.service.franchise' ? 'active' : ''}}">Franchise</a>
-										</li>
-
-									</ul>
-								</li>
-
-								<li class="nav-item">
-									<a href="{{route('frontend.about')}}" class="nav-link {{Route::currentRouteName() == 'frontend.about' ? 'active' : ''}}">
-										Tentang Kami
-									</a>
-								</li>
-
-								<li class="nav-item">
-									<a href="{{route('frontend.contact')}}" class="nav-link {{Route::currentRouteName() == 'frontend.contact' ? 'active' : ''}}">
-										Kontak Kami
-									</a>
-
-
-								</li>
-
-
-							</ul>
-
-							<div class="nav-right-options d-flex align-items-center">
-                                    <a href="{{route('frontend.warranty')}}" class="btn btn-primary">Warranty Claim</a>
-							</div>
-						</div>
-					</nav>
-				</div>
-			</div>
-			<!--=== End Main Navbar Section ===-->
-
-			<!--=== Start Mobile Navbar Section ===-->
-			<div class="mobile-nav">
-				<div class="container">
-					<div class="mobile-menu">
-						<div class="logo">
-							<a href="index.html">
-								<img src="assets/images/white-logo.svg" alt="logo">
-							</a>
-						</div>
-					</div>
-				</div>
-			</div>
-			<!--=== End Mobile Navbar Section ===-->
-		</div>
+        <li class="nav-item dropdown ms-lg-2">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Selengkapnya
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="{{ $faqHref }}">FAQ</a></li>
+            <li><a class="dropdown-item" href="{{ $artikelHref }}">Artikel</a></li>
+            <li><a class="dropdown-item" href="{{ route('frontend.contact') }}">Contact Us</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,117 @@
+name: Deploy to DomainEsia
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Upload via FTP
+    runs-on: ubuntu-latest
+    env:
+      # `if:` conditions can't reference `secrets.*` directly — routing it
+      # through `env` first is the standard GitHub Actions workaround.
+      FTP_APP_DIR: ${{ secrets.FTP_APP_DIR }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+
+      - name: Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
+      - name: Setup Node & build assets
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci && npm run build
+
+      # --- Security audit finding C-7 ------------------------------------
+      # A single-directory FTP upload puts the ENTIRE Laravel app (app/,
+      # config/, database/, vendor/, artisan, composer.json, ...) under
+      # whatever FTP_SERVER_DIR points at. If that directory is the actual
+      # web-served folder (the common default on shared hosting), all of
+      # that becomes directly downloadable — including anything that isn't
+      # explicitly excluded below (.env itself IS excluded, but composer.json
+      # /vendor/ are not, and vendor/ can carry its own secrets in some
+      # packages' default configs).
+      #
+      # The correct fix is to serve ONLY the contents of public/ from the
+      # web root, with everything else one level above it (Hostinger
+      # supports this: point public_html at a symlink to <app_root>/public,
+      # or set the domain's document root to <app_root>/public directly).
+      #
+      # This workflow supports that split, but only once you provision it:
+      #   1. On the server, create an app directory OUTSIDE the web root,
+      #      e.g. /home/<user>/acegard-app/, and point public_html (or the
+      #      domain's document root) at /home/<user>/acegard-app/public.
+      #   2. Add a new repo secret FTP_APP_DIR = /home/<user>/acegard-app
+      #      (keep FTP_SERVER_DIR as-is, pointing at public_html).
+      # Until FTP_APP_DIR is set, this step is skipped and deploy falls back
+      # to the original single-directory upload below — so this change does
+      # NOT break the existing pipeline by itself.
+      - name: Stage split deploy (app root vs public/)
+        if: ${{ env.FTP_APP_DIR != '' }}
+        run: |
+          mkdir -p deploy_app deploy_public
+          rsync -a --exclude='public' ./ deploy_app/
+          rsync -a public/ deploy_public/
+
+      - name: Deploy app root (everything except public/)
+        if: ${{ env.FTP_APP_DIR != '' }}
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ env.FTP_APP_DIR }}
+          local-dir: deploy_app/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/tests/**
+            .env
+            .env.example
+            .editorconfig
+            phpunit.xml
+            README.md
+
+      - name: Deploy public/ contents to web root
+        if: ${{ env.FTP_APP_DIR != '' }}
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          local-dir: deploy_public/
+
+      # Fallback: original single-directory deploy, used only until
+      # FTP_APP_DIR is configured (see comment above). Once it's set, this
+      # step is skipped so the two steps above take over.
+      - name: "Deploy (legacy, single directory — configure FTP_APP_DIR to retire this)"
+        if: ${{ env.FTP_APP_DIR == '' }}
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          # File & folder yang TIDAK dikirim ke server
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/tests/**
+            .env
+            .env.example
+            .editorconfig
+            phpunit.xml
+            README.md
