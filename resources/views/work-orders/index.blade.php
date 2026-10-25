@@ -7,14 +7,9 @@
 @section('content')
 
 {{-- Flash Messages --}}
-@if (session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
+
 @if (session('info'))
     <x-ui.alert type="info" class="mb-3">{{ session('info') }}</x-ui.alert>
-@endif
-@if (session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
 @endif
 
 {{-- Filters --}}
@@ -76,7 +71,7 @@
             </x-ui.button>
         </div>
         <div class="col-6 col-sm-3 col-md-1">
-            <x-ui.button href="{{ route('work-orders.index') }}" variant="outline" size="sm" class="w-100">
+            <x-ui.button :href="route('work-orders.index')" variant="outline" size="sm" class="w-100">
                 Reset
             </x-ui.button>
         </div>
@@ -89,20 +84,20 @@
     <div class="col-6 col-md-3">
         <x-ui.stats-card label="Pending"
             :value="$customers->getCollection()->filter(fn($c) => $c->invoice?->work_status === 'pending')->count()"
-            color="amber" />
+            color="amber" accent />
     </div>
     <div class="col-6 col-md-3">
         <x-ui.stats-card label="Diterima"
             :value="$customers->getCollection()->filter(fn($c) => $c->invoice?->work_status === 'accepted')->count()"
-            color="blue" />
+            color="blue" accent />
     </div>
     <div class="col-6 col-md-3">
         <x-ui.stats-card label="Selesai"
             :value="$customers->getCollection()->filter(fn($c) => $c->invoice?->work_status === 'completed')->count()"
-            color="green" />
+            color="green" accent />
     </div>
     <div class="col-6 col-md-3">
-        <x-ui.stats-card label="Menunggu QC" :value="$pendingQcCount" color="red" />
+        <x-ui.stats-card label="Menunggu QC" :value="$pendingQcCount" color="red" accent />
     </div>
 </div>
 
@@ -275,7 +270,11 @@
                     @endif
                     <span>
                         <iconify-icon icon="mdi:account-outline"></iconify-icon>
-                        {{ $customer->tukang?->name ?? '<span class="text-danger">Belum ditugaskan</span>' }}
+                        @if ($customer->tukang)
+                            {{ $customer->tukang->name }}
+                        @else
+                            <span class="text-danger">Belum ditugaskan</span>
+                        @endif
                     </span>
                     @if ($customer->kenek)
                         <span><iconify-icon icon="mdi:account-arrow-right-outline"></iconify-icon> {{ $customer->kenek->name }}</span>
@@ -323,7 +322,6 @@
 
     @slot('footer'){{ $customers->links() }}@endslot
 </x-ui.card>
-
 
 {{-- Assignment Modal --}}
 <div class="modal fade" id="assignModal" tabindex="-1" aria-labelledby="assignModalLabel" aria-hidden="true">

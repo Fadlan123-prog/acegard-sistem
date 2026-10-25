@@ -78,8 +78,27 @@ class CommissionController extends Controller
         ));
     }
 
+    /**
+     * teknisi/kenek/marketing may only ever see/export/print their own
+     * commissions — index() already enforces this; export/print/moveForm
+     * did not (audit findings M-6/M-7).
+     */
+    private function forcedEmployeeId(): ?int
+    {
+        $user = auth()->user();
+        if ($user->employee && $user->hasAnyRole(['teknisi', 'kenek', 'marketing'])) {
+            return $user->employee->id;
+        }
+        return null;
+    }
+
     public function exportByEmployee(Request $request)
     {
+        $forcedEmployeeId = $this->forcedEmployeeId();
+        if ($forcedEmployeeId) {
+            $request->merge(['employee_id' => $forcedEmployeeId]);
+        }
+
         $filters = [
             'branch_id'   => $this->branch->idOrNull(),
             'employee_id' => $request->input('employee_id'),
@@ -117,6 +136,17 @@ class CommissionController extends Controller
 
     public function moveForm(Commission $commission)
 {
+    abort_unless(
+        auth()->user()->hasAnyRole(['superadmin', 'owner', 'admin', 'manager_operasional']),
+        403
+    );
+
+    $user = auth()->user();
+    if (!$user->hasRole('superadmin') && $commission->branch_id) {
+        $allowed = $user->branches()->pluck('branches.id')->all();
+        abort_unless(in_array((int) $commission->branch_id, $allowed, true), 403, 'Tidak boleh mengubah komisi cabang lain.');
+    }
+
     $commission->load([
         'employee',
         'customer',
@@ -269,6 +299,11 @@ public function toggleActive(Commission $commission)
 
 public function print(Request $request)
 {
+    $forcedEmployeeId = $this->forcedEmployeeId();
+    if ($forcedEmployeeId) {
+        $request->merge(['employee_id' => $forcedEmployeeId]);
+    }
+
     $data = $request->validate([
         'employee_id' => ['required', 'exists:employees,id'],
         'from'        => ['required', 'date'],

@@ -12,6 +12,29 @@ class CommissionOverrideController extends Controller
 {
     public function __construct(private BranchContext $branch) {}
 
+    /**
+     * Override rules can legitimately span branches (a Branch A marketing
+     * referral triggering an override for a Branch B installer) — so unlike
+     * other controllers we don't reject cross-branch rules outright. We do
+     * require the acting branch-scoped admin to have a real connection to
+     * the rule via at least one side of it, otherwise a Branch A admin could
+     * create/edit/delete override rules between two entirely unrelated
+     * branches they have no legitimate reason to touch (audit finding M-8).
+     */
+    private function authorizeOverrideBranch(int $overrideEmployeeId, int $triggerMarketingId): void
+    {
+        $branchId = $this->branch->idOrNull();
+        if ($branchId === null) {
+            return; // superadmin
+        }
+
+        $touchesOwnBranch = Employee::whereIn('id', [$overrideEmployeeId, $triggerMarketingId])
+            ->where('branch_id', $branchId)
+            ->exists();
+
+        abort_unless($touchesOwnBranch, 403, 'Aturan ini tidak melibatkan karyawan dari cabang Anda.');
+    }
+
     public function index()
     {
         $branchId = $this->branch->idOrNull();
@@ -45,6 +68,8 @@ class CommissionOverrideController extends Controller
             'rate'                 => ['required', 'numeric', 'min:0.01', 'max:100'],
         ]);
 
+        $this->authorizeOverrideBranch((int) $data['override_employee_id'], (int) $data['trigger_marketing_id']);
+
         $rate = $data['rate'] / 100; // konversi % ke desimal
 
         $exists = CommissionOverrideTrigger::where('override_employee_id', $data['override_employee_id'])
@@ -68,6 +93,8 @@ class CommissionOverrideController extends Controller
 
     public function toggleActive(CommissionOverrideTrigger $trigger)
     {
+        $this->authorizeOverrideBranch((int) $trigger->override_employee_id, (int) $trigger->trigger_marketing_id);
+
         $trigger->update(['is_active' => !$trigger->is_active]);
 
         $status = $trigger->is_active ? 'diaktifkan' : 'dinonaktifkan';
@@ -77,6 +104,8 @@ class CommissionOverrideController extends Controller
 
     public function updateRate(Request $request, CommissionOverrideTrigger $trigger)
     {
+        $this->authorizeOverrideBranch((int) $trigger->override_employee_id, (int) $trigger->trigger_marketing_id);
+
         $data = $request->validate([
             'rate' => ['required', 'numeric', 'min:0.01', 'max:100'],
         ]);
@@ -88,6 +117,8 @@ class CommissionOverrideController extends Controller
 
     public function destroy(CommissionOverrideTrigger $trigger)
     {
+        $this->authorizeOverrideBranch((int) $trigger->override_employee_id, (int) $trigger->trigger_marketing_id);
+
         $trigger->delete();
 
         return back()->with('success', 'Aturan override berhasil dihapus.');

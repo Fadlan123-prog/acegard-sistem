@@ -180,7 +180,21 @@ body { font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; ba
         @endif
 
         {{-- Tim --}}
-        @if($salesOrder->tukang || $salesOrder->kenek)
+        @if($salesOrder->category === 'building_film')
+            @if($salesOrder->technicians->isNotEmpty())
+            <div class="section">
+                <div class="section-label">Tim Pelaksana</div>
+                <div class="staff-section">
+                    @foreach($salesOrder->technicians as $tech)
+                    <div class="staff-box">
+                        <div class="staff-role">Teknisi</div>
+                        <div class="staff-name">{{ $tech->name }}</div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+        @elseif($salesOrder->tukang || $salesOrder->kenek)
         <div class="section">
             <div class="section-label">Tim Pelaksana</div>
             <div class="staff-section">

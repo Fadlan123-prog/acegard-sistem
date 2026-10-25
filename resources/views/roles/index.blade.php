@@ -6,13 +6,6 @@
 
 @section('content')
 
-@if(session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-@if(session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
-
 <x-ui.card>
     @slot('header')
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -20,7 +13,7 @@
                 <div class="ui-card-title">Roles &amp; Permissions</div>
                 <div class="ui-card-subtitle">Kelola role dan hak akses tiap role</div>
             </div>
-            <x-ui.button href="{{ route('roles.create') }}" variant="primary" size="sm">
+            <x-ui.button :href="route('roles.create')" variant="primary" size="sm">
                 <iconify-icon icon="mdi:plus-circle-outline" class="me-1"></iconify-icon>Tambah Role
             </x-ui.button>
         </div>
@@ -51,7 +44,7 @@
                         <td>{{ $role->users_count }} user</td>
                         <td class="pe-3 text-end">
                             <div class="d-flex gap-2 justify-content-end">
-                                <x-ui.button href="{{ route('roles.edit', $role->id) }}" variant="outline" size="sm">
+                                <x-ui.button :href="route('roles.edit', $role->id)" variant="outline" size="sm">
                                     <iconify-icon icon="mdi:pencil-outline"></iconify-icon>
                                 </x-ui.button>
                                 @if ($role->name !== 'superadmin')

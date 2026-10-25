@@ -16,19 +16,15 @@
                 </small>
             </div>
 
-            <x-ui.button href="{{ route('film-complaints.create') }}" variant="primary" size="sm">
+            <x-ui.button :href="route('film-complaints.create')" variant="primary" size="sm">
                 + Tambah Complain
             </x-ui.button>
         </div>
     @endslot
 
-    @if(session('success'))
-        <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-    @endif
+    
 
-    @if(session('error'))
-        <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-    @endif
+    
 
     <form method="GET" action="{{ route('film-complaints.index') }}" class="row g-2 mb-4 align-items-end">
 
@@ -101,7 +97,7 @@
             </x-ui.button>
 
             @if(request()->query())
-                <x-ui.button href="{{ route('film-complaints.index') }}" variant="ghost">
+                <x-ui.button :href="route('film-complaints.index')" variant="ghost">
                     Reset
                 </x-ui.button>
             @endif
@@ -194,7 +190,7 @@
                         <td>{{ $complaint->creator->name ?? '-' }}</td>
 
                         <td>
-                            <x-ui.button href="{{ route('film-complaints.show', $complaint->id) }}" variant="outline" size="sm">
+                            <x-ui.button :href="route('film-complaints.show', $complaint->id)" variant="outline" size="sm">
                                 Detail
                             </x-ui.button>
                         </td>

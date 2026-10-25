@@ -7,7 +7,7 @@
 @section('content')
 
 <div class="d-flex align-items-center gap-3 mb-4">
-    <x-ui.button href="{{ route('my-leave-requests.index') }}" variant="outline" size="sm">
+    <x-ui.button :href="route('my-leave-requests.index')" variant="outline" size="sm">
         <x-slot name="icon"><svg viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></x-slot>
         Kembali
     </x-ui.button>
@@ -49,25 +49,18 @@
         <div id="libur_quota_info" class="mb-3" style="display:none">
             <div class="row g-2">
                 <div class="col-4">
-                    <div class="text-center p-2 rounded" style="background:var(--ui-surface-alt,#f8fafc);border:1px solid var(--ui-border)">
-                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em" class="ui-text-muted mb-1">Jatah</div>
-                        <div class="fw-bold" style="font-size:18px;color:var(--ui-primary,#3b82f6)">{{ $liburQuota['quota'] }}</div>
-                        <div style="font-size:11px" class="ui-text-muted">hari/bulan</div>
-                    </div>
+                    <x-ui.stats-card label="Jatah" :value="$liburQuota['quota'].' hari/bulan'" color="blue" accent />
                 </div>
                 <div class="col-4">
-                    <div class="text-center p-2 rounded" style="background:var(--ui-surface-alt,#f8fafc);border:1px solid var(--ui-border)">
-                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em" class="ui-text-muted mb-1">Dipakai</div>
-                        <div class="fw-bold" style="font-size:18px;color:var(--ui-amber,#f59e0b)">{{ $liburQuota['used'] }}</div>
-                        <div style="font-size:11px" class="ui-text-muted">{{ $liburQuota['month'] }}</div>
-                    </div>
+                    <x-ui.stats-card label="Dipakai" :value="$liburQuota['used'].' — '.$liburQuota['month']" color="amber" accent />
                 </div>
                 <div class="col-4">
-                    <div class="text-center p-2 rounded" style="background:var(--ui-surface-alt,#f8fafc);border:1px solid var(--ui-border)">
-                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em" class="ui-text-muted mb-1">Sisa</div>
-                        <div class="fw-bold" style="font-size:18px;color:{{ $liburQuota['remaining'] > 0 ? 'var(--ui-green,#10b981)' : 'var(--ui-red,#ef4444)' }}">{{ $liburQuota['remaining'] }}</div>
-                        <div style="font-size:11px" class="ui-text-muted">hari</div>
-                    </div>
+                    <x-ui.stats-card
+                        label="Sisa"
+                        :value="$liburQuota['remaining'].' hari'"
+                        :color="$liburQuota['remaining'] > 0 ? 'green' : 'red'"
+                        accent
+                    />
                 </div>
             </div>
             @if($liburQuota['remaining'] <= 0)
@@ -114,7 +107,7 @@
             <x-ui.button type="submit" variant="primary">
                 <iconify-icon icon="mdi:send-outline" class="me-1"></iconify-icon> Ajukan Sekarang
             </x-ui.button>
-            <x-ui.button href="{{ route('my-leave-requests.index') }}" variant="outline">Batal</x-ui.button>
+            <x-ui.button :href="route('my-leave-requests.index')" variant="outline">Batal</x-ui.button>
         </div>
     </form>
 </x-ui.card>

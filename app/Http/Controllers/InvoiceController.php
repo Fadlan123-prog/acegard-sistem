@@ -38,6 +38,7 @@ class InvoiceController extends Controller
     public function create(Customer $customer)
     {
         $customer = Customer::with('invoice')->findOrFail($customer->id);
+        $this->authorizeBranchForCustomer($customer);
 
         $employees = Employee::orderBy('name')->get();
         $products = Product::orderBy('name')->get();
@@ -49,14 +50,18 @@ class InvoiceController extends Controller
     {
         $data = $request->validate([
             'customer_id'    => ['required', 'exists:customers,id'],
-            'price'          => ['required', 'integer', 'min:0'],
+            'price'          => ['required', 'integer', 'min:' . config('pricing.minimum_transaction_amount')],
             'discount'       => ['nullable', 'integer', 'min:0'],
             'downpayment'    => ['nullable', 'integer', 'min:0'],
             'payment_method' => ['nullable', 'in:cash,credit,transfer,tokopedia'],
             'status'         => ['required', 'in:paid,unpaid,partial'],
             'invoice_number' => ['nullable', 'string', 'max:255', 'unique:invoices,invoice_number'],
             'invoice_date'   => ['required', 'date'],
+        ], [
+            'price.min' => 'Harga tampak tidak wajar (minimum Rp ' . number_format(config('pricing.minimum_transaction_amount'), 0, ',', '.') . '). Periksa kembali sebelum menyimpan.',
         ]);
+
+        $this->authorizeBranchForCustomer(Customer::findOrFail($data['customer_id']));
 
         $invoiceDate = Carbon::parse($data['invoice_date'])->format('Y-m-d H:i:s');
 
@@ -518,6 +523,23 @@ class InvoiceController extends Controller
             ]);
 
         return $pdf->stream('invoice-' . $invoice->invoice_number . '.pdf');
+    }
+
+    private function authorizeBranchForCustomer(Customer $customer): void
+    {
+        if (auth()->user()->hasRole('superadmin')) {
+            return;
+        }
+
+        $allowed = auth()->user()
+            ->branches()
+            ->pluck('branches.id')
+            ->map(fn ($id) => (int) $id)
+            ->toArray();
+
+        if (!in_array((int) $customer->branch_id, $allowed, true)) {
+            abort(403, 'Anda tidak memiliki akses ke customer dari cabang lain.');
+        }
     }
 
     private function authorizeBranchForInvoice(Invoice $invoice): void

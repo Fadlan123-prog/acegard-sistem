@@ -137,7 +137,7 @@ thead .col-total-sep { border-left: 2px solid #475569 !important; }
         ['label'=>'Alpha',   'val'=>$totalAbsent,        'color'=>'danger'],
     ] as $s)
     <div class="col-6 col-sm-4 col-md-2">
-        <x-ui.stats-card :label="$s['label']" :value="$s['val']" :color="$statsColorMap[$s['color']] ?? 'blue'" class="h-100" />
+        <x-ui.stats-card :label="$s['label']" :value="$s['val']" :color="$statsColorMap[$s['color']] ?? 'blue'" class="h-100" accent />
     </div>
     @endforeach
 </div>

@@ -30,7 +30,7 @@ thead .day-weekend { background: #374151 !important; }
         </p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
-        <x-ui.button href="{{ route('meal-allowances.weekly.pdf', ['branch_id' => $branchId, 'week_date' => $selectedDate]) }}" variant="danger" size="sm" target="_blank">
+        <x-ui.button :href="route('meal-allowances.weekly.pdf', ['branch_id' => $branchId, 'week_date' => $selectedDate])" variant="danger" size="sm" target="_blank">
             <iconify-icon icon="mdi:file-pdf-box" class="me-1"></iconify-icon> Export PDF
         </x-ui.button>
         <x-ui.button type="button" onclick="window.print()" variant="outline" size="sm">
@@ -66,39 +66,34 @@ thead .day-weekend { background: #374151 !important; }
 {{-- Stats --}}
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body py-3">
-                <div class="d-flex align-items-center gap-2 mb-1">
-                    <iconify-icon icon="mdi:calendar-week" class="text-primary" style="font-size:18px;"></iconify-icon>
-                    <span class="text-muted" style="font-size:12px;">Periode</span>
-                </div>
-                <p class="fw-bold mb-0" style="font-size:14px;">
-                    {{ $startDate->isoFormat('D MMM') }} – {{ $endDate->isoFormat('D MMM Y') }}
-                </p>
-            </div>
-        </div>
+        <x-ui.stats-card
+            label="Periode"
+            :value="$startDate->isoFormat('D MMM').' – '.$endDate->isoFormat('D MMM Y')"
+            color="blue"
+            icon='<iconify-icon icon="mdi:calendar-week"></iconify-icon>'
+            accent
+            class="h-100"
+        />
     </div>
     <div class="col-6 col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body py-3">
-                <div class="d-flex align-items-center gap-2 mb-1">
-                    <iconify-icon icon="mdi:account-check" class="text-success" style="font-size:18px;"></iconify-icon>
-                    <span class="text-muted" style="font-size:12px;">Total Hari Masuk</span>
-                </div>
-                <p class="fw-bold mb-0 text-success fs-4">{{ $totalPresentDays }} <small class="fs-6 fw-normal">hari</small></p>
-            </div>
-        </div>
+        <x-ui.stats-card
+            label="Total Hari Masuk"
+            :value="$totalPresentDays.' hari'"
+            color="green"
+            icon='<iconify-icon icon="mdi:account-check"></iconify-icon>'
+            accent
+            class="h-100"
+        />
     </div>
     <div class="col-12 col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body py-3">
-                <div class="d-flex align-items-center gap-2 mb-1">
-                    <iconify-icon icon="mdi:cash" class="text-warning" style="font-size:18px;"></iconify-icon>
-                    <span class="text-muted" style="font-size:12px;">Total Uang Makan</span>
-                </div>
-                <p class="fw-bold mb-0 text-warning fs-4">Rp{{ number_format($grandTotal, 0, ',', '.') }}</p>
-            </div>
-        </div>
+        <x-ui.stats-card
+            label="Total Uang Makan"
+            :value="'Rp'.number_format($grandTotal, 0, ',', '.')"
+            color="amber"
+            icon='<iconify-icon icon="mdi:cash"></iconify-icon>'
+            accent
+            class="h-100"
+        />
     </div>
 </div>
 
@@ -177,7 +172,7 @@ thead .day-weekend { background: #374151 !important; }
                         <td class="text-center fw-bold text-success">{{ $row['present_days'] }}</td>
                         <td class="text-end text-muted" style="font-size:12px;">
                             @if(!$row['employee']->meal_allowance_enabled)
-                                <span class="badge bg-light text-danger border">Tidak dapat</span>
+                                <x-ui.badge variant="danger" size="sm">Tidak dapat</x-ui.badge>
                             @else
                                 Rp{{ number_format($row['daily_rate'], 0, ',', '.') }}
                             @endif

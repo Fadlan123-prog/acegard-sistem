@@ -10,17 +10,13 @@
     @slot('header')
         <div class="d-flex justify-content-between align-items-center">
             <div class="ui-card-title">Daftar Supplier</div>
-            <x-ui.button href="{{ route('suppliers.create') }}" variant="primary" size="sm">+ Tambah Supplier</x-ui.button>
+            <x-ui.button :href="route('suppliers.create')" variant="primary" size="sm">+ Tambah Supplier</x-ui.button>
         </div>
     @endslot
 
-    @if(session('success'))
-        <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-    @endif
+    
 
-    @if(session('error'))
-        <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-    @endif
+    
 
     {{-- Search --}}
     <form method="GET" action="{{ route('suppliers.index') }}" class="row g-2 mb-4 align-items-end">
@@ -37,7 +33,7 @@
             <x-ui.button type="submit" variant="outline">Filter</x-ui.button>
 
             @if(request('search'))
-                <x-ui.button href="{{ route('suppliers.index') }}" variant="secondary">Reset</x-ui.button>
+                <x-ui.button :href="route('suppliers.index')" variant="secondary">Reset</x-ui.button>
             @endif
         </div>
     </form>

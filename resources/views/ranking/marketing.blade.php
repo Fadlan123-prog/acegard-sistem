@@ -54,7 +54,7 @@
             <tbody>
                 @forelse ($ranking as $idx => $emp)
                 @php
-                    $medal  = match ($idx) { 0 => '🥇', 1 => '🥈', 2 => '🥉', default => null };
+                    $medal  = match ($idx) { 0 => '#FFD700', 1 => '#C0C0C0', 2 => '#CD7F32', default => null };
                     $isTop3 = $idx < 3;
 
                     $empUserId = $userToEmployee->search($emp->id);
@@ -69,7 +69,7 @@
                 <tr style="{{ $isTop3 ? 'background:rgba(var(--ui-amber-rgb,245,158,11),.06)' : '' }}">
                     <td class="py-3 text-center">
                         @if ($medal)
-                            <span style="font-size:20px;line-height:1">{{ $medal }}</span>
+                            <iconify-icon icon="mdi:medal" style="font-size:22px;color:{{ $medal }}"></iconify-icon>
                         @else
                             <span class="ui-text-muted fw-bold">{{ $idx + 1 }}</span>
                         @endif

@@ -128,6 +128,88 @@ class LeadController extends Controller
             ->with('success', 'Lead berhasil ditambahkan.');
     }
 
+    /**
+     * Jalur cepat untuk input lead saat chat WhatsApp lagi deras masuk (iklan
+     * Click-to-WhatsApp) — cuma 3 field (nama, no HP, kategori), sumber otomatis
+     * 'whatsapp', status otomatis 'new'. Form lengkap (store()) tetap dipakai untuk
+     * melengkapi detail lead yang sudah dipastikan serius.
+     *
+     * Deteksi nomor duplikat:
+     *   - Ada lead dengan nomor sama yang statusnya MASIH BERJALAN (new/contacted/
+     *     follow_up/quoted) → jangan buat baru, ini obrolan lanjutan yang sama.
+     *     Cuma dicatat sebagai activity di lead yang sudah ada.
+     *   - Ada lead dengan nomor sama yang statusnya SUDAH SELESAI (won/lost) → tetap
+     *     buat lead baru (order/peluang baru), tapi dicatat riwayatnya sebagai activity
+     *     supaya staf tahu ini kemungkinan pelanggan lama/repeat order.
+     */
+    public function quickStore(Request $request, BranchContext $branchContext)
+    {
+        $validated = $request->validateWithBag('quickLead', [
+            'name'     => 'required|string|max:255',
+            'phone'    => 'required|string|max:30',
+            'category' => 'required|in:car_film,building_film,ppf',
+        ]);
+
+        $branchId = $branchContext->idOrNull();
+        $openStatuses = ['new', 'contacted', 'follow_up', 'quoted'];
+
+        $existingOpen = Lead::where('branch_id', $branchId)
+            ->where('phone', $validated['phone'])
+            ->whereIn('status', $openStatuses)
+            ->latest()
+            ->first();
+
+        if ($existingOpen) {
+            LeadActivity::create([
+                'lead_id'    => $existingOpen->id,
+                'type'       => 'whatsapp',
+                'notes'      => 'Chat masuk lagi dari nomor ini (terdeteksi lewat Lead Cepat) — lead lama ini dilanjutkan, tidak dibuat baru.',
+                'created_by' => auth()->id(),
+            ]);
+
+            return redirect()->route('leads.index')
+                ->with('warning', "Nomor {$validated['phone']} sudah punya lead yang masih berjalan (\"{$existingOpen->name}\", status {$existingOpen->status_label}) — tidak dibuat lead baru, dicatat sebagai chat lanjutan di lead yang sudah ada.");
+        }
+
+        $priorClosed = Lead::where('branch_id', $branchId)
+            ->where('phone', $validated['phone'])
+            ->whereIn('status', ['won', 'lost'])
+            ->latest()
+            ->first();
+
+        $lead = Lead::create([
+            'branch_id'  => $branchId,
+            'name'       => $validated['name'],
+            'phone'      => $validated['phone'],
+            'category'   => $validated['category'],
+            'source'     => 'whatsapp',
+            'status'     => 'new',
+            'created_by' => auth()->id(),
+        ]);
+
+        LeadActivity::create([
+            'lead_id'    => $lead->id,
+            'type'       => 'note',
+            'notes'      => 'Lead dibuat via Lead Cepat.',
+            'created_by' => auth()->id(),
+        ]);
+
+        if ($priorClosed) {
+            LeadActivity::create([
+                'lead_id'    => $lead->id,
+                'type'       => 'note',
+                'notes'      => "Kemungkinan pelanggan lama — nomor ini pernah jadi lead pada {$priorClosed->created_at->format('d M Y')} dengan hasil \"{$priorClosed->status_label}\".",
+                'created_by' => auth()->id(),
+            ]);
+
+            return redirect()->route('leads.index')
+                ->with('success', "Lead baru \"{$lead->name}\" berhasil dibuat. Catatan: nomor ini pernah jadi lead sebelumnya ({$priorClosed->status_label}, {$priorClosed->created_at->format('d M Y')}) — kemungkinan pelanggan lama.");
+        }
+
+        return redirect()->route('leads.index')
+            ->with('success', "Lead baru \"{$lead->name}\" berhasil dibuat.");
+    }
+
     public function show(Lead $lead)
     {
         $this->authorizeLeadAccess($lead);

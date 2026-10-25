@@ -10,12 +10,8 @@
         <div class="ui-card-title">Daftar Warranty Claim</div>
     @endslot
 
-    @if(session('success'))
-        <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-    @endif
-    @if(session('error'))
-        <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-    @endif
+    
+    
 
     <form method="GET" action="{{ route('admin.claims.index') }}" class="d-flex flex-wrap gap-2 mb-3" id="filterForm">
         <input type="text" name="search" value="{{ request('search') }}" class="form-control"
@@ -47,7 +43,7 @@
         <x-ui.button type="submit" variant="primary">Search</x-ui.button>
 
         @if(request('branch_id') || request('search') || request('status') || request('type'))
-            <x-ui.button href="{{ route('admin.claims.index') }}" variant="secondary">Reset</x-ui.button>
+            <x-ui.button :href="route('admin.claims.index')" variant="secondary">Reset</x-ui.button>
         @endif
     </form>
 
@@ -94,7 +90,7 @@
                 </td>
                 <td>
                     @if($c->invoice)
-                        <x-ui.button href="{{ route('admin.claim-invoices.show', $c->invoice->id) }}" variant="success" size="sm">Lihat</x-ui.button>
+                        <x-ui.button :href="route('admin.claim-invoices.show', $c->invoice->id)" variant="success" size="sm">Lihat</x-ui.button>
                     @else
                         <span class="text-muted">-</span>
                     @endif

@@ -33,7 +33,7 @@ class TeknisiSeeder extends Seeder
                 'user' => [
                     'name'     => 'Rizki',
                     'email'    => 'rizki.teknisi@acegard.id',
-                    'password' => 'Acegard.21',
+                    'password' => 'Acegard.12',
                 ],
                 'role' => 'teknisi',
             ],
@@ -47,7 +47,7 @@ class TeknisiSeeder extends Seeder
                 'user' => [
                     'name'     => 'Dhani',
                     'email'    => 'dhani.teknisi@acegard.id',
-                    'password' => 'Acegard.21',
+                    'password' => 'Acegard.12',
                 ],
                 'role' => 'teknisi',
             ],
@@ -61,7 +61,7 @@ class TeknisiSeeder extends Seeder
                 'user' => [
                     'name'     => 'Ferdi',
                     'email'    => 'ferdi.teknisi@acegard.id',
-                    'password' => 'Acegard.21',
+                    'password' => 'Acegard.12',
                 ],
                 'role' => 'teknisi',
             ],
@@ -75,7 +75,7 @@ class TeknisiSeeder extends Seeder
                 'user' => [
                     'name'     => 'Agil',
                     'email'    => 'agil.teknisi@acegard.id',
-                    'password' => 'Acegard.21',
+                    'password' => 'Acegard.12',
                 ],
                 'role' => 'teknisi',
             ],
@@ -89,7 +89,7 @@ class TeknisiSeeder extends Seeder
                 'user' => [
                     'name'     => 'Asep',
                     'email'    => 'asep.teknisi@acegard.id',
-                    'password' => 'Acegard.21',
+                    'password' => 'Acegard.12',
                 ],
                 'role' => 'teknisi',
             ],
@@ -104,7 +104,7 @@ class TeknisiSeeder extends Seeder
                 'user' => [
                     'name'     => 'Demo Teknisi',
                     'email'    => 'teknisi@acegard.id',
-                    'password' => 'Acegard.21',
+                    'password' => 'Acegard.12',
                 ],
                 'role' => 'teknisi',
             ],
@@ -119,7 +119,7 @@ class TeknisiSeeder extends Seeder
                 'user' => [
                     'name'     => 'Fajri',
                     'email'    => 'fajri.kenek@acegard.id',
-                    'password' => 'Acegard.21',
+                    'password' => 'Acegard.12',
                 ],
                 'role' => 'kenek',
             ],
@@ -133,7 +133,7 @@ class TeknisiSeeder extends Seeder
                 'user' => [
                     'name'     => 'Alam',
                     'email'    => 'alam.kenek@acegard.id',
-                    'password' => 'Acegard.21',
+                    'password' => 'Acegard.12',
                 ],
                 'role' => 'kenek',
             ],
@@ -148,7 +148,7 @@ class TeknisiSeeder extends Seeder
                 'user' => [
                     'name'     => 'Demo Kenek',
                     'email'    => 'kenek@acegard.id',
-                    'password' => 'Acegard.21',
+                    'password' => 'Acegard.12',
                 ],
                 'role' => 'kenek',
             ],

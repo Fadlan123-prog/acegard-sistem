@@ -43,7 +43,7 @@ if(($item->bpjs_jht_employee ?? 0) > 0) $bpjsLines[] = 'JHT Rp '.number_format($
 if(($item->bpjs_jp_employee  ?? 0) > 0) $bpjsLines[] = 'JP Rp '.number_format($item->bpjs_jp_employee,0,',','.');
 if(($item->bpjs_kes_employee ?? 0) > 0) $bpjsLines[] = 'Kes Rp '.number_format($item->bpjs_kes_employee,0,',','.');
 @endphp
-<div@if(!$loop->last) style="page-break-after:always;"@endif>
+<div @if(!$loop->last) style="page-break-after:always;" @endif>
 
 {{-- HEADER --}}
 <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8pt;">
@@ -91,8 +91,8 @@ if(($item->bpjs_kes_employee ?? 0) > 0) $bpjsLines[] = 'Kes Rp '.number_format($
 
 {{-- EMPLOYEE INFORMATION CARD --}}
 <div style="border:1pt solid #e2e8f0; border-radius:7pt; margin-bottom:8pt; background:#fff;">
-    <div style="background:#1e40af; border-radius:7pt 7pt 0 0; padding:5pt 14pt;">
-        <div style="font-size:6pt; font-weight:700; color:#bfdbfe; text-transform:uppercase; letter-spacing:.4pt;">&#9632;&nbsp; Data Karyawan</div>
+    <div style="background:#0f172a; border-radius:7pt 7pt 0 0; padding:5pt 14pt;">
+        <div style="font-size:6pt; font-weight:700; color:#cbd5e1; text-transform:uppercase; letter-spacing:.4pt;">Data Karyawan</div>
     </div>
     <div style="padding:10pt 14pt 8pt;">
         <table width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1pt solid #f1f5f9; padding-bottom:8pt; margin-bottom:9pt;">
@@ -150,52 +150,55 @@ if(($item->bpjs_kes_employee ?? 0) > 0) $bpjsLines[] = 'Kes Rp '.number_format($
 
 {{-- ATTENDANCE SUMMARY CARD --}}
 <div style="border:1pt solid #e2e8f0; border-radius:7pt; margin-bottom:8pt; background:#fff;">
-    <div style="background:#0369a1; border-radius:7pt 7pt 0 0; padding:5pt 14pt;">
-        <div style="font-size:6pt; font-weight:700; color:#bae6fd; text-transform:uppercase; letter-spacing:.4pt;">&#9632;&nbsp; Rekap Kehadiran &nbsp;&mdash;&nbsp; {{ $payroll->working_days ?? '—' }} Hari Kerja</div>
+    <div style="background:#0f172a; border-radius:7pt 7pt 0 0; padding:5pt 14pt;">
+        <div style="font-size:6pt; font-weight:700; color:#cbd5e1; text-transform:uppercase; letter-spacing:.4pt;">Rekap Kehadiran &nbsp;&mdash;&nbsp; {{ $payroll->working_days ?? '—' }} Hari Kerja</div>
     </div>
     <div style="padding:10pt 14pt;">
         <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
+                @php
+                    $attTileColor = fn ($bad) => $bad ? '#dc2626' : '#1e293b';
+                @endphp
                 <td width="16%"><div style="padding-right:4pt;">
-                    <div style="border:1pt solid #bbf7d0; background:#f0fdf4; border-radius:6pt; padding:8pt 3pt; text-align:center;">
-                        <div style="font-size:15pt; font-weight:700; color:#15803d; line-height:1;">{{ $item->present_days }}</div>
-                        <div style="font-size:5.5pt; font-weight:700; color:#16a34a; text-transform:uppercase; margin-top:3pt;">Masuk</div>
-                        <div style="font-size:5pt; color:#86efac; margin-top:1pt;">hari</div>
+                    <div style="border:1pt solid #e2e8f0; background:#f8fafc; border-radius:6pt; padding:8pt 3pt; text-align:center;">
+                        <div style="font-size:15pt; font-weight:700; color:#1e293b; line-height:1;">{{ $item->present_days }}</div>
+                        <div style="font-size:5.5pt; font-weight:700; color:#64748b; text-transform:uppercase; margin-top:3pt;">Masuk</div>
+                        <div style="font-size:5pt; color:#94a3b8; margin-top:1pt;">hari</div>
                     </div>
                 </div></td>
                 <td width="16%"><div style="padding-right:4pt;">
                     <div style="border:1pt solid #e2e8f0; background:#f8fafc; border-radius:6pt; padding:8pt 3pt; text-align:center;">
-                        <div style="font-size:15pt; font-weight:700; color:#475569; line-height:1;">{{ $item->off_days }}</div>
+                        <div style="font-size:15pt; font-weight:700; color:#1e293b; line-height:1;">{{ $item->off_days }}</div>
                         <div style="font-size:5.5pt; font-weight:700; color:#64748b; text-transform:uppercase; margin-top:3pt;">Libur</div>
                         <div style="font-size:5pt; color:#94a3b8; margin-top:1pt;">hari</div>
                     </div>
                 </div></td>
                 <td width="16%"><div style="padding-right:4pt;">
-                    <div style="border:1pt solid #bfdbfe; background:#eff6ff; border-radius:6pt; padding:8pt 3pt; text-align:center;">
-                        <div style="font-size:15pt; font-weight:700; color:#1d4ed8; line-height:1;">{{ $item->sick_days }}</div>
-                        <div style="font-size:5.5pt; font-weight:700; color:#2563eb; text-transform:uppercase; margin-top:3pt;">Sakit</div>
-                        <div style="font-size:5pt; color:#93c5fd; margin-top:1pt;">hari</div>
+                    <div style="border:1pt solid #e2e8f0; background:#f8fafc; border-radius:6pt; padding:8pt 3pt; text-align:center;">
+                        <div style="font-size:15pt; font-weight:700; color:#1e293b; line-height:1;">{{ $item->sick_days }}</div>
+                        <div style="font-size:5.5pt; font-weight:700; color:#64748b; text-transform:uppercase; margin-top:3pt;">Sakit</div>
+                        <div style="font-size:5pt; color:#94a3b8; margin-top:1pt;">hari</div>
                     </div>
                 </div></td>
                 <td width="16%"><div style="padding-right:4pt;">
-                    <div style="border:1pt solid #fed7aa; background:#fff7ed; border-radius:6pt; padding:8pt 3pt; text-align:center;">
-                        <div style="font-size:15pt; font-weight:700; color:#c2410c; line-height:1;">{{ $item->permission_days }}</div>
-                        <div style="font-size:5.5pt; font-weight:700; color:#ea580c; text-transform:uppercase; margin-top:3pt;">Izin</div>
-                        <div style="font-size:5pt; color:#fdba74; margin-top:1pt;">hari</div>
+                    <div style="border:1pt solid #e2e8f0; background:#f8fafc; border-radius:6pt; padding:8pt 3pt; text-align:center;">
+                        <div style="font-size:15pt; font-weight:700; color:#1e293b; line-height:1;">{{ $item->permission_days }}</div>
+                        <div style="font-size:5.5pt; font-weight:700; color:#64748b; text-transform:uppercase; margin-top:3pt;">Izin</div>
+                        <div style="font-size:5pt; color:#94a3b8; margin-top:1pt;">hari</div>
                     </div>
                 </div></td>
                 <td width="16%"><div style="padding-right:4pt;">
-                    <div style="border:1pt solid #fecaca; background:#fef2f2; border-radius:6pt; padding:8pt 3pt; text-align:center;">
-                        <div style="font-size:15pt; font-weight:700; color:#dc2626; line-height:1;">{{ $item->absent_days }}</div>
-                        <div style="font-size:5.5pt; font-weight:700; color:#dc2626; text-transform:uppercase; margin-top:3pt;">Alpha</div>
-                        <div style="font-size:5pt; color:#fca5a5; margin-top:1pt;">hari</div>
+                    <div style="border:1pt solid #e2e8f0; background:#f8fafc; border-radius:6pt; padding:8pt 3pt; text-align:center;">
+                        <div style="font-size:15pt; font-weight:700; color:{{ $attTileColor($item->absent_days > 0) }}; line-height:1;">{{ $item->absent_days }}</div>
+                        <div style="font-size:5.5pt; font-weight:700; color:{{ $attTileColor($item->absent_days > 0) }}; text-transform:uppercase; margin-top:3pt;">Alpha</div>
+                        <div style="font-size:5pt; color:#94a3b8; margin-top:1pt;">hari</div>
                     </div>
                 </div></td>
                 <td width="20%">
-                    <div style="border:1pt solid #e9d5ff; background:#faf5ff; border-radius:6pt; padding:8pt 3pt; text-align:center;">
-                        <div style="font-size:15pt; font-weight:700; color:#7c3aed; line-height:1;">{{ $item->excess_off_days }}</div>
-                        <div style="font-size:5.5pt; font-weight:700; color:#7c3aed; text-transform:uppercase; margin-top:3pt;">Lbh Libur</div>
-                        <div style="font-size:5pt; color:#c4b5fd; margin-top:1pt;">hari</div>
+                    <div style="border:1pt solid #e2e8f0; background:#f8fafc; border-radius:6pt; padding:8pt 3pt; text-align:center;">
+                        <div style="font-size:15pt; font-weight:700; color:{{ $attTileColor($item->excess_off_days > 0) }}; line-height:1;">{{ $item->excess_off_days }}</div>
+                        <div style="font-size:5.5pt; font-weight:700; color:{{ $attTileColor($item->excess_off_days > 0) }}; text-transform:uppercase; margin-top:3pt;">Lbh Libur</div>
+                        <div style="font-size:5pt; color:#94a3b8; margin-top:1pt;">hari</div>
                     </div>
                 </td>
             </tr>
@@ -204,9 +207,9 @@ if(($item->bpjs_kes_employee ?? 0) > 0) $bpjsLines[] = 'Kes Rp '.number_format($
 </div>
 
 {{-- SALARY DETAILS --}}
-<div style="border:1pt solid #d1fae5; border-radius:7pt; background:#fff; margin-bottom:8pt;">
-    <div style="background:#166534; border-radius:7pt 7pt 0 0; padding:5pt 14pt;">
-        <div style="font-size:6pt; font-weight:700; color:#bbf7d0; text-transform:uppercase; letter-spacing:.4pt;">&#9650;&nbsp; Rincian Gaji</div>
+<div style="border:1pt solid #e2e8f0; border-radius:7pt; background:#fff; margin-bottom:8pt;">
+    <div style="background:#0f172a; border-radius:7pt 7pt 0 0; padding:5pt 14pt;">
+        <div style="font-size:6pt; font-weight:700; color:#cbd5e1; text-transform:uppercase; letter-spacing:.4pt;">Rincian Gaji</div>
     </div>
     <div style="padding:8pt 14pt;">
         <table width="100%" cellpadding="0" cellspacing="0">
@@ -242,21 +245,62 @@ if(($item->bpjs_kes_employee ?? 0) > 0) $bpjsLines[] = 'Kes Rp '.number_format($
                 <td style="padding:5pt 6pt; font-size:7.5pt; font-weight:700; color:#15803d; text-align:right; background:#f8fafc; border-top:1pt solid #f1f5f9;">+ Rp {{ number_format($item->overtime_pay,0,',','.') }}</td>
             </tr>
             @endif
+            @if(($item->main_deduction ?? 0) > 0)
+            <tr>
+                <td style="padding:5pt 6pt; font-size:7.5pt; color:#374151; background:#f8fafc; border-top:1pt solid #f1f5f9;">Potongan Rokok</td>
+                <td style="padding:5pt 6pt; font-size:7.5pt; font-weight:700; color:#dc2626; text-align:right; background:#f8fafc; border-top:1pt solid #f1f5f9;">- Rp {{ number_format($item->main_deduction,0,',','.') }}</td>
+            </tr>
+            @endif
+            @if(($item->cash_advance ?? 0) > 0)
+            <tr>
+                <td style="padding:5pt 6pt; font-size:7.5pt; color:#374151; border-top:1pt solid #f1f5f9;">Kasbon</td>
+                <td style="padding:5pt 6pt; font-size:7.5pt; font-weight:700; color:#dc2626; text-align:right; border-top:1pt solid #f1f5f9;">- Rp {{ number_format($item->cash_advance,0,',','.') }}</td>
+            </tr>
+            @endif
+            @if(($item->attendance_deduction ?? 0) > 0)
+            <tr>
+                <td style="padding:5pt 6pt; font-size:7.5pt; color:#374151; background:#f8fafc; border-top:1pt solid #f1f5f9;">Potongan Absen</td>
+                <td style="padding:5pt 6pt; font-size:7.5pt; font-weight:700; color:#dc2626; text-align:right; background:#f8fafc; border-top:1pt solid #f1f5f9;">- Rp {{ number_format($item->attendance_deduction,0,',','.') }}</td>
+            </tr>
+            @endif
+            @if(($item->late_deduction ?? 0) > 0)
+            <tr>
+                <td style="padding:5pt 6pt; font-size:7.5pt; color:#374151; border-top:1pt solid #f1f5f9;">Potongan Keterlambatan</td>
+                <td style="padding:5pt 6pt; font-size:7.5pt; font-weight:700; color:#dc2626; text-align:right; border-top:1pt solid #f1f5f9;">- Rp {{ number_format($item->late_deduction,0,',','.') }}</td>
+            </tr>
+            @endif
+            @if(($item->bpjs_total_employee ?? 0) > 0)
+            <tr>
+                <td style="padding:5pt 6pt; background:#f8fafc; border-top:1pt solid #f1f5f9;">
+                    <div style="font-size:7.5pt; color:#374151;">BPJS (Karyawan)</div>
+                    @if(count($bpjsLines))
+                    <div style="font-size:6pt; color:#94a3b8; margin-top:1pt;">{{ implode(' &middot; ', $bpjsLines) }}</div>
+                    @endif
+                </td>
+                <td style="padding:5pt 6pt; font-size:7.5pt; font-weight:700; color:#dc2626; text-align:right; background:#f8fafc; border-top:1pt solid #f1f5f9;">- Rp {{ number_format($item->bpjs_total_employee,0,',','.') }}</td>
+            </tr>
+            @endif
+            @if(($item->other_deduction ?? 0) > 0)
+            <tr>
+                <td style="padding:5pt 6pt; font-size:7.5pt; color:#374151; border-top:1pt solid #f1f5f9;">Potongan Lainnya</td>
+                <td style="padding:5pt 6pt; font-size:7.5pt; font-weight:700; color:#dc2626; text-align:right; border-top:1pt solid #f1f5f9;">- Rp {{ number_format($item->other_deduction,0,',','.') }}</td>
+            </tr>
+            @endif
             @if($deductTotal > 0)
             <tr>
-                <td style="padding:5pt 6pt; font-size:7.5pt; color:#374151; border-top:1pt solid #f1f5f9;">Total Potongan</td>
+                <td style="padding:5pt 6pt; font-size:7.5pt; font-weight:700; color:#374151; border-top:1pt solid #f1f5f9;">Total Potongan</td>
                 <td style="padding:5pt 6pt; font-size:7.5pt; font-weight:700; color:#dc2626; text-align:right; border-top:1pt solid #f1f5f9;">- Rp {{ number_format($deductTotal,0,',','.') }}</td>
             </tr>
             @endif
             <tr>
-                <td colspan="2" style="height:4pt; border-top:1.5pt solid #d1fae5;"></td>
+                <td colspan="2" style="height:4pt; border-top:1.5pt solid #e2e8f0;"></td>
             </tr>
             <tr>
-                <td style="padding:6pt 6pt; background:#f0fdf4;">
-                    <div style="font-size:7.5pt; font-weight:700; color:#166534;">Total Penghasilan</div>
+                <td style="padding:6pt 6pt; background:#f1f5f9;">
+                    <div style="font-size:7.5pt; font-weight:700; color:#0f172a;">Total Penghasilan</div>
                 </td>
-                <td style="padding:6pt 6pt; background:#f0fdf4; text-align:right;">
-                    <div style="font-size:8.5pt; font-weight:700; color:#166534;">Rp {{ number_format($earnTotal,0,',','.') }}</div>
+                <td style="padding:6pt 6pt; background:#f1f5f9; text-align:right;">
+                    <div style="font-size:8.5pt; font-weight:700; color:#0f172a;">Rp {{ number_format($earnTotal,0,',','.') }}</div>
                 </td>
             </tr>
         </table>
@@ -275,7 +319,7 @@ if(($item->bpjs_kes_employee ?? 0) > 0) $bpjsLines[] = 'Kes Rp '.number_format($
             </td>
             <td style="background:#1e3a8a; vertical-align:middle;">
                 <div style="padding:13pt 18pt; text-align:right;">
-                    <div style="font-size:19pt; font-weight:700; color:#fff; line-height:1;">Rp {{ number_format($item->rounded_salary,0,',','.') }}</div>
+                    <div style="font-size:17pt; font-weight:700; color:#fff; line-height:1;">Rp {{ number_format($item->rounded_salary,0,',','.') }}</div>
                 </div>
             </td>
         </tr>
@@ -292,8 +336,8 @@ if(($item->bpjs_kes_employee ?? 0) > 0) $bpjsLines[] = 'Kes Rp '.number_format($
 
 {{-- SIGNATURE --}}
 <div style="border:1pt solid #e2e8f0; border-radius:7pt; margin-bottom:8pt; background:#fff;">
-    <div style="background:#475569; border-radius:7pt 7pt 0 0; padding:5pt 14pt;">
-        <div style="font-size:6pt; font-weight:700; color:#cbd5e1; text-transform:uppercase; letter-spacing:.4pt;">&#9632;&nbsp; Persetujuan &amp; Tanda Tangan</div>
+    <div style="background:#0f172a; border-radius:7pt 7pt 0 0; padding:5pt 14pt;">
+        <div style="font-size:6pt; font-weight:700; color:#cbd5e1; text-transform:uppercase; letter-spacing:.4pt;">Persetujuan &amp; Tanda Tangan</div>
     </div>
     <div style="padding:12pt 14pt 10pt;">
         <table width="100%" cellpadding="0" cellspacing="0">

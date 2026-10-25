@@ -313,7 +313,7 @@
                 </div>
             </div>
             <div class="cust-action-bar">
-                <x-ui.button href="{{ $isEdit ? route('quotations.show', $quotation) : route('quotations.index') }}" variant="outline">Batal</x-ui.button>
+                <x-ui.button :href="$isEdit ? route('quotations.show', $quotation) : route('quotations.index')" variant="outline">Batal</x-ui.button>
                 <x-ui.button type="submit" variant="primary" class="px-4">
                     <iconify-icon icon="mdi:content-save-outline" class="me-1"></iconify-icon>
                     {{ $isEdit ? 'Perbarui Quotation' : 'Simpan Quotation' }}
@@ -399,7 +399,10 @@
     }
 
     // Seed existing items (edit mode)
-    var seedItems = {!! $isEdit && $existingItems->isNotEmpty()
+    // Js::from() (not ->toJson() wrapped in a raw Blade echo) HEX-escapes <, >, &, ' so a
+    // description/specifications value containing a closing script tag can't break
+    // out of this inline script block (stored XSS — see audit finding H-10).
+    var seedItems = {!! \Illuminate\Support\Js::from($isEdit && $existingItems->isNotEmpty()
         ? $existingItems->map(fn($i) => [
             'description'      => $i->description,
             'specifications'   => $i->specifications,
@@ -407,8 +410,8 @@
             'quantity'         => $i->quantity,
             'unit_price'       => $i->unit_price,
             'discount_percent' => $i->discount_percent,
-          ])->toJson()
-        : '[]' !!};
+          ])
+        : []) !!};
     if (seedItems.length) { seedItems.forEach(addRow); } else { addRow(); }
 
     document.getElementById('addRowBtn').addEventListener('click', () => addRow());
@@ -420,7 +423,16 @@
         const vf  = document.getElementById('vehicleFields');
         if(vf) vf.style.display = cat === 'building_film' ? 'none' : '';
     }
-    document.getElementById('categorySelect')?.addEventListener('change', toggleVehicle);
+    document.getElementById('categorySelect')?.addEventListener('change', function(){
+        toggleVehicle();
+        // Kategori gedung tidak butuh data kendaraan — kosongkan supaya tidak ada
+        // sisa nilai lama yang ikut ter-submit walau field-nya disembunyikan
+        // (server juga menjaga hal yang sama, ini cuma agar form tidak membingungkan).
+        if (this.value === 'building_film') {
+            document.getElementById('vehicleFields')
+                ?.querySelectorAll('input').forEach(el => el.value = '');
+        }
+    });
     toggleVehicle();
 
     // Sidebar scroll spy

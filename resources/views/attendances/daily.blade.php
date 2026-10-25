@@ -26,8 +26,8 @@
         <p class="text-muted mb-0" style="font-size:13px;">Input kehadiran karyawan per tanggal</p>
     </div>
     <div class="d-flex gap-2">
-        <x-ui.button href="{{ route('attendances.report') }}" variant="outline" size="sm">Lap. Absensi</x-ui.button>
-        <x-ui.button href="{{ route('attendances.monthlyReport') }}" variant="outline" size="sm">Lap. Gaji</x-ui.button>
+        <x-ui.button :href="route('attendances.report')" variant="outline" size="sm">Lap. Absensi</x-ui.button>
+        <x-ui.button :href="route('attendances.monthlyReport')" variant="outline" size="sm">Lap. Gaji</x-ui.button>
     </div>
 </div>
 
@@ -64,6 +64,10 @@
     $cntBelum      = max(0, $employees->count() - $attendanceMap->count());
 @endphp
 
+@php
+    $statsColorMap = ['secondary'=>'blue','success'=>'green','info'=>'blue','warning'=>'amber','danger'=>'red'];
+    $mdIcon = fn (string $name) => '<iconify-icon icon="'.$name.'"></iconify-icon>';
+@endphp
 <div class="row g-3 mb-4">
     @foreach([
         ['label'=>'Total',   'val'=>$employees->count(), 'icon'=>'mdi:account-group',   'color'=>'secondary'],
@@ -74,13 +78,13 @@
         ['label'=>'Alpha',   'val'=>$cntAbsent,          'icon'=>'mdi:account-remove',   'color'=>'danger'],
     ] as $s)
     <div class="col-6 col-sm-4 col-md-2">
-        <x-ui.card>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <iconify-icon icon="{{ $s['icon'] }}" class="text-{{ $s['color'] }}" style="font-size:18px;"></iconify-icon>
-                <span class="text-muted" style="font-size:12px;">{{ $s['label'] }}</span>
-            </div>
-            <p class="mb-0 fw-bold fs-4 text-{{ $s['color'] }}">{{ $s['val'] }}</p>
-        </x-ui.card>
+        <x-ui.stats-card
+            :label="$s['label']"
+            :value="$s['val']"
+            :color="$statsColorMap[$s['color']] ?? 'blue'"
+            :icon="$mdIcon($s['icon'])"
+            accent
+        />
     </div>
     @endforeach
 </div>
@@ -173,7 +177,7 @@
 
             <div class="p-3 border-top d-flex gap-2">
                 <x-ui.button variant="primary" type="submit">Simpan Absensi</x-ui.button>
-                <x-ui.button href="{{ route('attendances.daily') }}" variant="outline">Reset</x-ui.button>
+                <x-ui.button :href="route('attendances.daily')" variant="outline">Reset</x-ui.button>
             </div>
         @endif
     </form>

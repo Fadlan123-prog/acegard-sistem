@@ -65,10 +65,13 @@ class PurchasingDashboardController extends Controller
             ->limit(8)
             ->get();
 
+        $upcomingBirthdays = \App\Models\Employee::upcomingBirthdays($branchId);
+
         return view('purchasing.dashboard', compact(
             'purchasesThisMonth', 'purchasesCount',
             'lowFilmStock', 'lowSupportingGoods',
             'recentPurchases', 'stockAlerts', 'lowGoods',
+            'upcomingBirthdays',
         ));
     }
 }

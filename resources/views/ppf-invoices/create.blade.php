@@ -9,7 +9,7 @@
   @slot('header')
     <div class="d-flex justify-content-between align-items-center">
       <div class="ui-card-title">Buat Invoice PPF</div>
-      <x-ui.button href="{{ route('ppf-customers.index') }}" variant="secondary" size="sm">Kembali</x-ui.button>
+      <x-ui.button :href="route('ppf-customers.index')" variant="secondary" size="sm">Kembali</x-ui.button>
     </div>
   @endslot
 

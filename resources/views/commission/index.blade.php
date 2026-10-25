@@ -6,13 +6,6 @@
 
 @section('content')
 
-@if(session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-@if(session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
-
 @php
     $roleConfig = [
         'installer'    => ['label' => 'Installer',    'color' => '#eff6ff', 'border' => '#93c5fd', 'text' => '#1d4ed8', 'icon' => 'mdi:hammer-wrench'],
@@ -66,7 +59,7 @@
             <a class="nav-link px-3 py-2 fw-semibold {{ $activeSource === $key ? 'active' : '' }}"
                href="{{ route('commission.index', array_merge($tabParams, ['source_type' => $key])) }}"
                style="font-size:.85rem;">
-                <i class="{{ $st['icon'] }} me-1" style="font-size:14px;"></i>
+                <iconify-icon icon="{{ $st['icon'] }}" class="me-1" style="font-size:14px;"></iconify-icon>
                 {{ $st['label'] }}
             </a>
         </li>
@@ -77,22 +70,22 @@
 {{-- ── SUMMARY CARDS ── --}}
 <div class="row g-3 mb-4">
     <div class="col-sm-6 col-xl-3">
-        <x-ui.stats-card label="Total Komisi" :value="'Rp'.number_format($totalSemua, 0, ',', '.')" color="blue">
+        <x-ui.stats-card label="Total Komisi" :value="'Rp'.number_format($totalSemua, 0, ',', '.')" color="blue" accent>
             <span>{{ $cntSemua }} transaksi</span>
         </x-ui.stats-card>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <x-ui.stats-card label="Installer" :value="'Rp'.number_format($totalInstaller, 0, ',', '.')" color="blue">
+        <x-ui.stats-card label="Installer" :value="'Rp'.number_format($totalInstaller, 0, ',', '.')" color="blue" accent>
             <span>teknisi + kenek</span>
         </x-ui.stats-card>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <x-ui.stats-card label="Marketing" :value="'Rp'.number_format($totalMarketing, 0, ',', '.')" color="purple">
+        <x-ui.stats-card label="Marketing" :value="'Rp'.number_format($totalMarketing, 0, ',', '.')" color="purple" accent>
             <span>{{ $roleSummary->get('marketing')?->cnt ?? 0 }} transaksi</span>
         </x-ui.stats-card>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <x-ui.stats-card label="Override Adit" :value="'Rp'.number_format($totalOverride, 0, ',', '.')" color="amber">
+        <x-ui.stats-card label="Override Adit" :value="'Rp'.number_format($totalOverride, 0, ',', '.')" color="amber" accent>
             <span>{{ $roleSummary->get('adit_override')?->cnt ?? 0 }} transaksi</span>
         </x-ui.stats-card>
     </div>
@@ -151,10 +144,10 @@
                     <x-ui.button type="submit" variant="primary" size="sm" class="flex-fill">
                         <iconify-icon icon="mdi:filter" class="me-1"></iconify-icon>Filter
                     </x-ui.button>
-                    <x-ui.button href="{{ route('commission.index', $activeSource ? ['source_type' => $activeSource] : []) }}" variant="secondary" size="sm">
+                    <x-ui.button :href="route('commission.index', $activeSource ? ['source_type' => $activeSource] : [])" variant="secondary" size="sm">
                         <iconify-icon icon="mdi:refresh"></iconify-icon>
                     </x-ui.button>
-                    <x-ui.button href="{{ route('commission.export', array_filter($filters)) }}" variant="success" size="sm" title="Export Excel">
+                    <x-ui.button :href="route('commission.export', array_filter($filters))" variant="success" size="sm" title="Export Excel">
                         <iconify-icon icon="mdi:microsoft-excel"></iconify-icon>
                     </x-ui.button>
                 </div>
@@ -269,7 +262,7 @@
                             </td>
                             <td class="text-end pe-3">
                                 <div class="d-flex gap-1 justify-content-end">
-                                    <x-ui.button href="{{ route('commission.move', $c->id) }}" variant="secondary" size="sm" title="Pindahkan komisi ke karyawan lain">
+                                    <x-ui.button :href="route('commission.move', $c->id)" variant="secondary" size="sm" title="Pindahkan komisi ke karyawan lain">
                                         <iconify-icon icon="mdi:account-switch-outline"></iconify-icon>
                                     </x-ui.button>
                                     @if($canToggle)

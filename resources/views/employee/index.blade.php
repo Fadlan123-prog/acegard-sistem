@@ -15,7 +15,7 @@
                     Data karyawan digunakan untuk komisi, absensi, dan laporan gaji.
                 </small>
             </div>
-            <x-ui.button href="{{ route('employee.create') }}" variant="primary" size="sm">
+            <x-ui.button :href="route('employee.create')" variant="primary" size="sm">
                 + Tambah Karyawan
             </x-ui.button>
         </div>
@@ -58,7 +58,7 @@
             <x-ui.button type="submit" variant="outline">Filter</x-ui.button>
 
             @if(request()->query())
-                <x-ui.button href="{{ route('employee.index') }}" variant="secondary">Reset</x-ui.button>
+                <x-ui.button :href="route('employee.index')" variant="secondary">Reset</x-ui.button>
             @endif
         </div>
 
@@ -132,7 +132,7 @@
                                         :variant="$employee->is_active ? 'warning' : 'success'"
                                         size="sm"
                                         :title="$employee->is_active ? 'Nonaktifkan' : 'Aktifkan'"
-                                        :onclick="'return confirm(\'' . ($employee->is_active ? 'Nonaktifkan' : 'Aktifkan') . ' karyawan ini?\'')"
+                                        :onclick="'return confirm(\'' . ($employee->is_active ? 'Nonaktifkan' : 'Aktifkan') . ' karyawan ini?\')'"
                                     >
                                         <iconify-icon icon="{{ $employee->is_active ? 'lucide:user-x' : 'lucide:user-check' }}"></iconify-icon>
                                     </x-ui.button>

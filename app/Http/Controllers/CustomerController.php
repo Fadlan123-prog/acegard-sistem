@@ -101,6 +101,13 @@ class CustomerController extends Controller
     }
 public function store(Request $request, InstallTypeResolver $resolver, CommissionService $commission, CustomerCommissionSyncService $commissionSync, FilmStockPoolService $filmStock)
 {
+    // SO yang sudah ditugaskan teknisi/kenek-nya (lewat SalesOrderController::assign())
+    // jadi sumber kebenaran untuk tukang_id/kenek_id/marketing_id Customer ini —
+    // tidak boleh dipilih ulang manual di sini. Lihat juga customer/create.blade.php
+    // yang menampilkannya read-only ketika $fromSo->tukang_id sudah terisi.
+    $fromSo = $request->filled('from_so') ? SalesOrder::find($request->integer('from_so')) : null;
+    $tukangLockedFromSo = (bool) $fromSo?->tukang_id;
+
     // 1) Validasi
     $request->validate([
         'wsn'               => ['required','string'],
@@ -126,7 +133,9 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
         'installer_share.kenek'      => ['nullable','integer','min:0','max:100'],
         'normalize_100'              => ['nullable','boolean'],
 
-        'tukang_id'         => ['required','exists:employees,id'],
+        // required hanya kalau tidak datang dari SO yang sudah ditugaskan —
+        // nilainya sendiri diambil paksa dari $fromSo di bawah, bukan dari input ini.
+        'tukang_id'         => [$tukangLockedFromSo ? 'nullable' : 'required', 'exists:employees,id'],
         'kenek_id'          => ['nullable','exists:employees,id'],
         'marketing_id'      => ['nullable','exists:employees,id'],
 
@@ -142,6 +151,12 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
 
         'admin_password'     => ['required','string'],
     ]);
+
+    $tukangId    = $tukangLockedFromSo ? (int) $fromSo->tukang_id : (int) $request->tukang_id;
+    $kenekId     = $tukangLockedFromSo ? $fromSo->kenek_id : ($request->filled('kenek_id') ? (int) $request->kenek_id : null);
+    $marketingId = $tukangLockedFromSo && $fromSo->marketing_id
+        ? $fromSo->marketing_id
+        : ($request->filled('marketing_id') ? (int) $request->marketing_id : null);
 
     // 2) Konfirmasi admin
     $admin = Auth::user();
@@ -180,9 +195,9 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
 
             'install_type'      => $request->install_type,
             'has_panoramic'     => $request->boolean('has_panoramic'),
-            'tukang_id'         => (int)$request->tukang_id,
-            'kenek_id'          => $request->filled('kenek_id') ? (int)$request->kenek_id : null,
-            'marketing_id'      => $request->filled('marketing_id') ? (int)$request->marketing_id : null,
+            'tukang_id'         => $tukangId,
+            'kenek_id'          => $kenekId,
+            'marketing_id'      => $marketingId,
             'install_date'      => $request->install_date,
         ]);
 
@@ -205,7 +220,7 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
 
         // 5) Final type (abaikan row customer yang baru dibuat)
         $finalType = $resolver->decideAfterInsert(
-            (int)$request->tukang_id,
+            $tukangId,
             $request->install_type,
             $request->boolean('has_panoramic'),
             $customer->id,
@@ -217,15 +232,12 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
 
         DB::commit();
 
-        if ($request->filled('from_so')) {
-            $so = SalesOrder::find($request->integer('from_so'));
-            if ($so && $so->isCompleted() && !$so->isConverted()) {
-                $so->update([
-                    'converted_to_type' => Customer::class,
-                    'converted_to_id'   => $customer->id,
-                    'converted_at'      => now(),
-                ]);
-            }
+        if ($fromSo && $fromSo->isCompleted() && !$fromSo->isConverted()) {
+            $fromSo->update([
+                'converted_to_type' => Customer::class,
+                'converted_to_id'   => $customer->id,
+                'converted_at'      => now(),
+            ]);
         }
 
         return redirect()
@@ -413,6 +425,7 @@ public function edit(Customer $customer)
                         $customer->id,
                         $invoice->id,
                         $baseType,
+                        (int) $invoice->price,
                     );
                 }
 
@@ -494,6 +507,7 @@ public function edit(Customer $customer)
             })
             ->select([
                 'c.id as customer_id',
+                'c.branch_id',
                 'c.name',
                 DB::raw('CAST(c.card_number AS CHAR) as card_number'),
                 'c.vehicle_brand',
@@ -518,6 +532,7 @@ public function edit(Customer $customer)
              ->whereRaw('REPLACE(REPLACE(cb.card_number," ", ""),"-","") = ?', [$normalize])
              ->select([
                 'cb.id as customer_building_id',
+                    'cb.branch_id',
                     'cb.name',
                     'cb.card_number',
                     'cb.address',
@@ -536,6 +551,15 @@ public function edit(Customer $customer)
         }
         $isBuilding = true;
         $row = $building;
+        }
+
+        // Authenticated route, but not branch-scoped by default — without
+        // this, any logged-in staffer (any branch) could enumerate other
+        // branches' customer warranty cards by card number (audit finding M-5).
+        $user = auth()->user();
+        if (!$user->hasRole('superadmin')) {
+            $allowedBranchIds = $user->branches()->pluck('branches.id')->all();
+            abort_unless(in_array((int) $row->branch_id, $allowedBranchIds), 403);
         }
 
         [$colors, $template] = $this->styleByCategory((int) ($row->cat_id ?? 1));

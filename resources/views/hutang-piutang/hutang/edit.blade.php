@@ -90,7 +90,7 @@
                     <x-ui.button variant="primary" type="submit">
                         <iconify-icon icon="mdi:content-save-outline" class="me-1"></iconify-icon>Simpan Perubahan
                     </x-ui.button>
-                    <x-ui.button href="{{ route('hutang.show', $payable->id) }}" variant="outline">Batal</x-ui.button>
+                    <x-ui.button :href="route('hutang.show', $payable->id)" variant="outline">Batal</x-ui.button>
                 </div>
             </form>
         </x-ui.card>

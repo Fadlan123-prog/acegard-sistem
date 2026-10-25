@@ -22,7 +22,7 @@
   <div class="container mw-1680">
     <div class="position-relative z-1" data-cues="slideInUp" data-group="images">
       <div class="text-center">
-        <img src="{{ asset('assets/images/acegard-logo.svg') }}" alt="logo" style="width: 350px; height:auto;">
+        <img src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}" alt="logo" style="width: 350px; height:auto; filter: brightness(0) invert(1);">
         <div class="row">
           <div class="col-md-4">
             <h3 style="color:#fff; text-align:end;">Enter Your Warranty <br>Card Number</h3>

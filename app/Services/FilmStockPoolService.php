@@ -235,6 +235,96 @@ class FilmStockPoolService
         });
     }
 
+    /**
+     * Roll fisik tersedia (status in_warehouse) untuk kriteria produk tertentu —
+     * dipakai Invoice Mitra, yang menjual per roll utuh (bukan per meter terpotong
+     * seperti consumeFromPool), jadi stoknya dihitung per roll, bukan agregat meter.
+     *
+     * Tidak difilter per usage_for (car/building/universal): roll yang dijual ke
+     * mitra itu barang fisik yang sama persis mau dia ke-tag car atau building saat
+     * Roll Masuk — tag itu cuma relevan untuk konsumsi job instalasi, bukan untuk
+     * penjualan grosir ke mitra. Dicocokkan lewat nama produk (film_type/darkness_code),
+     * bukan FK category_product_id, supaya roll yang di-input di kategori mobil pun
+     * tetap ketemu kalau namanya sama dengan kategori gedung yang dipakai di sini.
+     */
+    public function availableRollCount(array $criteria): int
+    {
+        $identity = $this->resolveIdentityFromCriteria($criteria);
+        $branchId = (int) $criteria['branch_id'];
+
+        return FilmRollEntry::query()
+            ->where('branch_id', $branchId)
+            ->where('status', 'in_warehouse')
+            ->whereRaw('LOWER(TRIM(film_type)) = ?', [strtolower(trim($identity['film_type']))])
+            ->whereRaw('LOWER(TRIM(darkness_code)) = ?', [strtolower(trim($identity['darkness_code']))])
+            ->count();
+    }
+
+    /**
+     * Jual N roll utuh ke mitra/non-franchise: kunci N roll in_warehouse tertua (FIFO),
+     * tandai sold_to_mitra, dan sesuaikan total pool-nya — sama persis prinsipnya dengan
+     * consumeFromPool() tapi beroperasi per roll diskrit, bukan potongan meter.
+     * Return array roll_code yang terjual, untuk dicatat di invoice item.
+     *
+     * @throws ValidationException kalau roll yang tersedia kurang dari $qty
+     */
+    public function sellRollsToMitra(array $criteria, int $qty, array $meta = []): array
+    {
+        return DB::transaction(function () use ($criteria, $qty, $meta) {
+            $identity = $this->resolveIdentityFromCriteria($criteria);
+            $branchId = (int) $criteria['branch_id'];
+
+            // Lintas usage_for — lihat catatan di availableRollCount().
+            $entries = FilmRollEntry::query()
+                ->where('branch_id', $branchId)
+                ->where('status', 'in_warehouse')
+                ->whereRaw('LOWER(TRIM(film_type)) = ?', [strtolower(trim($identity['film_type']))])
+                ->whereRaw('LOWER(TRIM(darkness_code)) = ?', [strtolower(trim($identity['darkness_code']))])
+                ->orderBy('received_date')
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->limit($qty)
+                ->get();
+
+            if ($entries->count() < $qty) {
+                throw ValidationException::withMessages([
+                    'roll' => "Stok {$identity['film_type']} {$identity['darkness_code']} di pusat tidak cukup. " .
+                        "Dibutuhkan {$qty} roll, tersedia {$entries->count()} roll.",
+                ]);
+            }
+
+            $soldCodes = [];
+            $poolTotals = [];
+
+            foreach ($entries as $entry) {
+                $entry->status = 'sold_to_mitra';
+                $entry->current_branch_id = null;
+                if (!empty($meta['notes'])) {
+                    $entry->notes = trim(($entry->notes ? $entry->notes . ' | ' : '') . $meta['notes']);
+                }
+                $entry->save();
+
+                $soldCodes[] = $entry->roll_code;
+                $poolTotals[$entry->film_stock_pool_id] = ($poolTotals[$entry->film_stock_pool_id] ?? 0) + (float) $entry->length_meter;
+            }
+
+            foreach ($poolTotals as $poolId => $lengthSold) {
+                $pool = FilmStockPool::lockForUpdate()->find($poolId);
+                if (!$pool) {
+                    continue;
+                }
+
+                $after = round((float) $pool->remaining_length_meter - $lengthSold, 2);
+                $pool->remaining_length_meter = max(0, $after);
+                $pool->total_used_length_meter = round((float) $pool->total_used_length_meter + $lengthSold, 2);
+                $pool->remaining_area_meter = round($pool->remaining_length_meter * (float) $pool->width_meter, 2);
+                $pool->save();
+            }
+
+            return $soldCodes;
+        });
+    }
+
     public function consumeForCar(Customer $customer, array $customerProducts, string $installType): void
     {
         foreach ($customerProducts as $row) {

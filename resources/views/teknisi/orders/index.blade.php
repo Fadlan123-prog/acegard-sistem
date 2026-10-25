@@ -11,16 +11,10 @@
 @endphp
 
 {{-- Flash --}}
-@if (session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-@if (session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
 
 {{-- Header --}}
 <div class="d-flex align-items-center gap-3 mb-4">
-    <x-ui.button href="{{ route('teknisi.dashboard') }}" variant="outline" size="sm">
+    <x-ui.button :href="route('teknisi.dashboard')" variant="outline" size="sm">
         <x-slot name="icon"><svg viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></x-slot>
         Dashboard
     </x-ui.button>
@@ -29,6 +23,8 @@
         <div class="ui-text-muted" style="font-size:12px">{{ $employee->name }}</div>
     </div>
 </div>
+
+@include('teknisi._incoming-sales-orders')
 
 {{-- Filter Tabs --}}
 <x-ui.card class="mb-3">
@@ -137,7 +133,7 @@
 
                 {{-- Actions --}}
                 <div class="d-flex flex-column gap-1 flex-shrink-0">
-                    <x-ui.button href="{{ route('teknisi.orders.show', $order->id) }}" variant="outline" size="sm">
+                    <x-ui.button :href="route('teknisi.orders.show', $order->id)" variant="outline" size="sm">
                         Detail
                     </x-ui.button>
 
@@ -151,7 +147,7 @@
                                 </x-ui.button>
                             </form>
                         @endif
-                        <x-ui.button href="{{ route('teknisi.job.complete.form', $order->id) }}" variant="success" size="sm">
+                        <x-ui.button :href="route('teknisi.job.complete.form', $order->id)" variant="success" size="sm">
                             <iconify-icon icon="mdi:camera-outline"></iconify-icon> Selesaikan
                         </x-ui.button>
                     @endif

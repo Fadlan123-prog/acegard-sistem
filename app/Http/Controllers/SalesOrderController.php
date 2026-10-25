@@ -13,6 +13,7 @@ use App\Services\DocumentNumberService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class SalesOrderController extends Controller
 {
@@ -116,6 +117,8 @@ class SalesOrderController extends Controller
                 'total_amount' => 0,
             ]);
 
+            // Teknisi/kenek/technicians SENGAJA tidak diisi di sini — lihat assign().
+
             $this->syncItems($so, $items);
             $so->recalculate();
 
@@ -146,8 +149,14 @@ class SalesOrderController extends Controller
     public function show(SalesOrder $salesOrder)
     {
         $this->authorizeAccess($salesOrder);
-        $salesOrder->load(['branch', 'quotation', 'lead', 'items', 'tukang', 'kenek', 'marketing', 'creator']);
-        return view('sales-orders.show', compact('salesOrder'));
+        $salesOrder->load(['branch', 'quotation', 'lead', 'items', 'tukang', 'kenek', 'marketing', 'technicians', 'creator']);
+
+        $employees = Employee::where('branch_id', $salesOrder->branch_id)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return view('sales-orders.show', compact('salesOrder', 'employees'));
     }
 
     public function edit(SalesOrder $salesOrder)
@@ -155,7 +164,7 @@ class SalesOrderController extends Controller
         $this->authorizeAccess($salesOrder);
         abort_unless($salesOrder->isEditable(), 403, 'Sales Order yang sedang dikerjakan tidak dapat diedit.');
 
-        $salesOrder->load('items');
+        $salesOrder->load(['items', 'technicians']);
         $employees = Employee::where('branch_id', $salesOrder->branch_id)
             ->where('is_active', true)->orderBy('name')->get();
 
@@ -216,6 +225,12 @@ class SalesOrderController extends Controller
         $this->authorizeAccess($salesOrder);
         abort_unless($salesOrder->isInProgress(), 422, 'Hanya SO yang sedang dikerjakan yang bisa diselesaikan.');
 
+        if ($salesOrder->assignsMultipleTechnicians()) {
+            abort_if($salesOrder->technicians()->count() === 0, 422, 'Tugaskan minimal satu teknisi terlebih dahulu sebelum menyelesaikan SO.');
+        } else {
+            abort_if(!$salesOrder->tukang_id, 422, 'Tugaskan teknisi terlebih dahulu sebelum menyelesaikan SO.');
+        }
+
         $salesOrder->update(['status' => 'completed', 'completed_at' => now()]);
 
         return back()->with('success', 'Sales Order selesai! Silakan buat Customer & Invoice.');
@@ -236,6 +251,83 @@ class SalesOrderController extends Controller
         ]);
 
         return back()->with('success', 'Sales Order dibatalkan.');
+    }
+
+    // ── Penugasan teknisi/kenek ─────────────────────────────────────────────
+
+    /**
+     * Tugaskan (atau ganti) teknisi/kenek pada SO. Hanya boleh setelah SO
+     * dikonfirmasi — ini satu-satunya jalur penugasan, termasuk untuk
+     * reassignment di tengah jalan (confirmed maupun in_progress). Belum ada
+     * komisi di tahap ini (dibuat saat pelunasan invoice), jadi tidak perlu
+     * logika cancel-komisi seperti WorkOrderController::assign() yang
+     * menangani reassignment setelah Customer/Invoice dibuat.
+     */
+    public function assign(Request $request, SalesOrder $salesOrder)
+    {
+        $this->authorizeAccess($salesOrder);
+
+        abort_unless(
+            in_array($salesOrder->status, ['confirmed', 'in_progress']),
+            422,
+            'SO harus dikonfirmasi terlebih dahulu sebelum menugaskan teknisi/kenek.'
+        );
+
+        if ($salesOrder->assignsMultipleTechnicians()) {
+            $data = $request->validate([
+                'technicians'   => 'nullable|array',
+                'technicians.*' => [
+                    'integer',
+                    Rule::exists('employees', 'id')->where('branch_id', $salesOrder->branch_id),
+                ],
+            ]);
+            $salesOrder->technicians()->sync($data['technicians'] ?? []);
+
+            return back()->with('success', 'Penugasan teknisi diperbarui.');
+        }
+
+        $request->merge([
+            'tukang_id' => $request->input('tukang_id') ?: null,
+            'kenek_id'  => $request->input('kenek_id') ?: null,
+        ]);
+
+        $employeeInBranch = Rule::exists('employees', 'id')->where('branch_id', $salesOrder->branch_id);
+
+        $validated = $request->validate([
+            'tukang_id' => ['nullable', 'integer', $employeeInBranch],
+            'kenek_id'  => ['nullable', 'integer', $employeeInBranch],
+        ]);
+
+        $oldTukangId = $salesOrder->tukang_id ? (int) $salesOrder->tukang_id : null;
+        $oldKenekId  = $salesOrder->kenek_id ? (int) $salesOrder->kenek_id : null;
+        $newTukangId = $validated['tukang_id'] ? (int) $validated['tukang_id'] : null;
+        $newKenekId  = $validated['kenek_id'] ? (int) $validated['kenek_id'] : null;
+
+        $tukangChanged = $oldTukangId !== $newTukangId;
+        $kenekChanged  = $oldKenekId !== $newKenekId;
+
+        if (!$tukangChanged && !$kenekChanged) {
+            return back()->with('info', 'Penugasan tidak berubah.');
+        }
+
+        $salesOrder->update([
+            'tukang_id' => $newTukangId,
+            'kenek_id'  => $newKenekId,
+        ]);
+
+        if ($newTukangId && $tukangChanged) {
+            $assignedUser = \App\Models\User::where('employee_id', $newTukangId)->first();
+            if ($assignedUser) {
+                $salesOrder->load('branch');
+                $assignedUser->notify(new \App\Notifications\SalesOrderAssigned($salesOrder));
+            }
+        }
+
+        $message = $newTukangId
+            ? 'Penugasan diperbarui. Teknisi akan melihat pekerjaan ini di dashboard mereka.'
+            : 'Teknisi dilepas dari SO ini.';
+
+        return back()->with('success', $message);
     }
 
     // ── SPK ──────────────────────────────────────────────────────────────
@@ -262,7 +354,7 @@ class SalesOrderController extends Controller
         $this->authorizeAccess($salesOrder);
         abort_unless($salesOrder->hasSpk(), 404, 'SPK belum diterbitkan untuk SO ini.');
 
-        $salesOrder->load(['branch', 'items', 'tukang', 'kenek', 'marketing', 'quotation', 'creator']);
+        $salesOrder->load(['branch', 'items', 'tukang', 'kenek', 'marketing', 'technicians', 'quotation', 'creator']);
 
         return view('sales-orders.spk-print', compact('salesOrder'));
     }
@@ -305,7 +397,7 @@ class SalesOrderController extends Controller
 
     private function validateSalesOrder(Request $request): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'lead_id'          => 'nullable|exists:leads,id',
             'quotation_id'     => 'nullable|exists:quotations,id',
             'date'             => 'required|date',
@@ -319,12 +411,12 @@ class SalesOrderController extends Controller
             'vehicle_model'    => 'nullable|string|max:100',
             'vehicle_year'     => 'nullable|string|max:10',
             'vehicle_plate'    => 'nullable|string|max:20',
-            'tukang_id'        => 'nullable|exists:employees,id',
-            'kenek_id'         => 'nullable|exists:employees,id',
             'marketing_id'     => 'nullable|exists:employees,id',
             'discount_amount'  => 'nullable|integer|min:0',
             'notes'            => 'nullable|string|max:2000',
         ]);
+
+        return $validated;
     }
 
     private function validateItems(Request $request): array

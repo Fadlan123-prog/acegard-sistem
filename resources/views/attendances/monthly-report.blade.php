@@ -10,6 +10,8 @@
 
 @php
     $grandMonthlySalary = $report->sum('monthly_salary');
+    $grandDailyProrate  = $report->sum('daily_prorate');
+    $grandBaseGaji      = $report->sum('base_gaji');
     $grandDeduction     = $report->sum('deduction_amount');
     $grandNetSalary     = $report->sum('salary');
     $grandTambahan      = $report->sum('total_tambahan');
@@ -64,7 +66,7 @@
 
 {{-- Stats --}}
 <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-4 col-lg-3">
         <x-ui.card class="h-100">
             <p class="text-muted mb-1" style="font-size:12px;">Periode</p>
             <p class="fw-bold mb-0" style="font-size:14px;">
@@ -73,14 +75,23 @@
             <p class="text-muted mb-0" style="font-size:11px;">{{ $daysInMonth }} hari dalam bulan ini</p>
         </x-ui.card>
     </div>
-    <div class="col-6 col-md-3">
-        <x-ui.stats-card label="Total Karyawan" :value="$report->count()" color="blue" class="h-100" />
+    <div class="col-6 col-md-4 col-lg-3">
+        <x-ui.stats-card label="Total Karyawan" :value="$report->count()" color="blue" accent class="h-100" />
     </div>
-    <div class="col-6 col-md-3">
-        <x-ui.stats-card label="Total Potongan" :value="'Rp'.number_format($grandDeduction,0,',','.')" color="red" class="h-100" />
+    <div class="col-6 col-md-4 col-lg-3">
+        <x-ui.stats-card label="Total Rate/Hari (Prorate)" :value="'Rp'.number_format($grandDailyProrate,0,',','.')" color="purple" accent class="h-100" />
     </div>
-    <div class="col-6 col-md-3">
-        <x-ui.stats-card label="Total Gaji Bersih" :value="'Rp'.number_format($grandNetSalary,0,',','.')" color="green" class="h-100" />
+    <div class="col-6 col-md-4 col-lg-3">
+        <x-ui.stats-card label="Total Prorate (Sebelum Potongan)" :value="'Rp'.number_format($grandBaseGaji,0,',','.')" color="purple" accent class="h-100" />
+    </div>
+    <div class="col-6 col-md-4 col-lg-3">
+        <x-ui.stats-card label="Total Tambahan" :value="'+Rp'.number_format($grandTambahan,0,',','.')" color="green" accent class="h-100" />
+    </div>
+    <div class="col-6 col-md-4 col-lg-3">
+        <x-ui.stats-card label="Total Potongan" :value="'Rp'.number_format($grandDeduction + $grandPotonganAdj,0,',','.')" color="red" accent class="h-100" />
+    </div>
+    <div class="col-6 col-md-4 col-lg-3">
+        <x-ui.stats-card label="Total Gaji Bersih" :value="'Rp'.number_format($grandNetSalary,0,',','.')" color="green" accent class="h-100" />
     </div>
 </div>
 
@@ -168,13 +179,73 @@
 </x-ui.card>
 
 {{-- Table --}}
+<style>
+    /* table-layout:fixed + colgroup eksplisit supaya lebar tiap kolom presisi (bukan
+       tebakan browser) — tanpa ini offset sticky left: 44px pada kolom Nama bisa meleset
+       dari lebar asli kolom #, muncul celah putih tipis di antara keduanya saat scroll. */
+    .jp-report-table { table-layout: fixed; }
+    /* Kolom # dan Nama dibekukan (sticky) saat scroll horizontal, supaya baris karyawan
+       tetap terbaca meski tabel punya banyak kolom rincian di kanan. */
+    .jp-report-table thead { position: sticky; top: 0; z-index: 5; }
+    .jp-report-table th:nth-child(1),
+    .jp-report-table td:nth-child(1) { position: sticky; left: 0; z-index: 3; width: 44px; }
+    .jp-report-table th:nth-child(2),
+    .jp-report-table td:nth-child(2) { position: sticky; left: 44px; z-index: 3; width: 170px; }
+    .jp-report-table thead th:nth-child(1),
+    .jp-report-table thead th:nth-child(2) { z-index: 6; }
+    .jp-report-table tbody td:nth-child(1),
+    .jp-report-table tbody td:nth-child(2) { background-color: #fff; }
+    .jp-report-table tbody tr:hover td:nth-child(1),
+    .jp-report-table tbody tr:hover td:nth-child(2) { background-color: #f5f5f7; }
+    .jp-report-table tfoot td:nth-child(1),
+    .jp-report-table tfoot td:nth-child(2) { background-color: #e2e3e5; }
+    .jp-report-table .grp-att   { background: #1e3a5f; color: #93c5fd; }
+    .jp-report-table .grp-calc  { background: #14532d; color: #86efac; }
+    .jp-report-table .grp-cut1  { background: #7f1d1d; color: #fca5a5; }
+    .jp-report-table .grp-bonus { background: #166534; color: #bbf7d0; }
+    .jp-report-table .grp-add   { background: #166534; color: #bbf7d0; }
+    .jp-report-table .grp-cut2  { background: #7f1d1d; color: #fca5a5; }
+    .jp-report-table .grp-final { background: #064e3b; color: #a7f3d0; }
+    .jp-report-table thead tr.hdr-grp th { font-size: 12px; }
+    .jp-report-table thead tr.hdr-sub th { font-size: 11.5px; font-weight: 600; }
+</style>
 <x-ui.card>
     <div class="table-responsive" style="max-height:600px; overflow-y:auto;">
-        <table class="table table-hover align-middle mb-0" style="min-width:1400px; font-size:13px; white-space:nowrap;">
-            <thead class="table-dark sticky-top">
-                <tr>
-                    <th class="ps-3" style="width:40px;">#</th>
-                    <th style="min-width:160px;">Nama</th>
+        <table class="table table-hover align-middle mb-0 jp-report-table" style="width:2175px; font-size:13px; white-space:nowrap;">
+            <colgroup>
+                <col style="width:44px;">
+                <col style="width:170px;">
+                <col style="width:52px;"><col style="width:52px;"><col style="width:52px;"><col style="width:52px;">
+                <col style="width:52px;"><col style="width:52px;"><col style="width:52px;"><col style="width:52px;">
+                <col style="width:110px;">
+                <col style="width:95px;">
+                <col style="width:80px;">
+                <col style="width:120px;">
+                <col style="width:90px;">
+                <col style="width:110px;">
+                <col style="width:80px;">
+                <col style="width:120px;">
+                <col style="width:100px;">
+                <col style="width:100px;">
+                <col style="width:95px;">
+                <col style="width:95px;">
+                <col style="width:95px;">
+                <col style="width:120px;">
+                <col style="width:135px;">
+            </colgroup>
+            <thead class="table-dark">
+                <tr class="hdr-grp">
+                    <th class="ps-3" rowspan="2">#</th>
+                    <th rowspan="2">Nama</th>
+                    <th class="text-center grp-att" colspan="8">Kehadiran</th>
+                    <th class="text-center grp-calc" colspan="4">Kalkulasi Dasar</th>
+                    <th class="text-center grp-cut1" colspan="2">Potongan Absen</th>
+                    <th class="text-center grp-bonus" colspan="2">Bonus Libur</th>
+                    <th class="text-center grp-add" colspan="2">Tambahan Manual</th>
+                    <th class="text-center grp-cut2" colspan="3">Potongan Manual</th>
+                    <th class="text-center grp-final" colspan="2">Hasil Akhir</th>
+                </tr>
+                <tr class="hdr-sub">
                     <th class="text-center">Masuk</th>
                     <th class="text-center">Libur</th>
                     <th class="text-center">Jatah</th>
@@ -183,20 +254,21 @@
                     <th class="text-center">Sakit</th>
                     <th class="text-center">Izin</th>
                     <th class="text-center">Alpha</th>
-                    <th class="text-end" style="min-width:130px;">Gaji Pokok</th>
-                    <th class="text-end" style="min-width:110px;">Rate/Hari</th>
-                    <th class="text-center" style="min-width:80px;">Total Masuk</th>
+                    <th class="text-end">Gaji Pokok</th>
+                    <th class="text-end">Rate/Hari</th>
+                    <th class="text-center">Total Masuk</th>
+                    <th class="text-end">Sebelum Potongan</th>
                     <th class="text-center">Alpha+Lebih</th>
-                    <th class="text-end" style="min-width:120px;">Potongan</th>
-                    <th class="text-center" style="min-width:80px;">Sisa Libur</th>
-                    <th class="text-end" style="min-width:120px; background:#064e3b; color:#a7f3d0;">Gaji Tambahan</th>
-                    <th class="text-end" style="min-width:110px; background:#166534; color:#bbf7d0;">+ Motor</th>
-                    <th class="text-end" style="min-width:110px; background:#166534; color:#bbf7d0;">+ Makan</th>
-                    <th class="text-end" style="min-width:110px; background:#7f1d1d; color:#fca5a5;">- Rokok</th>
-                    <th class="text-end" style="min-width:110px; background:#7f1d1d; color:#fca5a5;">- Kasbon</th>
-                    <th class="text-end" style="min-width:110px; background:#7f1d1d; color:#fca5a5;">- Pot.Absen</th>
-                    <th class="text-end" style="min-width:140px;">Sebelum Bulat</th>
-                    <th class="text-end pe-3" style="min-width:140px; background:#064e3b; color:#a7f3d0;">Gaji Bersih (Bulat)</th>
+                    <th class="text-end">Potongan</th>
+                    <th class="text-center">Sisa Libur</th>
+                    <th class="text-end">Gaji Tambahan</th>
+                    <th class="text-end">+ Motor</th>
+                    <th class="text-end">+ Makan</th>
+                    <th class="text-end">- Rokok</th>
+                    <th class="text-end">- Kasbon</th>
+                    <th class="text-end">- Pot.Absen</th>
+                    <th class="text-end">Sebelum Bulat</th>
+                    <th class="text-end pe-3">Gaji Bersih (Bulat)</th>
                 </tr>
             </thead>
             <tbody>
@@ -224,6 +296,7 @@
                         <td class="text-center">
                             <x-ui.badge variant="success" size="sm">{{ $row['present'] }} hr</x-ui.badge>
                         </td>
+                        <td class="text-end fw-semibold">Rp{{ number_format($row['base_gaji'], 0, ',', '.') }}</td>
                         <td class="text-center">
                             <x-ui.badge :variant="$row['deduction_days'] > 0 ? 'danger' : 'neutral'" size="sm">{{ $row['deduction_days'] }} hr</x-ui.badge>
                         </td>
@@ -263,8 +336,9 @@
                     <td class="text-center">{{ $report->sum('permission') }}</td>
                     <td class="text-center">{{ $report->sum('absent') }}</td>
                     <td class="text-end">Rp{{ number_format($grandMonthlySalary, 0, ',', '.') }}</td>
-                    <td></td>
+                    <td class="text-end">Rp{{ number_format($grandDailyProrate, 0, ',', '.') }}</td>
                     <td class="text-center">{{ $report->sum('present') }} hr</td>
+                    <td class="text-end">Rp{{ number_format($report->sum('base_gaji'), 0, ',', '.') }}</td>
                     <td class="text-center">{{ $report->sum('deduction_days') }} hr</td>
                     <td class="text-end text-danger">Rp{{ number_format($grandDeduction, 0, ',', '.') }}</td>
                     <td class="text-center">{{ $report->sum('unused_off') }} hr</td>

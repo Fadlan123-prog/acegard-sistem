@@ -163,9 +163,6 @@
     <ul class="mb-0">@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
   </x-ui.alert>
 @endif
-@if (session('error'))
-  <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
 
 @php
   $lockBranch      = $lockBranch ?? false;
@@ -695,7 +692,7 @@
           </div>
         </div>
         <div class="cust-action-bar">
-          <x-ui.button href="{{ route('ppf-customers.index') }}" variant="secondary">Batal</x-ui.button>
+          <x-ui.button :href="route('ppf-customers.index')" variant="secondary">Batal</x-ui.button>
           <x-ui.button type="submit" variant="primary" class="px-4">
             <iconify-icon icon="mdi:content-save-outline" class="me-1"></iconify-icon> Simpan Perubahan
           </x-ui.button>

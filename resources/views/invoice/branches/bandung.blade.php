@@ -169,7 +169,7 @@
     <table style="width: 100%;">
         <tr>
             <th style="text-align: left;">
-                <img style="width: 15rem;" src="{{ public_path('assets/images/logo.png') }}" alt="Logo Light">
+                <img style="width: 9.5rem;" src="{{ public_path('assets/frontend/images/new-acegard-logo.webp') }}" alt="Logo Light">
                 <p style="font-weight: bold;">
                     Komp. Sanggar Hurip Estate, Jl. Sanggar Kencana Utama No.1 <br> Jatisari, Kec. Buahbatu, Kota Bandung, Jawa Barat 40286
                 </p>
@@ -253,7 +253,7 @@
     <table style="width: 100%;">
         <tbody>
             <tr>
-                <td style="width: 15rem;">Brand</td>
+                <td style="width: 9.5rem;">Brand</td>
                 <td>: {{ $customer->vehicle_brand }}</td>
             </tr>
             <tr>
@@ -286,7 +286,7 @@
                     </table>
                 </div>
                 <div style="border: 1px solid #000; padding: 1rem; margin-top: 1rem; text-align: center; font-weight: bold; text-transform:uppercase;">
-                    TYPE OF TRANSACTION : {{ $invoice->type }}
+                    TYPE OF TRANSACTION : {{ $invoice->payment_method }}
                 </div>
                 <div style="margin-top: 1rem;">
                     <p>All Transactions are not refundable</p>
@@ -329,7 +329,7 @@
                 </div>
                 <div style="text-align: center; margin-top: 1rem;">
                     <p style="margin: 0;">SINCERELY,</p>
-                    <img src="{{ public_path('assets/images/blue-logo.png') }}" style="width: 15rem; transform: rotate(-5deg); margin: 1rem auto;" alt="cap Acegard">
+                    <img src="{{ public_path('assets/frontend/images/new-acegard-logo.webp') }}" style="width: 9.5rem; transform: rotate(-5deg); margin: 1rem auto;" alt="cap Acegard">
                     <p style="margin: 0;">ACEGARD INDONESIA</p>
                 </div>
             </td>

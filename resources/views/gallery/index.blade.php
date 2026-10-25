@@ -12,10 +12,10 @@
         <div class="d-flex justify-content-between align-items-center">
             <div class="ui-card-title">Daftar Gambar</div>
             <div class="d-flex gap-2">
-                <x-ui.button href="{{ route('customer.export') }}" variant="outline" size="sm">
+                <x-ui.button :href="route('customer.export')" variant="outline" size="sm">
                     Export Excel
                 </x-ui.button>
-                <x-ui.button href="{{ route('customer.create') }}" variant="primary" size="sm">+ Add Gambar</x-ui.button>
+                <x-ui.button :href="route('customer.create')" variant="primary" size="sm">+ Add Gambar</x-ui.button>
             </div>
         </div>
     @endslot
@@ -50,7 +50,7 @@
 
             {{-- Tombol reset jika filter aktif --}}
             @if(request('branch_id') || request('search'))
-                <x-ui.button href="{{ route('customer.index') }}" variant="outline">Reset</x-ui.button>
+                <x-ui.button :href="route('customer.index')" variant="outline">Reset</x-ui.button>
             @endif
         </form>
 
@@ -79,15 +79,15 @@
             </tr>
         </thead>
         <tbody>
-            @forelse ($gallery as $gallery)
+            @forelse ($gallery as $item)
             <tr>
-                <td><input type="checkbox" class="check-item form-check-input" value="{{ $customer->id }}"></td>
-                <td>{{ $gallery->wsn }}</td>
-                <td>{{ $gallery->card_number }}</td>
-                <td>{{ $gallery->name }}</td>
-                <td>{{ $gallery->email }}</td>
+                <td><input type="checkbox" class="check-item form-check-input" value="{{ $item->id }}"></td>
+                <td>{{ $item->wsn }}</td>
+                <td>{{ $item->card_number }}</td>
+                <td>{{ $item->name }}</td>
+                <td>{{ $item->email }}</td>
                 <td>
-                    @if ($gallery->warantee_end >= now()->format('Y-m-d'))
+                    @if ($item->warantee_end >= now()->format('Y-m-d'))
                     <x-ui.badge variant="success">Aktif</x-ui.badge>
                     @else
                     <x-ui.badge variant="danger">Kadaluarsa</x-ui.badge>
@@ -99,18 +99,18 @@
                         <a href="javascript:void(0)"
                             class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center"
                             data-bs-toggle="modal"
-                            data-bs-target="#viewCustomerModal{{ $gallery->id }}">
+                            data-bs-target="#viewCustomerModal{{ $item->id }}">
                             <iconify-icon icon="iconamoon:eye-light"></iconify-icon>
                         </a>
 
                         {{-- Edit --}}
-                        <a href="{{ route('customer.edit', $gallery->id) }}"
+                        <a href="{{ route('customer.edit', $item->id) }}"
                             class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center">
                             <iconify-icon icon="lucide:edit"></iconify-icon>
                         </a>
 
                         {{-- Delete --}}
-                        <form action="{{ route('customer.destroy', $gallery->id) }}" method="POST"
+                        <form action="{{ route('customer.destroy', $item->id) }}" method="POST"
                             onsubmit="return confirm('Hapus data ini?')" class="d-inline">
                             @csrf
                             @method('DELETE')
@@ -120,16 +120,16 @@
                             </button>
                         </form>
 
-                         @if ($gallery->invoice)
+                         @if ($item->invoice)
                             {{-- Lihat Invoice --}}
-                            <a href="{{ route('invoice.show', $gallery->invoice->id) }}"
+                            <a href="{{ route('invoice.show', $item->invoice->id) }}"
                                 class="w-32-px h-32-px bg-success-focus text-success-main rounded-circle d-inline-flex align-items-center justify-content-center ms-1"
                                 title="Lihat Invoice">
                                 <iconify-icon icon="mdi:paper-outline"></iconify-icon>
                             </a>
                         @else
                             {{-- Buat Invoice --}}
-                            <a href="{{ route('invoice.create', $gallery->id) }}"
+                            <a href="{{ route('invoice.create', $item->id) }}"
                                 class="w-32-px h-32-px bg-primary-light text-primary-600 rounded-circle d-inline-flex align-items-center justify-content-center ms-1"
                                 title="Buat Invoice">
                                 <iconify-icon icon="ic:baseline-add-circle-outline"></iconify-icon>
@@ -152,8 +152,8 @@
     <div class="mt-3">{{ $gallery->withQueryString()->links() }}</div>
 </x-ui.card>
 
-@foreach ($gallery as $gallery)
-<div class="modal fade" id="viewCustomerModal{{ $gallery->id }}" tabindex="-1" aria-labelledby="viewCustomerModalLabel{{ $gallery->id }}" aria-hidden="true">
+@foreach ($gallery as $item)
+<div class="modal fade" id="viewCustomerModal{{ $item->id }}" tabindex="-1" aria-labelledby="viewCustomerModalLabel{{ $item->id }}" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
@@ -163,28 +163,28 @@
       <div class="modal-body">
         <dl class="row">
           <dt class="col-sm-4">Nama</dt>
-          <dd class="col-sm-8">{{ $gallery->name }}</dd>
+          <dd class="col-sm-8">{{ $item->name }}</dd>
 
           <dt class="col-sm-4">Email</dt>
-          <dd class="col-sm-8">{{ $gallery->email }}</dd>
+          <dd class="col-sm-8">{{ $item->email }}</dd>
 
           <dt class="col-sm-4">WSN</dt>
-          <dd class="col-sm-8">{{ $gallery->wsn }}</dd>
+          <dd class="col-sm-8">{{ $item->wsn }}</dd>
 
           <dt class="col-sm-4">No Kartu</dt>
-          <dd class="col-sm-8">{{ $gallery->card_number }}</dd>
+          <dd class="col-sm-8">{{ $item->card_number }}</dd>
 
           <dt class="col-sm-4">Plat Nomor</dt>
-          <dd class="col-sm-8">{{ $gallery->plat_number }}</dd>
+          <dd class="col-sm-8">{{ $item->plat_number }}</dd>
 
           <dt class="col-sm-4">Merek Kendaraan</dt>
-          <dd class="col-sm-8">{{ $gallery->vehicle_brand }}</dd>
+          <dd class="col-sm-8">{{ $item->vehicle_brand }}</dd>
 
           <dt class="col-sm-4">Model Kendaraan</dt>
-          <dd class="col-sm-8">{{ $gallery->vehicle_model }}</dd>
+          <dd class="col-sm-8">{{ $item->vehicle_model }}</dd>
 
           <dt class="col-sm-4">Garansi</dt>
-          <dd class="col-sm-8">{{ $gallery->warantee_duration }} tahun (sampai {{ $gallery->warantee_end }})</dd>
+          <dd class="col-sm-8">{{ $item->warantee_duration }} tahun (sampai {{ $item->warantee_end }})</dd>
 
         </dl>
       </div>

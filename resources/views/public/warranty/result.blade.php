@@ -125,13 +125,16 @@
       $defaultCp  = $items->first()?->id ?? 0;
       $selectedCp = (int) request()->query('cp', $defaultCp);
 
-      $basePrev = route('public.warranty.card.preview', $card);
-      $baseDl   = route('public.warranty.card.download', $card);
+      $signedCardUrl = function (string $routeName, string $side) use ($card, $selectedCp) {
+          $params = ['cardNumber' => $card, 'side' => $side];
+          if ($selectedCp) { $params['cp'] = $selectedCp; }
+          return \Illuminate\Support\Facades\URL::signedRoute($routeName, $params);
+      };
 
-      $frontPreview  = $basePrev.'?side=front'.($selectedCp ? '&cp='.$selectedCp : '');
-      $backPreview   = $basePrev.'?side=back'. ($selectedCp ? '&cp='.$selectedCp : '');
-      $frontDownload = $baseDl.'?side=front'.($selectedCp ? '&cp='.$selectedCp : '');
-      $backDownload  = $baseDl.'?side=back'. ($selectedCp ? '&cp='.$selectedCp : '');
+      $frontPreview  = $signedCardUrl('public.warranty.card.preview', 'front');
+      $backPreview   = $signedCardUrl('public.warranty.card.preview', 'back');
+      $frontDownload = $signedCardUrl('public.warranty.card.download', 'front');
+      $backDownload  = $signedCardUrl('public.warranty.card.download', 'back');
     @endphp
 
     <div class="row g-3">
@@ -862,11 +865,11 @@
                 <div class="border rounded-3 p-2">
                   <div class="small fw-semibold mb-2">Front</div>
                   <img class="img-fluid rounded border"
-                       src="{{ route('public.warranty.ppf.preview', $latest->id) }}?side=front&v={{ time() }}"
+                       src="{{ \Illuminate\Support\Facades\URL::signedRoute('public.warranty.ppf.preview', ['installationId' => $latest->id, 'side' => 'front', 'v' => time()]) }}"
                        alt="PPF Card Front">
                   <div class="mt-2">
                     <a class="btn btn-sm btn-primary"
-                       href="{{ route('public.warranty.ppf.download', $latest->id) }}?side=front">
+                       href="{{ \Illuminate\Support\Facades\URL::signedRoute('public.warranty.ppf.download', ['installationId' => $latest->id, 'side' => 'front']) }}">
                       Download Front
                     </a>
                   </div>
@@ -877,11 +880,11 @@
                 <div class="border rounded-3 p-2">
                   <div class="small fw-semibold mb-2">Back</div>
                   <img class="img-fluid rounded border"
-                       src="{{ route('public.warranty.ppf.preview', $latest->id) }}?side=back&v={{ time() }}"
+                       src="{{ \Illuminate\Support\Facades\URL::signedRoute('public.warranty.ppf.preview', ['installationId' => $latest->id, 'side' => 'back', 'v' => time()]) }}"
                        alt="PPF Card Back">
                   <div class="mt-2">
                     <a class="btn btn-sm btn-outline-primary"
-                       href="{{ route('public.warranty.ppf.download', $latest->id) }}?side=back">
+                       href="{{ \Illuminate\Support\Facades\URL::signedRoute('public.warranty.ppf.download', ['installationId' => $latest->id, 'side' => 'back']) }}">
                       Download Back
                     </a>
                   </div>
@@ -1100,11 +1103,11 @@
                         <div class="border rounded-3 p-2">
                           <div class="small fw-semibold mb-2">Front</div>
                           <img class="img-fluid rounded border"
-                               src="{{ route('public.warranty.ppf.preview', $ins->id) }}?side=front&v={{ time() }}"
+                               src="{{ \Illuminate\Support\Facades\URL::signedRoute('public.warranty.ppf.preview', ['installationId' => $ins->id, 'side' => 'front', 'v' => time()]) }}"
                                alt="PPF Card Front">
                           <div class="mt-2">
                             <a class="btn btn-sm btn-primary"
-                               href="{{ route('public.warranty.ppf.download', $ins->id) }}?side=front">
+                               href="{{ \Illuminate\Support\Facades\URL::signedRoute('public.warranty.ppf.download', ['installationId' => $ins->id, 'side' => 'front']) }}">
                               Download Front
                             </a>
                           </div>
@@ -1115,11 +1118,11 @@
                         <div class="border rounded-3 p-2">
                           <div class="small fw-semibold mb-2">Back</div>
                           <img class="img-fluid rounded border"
-                               src="{{ route('public.warranty.ppf.preview', $ins->id) }}?side=back&v={{ time() }}"
+                               src="{{ \Illuminate\Support\Facades\URL::signedRoute('public.warranty.ppf.preview', ['installationId' => $ins->id, 'side' => 'back', 'v' => time()]) }}"
                                alt="PPF Card Back">
                           <div class="mt-2">
                             <a class="btn btn-sm btn-outline-primary"
-                               href="{{ route('public.warranty.ppf.download', $ins->id) }}?side=back">
+                               href="{{ \Illuminate\Support\Facades\URL::signedRoute('public.warranty.ppf.download', ['installationId' => $ins->id, 'side' => 'back']) }}">
                               Download Back
                             </a>
                           </div>

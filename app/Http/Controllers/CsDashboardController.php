@@ -67,11 +67,14 @@ class CsDashboardController extends Controller
         $totalOutstandingAmount  = (float) DB::table('invoices')->whereIn('status', ['unpaid', 'partial'])->sum('remaining_payment');
         $totalActiveClaims       = DB::table('warranty_claims')->whereIn('status', ['submitted', 'under_review'])->count();
 
+        $upcomingBirthdays = \App\Models\Employee::upcomingBirthdays();
+
         return view('cs.dashboard', compact(
             'followUpLeads', 'totalFollowUp',
             'warrantyExpiringCar', 'warrantyExpiringPpf',
             'pendingPayments', 'recentClaims',
             'totalPendingPayments', 'totalOutstandingAmount', 'totalActiveClaims',
+            'upcomingBirthdays',
         ));
     }
 }

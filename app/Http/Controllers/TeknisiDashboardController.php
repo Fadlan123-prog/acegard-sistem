@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Commission;
 use App\Models\CommissionPaymentBatch;
 use App\Models\Customer;
+use App\Models\EmployeeHealthBalance;
 use App\Models\Invoice;
+use App\Models\SalesOrder;
 use App\Services\CommissionEligibilityService;
 use App\Services\DashboardCacheService;
 use Carbon\Carbon;
@@ -70,6 +72,10 @@ class TeknisiDashboardController extends Controller
             && $eligibleUnbatched->count() > 0
             && $pendingWithdrawal === null;
 
+        $healthBalance = EmployeeHealthBalance::where('employee_id', $employee->id)
+            ->where('year', now()->year)
+            ->first();
+
         // Ambil notifikasi penugasan yang belum dibaca, lalu langsung tandai sudah dibaca
         $jobNotifications = $user->unreadNotifications()
             ->where('type', \App\Notifications\JobAssigned::class)
@@ -80,6 +86,21 @@ class TeknisiDashboardController extends Controller
                 ->where('type', \App\Notifications\JobAssigned::class)
                 ->update(['read_at' => now()]);
         }
+
+        // Sales Order yang sudah menyertakan nama karyawan ini tapi belum jadi Customer/Invoice
+        // sungguhan (baru muncul di "Orderan Saya" setelah admin klik "Buat Customer & Invoice").
+        // Ditampilkan read-only supaya teknisi tahu ada pekerjaan yang segera datang.
+        $incomingSalesOrders = SalesOrder::query()
+            ->whereNotIn('status', ['cancelled', 'completed'])
+            ->where(function ($q) use ($foreignKey, $employee, $isTeknisi) {
+                $q->where($foreignKey, $employee->id);
+                // Gedung: penugasan lewat pivot technicians (tidak ada kenek di kategori ini)
+                if ($isTeknisi) {
+                    $q->orWhereHas('technicians', fn ($qt) => $qt->where('employees.id', $employee->id));
+                }
+            })
+            ->orderBy('scheduled_date')
+            ->get();
 
         return view('teknisi.dashboard', [
             'title'               => $isTeknisi ? 'Dashboard Teknisi' : 'Dashboard Kenek',
@@ -95,6 +116,9 @@ class TeknisiDashboardController extends Controller
             'latestWithdrawal'    => $latestWithdrawal,
             'eligibleUnbatchedTotal' => $eligibleUnbatched->sum('amount'),
             'jobNotifications'    => $jobNotifications,
+            'healthBalance'       => $healthBalance,
+            'incomingSalesOrders' => $incomingSalesOrders,
+            'upcomingBirthdays'   => \App\Models\Employee::upcomingBirthdays($employee->branch_id),
         ]);
     }
 
@@ -169,15 +193,21 @@ class TeknisiDashboardController extends Controller
         }
 
         $request->validate([
-            'job_photo'       => ['required', 'image', 'max:5120'],
-            'checklist_photo' => ['required', 'image', 'max:5120'],
+            // 'image' alone also accepts svg/bmp/gif — svg with an embedded
+            // <script> would be a stored-XSS vector when opened directly by
+            // a supervisor during QC review (audit finding H-11), so pin the
+            // allowlist to real raster formats like the other upload handlers.
+            'job_photo'       => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'checklist_photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'notes'           => ['nullable', 'string', 'max:1000'],
         ], [
             'job_photo.required'       => 'Foto pekerjaan wajib diunggah.',
             'job_photo.image'          => 'File harus berupa gambar.',
+            'job_photo.mimes'          => 'Format foto harus JPG, PNG, atau WEBP.',
             'job_photo.max'            => 'Ukuran foto maksimal 5MB.',
             'checklist_photo.required' => 'Foto checklist wajib diunggah.',
             'checklist_photo.image'    => 'File harus berupa gambar.',
+            'checklist_photo.mimes'    => 'Format foto harus JPG, PNG, atau WEBP.',
             'checklist_photo.max'      => 'Ukuran foto checklist maksimal 5MB.',
         ]);
 
@@ -380,13 +410,30 @@ class TeknisiDashboardController extends Controller
             ->get()
             ->groupBy('customer_id');
 
+        // Sales Order yang sudah ditugaskan tapi belum dikonversi jadi Customer/
+        // Invoice — sama seperti pratinjau di dashboard (lihat
+        // TeknisiDashboardController::dashboard()), supaya "Semua Orderan" juga
+        // tidak terasa kosong begitu teknisi baru ditugaskan lewat
+        // SalesOrderController::assign(), sebelum admin sempat membuat invoice-nya.
+        $incomingSalesOrders = SalesOrder::query()
+            ->whereNotIn('status', ['cancelled', 'completed'])
+            ->where(function ($q) use ($foreignKey, $employee, $isTeknisi) {
+                $q->where($foreignKey, $employee->id);
+                if ($isTeknisi) {
+                    $q->orWhereHas('technicians', fn ($qt) => $qt->where('employees.id', $employee->id));
+                }
+            })
+            ->orderBy('scheduled_date')
+            ->get();
+
         return view('teknisi.orders.index', [
-            'title'         => 'Semua Orderan',
-            'employee'      => $employee,
-            'isTeknisi'     => $isTeknisi,
-            'orders'        => $orders,
-            'status'        => $status,
-            'commissionMap' => $commissionMap,
+            'title'               => 'Semua Orderan',
+            'employee'            => $employee,
+            'isTeknisi'           => $isTeknisi,
+            'orders'              => $orders,
+            'status'              => $status,
+            'commissionMap'       => $commissionMap,
+            'incomingSalesOrders' => $incomingSalesOrders,
         ]);
     }
 

@@ -6,6 +6,7 @@ use App\Models\Branch;
 use App\Models\Employee;
 use App\Services\BranchContext;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class BranchController extends Controller
@@ -169,6 +170,7 @@ class BranchController extends Controller
             'customers',
             'customerBuildings',
             'employees',
+            'invoiceBuildings',
         ]);
 
         if ($this->branchHasRelatedData($branch)) {
@@ -238,9 +240,19 @@ class BranchController extends Controller
 
     private function branchHasRelatedData(Branch $branch): bool
     {
+        // customer_ppf and bank_accounts cascade-delete on branch removal
+        // (see their migrations), so without this check a branch with no
+        // customers/employees but real PPF or bank-reconciliation history
+        // could still be deleted, silently wiping that data (audit finding
+        // M-15). payrolls/purchases don't cascade but would be orphaned.
         return
             (int) ($branch->customers_count ?? 0) > 0 ||
             (int) ($branch->customer_buildings_count ?? 0) > 0 ||
-            (int) ($branch->employees_count ?? 0) > 0;
+            (int) ($branch->employees_count ?? 0) > 0 ||
+            (int) ($branch->invoice_buildings_count ?? 0) > 0 ||
+            DB::table('customer_ppf')->where('branch_id', $branch->id)->exists() ||
+            DB::table('bank_accounts')->where('branch_id', $branch->id)->exists() ||
+            DB::table('payrolls')->where('branch_id', $branch->id)->exists() ||
+            DB::table('purchases')->where('branch_id', $branch->id)->exists();
     }
 }

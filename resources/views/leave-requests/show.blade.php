@@ -10,16 +10,12 @@
     @slot('header')
         <div class="d-flex justify-content-between align-items-center">
             <div class="ui-card-title">Detail Pengajuan</div>
-            <x-ui.button href="{{ route('leave-requests.index') }}" variant="secondary" size="sm">Kembali</x-ui.button>
+            <x-ui.button :href="route('leave-requests.index')" variant="secondary" size="sm">Kembali</x-ui.button>
         </div>
     @endslot
 
-    @if(session('success'))
-        <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-    @endif
-    @if(session('error'))
-        <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-    @endif
+    
+    
 
     <table class="table table-borderless table-sm">
         <tr><th style="width:40%">Karyawan</th><td>{{ $leaveRequest->employee->name ?? '-' }}</td></tr>

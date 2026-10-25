@@ -308,7 +308,6 @@
           </div>
         </div>
       </div>
-
       {{-- ── Section 3: Produk & Pemasangan ── --}}
       <div id="sec-produk" class="cust-section">
         <div class="cust-section-head">
@@ -414,10 +413,8 @@
                 <option value="7" {{ old('warantee_duration')==='7' ? 'selected' : '' }}>7 Tahun</option>
                 <option value="7" {{ old('warantee_duration')==='8' ? 'selected' : '' }}>8 Tahun</option>
               </select>
-          </select>
             </div>
          </div>
-          </div>
 
         </div>
       </div>
@@ -432,10 +429,20 @@
           </div>
         </div>
         <div class="cust-section-body">
+          @php $soLockedTeam = isset($fromSo) && $fromSo && $fromSo->tukang_id; @endphp
+          @if($soLockedTeam)
+          <div class="alert alert-info py-2 px-3 mb-3" style="font-size:.85rem;">
+            <iconify-icon icon="mdi:information-outline" class="me-1"></iconify-icon>
+            Teknisi/kenek sudah ditugaskan di Sales Order <strong>{{ $fromSo->so_number }}</strong> dan tidak bisa
+            diubah di sini — ganti penugasannya lewat halaman detail SO (sebelum dikonversi) atau menu
+            "Penugasan Pekerjaan" (setelah customer ini dibuat).
+          </div>
+          @endif
           <div class="row g-3 mb-3">
             <div class="col-md-6">
               <label class="form-label">Installer 1 (Teknisi) <span class="text-danger">*</span></label>
-              <select name="tukang_id" class="form-select" id="tukang_select" required>
+              <select name="tukang_id" class="form-select" id="tukang_select" required
+                      {{ $soLockedTeam ? 'disabled' : '' }}>
                 <option value="">Pilih Teknisi</option>
                 @foreach ($employees->whereIn('job_position', ['Teknisi','Kenek'])->groupBy('job_position') as $pos => $group)
                   <optgroup label="{{ $pos }}">
@@ -446,10 +453,14 @@
                   </optgroup>
                 @endforeach
               </select>
+              @if($soLockedTeam)
+                <input type="hidden" name="tukang_id" value="{{ $fromSo->tukang_id }}">
+              @endif
             </div>
             <div class="col-md-6">
               <label class="form-label">Installer 2 (Kenek) <span class="text-muted fw-normal small">opsional</span></label>
-              <select name="kenek_id" class="form-select" id="kenek_select">
+              <select name="kenek_id" class="form-select" id="kenek_select"
+                      {{ $soLockedTeam ? 'disabled' : '' }}>
                 <option value="">— Tidak ada —</option>
                 @foreach ($employees->whereIn('job_position', ['Teknisi','Kenek'])->groupBy('job_position') as $pos => $group)
                   <optgroup label="{{ $pos }}">
@@ -460,6 +471,9 @@
                   </optgroup>
                 @endforeach
               </select>
+              @if($soLockedTeam)
+                <input type="hidden" name="kenek_id" value="{{ $fromSo->kenek_id }}">
+              @endif
             </div>
           </div>
 
@@ -606,7 +620,7 @@
           </div>
         </div>
         <div class="cust-action-bar">
-          <x-ui.button href="{{ route('customer.index') }}" variant="outline">Batal</x-ui.button>
+          <x-ui.button :href="route('customer.index')" variant="outline">Batal</x-ui.button>
           <x-ui.button type="submit" variant="primary" class="px-4">
             <iconify-icon icon="mdi:content-save-outline" class="me-1"></iconify-icon> Simpan Customer
           </x-ui.button>

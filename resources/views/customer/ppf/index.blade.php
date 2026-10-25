@@ -10,17 +10,13 @@
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <h5 class="mb-0">Daftar Customer PPF</h5>
         <div class="d-flex gap-2">
-            <x-ui.button href="{{ route('ppf-customers.create') }}" variant="primary" size="sm">+ Add Customer PPF</x-ui.button>
+            <x-ui.button :href="route('ppf-customers.create')" variant="primary" size="sm">+ Add Customer PPF</x-ui.button>
         </div>
     </div>
     @endslot
 
-    @if(session('success'))
-        <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-    @endif
-    @if(session('error'))
-        <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-    @endif
+    
+    
 
     <div class="d-flex justify-content-between align-items-center flex-wrap mb-3 gap-2">
       <form method="GET" action="{{ route('ppf-customers.index') }}" id="filterForm"
@@ -46,7 +42,7 @@
         @endif
 
         @if(request('branch_id') || request('search'))
-          <x-ui.button href="{{ route('ppf-customers.index') }}" variant="outline">Reset</x-ui.button>
+          <x-ui.button :href="route('ppf-customers.index')" variant="outline">Reset</x-ui.button>
         @endif
       </form>
     </div>
@@ -297,23 +293,23 @@
           <div class="tab-content">
             <div class="tab-pane fade show active" id="ppfFront{{ $customer->id }}" role="tabpanel">
               <img class="img-fluid rounded border"
-                   src="{{ route('public.warranty.ppf.preview', $insId) }}?side=front"
+                   src="{{ \Illuminate\Support\Facades\URL::signedRoute('public.warranty.ppf.preview', ['installationId' => $insId, 'side' => 'front']) }}"
                    alt="PPF Card Front">
             </div>
 
             <div class="tab-pane fade" id="ppfBack{{ $customer->id }}" role="tabpanel">
               <img class="img-fluid rounded border"
-                   src="{{ route('public.warranty.ppf.preview', $insId) }}?side=back"
+                   src="{{ \Illuminate\Support\Facades\URL::signedRoute('public.warranty.ppf.preview', ['installationId' => $insId, 'side' => 'back']) }}"
                    alt="PPF Card Back">
             </div>
           </div>
 
           <div class="d-flex flex-wrap gap-2 mt-3">
-            <x-ui.button href="{{ route('public.warranty.ppf.download', $insId) }}?side=front" variant="primary" size="sm">
+            <x-ui.button :href="\Illuminate\Support\Facades\URL::signedRoute('public.warranty.ppf.download', ['installationId' => $insId, 'side' => 'front'])" variant="primary" size="sm">
               Download Front
             </x-ui.button>
 
-            <x-ui.button href="{{ route('public.warranty.ppf.download', $insId) }}?side=back" variant="outline" size="sm">
+            <x-ui.button :href="\Illuminate\Support\Facades\URL::signedRoute('public.warranty.ppf.download', ['installationId' => $insId, 'side' => 'back'])" variant="outline" size="sm">
               Download Back
             </x-ui.button>
 

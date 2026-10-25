@@ -19,17 +19,11 @@
 @endphp
 
 {{-- Flash --}}
-@if (session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-@if (session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
 
 {{-- Back + actions --}}
 <div class="d-flex align-items-center justify-content-between gap-3 mb-4 flex-wrap">
     <div class="d-flex align-items-center gap-3">
-        <x-ui.button href="{{ route('teknisi.orders.index') }}" variant="outline" size="sm">
+        <x-ui.button :href="route('teknisi.orders.index')" variant="outline" size="sm">
             <x-slot name="icon"><svg viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></x-slot>
             Semua Order
         </x-ui.button>
@@ -228,7 +222,7 @@
                     </x-ui.button>
                 </form>
             @endif
-            <x-ui.button href="{{ route('teknisi.job.complete.form', $customer->id) }}"
+            <x-ui.button :href="route('teknisi.job.complete.form', $customer->id)"
                     variant="success" class="{{ $workStatus === 'pending' ? 'flex-fill' : 'w-100' }}">
                 <iconify-icon icon="mdi:camera-outline" class="me-1"></iconify-icon> Selesaikan Pekerjaan
             </x-ui.button>

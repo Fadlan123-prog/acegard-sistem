@@ -28,12 +28,13 @@ class SendScheduledNotifications extends Command
 
         foreach ($configs as $config) {
             match ($config->type) {
-                'hutang_due'      => $this->processHutangDue($config),
-                'piutang_due'     => $this->processPiutangDue($config),
-                'warranty_expiry' => $this->processWarrantyExpiry($config),
-                'low_film_stock'  => $this->processLowFilmStock($config),
-                'low_goods_stock' => $this->processLowGoodsStock($config),
-                default           => null,
+                'hutang_due'        => $this->processHutangDue($config),
+                'piutang_due'       => $this->processPiutangDue($config),
+                'warranty_expiry'   => $this->processWarrantyExpiry($config),
+                'low_film_stock'    => $this->processLowFilmStock($config),
+                'low_goods_stock'   => $this->processLowGoodsStock($config),
+                'employee_birthday' => $this->processEmployeeBirthday($config),
+                default             => null,
             };
         }
 
@@ -89,6 +90,32 @@ class SendScheduledNotifications extends Command
         foreach ($items as $item) {
             $msg = "📋 Garansi pelanggan {$item->name} ({$item->vehicle_brand} {$item->vehicle_model}) berakhir pada {$item->warantee_end}.";
             $this->dispatch($config, $msg, 'App\Models\Customer', $item->id, $item->branch_id);
+        }
+    }
+
+    /**
+     * Ulang tahun berulang tiap tahun — jadi dicocokkan berdasarkan bulan+tanggal
+     * dari target_date (hari ini + days_before), bukan tanggal persis seperti
+     * due_date pada hutang/piutang/garansi (yang tahunnya memang harus sama).
+     */
+    private function processEmployeeBirthday(NotificationConfig $config): void
+    {
+        $targetDate = now()->addDays($config->days_before);
+
+        $items = DB::table('employees')
+            ->whereNotNull('birth_date')
+            ->where('is_active', true)
+            ->whereRaw('MONTH(birth_date) = ? AND DAY(birth_date) = ?', [$targetDate->month, $targetDate->day])
+            ->when($config->branch_id, fn ($q) => $q->where('branch_id', $config->branch_id))
+            ->get();
+
+        foreach ($items as $item) {
+            $when = $config->days_before > 0
+                ? "{$config->days_before} hari lagi ({$targetDate->translatedFormat('d M')})"
+                : 'hari ini';
+
+            $msg = "🎂 Ulang tahun {$item->name}" . ($item->job_position ? " ({$item->job_position})" : '') . " {$when}.";
+            $this->dispatch($config, $msg, 'App\Models\Employee', $item->id, $item->branch_id);
         }
     }
 

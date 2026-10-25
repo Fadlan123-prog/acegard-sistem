@@ -6,11 +6,16 @@
 
 @section('content')
 
-@if(session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-@if(session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
+@php
+    $kasbonDeducted = \App\Models\KasbonDeduction::where('commission_payment_batch_id', $batch->id)->sum('amount');
+@endphp
+
+@if($kasbonDeducted > 0)
+<x-ui.alert type="warning" class="mb-3">
+    <iconify-icon icon="mdi:cash-minus" class="me-1"></iconify-icon>
+    Dipotong kasbon <strong>Rp{{ number_format($kasbonDeducted) }}</strong> dari pencairan ini —
+    diterima bersih <strong>Rp{{ number_format($batch->total_amount - $kasbonDeducted) }}</strong>.
+</x-ui.alert>
 @endif
 
 <div class="row g-3 mb-3">
@@ -37,7 +42,7 @@
         <x-ui.stats-card
             label="Total Pencairan"
             :value="'Rp' . number_format($batch->total_amount)"
-            color="blue"
+            color="blue" accent
             class="h-100">
             <span>{{ $batch->commissions->count() }} komisi</span>
         </x-ui.stats-card>
@@ -63,7 +68,7 @@
                         </x-ui.badge>
                     @endif
                 </div>
-                <x-ui.button href="{{ route('commission.withdrawals.index') }}" variant="secondary" size="sm">
+                <x-ui.button :href="route('commission.withdrawals.index')" variant="secondary" size="sm">
                     <iconify-icon icon="mdi:arrow-left" class="me-1"></iconify-icon>Kembali
                 </x-ui.button>
             </div>

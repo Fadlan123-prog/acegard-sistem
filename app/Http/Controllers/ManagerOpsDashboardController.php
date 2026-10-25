@@ -51,7 +51,7 @@ class ManagerOpsDashboardController extends Controller
 
         // Upcoming installations (next 7 days)
         $upcomingInstallations = SalesOrder::accessibleByUser()
-            ->with(['tukang', 'kenek'])
+            ->with(['tukang', 'kenek', 'technicians'])
             ->whereNotNull('scheduled_date')
             ->whereBetween('scheduled_date', [today(), today()->addDays(7)])
             ->whereNotIn('status', ['cancelled', 'completed'])
@@ -66,9 +66,12 @@ class ManagerOpsDashboardController extends Controller
             ->limit(8)
             ->get();
 
+        $upcomingBirthdays = \App\Models\Employee::upcomingBirthdays($branchId);
+
         return view('manager-ops.dashboard', compact(
             'installationsToday', 'pendingRelease', 'activeJobs', 'lowStock',
             'pendingInvoices', 'upcomingInstallations', 'stockAlerts',
+            'upcomingBirthdays',
         ));
     }
 }

@@ -124,7 +124,7 @@
                 @if($quotation->prospect_address){{ $quotation->prospect_address }}@endif
             </p>
         </div>
-        @if($quotation->vehicle_brand)
+        @if($quotation->category !== 'building_film')
         <div class="info-box">
             <h3>Data Kendaraan</h3>
             <p>

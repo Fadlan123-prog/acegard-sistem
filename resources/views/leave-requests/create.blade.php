@@ -59,7 +59,7 @@
 
         <div class="d-flex gap-2">
             <x-ui.button type="submit" variant="primary">Ajukan</x-ui.button>
-            <x-ui.button href="{{ route('leave-requests.index') }}" variant="secondary">Batal</x-ui.button>
+            <x-ui.button :href="route('leave-requests.index')" variant="secondary">Batal</x-ui.button>
         </div>
     </form>
 </x-ui.card>

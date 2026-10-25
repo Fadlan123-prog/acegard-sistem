@@ -19,6 +19,11 @@ class CustomerBuildingProduct extends Model
 
     ];
 
+    protected $casts = [
+        'warantee_start' => 'date',
+        'warantee_end'   => 'date',
+    ];
+
     public function invoices()
     {
         return $this->belongsToMany(InvoiceBuilding::class, 'invoice_building_product')

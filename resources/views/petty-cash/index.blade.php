@@ -6,13 +6,6 @@
 
 @section('content')
 
-@if(session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-@if(session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
-
 {{-- FILTER --}}
 <x-ui.card class="mb-3">
     <form method="GET" action="{{ route('petty-cash.index') }}" class="row g-2 align-items-end">
@@ -30,18 +23,18 @@
         </div>
         <div class="col-auto ms-auto d-flex gap-2 flex-wrap">
             @if($branchId)
-            <x-ui.button href="{{ route('petty-cash.pdf', ['branch_id' => $branchId, 'month' => $month]) }}"
+            <x-ui.button :href="route('petty-cash.pdf', ['branch_id' => $branchId, 'month' => $month])"
                target="_blank" variant="secondary" size="sm">
                 <iconify-icon icon="mdi:file-pdf-box" class="me-1"></iconify-icon>Print PDF
             </x-ui.button>
             @endif
-            <x-ui.button href="{{ route('petty-cash.create-in') }}" variant="success" size="sm">
+            <x-ui.button :href="route('petty-cash.create-in')" variant="success" size="sm">
                 <iconify-icon icon="mdi:plus-circle" class="me-1"></iconify-icon>Tambah Saldo
             </x-ui.button>
-            <x-ui.button href="{{ route('petty-cash.create-out') }}" variant="primary" size="sm">
+            <x-ui.button :href="route('petty-cash.create-out')" variant="primary" size="sm">
                 <iconify-icon icon="mdi:motorbike" class="me-1"></iconify-icon>Catat Pemakaian Motor
             </x-ui.button>
-            <x-ui.button href="{{ route('petty-cash.create-purchase') }}" variant="warning" size="sm">
+            <x-ui.button :href="route('petty-cash.create-purchase')" variant="warning" size="sm">
                 <iconify-icon icon="mdi:cart-outline" class="me-1"></iconify-icon>Klaim Pembelian
             </x-ui.button>
         </div>
@@ -51,14 +44,22 @@
 {{-- SUMMARY CARDS --}}
 <div class="row g-3 mb-3">
     <div class="col-md-4">
-        <x-ui.stats-card label="Total Masuk (Bulan Ini)" :value="'Rp' . number_format($totalIn, 0, ',', '.')" color="green">
-            <iconify-icon icon="mdi:arrow-down-circle"></iconify-icon>
-        </x-ui.stats-card>
+        <x-ui.stats-card
+            label="Total Masuk (Bulan Ini)"
+            :value="'Rp' . number_format($totalIn, 0, ',', '.')"
+            color="green"
+            icon='<iconify-icon icon="mdi:arrow-down-circle"></iconify-icon>'
+            accent
+        />
     </div>
     <div class="col-md-4">
-        <x-ui.stats-card label="Total Keluar (Bulan Ini)" :value="'Rp' . number_format($totalOut, 0, ',', '.')" color="red">
-            <iconify-icon icon="mdi:arrow-up-circle"></iconify-icon>
-        </x-ui.stats-card>
+        <x-ui.stats-card
+            label="Total Keluar (Bulan Ini)"
+            :value="'Rp' . number_format($totalOut, 0, ',', '.')"
+            color="red"
+            icon='<iconify-icon icon="mdi:arrow-up-circle"></iconify-icon>'
+            accent
+        />
     </div>
     <div class="col-md-4">
         <div class="card border-0 shadow-sm h-100"

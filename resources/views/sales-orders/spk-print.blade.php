@@ -149,16 +149,22 @@ body { font-family:'Helvetica Neue',Arial,sans-serif; font-size:10pt; color:#1a1
 
         <div class="info-box">
             <h4>Tim Pelaksana</h4>
-            @if($salesOrder->tukang)
-            <p><span class="lbl">Teknisi</span><br><span class="val">{{ $salesOrder->tukang->name }}</span></p>
-            @endif
-            @if($salesOrder->kenek)
-            <p style="margin-top:3pt"><span class="lbl">Kenek</span><br>{{ $salesOrder->kenek->name }}</p>
+            @if($salesOrder->assignsMultipleTechnicians())
+                @if($salesOrder->technicians->isNotEmpty())
+                <p><span class="lbl">Teknisi</span><br><span class="val">{{ $salesOrder->technicians->pluck('name')->join(', ') }}</span></p>
+                @endif
+            @else
+                @if($salesOrder->tukang)
+                <p><span class="lbl">Teknisi</span><br><span class="val">{{ $salesOrder->tukang->name }}</span></p>
+                @endif
+                @if($salesOrder->kenek)
+                <p style="margin-top:3pt"><span class="lbl">Kenek</span><br>{{ $salesOrder->kenek->name }}</p>
+                @endif
             @endif
             @if($salesOrder->marketing)
             <p style="margin-top:3pt"><span class="lbl">Marketing</span><br>{{ $salesOrder->marketing->name }}</p>
             @endif
-            @if(!$salesOrder->tukang && !$salesOrder->kenek && !$salesOrder->marketing)
+            @if($salesOrder->assignsMultipleTechnicians() ? $salesOrder->technicians->isEmpty() && !$salesOrder->marketing : (!$salesOrder->tukang && !$salesOrder->kenek && !$salesOrder->marketing))
             <p style="color:#94a3b8;font-size:8pt">Belum ditugaskan</p>
             @endif
         </div>
@@ -246,7 +252,13 @@ body { font-family:'Helvetica Neue',Arial,sans-serif; font-size:10pt; color:#1a1
             <div class="sig-box">
                 <div class="sig-label">Teknisi</div>
                 <div class="sig-line"></div>
-                <div class="sig-name">{{ $salesOrder->tukang?->name ?? '—' }}</div>
+                <div class="sig-name">
+                    @if($salesOrder->assignsMultipleTechnicians())
+                        {{ $salesOrder->technicians->pluck('name')->join(', ') ?: '—' }}
+                    @else
+                        {{ $salesOrder->tukang?->name ?? '—' }}
+                    @endif
+                </div>
                 <div class="sig-role">Pelaksana</div>
             </div>
             <div class="sig-box">

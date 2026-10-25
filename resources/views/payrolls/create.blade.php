@@ -16,7 +16,7 @@
                     Sistem akan mengambil data absensi dan karyawan aktif dari cabang yang dipilih.
                 </small>
             </div>
-            <x-ui.button href="{{ route('payrolls.index') }}" variant="secondary" size="sm">
+            <x-ui.button :href="route('payrolls.index')" variant="secondary" size="sm">
                 Kembali
             </x-ui.button>
         </div>
@@ -33,9 +33,7 @@
         </x-ui.alert>
     @endif
 
-    @if(session('error'))
-        <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-    @endif
+    
 
     <form method="POST" action="{{ route('payrolls.store') }}">
         @csrf
@@ -116,7 +114,7 @@
                 Generate Payroll
             </x-ui.button>
 
-            <x-ui.button href="{{ route('payrolls.index') }}" variant="outline">
+            <x-ui.button :href="route('payrolls.index')" variant="outline">
                 Batal
             </x-ui.button>
         </div>

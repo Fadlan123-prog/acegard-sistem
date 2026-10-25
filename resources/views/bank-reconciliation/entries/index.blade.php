@@ -33,11 +33,11 @@
                     {{ $summary['unreconciled'] }}
                 </div>
             </div>
-            <x-ui.button href="{{ route('bank-accounts.entries.export', [$account->id, 'month'=>$filters['month']??'', 'status'=>$filters['status']??'']) }}"
+            <x-ui.button :href="route('bank-accounts.entries.export', [$account->id, 'month'=>$filters['month']??'', 'status'=>$filters['status']??''])"
                 variant="success" size="sm">
                 <iconify-icon icon="mdi:file-excel-outline" class="me-1"></iconify-icon>Export
             </x-ui.button>
-            <x-ui.button href="{{ route('bank-accounts.entries.create', $account->id) }}" variant="primary" size="sm">
+            <x-ui.button :href="route('bank-accounts.entries.create', $account->id)" variant="primary" size="sm">
                 <iconify-icon icon="mdi:plus" class="me-1"></iconify-icon>Tambah Mutasi
             </x-ui.button>
         </div>
@@ -47,26 +47,17 @@
 {{-- Summary Tiles --}}
 <div class="row g-3 mb-4">
     @php
+        $mdIcon = fn (string $name) => '<iconify-icon icon="'.$name.'"></iconify-icon>';
         $tiles = [
-            ['label'=>'Total Masuk',         'val'=>$fmtRp($summary['total_credit']), 'color'=>'#10b981', 'bg'=>'rgba(16,185,129,.1)', 'icon'=>'mdi:arrow-down-circle-outline'],
-            ['label'=>'Total Keluar',         'val'=>$fmtRp($summary['total_debit']),  'color'=>'#ef4444', 'bg'=>'rgba(239,68,68,.1)',  'icon'=>'mdi:arrow-up-circle-outline'],
-            ['label'=>'Sudah Rekonsiliasi',   'val'=>$summary['reconciled'].' item',   'color'=>'#10b981', 'bg'=>'rgba(16,185,129,.1)', 'icon'=>'mdi:checkbox-marked-circle-outline'],
-            ['label'=>'Belum Rekonsiliasi',   'val'=>$summary['unreconciled'].' item', 'color'=>'#f59e0b', 'bg'=>'rgba(245,158,11,.1)', 'icon'=>'mdi:clock-outline'],
+            ['label'=>'Total Masuk',         'val'=>$fmtRp($summary['total_credit']), 'color'=>'green', 'icon'=>$mdIcon('mdi:arrow-down-circle-outline')],
+            ['label'=>'Total Keluar',         'val'=>$fmtRp($summary['total_debit']),  'color'=>'red',   'icon'=>$mdIcon('mdi:arrow-up-circle-outline')],
+            ['label'=>'Sudah Rekonsiliasi',   'val'=>$summary['reconciled'].' item',   'color'=>'green', 'icon'=>$mdIcon('mdi:checkbox-marked-circle-outline')],
+            ['label'=>'Belum Rekonsiliasi',   'val'=>$summary['unreconciled'].' item', 'color'=>'amber', 'icon'=>$mdIcon('mdi:clock-outline')],
         ];
     @endphp
     @foreach ($tiles as $t)
     <div class="col-6 col-lg-3">
-        <x-ui.card>
-            <div class="d-flex align-items-center gap-3">
-                <div style="width:38px;height:38px;border-radius:10px;background:{{ $t['bg'] }};display:flex;align-items:center;justify-content:center;color:{{ $t['color'] }};font-size:17px;flex-shrink:0">
-                    <iconify-icon icon="{{ $t['icon'] }}"></iconify-icon>
-                </div>
-                <div>
-                    <div class="text-muted" style="font-size:11px">{{ $t['label'] }}</div>
-                    <div class="fw-bold" style="font-size:14px;color:{{ $t['color'] }}">{{ $t['val'] }}</div>
-                </div>
-            </div>
-        </x-ui.card>
+        <x-ui.stats-card :label="$t['label']" :value="$t['val']" :color="$t['color']" :icon="$t['icon']" accent />
     </div>
     @endforeach
 </div>
@@ -87,7 +78,7 @@
                 <option value="reconciled"   {{ ($filters['status'] ?? '') === 'reconciled'   ? 'selected' : '' }}>Sudah Rekonsiliasi</option>
             </select>
         </div>
-        <x-ui.button href="{{ route('bank-accounts.entries', $account->id) }}" variant="outline" size="sm">Reset</x-ui.button>
+        <x-ui.button :href="route('bank-accounts.entries', $account->id)" variant="outline" size="sm">Reset</x-ui.button>
 
         <div class="ms-auto d-flex gap-2">
             <x-ui.button type="button" id="selectAllBtn" variant="outline" size="sm">Pilih Semua</x-ui.button>

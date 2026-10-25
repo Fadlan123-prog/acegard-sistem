@@ -8,7 +8,7 @@ class SpkPublicController extends Controller
 {
     public function show(string $token)
     {
-        $salesOrder = SalesOrder::with(['branch', 'items', 'tukang', 'kenek', 'marketing'])
+        $salesOrder = SalesOrder::with(['branch', 'items', 'tukang', 'kenek', 'marketing', 'technicians'])
             ->where('spk_token', $token)
             ->firstOrFail();
 

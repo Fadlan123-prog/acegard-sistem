@@ -15,7 +15,7 @@
         @include('shifts._form')
         <div class="mt-3 d-flex gap-2">
             <x-ui.button type="submit" variant="primary">Perbarui</x-ui.button>
-            <x-ui.button href="{{ route('shifts.index') }}" variant="secondary">Batal</x-ui.button>
+            <x-ui.button :href="route('shifts.index')" variant="secondary">Batal</x-ui.button>
         </div>
     </form>
 </x-ui.card>

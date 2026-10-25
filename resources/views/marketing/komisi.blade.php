@@ -18,16 +18,10 @@
 @endphp
 
 {{-- Flash --}}
-@if (session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-@if (session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
 
 {{-- Header --}}
 <div class="d-flex align-items-center gap-3 mb-4">
-    <x-ui.button href="{{ route('marketing.dashboard') }}" variant="outline" size="sm">
+    <x-ui.button :href="route('marketing.dashboard')" variant="outline" size="sm">
         <x-slot name="icon"><svg viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></x-slot>
         Kembali
     </x-ui.button>
@@ -71,7 +65,7 @@
         <x-ui.stats-card
             label="Pending"
             :value="$idr($summary['pending_total'])"
-            color="amber"
+            color="amber" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
             <span>Menunggu invoice lunas</span>
@@ -81,7 +75,7 @@
         <x-ui.stats-card
             label="Siap Dicairkan"
             :value="$idr($summary['eligible_total'])"
-            color="green"
+            color="green" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
             <span>Bisa diajukan tgl. 15</span>
@@ -91,7 +85,7 @@
         <x-ui.stats-card
             label="Total Diterima"
             :value="$idr($summary['paid_total'])"
-            color="blue"
+            color="blue" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
             <span>Sudah dicairkan</span>

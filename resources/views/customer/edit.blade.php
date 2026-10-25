@@ -398,8 +398,8 @@
                   <option value="">Pilih Produk</option>
                 </select>
               </div>
-              <div class="col-md-1">
-                <x-ui.button type="button" variant="danger-outline" size="sm" class="remove-product w-100">
+              <div class="col-md-1 text-center">
+                <x-ui.button type="button" variant="danger-outline" size="sm" class="remove-product">
                   <iconify-icon icon="mdi:trash-can-outline"></iconify-icon>
                 </x-ui.button>
               </div>
@@ -613,7 +613,7 @@
           </div>
         </div>
         <div class="cust-action-bar">
-          <x-ui.button href="{{ route('customer.index') }}" variant="outline">Batal</x-ui.button>
+          <x-ui.button :href="route('customer.index')" variant="outline">Batal</x-ui.button>
           <x-ui.button type="submit" variant="primary" class="px-4">
             <iconify-icon icon="mdi:content-save-outline" class="me-1"></iconify-icon> Simpan Perubahan
           </x-ui.button>

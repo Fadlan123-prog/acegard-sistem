@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Domain\Commission\EmployeeCommissionResolver;
 use App\Models\Commission;
 use App\Models\CommissionPeriod;
+use App\Models\Employee;
 use App\Models\Invoice;
 use App\Models\PpfInvoice;
 use Illuminate\Support\Facades\Cache;
@@ -12,6 +14,10 @@ use Illuminate\Support\Facades\Log;
 
 class CommissionService
 {
+    public function __construct(
+        private readonly EmployeeCommissionResolver $employeeResolver,
+    ) {}
+
     /**
      * Membuat atau memperbarui komisi fixed untuk teknisi dan kenek.
      *
@@ -113,7 +119,8 @@ class CommissionService
         int $customerId,
         ?int $invoiceId,
         int $categoryProductId,
-        string $finalType
+        string $finalType,
+        int $invoicePrice = 0,
     ): void {
         if (!$marketingEmployeeId) {
             return;
@@ -124,7 +131,10 @@ class CommissionService
         $marketingMap = config('commission.marketing', []);
         $categoryMap = $marketingMap[$categoryProductId] ?? ($marketingMap['default'] ?? []);
 
-        $amount = (int) ($categoryMap[$baseType] ?? 0);
+        $defaultAmount = (int) ($categoryMap[$baseType] ?? 0);
+
+        $employee = Employee::find($marketingEmployeeId);
+        $amount   = $this->employeeResolver->resolve($employee, $defaultAmount, $invoicePrice)['amount'];
 
         if ($amount <= 0) {
             Log::warning('[CommissionService] Marketing amount nol — kategori belum dikonfigurasi, tetap simpan row', [
@@ -203,7 +213,8 @@ class CommissionService
         ?int $marketingEmployeeId,
         int $customerId,
         ?int $invoiceId,
-        string $finalType
+        string $finalType,
+        int $invoicePrice = 0,
     ): void {
         $categoryProductId = $this->resolveMarketingCategoryId($customerId);
 
@@ -223,7 +234,8 @@ class CommissionService
             $customerId,
             $invoiceId,
             $categoryProductId,
-            $finalType
+            $finalType,
+            $invoicePrice,
         );
     }
 
@@ -285,13 +297,16 @@ class CommissionService
         ) {
             // First technician = Teknisi (3%), remaining = Detailer (2% each).
             // Based on pivot order; applies to 1–4 technicians per installation.
+            // Per-employee commission setting (none/percentage) overrides the default rate.
             foreach ($technicians as $index => $tech) {
                 $isFirst = ($index === 0);
+                $defaultAmount = (int) round($totalPrice * ($isFirst ? $teknisiRate : $detailerRate));
+                $resolved = $this->employeeResolver->resolve($tech, $defaultAmount, $totalPrice);
                 $this->upsertPpfCommission([
                     'employees_id'  => (int) $tech->id,
                     'ppf_invoice_id'=> $invoice->id,
                     'branch_id'     => $invoice->branch_id,
-                    'amount'        => (int) round($totalPrice * ($isFirst ? $teknisiRate : $detailerRate)),
+                    'amount'        => $resolved['amount'],
                     'role'          => $isFirst ? 'teknisi' : 'detailer',
                     'install_type'  => $installation->install_type ?? 'ppf',
                     'installed_at'  => $installedAt,
@@ -318,13 +333,14 @@ class CommissionService
                 ]);
             }
 
-            // Marketing — fixed Rp500.000
+            // Marketing — fixed Rp500.000, kecuali ada setting komisi kustom per karyawan
             if ($customer && $customer->marketing_id) {
+                $marketingResolved = $this->employeeResolver->resolve($customer->marketing, $marketingFixed, $totalPrice);
                 $this->upsertPpfCommission([
                     'employees_id'  => (int) $customer->marketing_id,
                     'ppf_invoice_id'=> $invoice->id,
                     'branch_id'     => $invoice->branch_id,
-                    'amount'        => $marketingFixed,
+                    'amount'        => $marketingResolved['amount'],
                     'role'          => 'marketing',
                     'install_type'  => $installation->install_type ?? 'ppf',
                     'installed_at'  => $installedAt,

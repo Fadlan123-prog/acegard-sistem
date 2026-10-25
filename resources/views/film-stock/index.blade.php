@@ -17,24 +17,20 @@
             </div>
 
             <div class="d-flex gap-2">
-                <x-ui.button href="{{ route('film-stock.usages') }}" variant="outline" size="sm">
+                <x-ui.button :href="route('film-stock.usages')" variant="outline" size="sm">
                     Laporan Pemakaian
                 </x-ui.button>
 
-                <x-ui.button href="{{ route('film-stock.create') }}" variant="primary" size="sm">
+                <x-ui.button :href="route('film-stock.create')" variant="primary" size="sm">
                     + Roll Masuk
                 </x-ui.button>
             </div>
         </div>
     @endslot
 
-    @if(session('success'))
-        <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-    @endif
+    
 
-    @if(session('error'))
-        <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-    @endif
+    
 
     <form method="GET" action="{{ route('film-stock.index') }}" class="row g-2 mb-4 align-items-end">
 
@@ -85,35 +81,35 @@
             <x-ui.button type="submit" variant="outline">Filter</x-ui.button>
 
             @if(request()->query())
-                <x-ui.button href="{{ route('film-stock.index') }}" variant="outline">Reset</x-ui.button>
+                <x-ui.button :href="route('film-stock.index')" variant="outline">Reset</x-ui.button>
             @endif
         </div>
     </form>
 
     <div class="row mb-4">
         <div class="col-md-3 mb-2">
-            <x-ui.stats-card label="Total Pool" :value="$pools->total()" color="blue" />
+            <x-ui.stats-card label="Total Pool" :value="$pools->total()" color="blue" accent />
         </div>
 
         <div class="col-md-3 mb-2">
             <x-ui.stats-card
                 label="Meter Masuk Halaman Ini"
                 :value="number_format($pools->sum('total_received_length_meter'), 2, ',', '.') . ' m'"
-                color="green" />
+                color="green" accent />
         </div>
 
         <div class="col-md-3 mb-2">
             <x-ui.stats-card
                 label="Meter Terpakai Halaman Ini"
                 :value="number_format($pools->sum('total_used_length_meter'), 2, ',', '.') . ' m'"
-                color="amber" />
+                color="amber" accent />
         </div>
 
         <div class="col-md-3 mb-2">
             <x-ui.stats-card
                 label="Sisa Meter Halaman Ini"
                 :value="number_format($pools->sum('remaining_length_meter'), 2, ',', '.') . ' m'"
-                color="purple" />
+                color="purple" accent />
         </div>
     </div>
 

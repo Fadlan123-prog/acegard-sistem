@@ -43,7 +43,6 @@ use App\Http\Controllers\PpfProductController;
 
 // Film Stock
 use App\Http\Controllers\FilmStockController;
-use App\Http\Controllers\FilmStockTransferController;
 use App\Http\Controllers\FilmComplaintController;
 use App\Http\Controllers\SupportingGoodController;
 
@@ -67,6 +66,10 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\PurchaseReceiptController;
 use App\Http\Controllers\PurchaseReportController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\MitraController;
+use App\Http\Controllers\MitraInvoiceController;
+use App\Http\Controllers\DealerController;
+use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\LeaveRequestController;
 
@@ -100,7 +103,15 @@ Route::controller(FrontendController::class)->group(function () {
     Route::get('/about', 'about')->name('frontend.about');
     Route::get('/contact', 'contact')->name('frontend.contact');
     Route::get('/kaca-film-mobil', 'kacaFilmMobil')->name('frontend.kaca.film.mobil');
+    // Landing page Google Ads — kaca film rumah/bangunan
+    Route::get('/kaca-film-rumah', 'kacaFilmRumah')->name('frontend.kaca.film.rumah');
     Route::get('/ppf-mobil', 'ppfAds')->name('frontend.ppf.ads');
+    Route::get('/ppf', 'ppfCatalog')->name('frontend.ppf.catalog');
+    // Note: URI cannot be '/dealers' — collides with the admin Dealer CRUD resource route below.
+    Route::get('/lokasi-dealer', 'dealers')->name('frontend.dealers');
+    Route::get('/faq', 'faq')->name('frontend.faq');
+    Route::get('/artikel', 'articles')->name('frontend.artikel');
+    Route::get('/artikel/{article}', 'articleShow')->name('frontend.artikel.show');
 });
 
 Route::get('/promo/kaca-film-mobil', [PromotionController::class, 'car'])
@@ -120,22 +131,29 @@ Route::prefix('warranty')->name('warranty.')->group(function () {
     Route::post('/claim', [PublicWarrantyController::class, 'storeClaim'])->middleware('throttle:5,1')->name('claim.store');
     Route::get('/card/{type}/{id}/download', [PublicWarrantyController::class, 'downloadCard'])->middleware('throttle:20,1')->name('card.download.public');
 
-    Route::get('/card/{cardNumber}/preview/{cp?}', [WarrantyCardController::class, 'preview'])->middleware('throttle:10,1')->name('card.preview');
-    Route::get('/card/{cardNumber}/download/{cp?}', [WarrantyCardController::class, 'download'])->middleware('throttle:10,1')->name('card.download');
+    // Note: card.preview/card.download to WarrantyCardController were removed —
+    // that controller never defined preview()/download() methods (dead routes,
+    // always 500'd). PPF card routes below cover the live functionality.
 
+    // 'signed' requires a valid Laravel signature on the URL (see URL::signedRoute()
+    // call sites in result.blade.php / customer/ppf/index.blade.php) so the raw
+    // installation id can no longer be enumerated to pull another customer's card.
     Route::get('/ppf-card/{installationId}/{side}/preview', [WarrantyCardController::class, 'ppfPreview'])
-        ->whereIn('side', ['front', 'back'])->middleware('throttle:10,1')->name('ppf.card.preview');
+        ->whereIn('side', ['front', 'back'])->middleware(['throttle:10,1', 'signed'])->name('ppf.card.preview');
     Route::get('/ppf-card/{installationId}/{side}/download', [WarrantyCardController::class, 'ppfDownload'])
-        ->whereIn('side', ['front', 'back'])->middleware('throttle:10,1')->name('ppf.card.download');
+        ->whereIn('side', ['front', 'back'])->middleware(['throttle:10,1', 'signed'])->name('ppf.card.download');
 });
 
 // Public warranty cards — di luar named group agar nama route tidak dapat prefix 'warranty.'
-Route::prefix('warranty/cards')->name('public.warranty.card.')->middleware('throttle:10,1')->group(function () {
+// 'signed': cardNumber is a sequential, guessable identifier — the signature
+// (generated only by our own code via URL::signedRoute()) is what actually
+// prevents enumeration of other customers' cards, not the cardNumber itself.
+Route::prefix('warranty/cards')->name('public.warranty.card.')->middleware(['throttle:10,1', 'signed'])->group(function () {
     Route::get('/{cardNumber}/preview', [PublicWarrantyCardController::class, 'previewFilm'])->name('preview');
     Route::get('/{cardNumber}/download', [PublicWarrantyCardController::class, 'downloadFilm'])->name('download');
 });
 
-Route::prefix('warranty/ppf-cards')->name('public.warranty.ppf.')->middleware('throttle:10,1')->group(function () {
+Route::prefix('warranty/ppf-cards')->name('public.warranty.ppf.')->middleware(['throttle:10,1', 'signed'])->group(function () {
     Route::get('/{installationId}/preview', [PublicWarrantyCardController::class, 'previewPpf'])->name('preview');
     Route::get('/{installationId}/download', [PublicWarrantyCardController::class, 'downloadPpf'])->name('download');
 });
@@ -149,7 +167,7 @@ Route::prefix('warranty/ppf-cards')->name('public.warranty.ppf.')->middleware('t
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1');
+    Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:login');
 });
 
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
@@ -168,6 +186,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/read-all', 'readAll')->name('readAll');
     });
 
+    // Generic approval queue — "Menunggu Approval Saya" (siapa pun yang jadi approver di flow apa pun)
+    Route::prefix('approvals')->name('approvals.')->controller(\App\Http\Controllers\ApprovalController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/{approvalRequest}/approve', 'approve')->name('approve');
+        Route::post('/{approvalRequest}/reject', 'reject')->name('reject');
+    });
+
     // Self-service leave requests (semua role)
     Route::prefix('my-leave-requests')->name('my-leave-requests.')->controller(\App\Http\Controllers\MyLeaveRequestController::class)->group(function () {
         Route::get('/',                         'index')->name('index');
@@ -176,6 +201,45 @@ Route::middleware('auth')->group(function () {
         Route::get('/{leaveRequest}',           'show')->name('show');
         Route::put('/{leaveRequest}/cancel',    'cancel')->name('cancel');
     });
+
+    // Self-service kasbon (semua role dengan data employee) — pengajuan + approval
+    // lewat flow 'kasbon' (lihat ApprovalFlowSeeder), potongan aktual dieksekusi
+    // oleh KasbonDeductionService saat payroll/komisi diproses, bukan di sini.
+    Route::prefix('my-kasbon')->name('my-kasbon.')->controller(\App\Http\Controllers\KasbonController::class)->group(function () {
+        Route::get('/',             'index')->name('index');
+        Route::get('/create',       'create')->name('create');
+        Route::post('/',            'store')->name('store');
+        Route::get('/{kasbon}',     'show')->name('show');
+    });
+
+    // Self-service claims — Teknisi/Kenek only (Claim Pembelian, Bensin, Saldo Kesehatan)
+    Route::prefix('my-claims')->name('my-claims.')->middleware('role:teknisi|kenek')
+        ->controller(\App\Http\Controllers\EmployeeClaimController::class)->group(function () {
+            Route::get('/',        'index')->name('index');
+            Route::get('/create',  'create')->name('create');
+            Route::post('/',       'store')->name('store');
+        });
+
+    // Finance / IT Manager — cairkan klaim yang sudah disetujui Manager Operasional
+    Route::prefix('claims-disbursement')->name('claims-disbursement.')
+        ->middleware('role:superadmin|admin|finance|it_manager')
+        ->controller(\App\Http\Controllers\EmployeeClaimController::class)->group(function () {
+            Route::get('/',                'readyForDisbursement')->name('index');
+            Route::post('/{claim}/disburse', 'disburse')->name('disburse');
+        });
+
+    // Team Creative — Strategi Pengembangan meng-assign, Designer/Videographer mengerjakan
+    Route::prefix('creative-tasks')->name('creative-tasks.')
+        ->middleware('role:superadmin|strategi_pengembangan|designer|videographer')
+        ->controller(\App\Http\Controllers\CreativeTaskController::class)->group(function () {
+            Route::get('/',                       'index')->name('index');
+            Route::get('/create',                 'create')->name('create');
+            Route::post('/',                      'store')->name('store');
+            Route::get('/{creativeTask}',          'show')->name('show');
+            Route::post('/{creativeTask}/deliverables', 'storeDeliverable')->name('deliverables.store');
+            Route::post('/{creativeTask}/approve', 'approve')->name('approve');
+            Route::post('/{creativeTask}/revision', 'requestRevision')->name('revision');
+        });
 });
 
 
@@ -219,6 +283,7 @@ Route::middleware(['auth', 'branch.access', "role:{$crmRoles}"])
         Route::get('/',                 'index')->name('index');
         Route::get('/create',           'create')->name('create');
         Route::post('/',                'store')->name('store');
+        Route::post('/quick',           'quickStore')->name('quick-store');
         Route::get('/{lead}',           'show')->name('show');
         Route::get('/{lead}/edit',      'edit')->name('edit');
         Route::put('/{lead}',           'update')->name('update');
@@ -258,6 +323,7 @@ Route::middleware(['auth', 'branch.access', "role:{$crmRoles}"])
         Route::post('/{salesOrder}/start-work', 'startWork')->name('start-work');
         Route::post('/{salesOrder}/complete',   'complete')->name('complete');
         Route::post('/{salesOrder}/cancel',     'cancel')->name('cancel');
+        Route::post('/{salesOrder}/assign',     'assign')->name('assign');
         Route::post('/{salesOrder}/issue-spk',  'issueSpk')->name('issue-spk');
         Route::get('/{salesOrder}/spk',         'printSpk')->name('spk');
     });
@@ -267,7 +333,10 @@ Route::get('/spk/{token}', [SpkPublicController::class, 'show'])
     ->name('spk.public')
     ->middleware('throttle:60,1');
 
-Route::middleware(['auth', 'branch.access', "role:{$crmRoles}"])
+// Teknisi/kenek disertakan di role list, TANPA branch.access — middleware itu
+// sengaja menolak akun teknisi/kenek (lihat EnsureBranchAccess), dan cabang
+// mereka sudah divalidasi langsung dari data karyawan di JadwalPemasanganController.
+Route::middleware(['auth', "role:{$crmRoles}|teknisi|kenek"])
     ->get('/jadwal-pemasangan', [JadwalPemasanganController::class, 'index'])
     ->name('jadwal.index');
 
@@ -416,6 +485,12 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin'])->group(fun
     // Roles & Permissions
     Route::resource('roles', RoleController::class)->except(['show']);
 
+    // Dealers (public website directory)
+    Route::resource('dealers', DealerController::class)->except(['show']);
+
+    // Articles (public website blog)
+    Route::resource('articles', ArticleController::class)->except(['show']);
+
     // Audit Log
     Route::prefix('audit-logs')->name('audit-logs.')->controller(AuditLogController::class)->group(function () {
         Route::get('/', 'index')->name('index');
@@ -432,6 +507,13 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin'])->group(fun
         Route::patch('/{employee}/toggle', 'toggle')->name('toggle');
         Route::delete('/{employee}', 'destroy')->name('destroy');
     });
+
+    // Saldo Biaya Kesehatan (Teknisi/Kenek)
+    Route::prefix('employee-health-balances')->name('employee-health-balances.')
+        ->controller(\App\Http\Controllers\EmployeeHealthBalanceController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::put('/{employeeHealthBalance}', 'update')->name('update');
+        });
 
     // PPF Products
     Route::resource('ppf-products', PpfProductController::class);
@@ -467,6 +549,12 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin'])->group(fun
         Route::delete('/{trigger}', 'destroy')->name('destroy');
     });
 
+    // Per-employee commission mode (Sistem Saat Ini / Persentase Kustom / Tidak Dapat Komisi)
+    Route::prefix('commission-settings')->name('commission.settings.')->controller(\App\Http\Controllers\CommissionSettingController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::put('/{employee}', 'update')->name('update');
+    });
+
     Route::prefix('commission-periods')->name('commission.periods.')->controller(\App\Http\Controllers\CommissionPeriodController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/{period}', 'show')->name('show')->where('period', '\d{4}-\d{2}-\d{2}');
@@ -500,6 +588,7 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin'])->group(fun
 
     Route::prefix('leave-requests')->name('leave-requests.')->controller(LeaveRequestController::class)->group(function () {
         Route::get('/',                      'index')->name('index');
+        Route::get('/schedule',              'schedule')->name('schedule');
         Route::get('/create',                'create')->name('create');
         Route::post('/',                     'store')->name('store');
         Route::get('/{leaveRequest}',        'show')->name('show');
@@ -550,7 +639,7 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|owner|manager
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'branch.access', 'role:superadmin|finance'])
+Route::middleware(['auth', 'branch.access', 'role:superadmin|finance|it_manager'])
     ->prefix('commission/withdrawals')->name('commission.withdrawals.')
     ->controller(CommissionWithdrawalController::class)
     ->group(function () {
@@ -567,22 +656,15 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|finance'])
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|manager_operasional|purchasing'])
+Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|manager_operasional|purchasing|it_manager'])
     ->group(function () {
         Route::prefix('film-stock')->name('film-stock.')->controller(FilmStockController::class)->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('/create', 'create')->name('create');
             Route::post('/', 'store')->name('store');
             Route::get('/usages', 'usages')->name('usages');
+            Route::get('/suggest-roll-codes', 'suggestRollCodes')->name('suggest-roll-codes');
             Route::get('/{pool}', 'show')->name('show');
-        });
-
-        Route::prefix('film-stock-transfers')->name('film-stock-transfers.')->controller(FilmStockTransferController::class)->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/create', 'create')->name('create');
-            Route::post('/', 'store')->name('store');
-            Route::get('/{transfer}', 'show')->name('show');
-            Route::post('/{transfer}/receive', 'receive')->name('receive');
         });
     });
 
@@ -614,7 +696,7 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|manager_opera
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|purchasing'])
+Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|purchasing|it_manager'])
     ->group(function () {
         Route::get('supporting-goods/export', [SupportingGoodController::class, 'export'])->name('supporting-goods.export');
         Route::prefix('supporting-goods')->name('supporting-goods.')->controller(SupportingGoodController::class)->group(function () {
@@ -636,7 +718,7 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|purchasing'])
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|purchasing'])
+Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|purchasing|it_manager'])
     ->group(function () {
         Route::resource('purchases', PurchaseController::class);
         Route::get('/purchase-reports/monthly', [PurchaseReportController::class, 'monthly'])->name('purchase.reports.monthly');
@@ -649,6 +731,79 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|purchasing'])
         Route::resource('suppliers', SupplierController::class)->except(['show']);
     });
 
+/*
+|--------------------------------------------------------------------------
+| MITRA & INVOICE MITRA — pembelian bahan dari pusat ke mitra/non-franchise.
+| Tidak pakai middleware branch.access: mitra bukan branch, ini transaksi
+| pusat (tidak terikat cabang aktif user).
+| superadmin, admin, purchasing, finance
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:superadmin|admin|purchasing|finance|it_manager'])
+    ->group(function () {
+        Route::resource('mitras', MitraController::class)->except(['show']);
+
+        Route::resource('mitra-invoices', MitraInvoiceController::class)->only(['index', 'create', 'store', 'show']);
+        Route::patch('mitra-invoices/{mitraInvoice}/mark-paid', [MitraInvoiceController::class, 'markPaid'])->name('mitra-invoices.mark-paid');
+        Route::get('mitra-invoices/{mitraInvoice}/pdf', [MitraInvoiceController::class, 'download'])->name('mitra-invoices.pdf');
+        Route::get('mitra-invoices-available-stock', [MitraInvoiceController::class, 'availableStock'])->name('mitra-invoices.available-stock');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| EXPORT & IMPORT — superadmin, export_import
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:superadmin|export_import'])->group(function () {
+    Route::resource('international-partners', \App\Http\Controllers\InternationalPartnerController::class)->except(['show']);
+
+    Route::prefix('import-orders')->name('import-orders.')
+        ->controller(\App\Http\Controllers\ImportOrderController::class)->group(function () {
+            Route::get('/',                  'index')->name('index');
+            Route::get('/create',            'create')->name('create');
+            Route::post('/',                 'store')->name('store');
+            Route::get('/{importOrder}',      'show')->name('show');
+            Route::put('/{importOrder}/status', 'updateStatus')->name('status');
+        });
+
+    Route::prefix('export-orders')->name('export-orders.')
+        ->controller(\App\Http\Controllers\ExportOrderController::class)->group(function () {
+            Route::get('/',                  'index')->name('index');
+            Route::get('/create',            'create')->name('create');
+            Route::post('/',                 'store')->name('store');
+            Route::get('/{exportOrder}',      'show')->name('show');
+            Route::put('/{exportOrder}/status', 'updateStatus')->name('status');
+        });
+});
+
+/*
+|--------------------------------------------------------------------------
+| DEVELOPMENT — superadmin, development; Owner can view (laporan ke Owner)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:superadmin|development|owner'])->group(function () {
+    Route::prefix('development-reports')->name('development-reports.')
+        ->controller(\App\Http\Controllers\DevelopmentReportController::class)->group(function () {
+            Route::get('/',                       'index')->name('index');
+            Route::get('/create',                 'create')->name('create');
+            Route::post('/',                      'store')->name('store');
+            Route::get('/{developmentReport}',     'show')->name('show');
+        });
+
+    Route::prefix('development-plans')->name('development-plans.')
+        ->controller(\App\Http\Controllers\DevelopmentAnnualPlanController::class)->group(function () {
+            Route::get('/',                       'index')->name('index');
+            Route::get('/create',                 'create')->name('create');
+            Route::post('/',                      'store')->name('store');
+            Route::get('/{developmentPlan}',       'show')->name('show');
+            Route::post('/{developmentPlan}/initiatives', 'storeInitiative')->name('initiatives.store');
+            Route::put('/{developmentPlan}/initiatives/{initiative}/status', 'updateInitiativeStatus')->name('initiatives.status');
+        });
+});
+
 
 /*
 |--------------------------------------------------------------------------
@@ -656,7 +811,7 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|purchasing'])
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|finance'])
+Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|finance|it_manager'])
     ->group(function () {
         Route::prefix('payrolls')->name('payrolls.')->controller(PayrollController::class)->group(function () {
             Route::get('/', 'index')->name('index');
@@ -677,11 +832,26 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|finance'])
 
 /*
 |--------------------------------------------------------------------------
+| KASBON MANAGEMENT — superadmin, admin, finance (audit lintas karyawan;
+| persetujuan tetap lewat /approvals, ini cuma listing read-only)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|finance|it_manager'])
+    ->group(function () {
+        Route::prefix('kasbons')->name('kasbons.')->controller(\App\Http\Controllers\KasbonController::class)->group(function () {
+            Route::get('/', 'manage')->name('index');
+        });
+    });
+
+
+/*
+|--------------------------------------------------------------------------
 | FINANCE — petty cash, hutang/piutang, bank reconciliation (superadmin, admin, finance)
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|finance'])
+Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|finance|it_manager'])
     ->group(function () {
         // Petty Cash
         Route::prefix('petty-cash')->name('petty-cash.')->controller(PettyCashController::class)->group(function () {
@@ -771,6 +941,14 @@ Route::middleware(['auth', 'branch.access', 'role:owner'])
         Route::get('/dashboard', [OwnerDashboardController::class, 'dashboard'])->name('dashboard');
     });
 
+// Owner monitoring — progres lintas-role (approval queue, claims, Team
+// Creative, Export & Import, Development) dalam satu layar. Company-wide,
+// tidak branch-scoped, konsisten dengan modul baru lainnya.
+Route::middleware(['auth', 'role:superadmin|owner'])->group(function () {
+    Route::get('/owner-monitoring', [\App\Http\Controllers\OwnerMonitoringController::class, 'index'])
+        ->name('owner-monitoring.index');
+});
+
 Route::middleware(['auth', 'branch.access', 'role:marketing|manager_marketing'])
     ->prefix('marketing')->name('marketing.')
     ->group(function () {
@@ -791,13 +969,13 @@ Route::middleware(['auth', 'branch.access', 'role:manager_operasional'])
         Route::get('/dashboard', [ManagerOpsDashboardController::class, 'dashboard'])->name('dashboard');
     });
 
-Route::middleware(['auth', 'branch.access', 'role:finance'])
+Route::middleware(['auth', 'branch.access', 'role:finance|it_manager'])
     ->prefix('finance')->name('finance.')
     ->group(function () {
         Route::get('/dashboard', [FinanceDashboardController::class, 'dashboard'])->name('dashboard');
     });
 
-Route::middleware(['auth', 'branch.access', 'role:purchasing'])
+Route::middleware(['auth', 'branch.access', 'role:purchasing|it_manager'])
     ->prefix('purchasing')->name('purchasing.')
     ->group(function () {
         Route::get('/dashboard', [PurchasingDashboardController::class, 'dashboard'])->name('dashboard');
@@ -809,3 +987,4 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|owner|manager
         Route::get('/teknisi', [EmployeeRankingController::class, 'teknisi'])->name('teknisi');
         Route::get('/marketing', [EmployeeRankingController::class, 'marketing'])->name('marketing');
     });
+

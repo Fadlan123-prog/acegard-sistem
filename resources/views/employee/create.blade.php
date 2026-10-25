@@ -333,7 +333,7 @@
                 <div class="ui-card-title">Tambah Karyawan</div>
                 <small class="text-muted">Data ini akan digunakan untuk absensi, komisi, dan laporan gaji.</small>
             </div>
-            <x-ui.button href="{{ route('employee.index') }}" variant="secondary" size="sm">
+            <x-ui.button :href="route('employee.index')" variant="secondary" size="sm">
                 <iconify-icon icon="mdi:arrow-left" class="me-1"></iconify-icon> Kembali
             </x-ui.button>
         </div>
@@ -446,6 +446,13 @@
                                     <label class="emp-label" for="hire_date">Tanggal Bergabung</label>
                                     <input type="date" id="hire_date" name="hire_date" class="form-control"
                                            value="{{ old('hire_date', '') }}">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="emp-field">
+                                    <label class="emp-label" for="birth_date">Tanggal Lahir</label>
+                                    <input type="date" id="birth_date" name="birth_date" class="form-control"
+                                           value="{{ old('birth_date', '') }}">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -655,7 +662,7 @@
                         Field bertanda <strong style="color:#ef4444;">*</strong> wajib diisi
                     </p>
                     <div class="d-flex gap-2">
-                        <x-ui.button href="{{ route('employee.index') }}" variant="secondary">Batal</x-ui.button>
+                        <x-ui.button :href="route('employee.index')" variant="secondary">Batal</x-ui.button>
                         <x-ui.button type="submit" variant="primary" class="px-4">
                             <iconify-icon icon="mdi:content-save-outline" class="me-1"></iconify-icon> Simpan Karyawan
                         </x-ui.button>

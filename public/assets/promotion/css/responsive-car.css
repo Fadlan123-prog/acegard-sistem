@@ -45,12 +45,28 @@
         font-size: 12px;
     }
 
-    .feature-item{
-        font-size: 12px;
+    .hero .protection-label {
+        font-size: 0.6rem;
+        margin-top: 12px;
     }
 
-    .feature-list{
-        margin-top: 5rem;
+    .hero-stats {
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .hero-stat {
+        font-size: 0.85rem;
+    }
+
+    .hero-stat-divider {
+        height: 16px;
+    }
+
+    .hero p.hero-footnote {
+        width: 65%;
+        font-size: 0.6rem;
+        margin-top: 4px;
     }
 
     .review-coment img{
@@ -79,7 +95,7 @@
         margin: 40px 0;
     }
 
-    .adventage h4 {
+    .adventage h3 {
         margin-top: 35px;
         margin-bottom: 35px;
     }
@@ -89,8 +105,12 @@
     }
     .adventage img, .adventage .col-12{
         width: 80%;
-        height: 40%;
         padding: 0 !important;
+    }
+
+    .adventage img{
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
     }
 
     .features{
@@ -142,7 +162,7 @@
         color: #fff;
     }
 
-    .warranty .text-warranty h1 {
+    .warranty .text-warranty h2 {
         font-size: 24px;
     }
 
@@ -191,7 +211,7 @@
         margin-bottom: 30px;
     }
 
-    .faq__section h1{
+    .faq__section h2{
         width: 100%;
         text-align: center;
     }
@@ -264,12 +284,28 @@
         font-size: 12px;
     }
 
-    .feature-item{
-        font-size: 12px;
+    .hero .protection-label {
+        font-size: 0.7rem;
+        margin-top: 16px;
     }
 
-    .feature-list{
-        margin-top: 5rem;
+    .hero-stats {
+        gap: 12px;
+        margin-top: 12px;
+    }
+
+    .hero-stat {
+        font-size: 1.1rem;
+    }
+
+    .hero-stat-divider {
+        height: 20px;
+    }
+
+    .hero p.hero-footnote {
+        width: 65%;
+        font-size: 0.65rem;
+        margin-top: 4px;
     }
 
     .review-coment img{
@@ -293,6 +329,11 @@
     .adventage img, .adventage .col-12{
         width: 80%;
         padding: 0 !important;
+    }
+
+    .adventage img{
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
     }
 
     .features{
@@ -332,7 +373,7 @@
         color: #fff;
     }
 
-    .warranty .text-warranty h1 {
+    .warranty .text-warranty h2 {
         font-size: 24px;
     }
 
@@ -382,7 +423,7 @@
         margin-bottom: 30px;
     }
 
-    .faq__section h1{
+    .faq__section h2{
         width: 100%;
         text-align: center;
     }
@@ -460,12 +501,28 @@
         text-align: start !important;
     }
 
-    .feature-item{
-        font-size: 12px;
+    .hero .protection-label {
+        font-size: 0.75rem;
+        margin-top: 18px;
     }
 
-    .feature-list{
-        margin-top: 5rem;
+    .hero-stats {
+        gap: 14px;
+        margin-top: 14px;
+    }
+
+    .hero-stat {
+        font-size: 1.3rem;
+    }
+
+    .hero-stat-divider {
+        height: 24px;
+    }
+
+    .hero p.hero-footnote {
+        width: 60%;
+        font-size: 0.7rem;
+        margin-top: 5px;
     }
 
     .review-coment img{
@@ -489,6 +546,11 @@
     .adventage img, .adventage .col-12{
         width: 80%;
         padding: 0 !important;
+    }
+
+    .adventage img{
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
     }
 
     .features{
@@ -528,7 +590,7 @@
         color: #fff;
     }
 
-    .warranty .text-warranty h1 {
+    .warranty .text-warranty h2 {
         font-size: 24px;
     }
 
@@ -578,7 +640,7 @@
         margin-bottom: 30px;
     }
 
-    .faq__section h1{
+    .faq__section h2{
         width: 100%;
         text-align: center;
     }
@@ -657,8 +719,28 @@
         border: 5px solid #00D0FF;
     }
 
-    .feature-item {
-        font-size: 2rem;
+    .hero .protection-label {
+        font-size: 1.1rem;
+        margin-top: 32px;
+    }
+
+    .hero-stats {
+        gap: 28px;
+        margin-top: 24px;
+    }
+
+    .hero-stat {
+        font-size: 2.2rem;
+    }
+
+    .hero-stat-divider {
+        height: 40px;
+    }
+
+    .hero p.hero-footnote {
+        width: 50%;
+        font-size: 1.1rem;
+        margin-top: 10px;
     }
 
     .review-coment img {
@@ -691,7 +773,7 @@
         margin: 3rem 0;
     }
 
-    .adventage h4{
+    .adventage h3{
         font-size: 2rem;
     }
 
@@ -709,7 +791,7 @@
         font-size: 1.5rem;
     }
 
-    .warranty .text-warranty h1 {
+    .warranty .text-warranty h2 {
         font-size: 4rem;
     }
 
@@ -766,7 +848,7 @@
         font-size: 1.5rem;
     }
 
-    .faq__section h1 {
+    .faq__section h2 {
         font-size: 3rem;
     }
 

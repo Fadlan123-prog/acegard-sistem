@@ -6,14 +6,6 @@
 
 @section('content')
 
-@if(session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-
-@if(session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
-
 <x-ui.card>
     @slot('header')
         <div>
@@ -23,36 +15,42 @@
 
         <div class="d-flex gap-2 flex-wrap">
             @if($purchase->status === 'draft')
-                <x-ui.button href="{{ route('purchases.edit', $purchase->id) }}" variant="primary" size="sm">Edit</x-ui.button>
+                <x-ui.button :href="route('purchases.edit', $purchase->id)" variant="primary" size="sm">Edit</x-ui.button>
             @endif
 
             @if($purchase->isReceivable())
-                <x-ui.button href="{{ route('purchase-receipts.create', $purchase->id) }}" variant="success" size="sm">
+                <x-ui.button :href="route('purchase-receipts.create', $purchase->id)" variant="success" size="sm">
                     <iconify-icon icon="mdi:package-variant-closed-check" class="me-1"></iconify-icon>
                     Terima Barang
                 </x-ui.button>
             @endif
 
-            <x-ui.button href="{{ route('purchases.index') }}" variant="secondary" size="sm">Kembali</x-ui.button>
+            <x-ui.button :href="route('purchases.index')" variant="secondary" size="sm">Kembali</x-ui.button>
         </div>
     @endslot
 
     {{-- Stat cards --}}
     <div class="row mb-4">
         <div class="col-md-3 mb-2">
-            <div class="border rounded p-3 h-100">
-                <small class="text-muted d-block">No Purchasing</small>
-                <h6 class="mb-0 fw-semibold">{{ $purchase->purchase_number }}</h6>
-            </div>
+            <x-ui.stats-card
+                label="No Purchasing"
+                :value="$purchase->purchase_number"
+                color="blue"
+                icon='<iconify-icon icon="mdi:receipt-text-outline"></iconify-icon>'
+                accent
+                class="h-100"
+            />
         </div>
 
         <div class="col-md-3 mb-2">
-            <div class="border rounded p-3 h-100">
-                <small class="text-muted d-block">Tanggal</small>
-                <h6 class="mb-0">
-                    {{ $purchase->purchase_date ? $purchase->purchase_date->format('d-m-Y') : '-' }}
-                </h6>
-            </div>
+            <x-ui.stats-card
+                label="Tanggal"
+                :value="$purchase->purchase_date ? $purchase->purchase_date->format('d-m-Y') : '-'"
+                color="purple"
+                icon='<iconify-icon icon="mdi:calendar-outline"></iconify-icon>'
+                accent
+                class="h-100"
+            />
         </div>
 
         <div class="col-md-3 mb-2">
@@ -77,12 +75,14 @@
         </div>
 
         <div class="col-md-3 mb-2">
-            <div class="border rounded p-3 h-100">
-                <small class="text-muted d-block">Total Nilai</small>
-                <h6 class="mb-0 fw-semibold text-success">
-                    Rp{{ number_format($purchase->total_amount ?? 0, 0, ',', '.') }}
-                </h6>
-            </div>
+            <x-ui.stats-card
+                label="Total Nilai"
+                :value="'Rp'.number_format($purchase->total_amount ?? 0, 0, ',', '.')"
+                color="green"
+                icon='<iconify-icon icon="mdi:cash-multiple"></iconify-icon>'
+                accent
+                class="h-100"
+            />
         </div>
     </div>
 
@@ -172,7 +172,7 @@
     {{-- Actions footer --}}
     @if($purchase->status === 'draft')
         <div class="mt-4 d-flex gap-2">
-            <x-ui.button href="{{ route('purchases.edit', $purchase->id) }}" variant="primary" size="sm">Edit Purchasing</x-ui.button>
+            <x-ui.button :href="route('purchases.edit', $purchase->id)" variant="primary" size="sm">Edit Purchasing</x-ui.button>
 
             <form action="{{ route('purchases.destroy', $purchase->id) }}"
                   method="POST"
@@ -192,7 +192,7 @@
     @slot('header')
         <div class="ui-card-title">Riwayat Penerimaan Barang (GRN)</div>
         @if($purchase->isReceivable())
-            <x-ui.button href="{{ route('purchase-receipts.create', $purchase->id) }}" variant="success" size="sm">+ Terima Barang</x-ui.button>
+            <x-ui.button :href="route('purchase-receipts.create', $purchase->id)" variant="success" size="sm">+ Terima Barang</x-ui.button>
         @endif
     @endslot
 
@@ -226,7 +226,7 @@
                             <td>{{ $receipt->receiver?->name ?? '-' }}</td>
                             <td class="text-muted">{{ $receipt->notes ?: '-' }}</td>
                             <td>
-                                <x-ui.button href="{{ route('purchase-receipts.show', $receipt->id) }}" variant="secondary" size="sm">Detail</x-ui.button>
+                                <x-ui.button :href="route('purchase-receipts.show', $receipt->id)" variant="secondary" size="sm">Detail</x-ui.button>
                             </td>
                         </tr>
                     @endforeach

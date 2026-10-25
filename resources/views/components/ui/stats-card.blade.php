@@ -1,4 +1,4 @@
-<div {{ $attributes->merge(['class' => 'ui-stats-card']) }}>
+<div {{ $attributes->merge(['class' => 'ui-stats-card '.$accentClass]) }}>
 
     @if($icon)
         <div class="ui-stats-icon {{ $iconColorClass }}" aria-hidden="true">

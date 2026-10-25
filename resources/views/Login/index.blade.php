@@ -53,7 +53,7 @@
                 <div class="max-w-464-px mx-auto my-60 w-100">
                     <div class="text-center">
                         <a href="#" class="mb-40 max-w-290-px text-center">
-                            <img src="{{ asset('assets/images/auth/dark-logo.png') }}" alt="">
+                            <img src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}" alt="" style="width: 170px;">
                         </a>
                         <h4 class="mb-50">Login</h4>
                         {{-- <p class="mb-32 text-secondary-light text-lg">Selamat Datang Kembali!</p> --}}

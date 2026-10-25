@@ -9,11 +9,10 @@ use RuntimeException;
 /**
  * Generates unique document numbers atomically using a Redis distributed lock.
  *
- * Fixes the race condition present in 4 separate busy-wait loops:
+ * Fixes the race condition present in several separate busy-wait loops:
  *   - InvoiceController::generateInvoiceNumber()
  *   - InvoiceBuildingController::generateInvoiceNumber()
  *   - PurchaseController (inline)
- *   - FilmStockTransferService::generateTransferNumber()
  *
  * Design:
  *   1. Acquire a Redis lock scoped to the (table, column) pair.

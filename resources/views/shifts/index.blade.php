@@ -19,16 +19,8 @@
         </div>
     @endslot
 
-    @if(session('success'))
-        <x-ui.alert type="success" class="mb-3">
-            {{ session('success') }}<button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
-        </x-ui.alert>
-    @endif
-    @if(session('error'))
-        <x-ui.alert type="danger" class="mb-3">
-            {{ session('error') }}<button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
-        </x-ui.alert>
-    @endif
+    
+    
 
     <div class="table-responsive">
         <table class="table table-bordered table-hover">

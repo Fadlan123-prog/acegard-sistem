@@ -23,14 +23,14 @@
 
 {{-- Status tab filter --}}
 <div class="d-flex gap-2 mb-3 flex-wrap">
-    <x-ui.button href="{{ route('leads.index', request()->except('status', 'page')) }}"
+    <x-ui.button :href="route('leads.index', request()->except('status', 'page'))"
         size="sm" variant="{{ $activeStatus === '' ? 'primary' : 'outline' }}">
         Semua
         <x-ui.badge variant="neutral" size="sm" class="ms-1">{{ $total }}</x-ui.badge>
     </x-ui.button>
     @foreach($allStatuses as $key => $label)
         @php $count = $statusCounts[$key] ?? 0; @endphp
-        <x-ui.button href="{{ route('leads.index', array_merge(request()->except('status', 'page'), ['status' => $key])) }}"
+        <x-ui.button :href="route('leads.index', array_merge(request()->except('status', 'page'), ['status' => $key]))"
             size="sm" variant="{{ $activeStatus === $key ? 'primary' : 'outline' }}">
             {{ $label }}
             @if($count)
@@ -44,7 +44,10 @@
     @slot('header')
         <div class="d-flex justify-content-between align-items-center">
             <div class="ui-card-title">Daftar Lead</div>
-            <x-ui.button href="{{ route('leads.create') }}" variant="primary" size="sm">+ Tambah Lead</x-ui.button>
+            <div class="d-flex gap-2">
+                <x-ui.button type="button" variant="success" size="sm" data-bs-toggle="modal" data-bs-target="#quickLeadModal">+ Lead Cepat</x-ui.button>
+                <x-ui.button :href="route('leads.create')" variant="primary" size="sm">+ Tambah Lead</x-ui.button>
+            </div>
         </div>
     @endslot
 
@@ -95,7 +98,7 @@
         <x-ui.button type="submit" variant="outline">Cari</x-ui.button>
 
         @if(request()->hasAny(['search', 'category', 'assigned_to', 'branch_id']))
-            <x-ui.button href="{{ route('leads.index', request()->only('status')) }}" variant="outline">Reset</x-ui.button>
+            <x-ui.button :href="route('leads.index', request()->only('status'))" variant="outline">Reset</x-ui.button>
         @endif
     </form>
 
@@ -195,7 +198,7 @@
                             title="Tidak ada lead ditemukan"
                             description="Belum ada data lead. Klik tombol Tambah Lead untuk memulai."
                         >
-                            <x-ui.button href="{{ route('leads.create') }}" variant="primary" size="sm">+ Tambah Lead</x-ui.button>
+                            <x-ui.button :href="route('leads.create')" variant="primary" size="sm">+ Tambah Lead</x-ui.button>
                         </x-ui.empty-state>
                     </td>
                 </tr>
@@ -206,5 +209,56 @@
 
     @slot('footer'){{ $leads->withQueryString()->links() }}@endslot
 </x-ui.card>
+
+{{-- Lead Cepat: khusus input cepat saat chat WA dari iklan lagi deras — cuma 3 field,
+     dibedakan dari form lengkap "+ Tambah Lead" di atas yang dipakai untuk melengkapi
+     detail lead yang sudah dipastikan serius. --}}
+<div class="modal fade" id="quickLeadModal" tabindex="-1" aria-labelledby="quickLeadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quickLeadModalLabel">+ Lead Cepat</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ route('leads.quick-store') }}">
+                @csrf
+                <div class="modal-body">
+                    <p class="text-muted small mb-3">Cuma 3 isian — sumber otomatis "WhatsApp", status otomatis "Baru". Detail lain (alamat, kendaraan, dst) dilengkapi belakangan lewat halaman lead.</p>
+
+                    <x-ui.form-field label="Nama" name="name" :required="true" :error="$errors->quickLead->first('name')">
+                        <input type="text" name="name" id="name" class="form-control" value="{{ old('name') }}" required autofocus>
+                    </x-ui.form-field>
+
+                    <x-ui.form-field label="No. WhatsApp" name="phone" :required="true" :error="$errors->quickLead->first('phone')" class="mt-3">
+                        <input type="text" name="phone" id="phone" class="form-control" value="{{ old('phone') }}" placeholder="08xxxxxxxxxx" required>
+                    </x-ui.form-field>
+
+                    <x-ui.form-field label="Kategori" name="category" :required="true" :error="$errors->quickLead->first('category')" class="mt-3">
+                        <div class="d-flex gap-2">
+                            @foreach(\App\Models\Lead::CATEGORIES as $key => $label)
+                                <input type="radio" class="btn-check" name="category" id="qcat_{{ $key }}"
+                                       value="{{ $key }}" autocomplete="off" required
+                                       {{ old('category') === $key ? 'checked' : '' }}>
+                                <label class="btn btn-outline-primary flex-fill" for="qcat_{{ $key }}">{{ $label }}</label>
+                            @endforeach
+                        </div>
+                    </x-ui.form-field>
+                </div>
+                <div class="modal-footer">
+                    <x-ui.button type="button" variant="outline" data-bs-dismiss="modal">Batal</x-ui.button>
+                    <x-ui.button type="submit" variant="success">Simpan</x-ui.button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if($errors->quickLead->any())
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    new bootstrap.Modal(document.getElementById('quickLeadModal')).show();
+});
+</script>
+@endif
 
 @endsection

@@ -46,11 +46,12 @@ class NotificationConfig extends Model
     }
 
     public static array $types = [
-        'hutang_due'      => 'Hutang Jatuh Tempo',
-        'piutang_due'     => 'Piutang Jatuh Tempo',
-        'warranty_expiry' => 'Garansi Pelanggan',
-        'low_film_stock'  => 'Stok Film Kritis',
-        'low_goods_stock' => 'Stok Barang Pendukung',
+        'hutang_due'         => 'Hutang Jatuh Tempo',
+        'piutang_due'        => 'Piutang Jatuh Tempo',
+        'warranty_expiry'    => 'Garansi Pelanggan',
+        'low_film_stock'     => 'Stok Film Kritis',
+        'low_goods_stock'    => 'Stok Barang Pendukung',
+        'employee_birthday'  => 'Ulang Tahun Karyawan',
     ];
 
     public static array $channels = [
@@ -60,5 +61,5 @@ class NotificationConfig extends Model
     ];
 
     // Types that use days_before (time-based reminders)
-    public static array $timeBased = ['hutang_due', 'piutang_due', 'warranty_expiry'];
+    public static array $timeBased = ['hutang_due', 'piutang_due', 'warranty_expiry', 'employee_birthday'];
 }

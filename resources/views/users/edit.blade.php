@@ -10,7 +10,7 @@
     @slot('header')
         <div class="d-flex justify-content-between align-items-center">
             <div class="ui-card-title">Edit User</div>
-            <x-ui.button href="{{ route('users.index') }}" variant="secondary" size="sm">Kembali</x-ui.button>
+            <x-ui.button :href="route('users.index')" variant="secondary" size="sm">Kembali</x-ui.button>
         </div>
     @endslot
 
@@ -48,6 +48,15 @@
                    value="{{ old('email', $user->email) }}"
                    required>
         </x-ui.form-field>
+
+        @if(auth()->id() === $user->id)
+        <x-ui.form-field label="Password Saat Ini" name="current_password" :error="$errors->first('current_password')">
+            <input type="password"
+                   name="current_password"
+                   class="form-control @error('current_password') is-invalid @enderror"
+                   placeholder="Wajib diisi hanya jika mengubah password di bawah">
+        </x-ui.form-field>
+        @endif
 
         {{-- Password --}}
         <div class="row">
@@ -172,7 +181,7 @@
         {{-- Button --}}
         <div class="d-flex gap-2">
             <x-ui.button type="submit" variant="primary" class="px-4">Simpan Perubahan</x-ui.button>
-            <x-ui.button href="{{ route('users.index') }}" variant="secondary" class="px-4">Batal</x-ui.button>
+            <x-ui.button :href="route('users.index')" variant="secondary" class="px-4">Batal</x-ui.button>
         </div>
 
     </form>

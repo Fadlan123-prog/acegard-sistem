@@ -6,13 +6,6 @@
 
 @section('content')
 
-@if(session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-@if(session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
-
 {{-- ═══ STEP TRACKER ══════════════════════════════════════════════════════════ --}}
 @php
     $s1 = $invoice->isStep1Done();
@@ -158,7 +151,7 @@
                 <th style="text-align: left;">
                     <img
                         style="width: 15rem; margin-bottom: 1.5rem;"
-                        src="{{ asset('assets/images/logo.png') }}"
+                        src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}"
                         alt="Logo Light"
                         class="hidden dark:block"
                     >
@@ -331,12 +324,11 @@
                 <div class="text-center">
                     <h6 class="bg-dark text-white py-2 fw-bold rounded text-uppercase">STATUS : {{ $invoice->status }}</h6>
                     <p class="text-dark mt-2 mb-1">SINCERELY,</p>
-                    <img src="{{ asset('assets/images/blue-logo.png') }}" class="img-fluid" style="width: 15rem; transform: rotate(-5deg);" alt="cap Acegard">
+                    <img src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}" class="img-fluid" style="width: 15rem; transform: rotate(-5deg);" alt="cap Acegard">
                     <p class="text-dark mt-2">ACEGARD INDONESIA</p>
                 </div>
             </div>
         </div>
-
 
         <div class="my-4">
             <h6 class="bg-gray-100 dark:bg-gray-950 text-center text-gray-800 dark:text-white font-bold py-1 my-8" style="background-color:black; color:white; ">

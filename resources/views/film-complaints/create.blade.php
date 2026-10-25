@@ -17,10 +17,6 @@
     </x-ui.alert>
 @endif
 
-@if(session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
-
 <x-ui.card>
     @slot('header')
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -31,7 +27,7 @@
                 </small>
             </div>
 
-            <x-ui.button href="{{ route('film-complaints.index') }}" variant="secondary" size="sm">
+            <x-ui.button :href="route('film-complaints.index')" variant="secondary" size="sm">
                 Kembali
             </x-ui.button>
         </div>
@@ -351,7 +347,7 @@
                 Simpan Complain
             </x-ui.button>
 
-            <x-ui.button href="{{ route('film-complaints.index') }}" variant="ghost">
+            <x-ui.button :href="route('film-complaints.index')" variant="ghost">
                 Batal
             </x-ui.button>
         </div>

@@ -33,7 +33,11 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // Never expose this disk via an unauthenticated storage/{path}
+            // route — it holds payroll/commission exports and other private
+            // files. Access must go through a controller that checks
+            // ownership (see ExportStatusController::download()).
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],

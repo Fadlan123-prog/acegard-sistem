@@ -873,7 +873,7 @@
 {{-- ─── HERO ──────────────────────────────────────────────────── --}}
 <section class="hero-section">
     <nav class="lp-nav">
-        <img src="{{ asset('assets/frontend/ppf/logo.webp') }}" alt="Acegard" class="lp-nav-logo">
+        <img src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}" alt="Acegard" class="lp-nav-logo">
     </nav>
     <div class="hero-wrap">
 
@@ -1487,7 +1487,7 @@
     <div class="container">
         <div class="row g-4 align-items-start">
             <div class="col-lg-6">
-                <img src="{{ asset('assets/frontend/ppf/logo.webp') }}" alt="Acegard" class="f-logo mb-3">
+                <img src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}" alt="Acegard" class="f-logo mb-3">
                 <p style="max-width:380px">Bergabunglah bersama kami dalam menghadirkan solusi ppf terbaik untuk kendaraan anda. Hubungi Acegard Sekarang juga.</p>
                 <div class="d-flex gap-2 mt-3">
                     <a href="#" class="soc-icon"><iconify-icon icon="ic:baseline-facebook" width="24" height="24"></iconify-icon></a>

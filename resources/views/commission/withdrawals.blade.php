@@ -6,13 +6,6 @@
 
 @section('content')
 
-@if(session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-@if(session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
-
 @php
     $statusMap = [
         ''          => ['label' => 'Semua',     'badge' => 'secondary'],
@@ -97,7 +90,7 @@
                     </td>
                     <td class="text-center pe-3">
                         <div class="d-flex gap-1 justify-content-center">
-                            <x-ui.button href="{{ route('commission.withdrawals.show', $batch->id) }}" variant="outline" size="sm" title="Lihat Detail">
+                            <x-ui.button :href="route('commission.withdrawals.show', $batch->id)" variant="outline" size="sm" title="Lihat Detail">
                                 <iconify-icon icon="mdi:eye-outline"></iconify-icon>
                             </x-ui.button>
                             @if($batch->status === 'draft')
@@ -163,7 +156,7 @@
             {{ $batch->period_from?->format('d M Y') }} – {{ $batch->period_to?->format('d M Y') }}
         </div>
         <div class="d-flex gap-2">
-            <x-ui.button href="{{ route('commission.withdrawals.show', $batch->id) }}" variant="outline" size="sm" class="flex-fill">
+            <x-ui.button :href="route('commission.withdrawals.show', $batch->id)" variant="outline" size="sm" class="flex-fill">
                 <iconify-icon icon="mdi:eye-outline" class="me-1"></iconify-icon>Detail
             </x-ui.button>
             @if($batch->status === 'draft')

@@ -89,6 +89,9 @@ class WorkOrderController extends Controller
 
     public function assign(Request $request, Customer $customer)
     {
+        $branchId = $this->branch->idOrNull();
+        abort_unless($branchId === null || (int) $customer->branch_id === (int) $branchId, 403);
+
         // Normalize empty strings from form to null
         $request->merge([
             'tukang_id' => $request->input('tukang_id') ?: null,
@@ -185,6 +188,8 @@ class WorkOrderController extends Controller
     public function qcApprove(Request $request, Customer $customer)
     {
         abort_unless(auth()->user()->hasAnyRole(self::SUPERVISOR_ROLES), 403, 'Hanya supervisor yang dapat menyetujui QC.');
+        $branchId = $this->branch->idOrNull();
+        abort_unless($branchId === null || (int) $customer->branch_id === (int) $branchId, 403);
 
         $invoice = $customer->invoice;
 
@@ -205,6 +210,8 @@ class WorkOrderController extends Controller
     public function qcReject(Request $request, Customer $customer)
     {
         abort_unless(auth()->user()->hasAnyRole(self::SUPERVISOR_ROLES), 403, 'Hanya supervisor yang dapat menolak QC.');
+        $branchId = $this->branch->idOrNull();
+        abort_unless($branchId === null || (int) $customer->branch_id === (int) $branchId, 403);
 
         $data = $request->validate([
             'qc_notes' => ['required', 'string', 'max:1000'],

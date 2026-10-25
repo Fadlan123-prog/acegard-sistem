@@ -6,12 +6,6 @@
 
 @section('content')
 
-@if(session('success'))
-<x-ui.alert type="success" class="mb-3">
-    {{ session('success') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-</x-ui.alert>
-@endif
-
 @php
     $variantMap = [
         'pending'     => 'neutral',
@@ -173,7 +167,18 @@
                     </div>
                 </div>
                 @endif
-                @if($salesOrder->tukang || $salesOrder->kenek)
+                @if($salesOrder->assignsMultipleTechnicians())
+                    @if($salesOrder->technicians->isNotEmpty())
+                    <div class="col-sm-6">
+                        <div class="text-muted small mb-1">Tim Teknisi</div>
+                        <div>
+                            @foreach($salesOrder->technicians as $tech)
+                                <span class="fw-semibold">{{ $tech->name }}</span>@if(!$loop->last), @endif
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+                @elseif($salesOrder->tukang || $salesOrder->kenek)
                 <div class="col-sm-6">
                     <div class="text-muted small mb-1">Tim Teknisi</div>
                     <div>
@@ -186,6 +191,17 @@
                             <span class="text-muted small">(Kenek)</span>
                         @endif
                     </div>
+                </div>
+                @endif
+
+                @if(in_array($salesOrder->status, ['confirmed', 'in_progress']))
+                <div class="col-12">
+                    <x-ui.button variant="outline" size="sm" type="button"
+                            data-bs-toggle="modal" data-bs-target="#assignSoModal">
+                        <iconify-icon icon="mdi:account-switch-outline" class="me-1"></iconify-icon>
+                        {{ ($salesOrder->tukang || $salesOrder->kenek || ($salesOrder->assignsMultipleTechnicians() && $salesOrder->technicians->isNotEmpty())) ? 'Ganti' : 'Tugaskan' }}
+                        Teknisi/Kenek
+                    </x-ui.button>
                 </div>
                 @endif
             </div>
@@ -460,5 +476,74 @@
 
     </div>
 </div>
+
+{{-- Modal: Tugaskan/Ganti Teknisi & Kenek --}}
+@if(in_array($salesOrder->status, ['confirmed', 'in_progress']))
+<div class="modal fade" id="assignSoModal" tabindex="-1" aria-labelledby="assignSoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignSoModalLabel">Tugaskan Teknisi/Kenek</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ route('sales-orders.assign', $salesOrder) }}">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <div class="text-muted small">SO</div>
+                        <div class="fw-semibold">{{ $salesOrder->so_number }} — {{ $salesOrder->prospect_name }}</div>
+                    </div>
+
+                    @if($salesOrder->assignsMultipleTechnicians())
+                        @php $selectedTechs = $salesOrder->technicians->pluck('id')->toArray(); @endphp
+                        <x-ui.form-field label="Teknisi (bisa pilih lebih dari satu)" name="technicians">
+                            <div style="max-height:220px;overflow-y:auto" class="border rounded p-2">
+                                @forelse($employees as $emp)
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="technicians[]"
+                                               value="{{ $emp->id }}" id="assignTech{{ $emp->id }}"
+                                               {{ in_array($emp->id, $selectedTechs) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="assignTech{{ $emp->id }}">{{ $emp->name }}</label>
+                                    </div>
+                                @empty
+                                    <div class="text-muted small">Tidak ada karyawan aktif di cabang ini.</div>
+                                @endforelse
+                            </div>
+                        </x-ui.form-field>
+                    @else
+                        <x-ui.form-field label="Teknisi / Tukang" name="tukang_id">
+                            <select name="tukang_id" class="form-select">
+                                <option value="">— Tidak ditugaskan —</option>
+                                @foreach($employees as $emp)
+                                    <option value="{{ $emp->id }}" {{ $salesOrder->tukang_id == $emp->id ? 'selected' : '' }}>
+                                        {{ $emp->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </x-ui.form-field>
+                        <x-ui.form-field label="Kenek" name="kenek_id" class="mt-3">
+                            <select name="kenek_id" class="form-select">
+                                <option value="">— Tidak ditugaskan —</option>
+                                @foreach($employees as $emp)
+                                    <option value="{{ $emp->id }}" {{ $salesOrder->kenek_id == $emp->id ? 'selected' : '' }}>
+                                        {{ $emp->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </x-ui.form-field>
+                        <p class="text-muted mt-2" style="font-size:11px">
+                            Mengganti teknisi yang sudah ditugaskan akan mengirim notifikasi ke teknisi baru.
+                        </p>
+                    @endif
+                </div>
+                <div class="modal-footer flex-column flex-sm-row gap-2">
+                    <x-ui.button type="button" variant="outline" class="w-100 w-sm-auto" data-bs-dismiss="modal">Batal</x-ui.button>
+                    <x-ui.button type="submit" variant="primary" class="w-100 w-sm-auto">Simpan Penugasan</x-ui.button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
 
 @endsection

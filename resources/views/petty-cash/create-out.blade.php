@@ -77,6 +77,13 @@
             <tbody id="rowsTbody">
                 {{-- Rows injected by JavaScript --}}
             </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6" class="text-end fw-semibold">Total Biaya Bensin</td>
+                    <td class="text-end pe-3 fw-bold" id="totalFuel">Rp0</td>
+                    <td></td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 
@@ -128,9 +135,19 @@
     const form      = document.getElementById('formOut');
     const empSrc    = document.getElementById('empOptsSrc');
     const submitBtn = document.getElementById('submitBtn');
+    const totalFuel = document.getElementById('totalFuel');
 
     const calc  = km => Math.round(((km * RATE) * 2) / 1000) * 1000;
     const rpFmt = n  => 'Rp' + n.toLocaleString('id-ID');
+
+    function updateTotal() {
+        var total = 0;
+        tbody.querySelectorAll('.row-km').forEach(function (inp) {
+            var v = parseFloat(inp.value) || 0;
+            if (v > 0) total += calc(v);
+        });
+        totalFuel.textContent = rpFmt(total);
+    }
 
     function setFuelSpan(span, amount) {
         if (amount > 0) {
@@ -250,12 +267,14 @@
         inpKm.addEventListener('input', function () {
             var v = parseFloat(this.value) || 0;
             setFuelSpan(spanFuel, v > 0 ? calc(v) : 0);
+            updateTotal();
         });
 
         btnDel.addEventListener('click', function () {
             if (tbody.querySelectorAll('.trip-row').length <= 1) return;
             tr.remove();
             renum();
+            updateTotal();
         });
 
         tbody.appendChild(tr);
@@ -267,6 +286,7 @@
         var tr = addRow(null);
         tr.querySelector('.row-date').focus();
         tr.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        updateTotal();
     });
 
     form.addEventListener('submit', function (e) {
@@ -299,6 +319,8 @@
     @else
         addRow(null);
     @endif
+
+    updateTotal();
 
 })();
 </script>

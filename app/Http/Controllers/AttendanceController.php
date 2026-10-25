@@ -389,6 +389,7 @@ class AttendanceController extends Controller
                 'total_potongan'   => $totalPotongan,
                 'monthly_salary'   => $monthlySalary,
                 'daily_prorate'    => $dailyProrate,
+                'base_gaji'        => (int) round($baseGaji),
                 'salary_raw'       => (int) round($salaryRaw),
                 'salary'           => (int) (round($salaryRaw / 1000) * 1000),
             ];

@@ -463,7 +463,7 @@
           </div>
         </div>
         <div class="br-action-bar">
-          <x-ui.button href="{{ route('branches.index') }}" variant="secondary">Batal</x-ui.button>
+          <x-ui.button :href="route('branches.index')" variant="secondary">Batal</x-ui.button>
           <x-ui.button type="submit" variant="primary" class="px-4">
             <iconify-icon icon="mdi:content-save-outline" class="me-1"></iconify-icon> Simpan &amp; Tambah User
           </x-ui.button>

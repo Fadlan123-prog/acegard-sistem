@@ -19,10 +19,6 @@
 
 @section('content')
 
-@if(session('success'))
-<x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-
 @php
     $variantMap = ['new'=>'primary','contacted'=>'info','follow_up'=>'warning','quoted'=>'neutral','won'=>'success','lost'=>'danger'];
     $iconMap    = ['new'=>'mdi:plus-circle-outline','contacted'=>'mdi:phone-outline','follow_up'=>'mdi:refresh','quoted'=>'mdi:file-document-outline','won'=>'mdi:checkbox-marked-circle-outline','lost'=>'mdi:close-circle-outline'];
@@ -47,7 +43,7 @@
                     </div>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
-                    <x-ui.button href="{{ route('leads.edit', $lead) }}" variant="outline" size="sm">
+                    <x-ui.button :href="route('leads.edit', $lead)" variant="outline" size="sm">
                         <iconify-icon icon="mdi:pencil-outline" class="me-1"></iconify-icon> Edit
                     </x-ui.button>
                     <form action="{{ route('leads.destroy', $lead) }}" method="POST"
@@ -273,15 +269,15 @@
             @endslot
             <p class="small text-muted mb-3">Lead ini siap dikonversi menjadi data customer.</p>
             @if($lead->category === 'car_film')
-                <x-ui.button href="{{ route('customer.create') }}?from_lead={{ $lead->id }}" variant="success" size="sm" class="w-100">
+                <x-ui.button :href="route('customer.create') . '?from_lead=' . $lead->id" variant="success" size="sm" class="w-100">
                     <iconify-icon icon="mdi:account-plus-outline" class="me-1"></iconify-icon> Buat Customer Kaca Film
                 </x-ui.button>
             @elseif($lead->category === 'building_film')
-                <x-ui.button href="{{ route('customer.building.create') }}?from_lead={{ $lead->id }}" variant="success" size="sm" class="w-100">
+                <x-ui.button :href="route('customer.building.create') . '?from_lead=' . $lead->id" variant="success" size="sm" class="w-100">
                     <iconify-icon icon="mdi:office-building-outline" class="me-1"></iconify-icon> Buat Customer Gedung
                 </x-ui.button>
             @elseif($lead->category === 'ppf')
-                <x-ui.button href="{{ route('ppf-customers.create') }}?from_lead={{ $lead->id }}" variant="success" size="sm" class="w-100">
+                <x-ui.button :href="route('ppf-customers.create') . '?from_lead=' . $lead->id" variant="success" size="sm" class="w-100">
                     <iconify-icon icon="mdi:car-outline" class="me-1"></iconify-icon> Buat Customer PPF
                 </x-ui.button>
             @endif
@@ -301,7 +297,7 @@
         {{-- Buat Quotation --}}
         @if(!$lead->isConverted() && !in_array($lead->status, ['lost']))
         <x-ui.card class="mb-3">
-            <x-ui.button href="{{ route('quotations.create', ['from_lead' => $lead->id]) }}" variant="outline" size="sm" class="w-100">
+            <x-ui.button :href="route('quotations.create', ['from_lead' => $lead->id])" variant="outline" size="sm" class="w-100">
                 <iconify-icon icon="mdi:file-document-outline" class="me-1"></iconify-icon> Buat Quotation dari Lead ini
             </x-ui.button>
         </x-ui.card>

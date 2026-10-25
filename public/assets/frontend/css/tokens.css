@@ -1,0 +1,167 @@
+/*
+ * ACEGARD frontend design tokens (Figma "Website ACEGARD - 1920px").
+ * Shared across all resources/views/frontend/* pages via frontend.layout.index.
+ */
+:root{
+  --ace-navy: #02214e;
+  --ace-blue: #0066ff;
+  --ace-gradient: linear-gradient(90deg, var(--ace-navy), var(--ace-blue));
+  --ace-ink: #171f32;
+  --ace-muted: rgba(33, 37, 41, .75);
+  --ace-bg-soft: #f5f9fe;
+  --ace-bg-card: #f8f9fa;
+  --ace-border: #e2e9f0;
+  --ace-success-bg: #d1e7dd;
+  --ace-success: #198754;
+  --ace-warning-bg: #fff3cd;
+  --ace-warning-ink: #8a6d00;
+
+  --ace-radius-sm: 6px;
+  --ace-radius-md: 12px;
+  --ace-radius-pill: 999px;
+
+  --ace-section-y: 96px;
+  --ace-section-y-sm: 48px;
+
+  --ace-font: 'Inter', sans-serif;
+}
+
+body{
+  font-family: var(--ace-font);
+  color: var(--ace-ink);
+}
+
+/* ================= Layout rhythm ================= */
+.ace-section{ padding-block: var(--ace-section-y); }
+.ace-section-sm{ padding-block: var(--ace-section-y-sm); }
+
+/* ================= Typography ================= */
+.ace-gradient-text{
+  background: var(--ace-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.ace-muted{ color: var(--ace-muted); }
+.ace-navy-text{ color: var(--ace-navy); }
+
+/* ================= Surfaces ================= */
+.ace-card{
+  background: #fff;
+  border: 1px solid var(--ace-border);
+  border-radius: var(--ace-radius-md);
+}
+
+.ace-card-soft{
+  background: var(--ace-bg-soft);
+  border-radius: var(--ace-radius-md);
+}
+
+/* ================= Pills / badges ================= */
+.ace-pill{
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .35rem 1rem;
+  border-radius: var(--ace-radius-pill);
+  font-size: .875rem;
+  font-weight: 600;
+  background: var(--ace-bg-soft);
+  color: var(--ace-ink);
+  white-space: nowrap;
+}
+.ace-pill-success{ background: var(--ace-success-bg); color: var(--ace-success); }
+.ace-pill-warning{ background: var(--ace-warning-bg); color: var(--ace-warning-ink); }
+.ace-pill-dark{ background: var(--ace-navy); color: #fff; }
+a.ace-pill{ text-decoration: none; }
+a.ace-pill:hover{ opacity: .85; }
+
+/* ================= Buttons ================= */
+.btn-ace-gradient{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .65rem 1.75rem;
+  border-radius: var(--ace-radius-pill);
+  background: var(--ace-gradient);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  text-decoration: none;
+  transition: opacity .15s ease;
+}
+.btn-ace-gradient:hover{ opacity: .9; color: #fff; }
+
+.btn-ace-outline{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .6rem 1.7rem;
+  border-radius: var(--ace-radius-pill);
+  background: #fff;
+  border: 1px solid var(--ace-navy);
+  color: var(--ace-navy);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background .15s ease;
+}
+.btn-ace-outline:hover{ background: var(--ace-bg-soft); color: var(--ace-navy); }
+
+/* ================= Navbar ================= */
+.ace-navbar .nav-link{
+  font-weight: 300;
+  color: var(--ace-ink);
+  padding: .5rem .75rem;
+}
+.ace-navbar .nav-link.active,
+.ace-navbar .nav-link:hover{
+  background: var(--ace-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.ace-navbar .dropdown-menu{
+  border: 1px solid var(--ace-border);
+  border-radius: var(--ace-radius-md);
+}
+
+/* ================= Spec table ================= */
+.ace-spec-table{
+  border: 1px solid var(--ace-border);
+  border-radius: var(--ace-radius-md);
+  overflow: hidden;
+}
+.ace-spec-table th{
+  font-weight: 600;
+  color: var(--ace-navy);
+  background: #fff;
+}
+.ace-spec-table td{ color: var(--ace-ink); }
+.ace-spec-table tbody tr:nth-child(even){ background: var(--ace-bg-soft); }
+
+/* PPF tier rows */
+.ace-spec-table tr.ace-tier-navy td{ background: linear-gradient(90deg, #0b1f3d, #1c2f52); color: #fff; }
+.ace-spec-table tr.ace-tier-gold td{ background: linear-gradient(90deg, #d9a441, #f0c669); color: #171f32; }
+.ace-spec-table tr.ace-tier-dark td{ background: linear-gradient(90deg, #161616, #2b2b2b); color: #fff; }
+
+/* ================= FAQ accordion ================= */
+.ace-faq .accordion-button{
+  font-weight: 600;
+  color: var(--ace-ink);
+}
+.ace-faq .accordion-button:not(.collapsed){
+  background: var(--ace-bg-soft);
+  color: var(--ace-ink);
+  box-shadow: none;
+}
+.ace-faq .accordion-button:focus{ box-shadow: none; border-color: var(--ace-border); }
+.ace-faq .accordion-item{ border-color: var(--ace-border); }
+
+/* ================= Footer ================= */
+.ace-footer{ background: var(--ace-bg-soft); }
+.ace-footer a{ color: var(--ace-ink); text-decoration: none; }
+.ace-footer a:hover{ color: var(--ace-blue); }
+.ace-footer h6{ color: var(--ace-navy); font-weight: 700; }

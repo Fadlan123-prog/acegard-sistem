@@ -108,12 +108,15 @@ class MarketingDashboardController extends Controller
             $canRequestWithdrawal = $nowWib->day === 15 && $eligibleUnbatched && !$pendingExists;
         }
 
+        $upcomingBirthdays = \App\Models\Employee::upcomingBirthdays($myEmployee?->branch_id);
+
         return view('marketing.dashboard', compact(
             'myLeadsTotal', 'myLeadsActive', 'myLeadsWon',
             'myLeadsThisMonth', 'conversionRate',
             'myCommissionMonth', 'myCommissionTotal',
             'followUpLeads', 'recentLeads', 'leadFunnel',
             'latestWithdrawal', 'canRequestWithdrawal', 'nowWib',
+            'upcomingBirthdays',
         ));
     }
 

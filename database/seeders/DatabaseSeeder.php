@@ -15,18 +15,29 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
+        // Safe to run against production: reference data only, no user accounts.
         $this->call([
             RoleSeeder::class,
             CategoryProductSeeder::class,
             ProductSeeder::class,
             PartSeeder::class,
             BranchSeeder::class,
-            BranchUserSeeder::class,
             CategoryProductBuildingSeeder::class,
             ProductBuildingSeeder::class,
             EmployeeSeeder::class,
             PpfProductSeeder::class,
-            TeknisiSeeder::class,
+            ApprovalFlowSeeder::class,
         ]);
+
+        // Fixed-credential demo/dev accounts — local development only.
+        // Production's first superadmin account must be created via
+        // `php artisan app:create-superadmin` instead.
+        if (app()->environment('local')) {
+            $this->call([
+                TeknisiSeeder::class,
+                DevAccountSeeder::class,
+                DemoDataSeeder::class,
+            ]);
+        }
     }
 }

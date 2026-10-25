@@ -11,7 +11,7 @@
     @slot('header')
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
             <p class="mb-0 text-muted small">{{ $installations->total() }} data pemasangan</p>
-            <x-ui.button href="{{ route('ppf-installations.create') }}" variant="primary" size="sm">
+            <x-ui.button :href="route('ppf-installations.create')" variant="primary" size="sm">
                 <iconify-icon icon="mdi:plus" class="me-1"></iconify-icon>Tambah Pemasangan
             </x-ui.button>
         </div>
@@ -88,15 +88,15 @@
                     <td class="py-3 pe-4">
                         <div class="d-flex gap-1 justify-content-end flex-wrap">
                             @if($inst->invoice)
-                                <x-ui.button href="{{ route('ppf-invoices.show', $inst->invoice->id) }}" variant="success" size="sm" title="Lihat Invoice">
+                                <x-ui.button :href="route('ppf-invoices.show', $inst->invoice->id)" variant="success" size="sm" title="Lihat Invoice">
                                     <iconify-icon icon="mdi:receipt"></iconify-icon>
                                 </x-ui.button>
                             @else
-                                <x-ui.button href="{{ route('ppf-invoices.create', $inst->id) }}" variant="warning" size="sm" title="Buat Invoice">
+                                <x-ui.button :href="route('ppf-invoices.create', $inst->id)" variant="warning" size="sm" title="Buat Invoice">
                                     <iconify-icon icon="mdi:file-plus-outline"></iconify-icon>
                                 </x-ui.button>
                             @endif
-                            <x-ui.button href="{{ route('ppf-installations.edit', $inst) }}" variant="outline" size="sm" title="Edit">
+                            <x-ui.button :href="route('ppf-installations.edit', $inst)" variant="outline" size="sm" title="Edit">
                                 <iconify-icon icon="mdi:pencil-outline"></iconify-icon>
                             </x-ui.button>
                             <form method="POST" action="{{ route('ppf-installations.destroy', $inst) }}">

@@ -50,19 +50,25 @@ final class CommissionCalculator
         $baseType = $this->resolveBaseType($customer);
         $carCount = $this->carCountForInstaller($invoice, $customer->tukang_id);
 
+        // The "2nd/3rd car of the day" upgrade tier is a fullset-only bonus (it
+        // upgrades into fullset_ekstra / fullset_ekstra_plus). DSP and SKKB have
+        // their own flat rates and must never be bumped into a fullset tier just
+        // because the same installer also did a fullset job earlier that day.
+        $upgradeEligible = ! str_starts_with($baseType, 'dsp') && ! str_starts_with($baseType, 'skkb');
+
         // Select upgrade tier based on how many same-day invoices the installer already has
-        $isSecond  = $carCount === 1;
-        $isThird   = $carCount >= 2;
+        $isSecond  = $upgradeEligible && $carCount === 1;
+        $isThird   = $upgradeEligible && $carCount >= 2;
         $finalType = match (true) {
-            $carCount >= 2 => $this->config['third_car_upgrade']  ?? 'fullset_ekstra_plus',
-            $carCount >= 1 => $this->config['second_car_upgrade'] ?? 'fullset_ekstra',
-            default        => $baseType,
+            $upgradeEligible && $carCount >= 2 => $this->config['third_car_upgrade']  ?? 'fullset_ekstra_plus',
+            $upgradeEligible && $carCount >= 1 => $this->config['second_car_upgrade'] ?? 'fullset_ekstra',
+            default                            => $baseType,
         };
 
         // When upgraded to ekstra/plus tier, carry over panoramic suffix if applicable.
         // fullset_ekstra + panoramic → ekstra_panoramic (config uses short name, not fullset_ekstra_panoramic)
         // fullset_ekstra_plus + panoramic → fullset_ekstra_plus_panoramic (suffix works normally)
-        if ($carCount >= 1 && str_contains($baseType, 'panoramic')) {
+        if ($upgradeEligible && $carCount >= 1 && str_contains($baseType, 'panoramic')) {
             $finalType = match ($finalType) {
                 'fullset_ekstra' => 'ekstra_panoramic',
                 default          => $finalType . '_panoramic',

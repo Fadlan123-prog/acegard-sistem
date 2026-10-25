@@ -65,7 +65,12 @@ class WarrantyCardController extends Controller
         // Template + colors by product
         [$colors, $template] = $this->styleByPpfProduct($productName, (int) ($ins->warranty_duration ?? 0));
 
-        $templatePath = public_path('assets/ppf/' . $template);
+        // Templates live directly under public/assets/ (Template 17/26/27.png),
+        // not in an 'assets/ppf/' subfolder — that subfolder never existed, so
+        // every PPF card preview/download 500'd (Intervention Image couldn't
+        // decode a non-existent file). PublicWarrantyCardController already
+        // gets this path right; mirror it here.
+        $templatePath = public_path('assets/' . $template);
 
         $fontSemiBold = resource_path('fonts/Montserrat-semibold.ttf');
         $fontRegular  = resource_path('fonts/Montserrat-regular.ttf');

@@ -278,7 +278,7 @@
                 </div>
             </div>
             <div class="cust-action-bar">
-                <x-ui.button href="{{ route('leads.show', $lead) }}" variant="outline">Batal</x-ui.button>
+                <x-ui.button :href="route('leads.show', $lead)" variant="outline">Batal</x-ui.button>
                 <x-ui.button type="submit" variant="primary" class="px-4">
                     <iconify-icon icon="mdi:content-save-outline" class="me-1"></iconify-icon> Perbarui Lead
                 </x-ui.button>
@@ -286,7 +286,7 @@
         </div>
         @else
         <div class="cust-action-bar" style="border-radius:12px; border:1px solid var(--border-color); margin-bottom:20px;">
-            <x-ui.button href="{{ route('leads.index') }}" variant="outline">Batal</x-ui.button>
+            <x-ui.button :href="route('leads.index')" variant="outline">Batal</x-ui.button>
             <x-ui.button type="submit" variant="primary" class="px-4">
                 <iconify-icon icon="mdi:content-save-outline" class="me-1"></iconify-icon> Simpan Lead
             </x-ui.button>

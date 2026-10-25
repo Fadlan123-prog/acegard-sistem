@@ -13,6 +13,24 @@ use Carbon\Carbon;
 
 class CustomerPpfInstallationController extends Controller
 {
+    private function authorizeBranch(?int $branchId): void
+    {
+        $user = auth()->user();
+        if (!$user->hasRole('superadmin')) {
+            $allowed = $user->branches()->pluck('branches.id')->all();
+            abort_unless(in_array($branchId, $allowed), 403);
+        }
+    }
+
+    private function allowedBranchIds(): ?array
+    {
+        $user = auth()->user();
+        if ($user->hasRole('superadmin')) {
+            return null; // no restriction
+        }
+        return $user->branches()->pluck('branches.id')->map(fn ($id) => (int) $id)->all();
+    }
+
     public function index()
     {
         $installations = CustomerPpfInstallation::with([
@@ -44,10 +62,16 @@ class CustomerPpfInstallationController extends Controller
 
     public function store(Request $request)
     {
+        $allowedBranchIds = $this->allowedBranchIds();
+        $branchIdRules = ['required', 'exists:branches,id'];
+        if ($allowedBranchIds !== null) {
+            $branchIdRules[] = \Illuminate\Validation\Rule::in($allowedBranchIds);
+        }
+
         $data = $request->validate([
             'customer_ppf_id' => ['required', 'exists:customer_ppf,id'],
             'ppf_product_id'  => ['required', 'exists:ppf_products,id'],
-            'branch_id'       => ['required', 'exists:branches,id'],
+            'branch_id'       => $branchIdRules,
 
             'install_type'    => ['required', 'in:fullbody,partial'],
             'install_date'    => ['required', 'date'],
@@ -111,6 +135,8 @@ class CustomerPpfInstallationController extends Controller
 
     public function edit(CustomerPpfInstallation $ppf_installation)
     {
+        $this->authorizeBranch($ppf_installation->branch_id);
+
         $customers = CustomerPpf::orderBy('name')->get();
         $products  = PpfProduct::orderBy('brand')->orderBy('name')->get();
         $branches  = Branch::orderBy('name')->get();
@@ -127,10 +153,19 @@ class CustomerPpfInstallationController extends Controller
 
     public function update(Request $request, CustomerPpfInstallation $ppf_installation)
     {
+        $this->authorizeBranch($ppf_installation->branch_id);
+        $allowedBranchIds = $this->allowedBranchIds();
+
+        $branchIdRules = ['required', 'exists:branches,id'];
+        if ($allowedBranchIds !== null) {
+            // Non-superadmin: cannot re-parent the installation to a branch they don't belong to.
+            $branchIdRules[] = \Illuminate\Validation\Rule::in($allowedBranchIds);
+        }
+
         $data = $request->validate([
             'customer_ppf_id' => ['required', 'exists:customer_ppf,id'],
             'ppf_product_id'  => ['required', 'exists:ppf_products,id'],
-            'branch_id'       => ['required', 'exists:branches,id'],
+            'branch_id'       => $branchIdRules,
 
             'install_type'    => ['required', 'in:fullbody,partial'],
             'install_date'    => ['required', 'date'],
@@ -194,6 +229,8 @@ class CustomerPpfInstallationController extends Controller
 
     public function destroy(CustomerPpfInstallation $ppf_installation)
     {
+        $this->authorizeBranch($ppf_installation->branch_id);
+
         // detach technicians
         if (method_exists($ppf_installation, 'technicians')) {
             $ppf_installation->technicians()->detach();
