@@ -87,9 +87,9 @@ class GenerateExportJob implements ShouldQueue
     {
         $p    = $req->params;
         $data = $this->buildAttendanceData($p['month'], (int) $p['branch_id']);
-        $path = storage_path('app/exports/' . $req->file_name);
+        $path = 'exports/' . $req->file_name;
 
-        Pdf::loadView('attendances.monthly-report-pdf', $data)
+        $pdf = Pdf::loadView('attendances.monthly-report-pdf', $data)
             ->setPaper('a4', 'landscape')
             ->setOptions([
                 'isRemoteEnabled'     => false,
@@ -98,10 +98,11 @@ class GenerateExportJob implements ShouldQueue
                 'fontDir'             => storage_path('fonts'),
                 'fontCache'           => storage_path('fonts'),
                 'chroot'              => storage_path('fonts'),
-            ])
-            ->save($path);
+            ]);
 
-        return 'exports/' . $req->file_name;
+        Storage::disk('local')->put($path, $pdf->output());
+
+        return $path;
     }
 
     private function buildAttendanceData(string $month, int $branchId): array
@@ -178,6 +179,7 @@ class GenerateExportJob implements ShouldQueue
                 'total_potongan'   => $totalPotongan,
                 'monthly_salary'   => $monthlySalary,
                 'daily_prorate'    => $dailyProrate,
+                'base_gaji'        => (int) round($baseGaji),
                 'salary_raw'       => (int) round($salaryRaw),
                 'salary'           => (int) (round($salaryRaw / 1000) * 1000),
             ];

@@ -23,6 +23,7 @@
     $totalUsers     ??= 0;
     $totalCustomers ??= 0;
     $totalBranches  ??= 0;
+    $upcomingBirthdays ??= collect();
 
     $months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 
@@ -110,6 +111,8 @@
         padding: 9px 0;
     }
 </style>
+
+<x-dashboard.birthday-widget :birthdays="$upcomingBirthdays" />
 
 {{-- ─ Filter Bar ───────────────────────────────────────────────────────────── --}}
 <x-ui.card class="mb-4 dash-card">
@@ -692,7 +695,7 @@
                         Stok Kritis
                         <span class="text-muted fw-normal" style="font-size:12px">≤ 10 meter</span>
                     </div>
-                    <x-ui.button href="{{ route('film-stock.index') }}" variant="ghost" size="sm">Lihat Semua</x-ui.button>
+                    <x-ui.button :href="route('film-stock.index')" variant="ghost" size="sm">Lihat Semua</x-ui.button>
                 </div>
             @endslot
             @if ($stockAlerts->isEmpty())

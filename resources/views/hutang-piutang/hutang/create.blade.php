@@ -89,7 +89,7 @@
                     <x-ui.button variant="danger" type="submit">
                         <iconify-icon icon="mdi:content-save-outline" class="me-1"></iconify-icon>Simpan Hutang
                     </x-ui.button>
-                    <x-ui.button href="{{ route('hutang.index') }}" variant="outline">Batal</x-ui.button>
+                    <x-ui.button :href="route('hutang.index')" variant="outline">Batal</x-ui.button>
                 </div>
             </form>
         </x-ui.card>

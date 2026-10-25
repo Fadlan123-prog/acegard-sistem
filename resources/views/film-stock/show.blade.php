@@ -16,7 +16,7 @@
                 </small>
             </div>
 
-            <x-ui.button href="{{ route('film-stock.index') }}" variant="secondary" size="sm">
+            <x-ui.button :href="route('film-stock.index')" variant="secondary" size="sm">
                 Kembali
             </x-ui.button>
         </div>
@@ -24,19 +24,19 @@
 
     <div class="row mb-4">
         <div class="col-md-3 mb-2">
-            <x-ui.stats-card label="Type" :value="$pool->film_type ?? '-'" color="blue" />
+            <x-ui.stats-card label="Type" :value="$pool->film_type ?? '-'" color="blue" accent />
         </div>
 
         <div class="col-md-3 mb-2">
-            <x-ui.stats-card label="Kode / Kegelapan" :value="$pool->darkness_code ?? '-'" color="blue" />
+            <x-ui.stats-card label="Kode / Kegelapan" :value="$pool->darkness_code ?? '-'" color="blue" accent />
         </div>
 
         <div class="col-md-3 mb-2">
-            <x-ui.stats-card label="Sisa Meter" :value="number_format($pool->remaining_length_meter, 2, ',', '.') . ' m'" color="amber" />
+            <x-ui.stats-card label="Sisa Meter" :value="number_format($pool->remaining_length_meter, 2, ',', '.') . ' m'" color="amber" accent />
         </div>
 
         <div class="col-md-3 mb-2">
-            <x-ui.stats-card label="Sisa Area" :value="number_format($pool->remaining_area_meter, 2, ',', '.') . ' m²'" color="amber" />
+            <x-ui.stats-card label="Sisa Area" :value="number_format($pool->remaining_area_meter, 2, ',', '.') . ' m²'" color="amber" accent />
         </div>
     </div>
 

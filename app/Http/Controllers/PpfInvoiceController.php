@@ -14,17 +14,21 @@ class PpfInvoiceController extends Controller
 {
     public function __construct(private CommissionService $commissionService) {}
 
+    private function authorizeBranch(?int $branchId): void
+    {
+        $user = auth()->user();
+        if (!$user->hasRole('superadmin')) {
+            $allowed = $user->branches()->pluck('branches.id')->all();
+            abort_unless(in_array($branchId, $allowed), 403);
+        }
+    }
+
     public function create($installationId)
     {
         $installation = CustomerPpfInstallation::with(['customerPpf','ppfProduct','technicians'])
             ->findOrFail($installationId);
 
-        // validasi cabang user (kalau pakai pivot branch_user)
-        $user = auth()->user();
-        if (!$user->hasRole('superadmin')) {
-            $allowed = $user->branches()->pluck('branches.id')->all();
-            abort_unless(in_array($installation->branch_id, $allowed), 403);
-        }
+        $this->authorizeBranch($installation->branch_id);
 
         return view('ppf-invoices.create', compact('installation'));
     }
@@ -32,14 +36,17 @@ class PpfInvoiceController extends Controller
     public function store(Request $request, $installationId)
     {
         $installation = CustomerPpfInstallation::with('customerPpf')->findOrFail($installationId);
+        $this->authorizeBranch($installation->branch_id);
 
         $data = $request->validate([
             'payment_method' => ['required','string','max:50'],
-            'price' => ['required','integer','min:0'],
+            'price' => ['required','integer','min:' . config('pricing.minimum_transaction_amount')],
             'discount' => ['nullable','integer','min:0'],
             'downpayment' => ['nullable','integer','min:0'],
             'notes' => ['nullable','string'],
             'invoice_date' => ['nullable','date'],
+        ], [
+            'price.min' => 'Harga tampak tidak wajar. Periksa kembali sebelum menyimpan.',
         ]);
 
         $price = (int)$data['price'];
@@ -52,6 +59,19 @@ class PpfInvoiceController extends Controller
         $status = 'unpaid';
         if ($remaining <= 0 && $total > 0) $status = 'paid';
         elseif ($downpayment > 0 && $remaining > 0) $status = 'partial';
+
+        // Guard against accidental double-submit creating two invoices for the
+        // same installation (same pattern as InvoiceController::store()).
+        $recentDuplicate = PpfInvoice::where('customer_ppf_installation_id', $installation->id)
+            ->where('price', $price)
+            ->where('total_price', $total)
+            ->where('created_at', '>=', now()->subSeconds(30))
+            ->first();
+
+        if ($recentDuplicate) {
+            return redirect()->route('ppf-invoices.show', $recentDuplicate->id)
+                ->with('success', 'Invoice ini baru saja tersimpan.');
+        }
 
         // generate invoice number (simple)
         $dateStr = now()->format('Ymd');
@@ -86,6 +106,7 @@ class PpfInvoiceController extends Controller
             'installation.ppfProduct',
             'installation.technicians',
         ])->findOrFail($id);
+        $this->authorizeBranch($invoice->branch_id);
 
         return view('ppf-invoices.show', compact('invoice'));
     }
@@ -98,13 +119,7 @@ class PpfInvoiceController extends Controller
             'installation.ppfProduct',
             'installation.technicians',
         ])->findOrFail($id);
-
-        // guard cabang (pivot branch_user)
-        $user = auth()->user();
-        if (!$user->hasRole('superadmin')) {
-            $allowed = $user->branches()->pluck('branches.id')->all();
-            abort_unless(in_array($invoice->branch_id, $allowed), 403);
-        }
+        $this->authorizeBranch($invoice->branch_id);
 
         return view('ppf-invoices.edit', compact('invoice'));
     }
@@ -112,22 +127,18 @@ class PpfInvoiceController extends Controller
     public function update(Request $request, $id)
     {
         $invoice = \App\Models\PpfInvoice::with(['installation'])->findOrFail($id);
-
-        // guard cabang
-        $user = auth()->user();
-        if (!$user->hasRole('superadmin')) {
-            $allowed = $user->branches()->pluck('branches.id')->all();
-            abort_unless(in_array($invoice->branch_id, $allowed), 403);
-        }
+        $this->authorizeBranch($invoice->branch_id);
 
         $data = $request->validate([
             'invoice_date'    => ['required','date'],
             'payment_method'  => ['required','string','max:50'],
-            'price'           => ['required','integer','min:0'],
+            'price'           => ['required','integer','min:' . config('pricing.minimum_transaction_amount')],
             'discount'        => ['nullable','integer','min:0'],
             'downpayment'     => ['nullable','integer','min:0'],
             'status'          => ['required','in:unpaid,partial,paid,void'],
             'notes'           => ['nullable','string'],
+        ], [
+            'price.min' => 'Harga tampak tidak wajar. Periksa kembali sebelum menyimpan.',
         ]);
 
         $price      = (int)$data['price'];
@@ -163,13 +174,7 @@ class PpfInvoiceController extends Controller
     public function destroy($id)
     {
         $invoice = \App\Models\PpfInvoice::findOrFail($id);
-
-        // guard cabang
-        $user = auth()->user();
-        if (!$user->hasRole('superadmin')) {
-            $allowed = $user->branches()->pluck('branches.id')->all();
-            abort_unless(in_array($invoice->branch_id, $allowed), 403);
-        }
+        $this->authorizeBranch($invoice->branch_id);
 
         $invoice->delete();
 
@@ -182,6 +187,8 @@ class PpfInvoiceController extends Controller
 
     public function download(PpfInvoice $invoice)
     {
+        $this->authorizeBranch($invoice->branch_id);
+
         $invoice->load([
             'branch',
             'customer',

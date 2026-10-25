@@ -7,13 +7,6 @@
 @section('content')
 
 {{-- Flash Messages --}}
-@if (session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-
-@if (session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
 
 {{-- Job Assignment Notifications --}}
 @if ($jobNotifications->isNotEmpty())
@@ -48,6 +41,10 @@
     </x-ui.card>
 @endif
 
+<x-dashboard.birthday-widget :birthdays="$upcomingBirthdays" />
+
+@include('teknisi._incoming-sales-orders')
+
 {{-- Header Info --}}
 <x-ui.card class="mb-3">
     <div class="d-flex align-items-center gap-3">
@@ -68,19 +65,28 @@
 {{-- Stats Row --}}
 <div class="row g-2 mb-3">
     <div class="col-6 col-md-3">
-        <x-ui.stats-card label="Pesanan Aktif" :value="$jobs->count()" color="blue" />
+        <x-ui.stats-card label="Pesanan Aktif" :value="$jobs->count()" color="blue" accent />
     </div>
     <div class="col-6 col-md-3">
-        <x-ui.stats-card label="Selesai" :value="$completedJobs->count()" color="green" />
+        <x-ui.stats-card label="Selesai" :value="$completedJobs->count()" color="green" accent />
     </div>
     <div class="col-6 col-md-3">
-        <x-ui.stats-card label="Komisi Siap Cair" :value="$commissionSummary['eligible_count']" color="amber">
+        <x-ui.stats-card label="Komisi Siap Cair" :value="$commissionSummary['eligible_count']" color="amber" accent>
             <span>Rp {{ number_format($commissionSummary['eligible_total']) }}</span>
         </x-ui.stats-card>
     </div>
     <div class="col-6 col-md-3">
-        <x-ui.stats-card label="Total Dibayar" :value="$commissionSummary['paid_count']" color="purple">
+        <x-ui.stats-card label="Total Dibayar" :value="$commissionSummary['paid_count']" color="purple" accent>
             <span>Rp {{ number_format($commissionSummary['paid_total']) }}</span>
+        </x-ui.stats-card>
+    </div>
+    <div class="col-6 col-md-3">
+        <x-ui.stats-card label="Sisa Saldo Berobat {{ now()->year }}" :value="$healthBalance ? 'Rp ' . number_format($healthBalance->remaining()) : '-'" color="green" accent>
+            @if($healthBalance)
+                <span>dari Rp {{ number_format($healthBalance->allocated_amount) }}</span>
+            @else
+                <span>Belum tersedia — hubungi admin</span>
+            @endif
         </x-ui.stats-card>
     </div>
 </div>

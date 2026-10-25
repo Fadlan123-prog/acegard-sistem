@@ -45,14 +45,14 @@
 
             @forelse ($ranking as $idx => $emp)
             @php
-                $medal  = match ($idx) { 0 => '🥇', 1 => '🥈', 2 => '🥉', default => null };
+                $medal  = match ($idx) { 0 => '#FFD700', 1 => '#C0C0C0', 2 => '#CD7F32', default => null };
                 $isTop3 = $idx < 3;
             @endphp
             <div class="d-flex align-items-center gap-3 py-3 {{ !$loop->last ? 'border-bottom' : '' }}"
                  style="{{ $isTop3 ? 'background:rgba(var(--ui-amber-rgb,245,158,11),.06);margin:0 -1px;padding-left:1px;padding-right:1px;' : '' }}border-color:var(--ui-border)">
                 <div class="text-center flex-shrink-0" style="width:36px">
                     @if ($medal)
-                        <span style="font-size:22px;line-height:1">{{ $medal }}</span>
+                        <iconify-icon icon="mdi:medal" style="font-size:22px;color:{{ $medal }}"></iconify-icon>
                     @else
                         <span class="ui-text-muted fw-bold" style="font-size:14px">{{ $idx + 1 }}</span>
                     @endif
@@ -86,14 +86,14 @@
 
             @forelse ($rankingKenek as $idx => $emp)
             @php
-                $medal  = match ($idx) { 0 => '🥇', 1 => '🥈', 2 => '🥉', default => null };
+                $medal  = match ($idx) { 0 => '#FFD700', 1 => '#C0C0C0', 2 => '#CD7F32', default => null };
                 $isTop3 = $idx < 3;
             @endphp
             <div class="d-flex align-items-center gap-3 py-3 {{ !$loop->last ? 'border-bottom' : '' }}"
                  style="{{ $isTop3 ? 'background:rgba(var(--ui-amber-rgb,245,158,11),.06);margin:0 -1px;padding-left:1px;padding-right:1px;' : '' }}border-color:var(--ui-border)">
                 <div class="text-center flex-shrink-0" style="width:36px">
                     @if ($medal)
-                        <span style="font-size:22px;line-height:1">{{ $medal }}</span>
+                        <iconify-icon icon="mdi:medal" style="font-size:22px;color:{{ $medal }}"></iconify-icon>
                     @else
                         <span class="ui-text-muted fw-bold" style="font-size:14px">{{ $idx + 1 }}</span>
                     @endif

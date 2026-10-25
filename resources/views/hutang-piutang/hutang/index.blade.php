@@ -19,7 +19,7 @@
     @endphp
     @foreach ($cards as $c)
     <div class="col-6 col-lg-3">
-        <x-ui.stats-card :label="$c['label']" :value="$c['val']" :color="$c['color']" />
+        <x-ui.stats-card :label="$c['label']" :value="$c['val']" :color="$c['color']" accent />
     </div>
     @endforeach
 </div>
@@ -107,7 +107,10 @@
                     <td class="py-3 text-center">
                         @if ($p->due_date)
                             <span class="{{ $overdue ? 'text-danger fw-semibold' : 'text-muted' }}" style="font-size:12px">
-                                {{ $overdue ? '⚠ ' : '' }}{{ $p->due_date->format('d/m/Y') }}
+                                @if ($overdue)
+                                    <iconify-icon icon="mdi:alert" style="font-size:13px"></iconify-icon>
+                                @endif
+                                {{ $p->due_date->format('d/m/Y') }}
                             </span>
                         @else
                             <span class="text-muted">—</span>

@@ -17,9 +17,13 @@
   {{-- Bootstrap 5 --}}
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  {{-- Inter / Poppins (opsional) --}}
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+  {{-- Iconify (mdi:* icons) --}}
+  <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js" async></script>
+
+  {{-- Inter --}}
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('assets/frontend/home/css/style.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/frontend/css/tokens.css') }}">
   @stack('styles')
 </head>
 <body>
@@ -28,12 +32,21 @@
   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   {{-- Navbar --}}
-  @include('frontend.partials.navbar')
+  {{-- Landing page ads dapat menyembunyikan navbar via @section('hide-navbar', '1') --}}
+  @if (! View::hasSection('hide-navbar'))
+    @include('frontend.partials.navbar')
+  @endif
 
   {{-- Content --}}
   <main class="flex-shrink-0">
     @yield('content')
   </main>
+
+  {{-- Footer --}}
+  {{-- Landing page ads dapat memakai footer khusus via @section('hide-footer', '1') + markup sendiri di @section('content') --}}
+  @if (! View::hasSection('hide-footer'))
+    @include('frontend.partials.footer')
+  @endif
 
   {{-- Bootstrap JS --}}
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

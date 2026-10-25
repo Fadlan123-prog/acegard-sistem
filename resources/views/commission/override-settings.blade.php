@@ -6,13 +6,6 @@
 
 @section('content')
 
-@if(session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-@if(session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
-
 @if(isset($branch) && $branch)
 <div class="d-flex align-items-center gap-2 mb-3">
     <iconify-icon icon="proicons-branch" style="font-size:16px;color:#64748b;"></iconify-icon>

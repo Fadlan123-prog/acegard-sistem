@@ -303,6 +303,14 @@
 .si-red svg    { color: #DC2626; }
 .si-purple svg { color: #7C3AED; }
 
+/* optional left-border accent, opt-in via <x-ui.stats-card accent> — matches the
+   same color tokens as the icon chip so the whole card reads as one category */
+.ui-stats-accent-blue   { border-left: 4px solid #2563EB; }
+.ui-stats-accent-green  { border-left: 4px solid #16A34A; }
+.ui-stats-accent-amber  { border-left: 4px solid #CA8A04; }
+.ui-stats-accent-red    { border-left: 4px solid #DC2626; }
+.ui-stats-accent-purple { border-left: 4px solid #7C3AED; }
+
 [data-theme="dark"] .si-blue   { background: rgba(37,99,235,.15); }
 [data-theme="dark"] .si-green  { background: rgba(22,163,74,.12); }
 [data-theme="dark"] .si-amber  { background: rgba(202,138,4,.12); }

@@ -16,7 +16,7 @@
     @slot('header')
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div class="ui-card-title">Detail Audit Log</div>
-            <x-ui.button href="{{ route('audit-logs.index') }}" variant="secondary" size="sm">Kembali</x-ui.button>
+            <x-ui.button :href="route('audit-logs.index')" variant="secondary" size="sm">Kembali</x-ui.button>
         </div>
     @endslot
 

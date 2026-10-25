@@ -112,6 +112,8 @@ class OwnerDashboardController extends Controller
             ->limit(10)
             ->get();
 
+        $upcomingBirthdays = \App\Models\Employee::upcomingBirthdays();
+
         return view('owner.dashboard', compact(
             'revenueToday', 'revenueMonth',
             'outstandingCount', 'outstandingAmount',
@@ -119,6 +121,7 @@ class OwnerDashboardController extends Controller
             'revenueByBranch',
             'totalCustomers', 'totalBranches',
             'recentInvoices',
+            'upcomingBirthdays',
         ));
     }
 }

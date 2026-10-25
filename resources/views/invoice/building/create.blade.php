@@ -17,14 +17,6 @@
     </x-ui.alert>
 @endif
 
-@if (session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
-
-@if (session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-
 <x-ui.card>
     @slot('header')
         <div class="ui-card-title">Form Buat Invoice Building</div>

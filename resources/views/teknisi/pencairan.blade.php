@@ -18,16 +18,10 @@
 @endphp
 
 {{-- Flash --}}
-@if (session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-@if (session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
 
 {{-- Header --}}
 <div class="d-flex align-items-center gap-3 mb-4">
-    <x-ui.button href="{{ route('teknisi.dashboard') }}" variant="outline" size="sm">
+    <x-ui.button :href="route('teknisi.dashboard')" variant="outline" size="sm">
         <x-slot name="icon"><svg viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></x-slot>
         Kembali
     </x-ui.button>
@@ -41,7 +35,7 @@
 <x-ui.stats-card
     label="Total Komisi Diterima"
     :value="$idr($totalPaid)"
-    color="green"
+    color="green" accent
     class="mb-4"
     icon='<svg viewBox="0 0 24 24" fill="none"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 >
@@ -119,7 +113,7 @@
 @empty
 <x-ui.card>
     <x-ui.empty-state title="Belum ada riwayat pengajuan pencairan">
-        <x-ui.button href="{{ route('teknisi.dashboard') }}" variant="outline" size="sm">
+        <x-ui.button :href="route('teknisi.dashboard')" variant="outline" size="sm">
             Kembali ke Dashboard
         </x-ui.button>
     </x-ui.empty-state>

@@ -47,6 +47,9 @@ class LoginController extends Controller
             'manager_operasional', 'manager_marketing',
             'marketing', 'finance', 'purchasing',
             'customer_service', 'teknisi', 'kenek',
+            // Restrukturisasi ERP (2026-08)
+            'it_manager', 'development', 'export_import',
+            'strategi_pengembangan', 'designer', 'videographer',
         ];
 
         if (!$user->hasAnyRole($allowedRoles)) {
@@ -70,6 +73,24 @@ class LoginController extends Controller
         if ($user->hasAnyRole(['teknisi', 'kenek'])) {
             AuditService::logLogin($user, $request);
             return redirect()->intended(route('teknisi.dashboard'));
+        }
+
+        // Restrukturisasi ERP (2026-08) — company-wide roles, no branch needed,
+        // same as teknisi/kenek. Each lands on its own module home page since
+        // none of these roles use the generic /dashboard (superadmin|admin|...).
+        if ($user->hasRole('development')) {
+            AuditService::logLogin($user, $request);
+            return redirect()->intended(route('development-reports.index'));
+        }
+
+        if ($user->hasRole('export_import')) {
+            AuditService::logLogin($user, $request);
+            return redirect()->intended(route('import-orders.index'));
+        }
+
+        if ($user->hasAnyRole(['strategi_pengembangan', 'designer', 'videographer'])) {
+            AuditService::logLogin($user, $request);
+            return redirect()->intended(route('creative-tasks.index'));
         }
 
         // All other staff roles — require at least one assigned branch
@@ -107,7 +128,7 @@ class LoginController extends Controller
             return redirect()->intended(route('finance.dashboard'));
         }
 
-        if ($user->hasRole('purchasing')) {
+        if ($user->hasAnyRole(['purchasing', 'it_manager'])) {
             return redirect()->intended(route('purchasing.dashboard'));
         }
 

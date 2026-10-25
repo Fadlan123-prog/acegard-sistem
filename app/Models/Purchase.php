@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Traits\Auditable;
+use App\Traits\HasApprovalFlow;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Purchase extends Model
 {
-    use Auditable, SoftDeletes;
+    use Auditable, HasApprovalFlow, SoftDeletes;
 
     // Status constants — covers both legacy ('confirmed') and new GRN flow
     const STATUS_DRAFT            = 'draft';
@@ -81,5 +82,28 @@ class Purchase extends Model
     public function isFullyReceived(): bool
     {
         return in_array($this->status, [self::STATUS_RECEIVED, self::STATUS_MATCHED]);
+    }
+
+    /** Shown in the generic approval queue (approvals/index.blade.php). */
+    public function approvalSummary(): string
+    {
+        $supplierName = $this->supplier?->name ?? '-';
+
+        return "PO {$this->purchase_number} — {$supplierName} — Rp " . number_format($this->total_amount, 0, ',', '.');
+    }
+
+    /**
+     * Called by ApprovalService once the approval_flow's last step is decided.
+     * A purchase is saved as 'draft' when submitted for confirm-approval
+     * (see PurchaseController); this flips it to 'confirmed' only once the
+     * Owner approves, or leaves it as 'draft' if rejected.
+     */
+    public function onApprovalDecision(string $decision, $approvalRequest): void
+    {
+        if ($decision === 'approved') {
+            $this->update(['status' => self::STATUS_CONFIRMED]);
+        } elseif ($decision === 'rejected') {
+            $this->update(['status' => self::STATUS_DRAFT]);
+        }
     }
 }

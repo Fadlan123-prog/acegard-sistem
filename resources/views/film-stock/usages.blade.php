@@ -16,7 +16,7 @@
                 </small>
             </div>
 
-            <x-ui.button href="{{ route('film-stock.index') }}" variant="secondary" size="sm">
+            <x-ui.button :href="route('film-stock.index')" variant="secondary" size="sm">
                 Kembali ke Stock
             </x-ui.button>
         </div>
@@ -78,7 +78,7 @@
             </x-ui.button>
 
             @if(request()->query())
-                <x-ui.button href="{{ route('film-stock.usages') }}" variant="ghost">
+                <x-ui.button :href="route('film-stock.usages')" variant="ghost">
                     Reset
                 </x-ui.button>
             @endif
@@ -87,15 +87,15 @@
 
     <div class="row mb-4">
         <div class="col-md-4 mb-2">
-            <x-ui.stats-card label="Total Data Halaman Ini" :value="$usages->count() . ' Pemakaian'" color="blue" />
+            <x-ui.stats-card label="Total Data Halaman Ini" :value="$usages->count() . ' Pemakaian'" color="blue" accent />
         </div>
 
         <div class="col-md-4 mb-2">
-            <x-ui.stats-card label="Total Meter Terpakai Halaman Ini" :value="number_format($usages->sum('used_length_meter'), 2, ',', '.') . ' m'" color="amber" />
+            <x-ui.stats-card label="Total Meter Terpakai Halaman Ini" :value="number_format($usages->sum('used_length_meter'), 2, ',', '.') . ' m'" color="amber" accent />
         </div>
 
         <div class="col-md-4 mb-2">
-            <x-ui.stats-card label="Total Area Terpakai Halaman Ini" :value="number_format($usages->sum('area_meter'), 2, ',', '.') . ' m²'" color="green" />
+            <x-ui.stats-card label="Total Area Terpakai Halaman Ini" :value="number_format($usages->sum('area_meter'), 2, ',', '.') . ' m²'" color="green" accent />
         </div>
     </div>
 

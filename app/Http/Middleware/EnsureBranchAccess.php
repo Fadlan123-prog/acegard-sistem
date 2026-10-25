@@ -42,7 +42,7 @@ class EnsureBranchAccess
         | Staff dengan branch assignment (admin, manager, marketing, finance, dst)
         |--------------------------------------------------------------------------
         */
-        $staffRoles = ['admin', 'owner', 'manager_operasional', 'manager_marketing', 'marketing', 'finance', 'purchasing', 'customer_service'];
+        $staffRoles = ['admin', 'owner', 'manager_operasional', 'manager_marketing', 'marketing', 'finance', 'purchasing', 'customer_service', 'it_manager'];
 
         if ($user->hasAnyRole($staffRoles)) {
             $this->ensureAdminHasValidBranch($user);

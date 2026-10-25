@@ -28,7 +28,7 @@
     @slot('header')
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div class="ui-card-title">Edit Role</div>
-            <x-ui.button href="{{ route('roles.index') }}" variant="secondary" size="sm">Kembali</x-ui.button>
+            <x-ui.button :href="route('roles.index')" variant="secondary" size="sm">Kembali</x-ui.button>
         </div>
     @endslot
 
@@ -64,7 +64,7 @@
 
         <div class="d-flex gap-2 mt-4">
             <x-ui.button type="submit" variant="primary">Simpan Perubahan</x-ui.button>
-            <x-ui.button href="{{ route('roles.index') }}" variant="outline">Batal</x-ui.button>
+            <x-ui.button :href="route('roles.index')" variant="outline">Batal</x-ui.button>
         </div>
     </form>
 </x-ui.card>

@@ -40,11 +40,21 @@ class NotificationController extends Controller
     $url = $data['url'] ?? null;
 
     if ($url) {
-        // kalau url absolute http(s)://..., ambil path+query biar tidak pindah port 80
-        if (preg_match('~^https?://~i', $url)) {
+        // Strip to path+query for ANY absolute or protocol-relative URL
+        // (http://, https://, or a bare "//host/..."). The previous check
+        // only matched "^https?://" — "//evil.com" skipped it entirely,
+        // and browsers still treat "//host" as a cross-origin redirect, so
+        // that was a live open-redirect bypass (audit finding M-13).
+        if (preg_match('~^(?:https?:)?//~i', $url)) {
             $path  = parse_url($url, PHP_URL_PATH) ?? '/';
             $query = parse_url($url, PHP_URL_QUERY);
             $url = $path . ($query ? '?'.$query : '');
+        }
+
+        // Belt-and-suspenders: whatever the parsing above produced, it must
+        // start with exactly one "/" before it's trusted as same-origin.
+        if (!str_starts_with($url, '/') || str_starts_with($url, '//') || str_starts_with($url, '/\\')) {
+            $url = '/';
         }
 
         return redirect()->to($url);

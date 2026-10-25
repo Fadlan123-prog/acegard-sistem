@@ -8,13 +8,11 @@
     @slot('header')
         <div class="d-flex justify-content-between align-items-center">
             <div class="ui-card-title">Edit Invoice Claim — {{ $invoice->claim?->claim_number ?? '#'.$invoice->id }}</div>
-            <x-ui.button href="{{ route('admin.claim-invoices.show', $invoice->id) }}" variant="secondary" size="sm">Kembali</x-ui.button>
+            <x-ui.button :href="route('admin.claim-invoices.show', $invoice->id)" variant="secondary" size="sm">Kembali</x-ui.button>
         </div>
     @endslot
 
-    @if(session('error'))
-        <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-    @endif
+    
     @if($errors->any())
         <x-ui.alert type="danger" class="mb-3">
             <ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>

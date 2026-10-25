@@ -31,7 +31,7 @@
         </form>
         @endif
     </div>
-    <x-ui.button href="{{ route('notification-config.logs', $filters) }}" variant="outline" size="sm">
+    <x-ui.button :href="route('notification-config.logs', $filters)" variant="outline" size="sm">
         <iconify-icon icon="mdi:history" class="me-1"></iconify-icon>Riwayat Kiriman
     </x-ui.button>
 </div>
@@ -162,7 +162,7 @@
     @slot('header')
         <div class="d-flex align-items-center justify-content-between">
             <div class="ui-card-title">Kiriman Terakhir</div>
-            <x-ui.button href="{{ route('notification-config.logs', $filters) }}" variant="outline" size="sm">Lihat Semua</x-ui.button>
+            <x-ui.button :href="route('notification-config.logs', $filters)" variant="outline" size="sm">Lihat Semua</x-ui.button>
         </div>
     @endslot
     <div class="table-responsive">

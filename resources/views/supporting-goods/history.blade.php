@@ -21,7 +21,7 @@
                 <div class="text-muted" style="font-size:11px">Stok Saat Ini</div>
                 <div class="fw-bold fs-5">{{ number_format($good->current_stock, 2) }} {{ $good->unit }}</div>
             </div>
-            <x-ui.button href="{{ route('supporting-goods.index') }}" variant="outline" size="sm">
+            <x-ui.button :href="route('supporting-goods.index')" variant="outline" size="sm">
                 <iconify-icon icon="mdi:arrow-left" class="me-1"></iconify-icon>Kembali
             </x-ui.button>
         </div>

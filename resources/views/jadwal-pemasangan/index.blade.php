@@ -32,6 +32,7 @@
 .jp-dot-success { background:var(--success-main); }
 .jp-dot-primary { background:var(--primary-600); }
 .jp-dot-warning { background:var(--warning-main); }
+.jp-dot-info { background:#8b5cf6; }
 .jp-day-count { font-size:10px; color:var(--neutral-400); margin-top:3px; }
 
 /* ── Sidebar Panel ──────────────────────────────────────────── */
@@ -95,27 +96,34 @@
         <input type="hidden" name="year"  value="{{ $year }}">
         <input type="hidden" name="month" value="{{ $month }}">
 
-        <label class="small fw-semibold text-muted mb-0">Filter Teknisi:</label>
-        <select name="tukang_id" class="form-select form-select-sm" style="max-width:200px"
-                onchange="this.form.submit()">
-            <option value="">— Semua Teknisi —</option>
-            @foreach($employees as $emp)
-                <option value="{{ $emp->id }}" {{ $tukangFilter == $emp->id ? 'selected' : '' }}>
-                    {{ $emp->name }}
-                </option>
-            @endforeach
-        </select>
+        @unless(auth()->user()->hasAnyRole(['teknisi', 'kenek']))
+            <label class="small fw-semibold text-muted mb-0">Filter Teknisi:</label>
+            <select name="tukang_id" class="form-select form-select-sm" style="max-width:200px"
+                    onchange="this.form.submit()">
+                <option value="">— Semua Teknisi —</option>
+                @foreach($employees as $emp)
+                    <option value="{{ $emp->id }}" {{ $tukangFilter == $emp->id ? 'selected' : '' }}>
+                        {{ $emp->name }}
+                    </option>
+                @endforeach
+            </select>
 
-        @if($tukangFilter)
-            <x-ui.button href="{{ route('jadwal.index', ['year' => $year, 'month' => $month]) }}" variant="outline" size="sm">Reset Filter</x-ui.button>
-        @endif
+            @if($tukangFilter)
+                <x-ui.button :href="route('jadwal.index', ['year' => $year, 'month' => $month])" variant="outline" size="sm">Reset Filter</x-ui.button>
+            @endif
+        @else
+            <span class="small fw-semibold text-muted">Jadwal Anda — {{ auth()->user()->employee?->name }}</span>
+        @endunless
 
         <div class="ms-auto jp-legend">
             <div class="jp-legend-item">
                 <span class="jp-dot jp-dot-success"></span> Sales Order
             </div>
             <div class="jp-legend-item">
-                <span class="jp-dot jp-dot-primary"></span> Kaca Film (Customer)
+                <span class="jp-dot jp-dot-primary"></span> Kaca Film Mobil
+            </div>
+            <div class="jp-legend-item">
+                <span class="jp-dot jp-dot-info"></span> Kaca Film Bangunan
             </div>
             <div class="jp-legend-item">
                 <span class="jp-dot jp-dot-warning"></span> PPF
@@ -133,11 +141,11 @@
             <div class="jp-cal-header">
                 <h5 class="jp-cal-title">{{ Carbon::create($year, $month, 1)->locale('id')->isoFormat('MMMM YYYY') }}</h5>
                 <div class="jp-cal-nav">
-                    <x-ui.button href="{{ route('jadwal.index', array_merge(request()->only('tukang_id'), ['year' => $prevMonth->year, 'month' => $prevMonth->month])) }}" variant="outline" size="sm" class="px-2">
+                    <x-ui.button :href="route('jadwal.index', array_merge(request()->only('tukang_id'), ['year' => $prevMonth->year, 'month' => $prevMonth->month]))" variant="outline" size="sm" class="px-2">
                         <iconify-icon icon="mdi:chevron-left"></iconify-icon>
                     </x-ui.button>
-                    <x-ui.button href="{{ route('jadwal.index', array_merge(request()->only('tukang_id'), ['year' => now()->year, 'month' => now()->month])) }}" variant="outline" size="sm" class="px-3">Hari ini</x-ui.button>
-                    <x-ui.button href="{{ route('jadwal.index', array_merge(request()->only('tukang_id'), ['year' => $nextMonth->year, 'month' => $nextMonth->month])) }}" variant="outline" size="sm" class="px-2">
+                    <x-ui.button :href="route('jadwal.index', array_merge(request()->only('tukang_id'), ['year' => now()->year, 'month' => now()->month]))" variant="outline" size="sm" class="px-3">Hari ini</x-ui.button>
+                    <x-ui.button :href="route('jadwal.index', array_merge(request()->only('tukang_id'), ['year' => $nextMonth->year, 'month' => $nextMonth->month]))" variant="outline" size="sm" class="px-2">
                         <iconify-icon icon="mdi:chevron-right"></iconify-icon>
                     </x-ui.button>
                 </div>
@@ -162,6 +170,7 @@
                         $dayEvents = $events[$d] ?? [];
                         $soCount   = collect($dayEvents)->where('type', 'so')->count();
                         $custCount = collect($dayEvents)->where('type', 'customer')->count();
+                        $bldCount  = collect($dayEvents)->where('type', 'customer_building')->count();
                         $ppfCount  = collect($dayEvents)->where('type', 'ppf')->count();
                         $total     = count($dayEvents);
                     @endphp
@@ -176,6 +185,9 @@
                             @endfor
                             @for($s = 0; $s < min($custCount, 3); $s++)
                                 <span class="jp-dot jp-dot-primary"></span>
+                            @endfor
+                            @for($s = 0; $s < min($bldCount, 3); $s++)
+                                <span class="jp-dot jp-dot-info"></span>
                             @endfor
                             @for($s = 0; $s < min($ppfCount, 3); $s++)
                                 <span class="jp-dot jp-dot-warning"></span>
@@ -199,14 +211,17 @@
 
         {{-- Stats row --}}
         <div class="row g-3 mt-1">
-            <div class="col-4">
-                <x-ui.stats-card label="Sales Order" :value="$salesOrders->count()" color="green" />
+            <div class="col-6 col-md-3">
+                <x-ui.stats-card label="Sales Order" :value="$salesOrders->count()" color="green" accent />
             </div>
-            <div class="col-4">
-                <x-ui.stats-card label="Kaca Film" :value="$customers->count()" color="blue" />
+            <div class="col-6 col-md-3">
+                <x-ui.stats-card label="Kaca Film Mobil" :value="$customers->count()" color="blue" accent />
             </div>
-            <div class="col-4">
-                <x-ui.stats-card label="PPF" :value="$ppfInstallations->count()" color="amber" />
+            <div class="col-6 col-md-3">
+                <x-ui.stats-card label="Kaca Film Bangunan" :value="$buildingProducts->count()" color="purple" accent />
+            </div>
+            <div class="col-6 col-md-3">
+                <x-ui.stats-card label="PPF" :value="$ppfInstallations->count()" color="amber" accent />
             </div>
         </div>
     </div>

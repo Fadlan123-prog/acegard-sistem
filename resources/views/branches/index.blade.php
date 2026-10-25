@@ -9,7 +9,7 @@
     @slot('header')
         <div class="d-flex justify-content-between align-items-center">
             <div class="ui-card-title">Daftar Cabang</div>
-            <x-ui.button href="{{ route('branches.create') }}" variant="primary" size="sm">
+            <x-ui.button :href="route('branches.create')" variant="primary" size="sm">
                 <iconify-icon icon="mdi:plus" class="me-1"></iconify-icon> Tambah Cabang
             </x-ui.button>
         </div>
@@ -28,7 +28,7 @@
                    style="max-width: 260px;">
             <x-ui.button type="submit" variant="outline" size="sm">Cari</x-ui.button>
             @if($search)
-                <x-ui.button href="{{ route('branches.index') }}" variant="secondary" size="sm">Reset</x-ui.button>
+                <x-ui.button :href="route('branches.index')" variant="secondary" size="sm">Reset</x-ui.button>
             @endif
         </form>
 
@@ -45,12 +45,8 @@
 
     </div>
 
-    @if(session('success'))
-        <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-    @endif
-    @if(session('error'))
-        <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-    @endif
+    
+    
 
     {{-- Table --}}
     <div class="table-responsive">
@@ -188,7 +184,6 @@
     @slot('footer'){{ $branches->withQueryString()->links() }}@endslot
 </x-ui.card>
 
-
 {{-- ── Modal Detail per Cabang ── --}}
 @foreach ($branches as $branch)
     <div class="modal fade"
@@ -298,13 +293,13 @@
                         <div class="col-12">
                             <div class="row g-2">
                                 <div class="col-md-3 col-6">
-                                    <x-ui.stats-card label="Customer Mobil" :value="$branch->customers_count" color="blue" />
+                                    <x-ui.stats-card label="Customer Mobil" :value="$branch->customers_count" color="blue" accent />
                                 </div>
                                 <div class="col-md-3 col-6">
-                                    <x-ui.stats-card label="Customer Gedung" :value="$branch->customer_buildings_count" color="purple" />
+                                    <x-ui.stats-card label="Customer Gedung" :value="$branch->customer_buildings_count" color="purple" accent />
                                 </div>
                                 <div class="col-md-3 col-6">
-                                    <x-ui.stats-card label="Karyawan" :value="$branch->employees_count" color="green" />
+                                    <x-ui.stats-card label="Karyawan" :value="$branch->employees_count" color="green" accent />
                                 </div>
                             </div>
                         </div>
@@ -362,7 +357,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <x-ui.button href="{{ route('branches.edit', $branch->id) }}" variant="primary" size="sm">
+                    <x-ui.button :href="route('branches.edit', $branch->id)" variant="primary" size="sm">
                         <iconify-icon icon="mdi:pencil-outline" class="me-1"></iconify-icon> Edit Cabang
                     </x-ui.button>
                     <x-ui.button variant="secondary" size="sm" data-bs-dismiss="modal">Tutup</x-ui.button>
@@ -372,7 +367,6 @@
         </div>
     </div>
 @endforeach
-
 
 @include('partials.bulk-delete-script')
 @endsection

@@ -32,8 +32,8 @@
             <option value="failed" {{ ($filters['status'] ?? '') === 'failed' ? 'selected' : '' }}>Gagal</option>
         </select>
 
-        <x-ui.button href="{{ route('notification-config.logs') }}" variant="outline" size="sm">Reset</x-ui.button>
-        <x-ui.button href="{{ route('notification-config.index', $filters) }}" variant="outline" size="sm" class="ms-auto">
+        <x-ui.button :href="route('notification-config.logs')" variant="outline" size="sm">Reset</x-ui.button>
+        <x-ui.button :href="route('notification-config.index', $filters)" variant="outline" size="sm" class="ms-auto">
             <iconify-icon icon="mdi:cog-outline" class="me-1"></iconify-icon>Pengaturan
         </x-ui.button>
     </form>

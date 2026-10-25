@@ -7,11 +7,13 @@ use App\Models\CategoryProduct;
 use App\Models\Product;
 use App\Models\CategoryProductBuilding;
 use App\Models\ProductBuilding;
+use App\Models\FilmRollEntry;
 use App\Models\FilmStockPool;
 use App\Models\FilmStockUsage;
 use App\Services\BranchContext;
 use App\Services\FilmStockPoolService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class FilmStockController extends Controller
@@ -86,57 +88,108 @@ class FilmStockController extends Controller
         ));
     }
 
+    /**
+     * Auto-generate the next available roll codes for a product prefix (e.g. "AP05"),
+     * so Roll Masuk no longer needs the code typed by hand — which is what let
+     * duplicate/typo'd codes slip through until the unique-constraint error on submit.
+     * Looks at ALL existing roll_code rows for that prefix (not just this form's
+     * session) so suggestions never collide with roll codes from earlier batches.
+     */
+    public function suggestRollCodes(Request $request)
+    {
+        $data = $request->validate([
+            'prefix' => ['required', 'string', 'max:50'],
+            'qty'    => ['required', 'integer', 'min:1', 'max:200'],
+        ]);
+
+        $prefix = strtoupper(trim($data['prefix']));
+
+        $maxSeq = FilmRollEntry::where('roll_code', 'like', $prefix . '-%')
+            ->pluck('roll_code')
+            ->reduce(function ($max, $code) use ($prefix) {
+                if (preg_match('/^' . preg_quote($prefix, '/') . '-(\d+)$/', $code, $m)) {
+                    return max($max, (int) $m[1]);
+                }
+                return $max;
+            }, 0);
+
+        $codes = [];
+        for ($i = 1; $i <= $data['qty']; $i++) {
+            $codes[] = $prefix . '-' . str_pad($maxSeq + $i, 3, '0', STR_PAD_LEFT);
+        }
+
+        return response()->json(['codes' => $codes]);
+    }
+
+    /**
+     * Satu kiriman roll masuk bisa berisi beberapa varian (kategori & persentase
+     * kegelapan berbeda) sekaligus — "batches" me-loop addRolls() per varian,
+     * semua dalam satu transaksi supaya kiriman tersimpan atomik (semua varian
+     * masuk, atau tidak sama sekali kalau salah satu gagal).
+     */
     public function store(Request $request, FilmStockPoolService $filmStock)
     {
         $validator = Validator::make($request->all(), [
             'branch_id' => ['required', 'exists:branches,id'],
             'usage_for' => ['required', 'in:car,building,universal'],
-
-            'category_product_id' => ['nullable', 'exists:category_products,id'],
-            'product_id' => ['nullable', 'exists:products,id'],
-
-            'category_product_building_id' => ['nullable', 'exists:category_product_building,id'],
-            'product_building_id' => ['nullable', 'exists:product_building,id'],
-
-            'qty_roll' => ['required', 'integer', 'min:1'],
-            'width_meter' => ['nullable', 'numeric', 'min:0.01'],
-            'length_meter' => ['nullable', 'numeric', 'min:0.01'],
-
-            'roll_codes' => ['required', 'array', 'min:1'],
-            'roll_codes.*' => ['required', 'string', 'distinct', 'unique:film_roll_entries,roll_code'],
-
             'received_date' => ['nullable', 'date'],
             'notes' => ['nullable', 'string'],
+
+            'batches' => ['required', 'array', 'min:1'],
+            'batches.*.category_product_id' => ['nullable', 'exists:category_products,id'],
+            'batches.*.product_id' => ['nullable', 'exists:products,id'],
+            'batches.*.category_product_building_id' => ['nullable', 'exists:category_product_building,id'],
+            'batches.*.product_building_id' => ['nullable', 'exists:product_building,id'],
+            'batches.*.width_meter' => ['nullable', 'numeric', 'min:0.01'],
+            'batches.*.length_meter' => ['nullable', 'numeric', 'min:0.01'],
+            'batches.*.qty_roll' => ['required', 'integer', 'min:1'],
+            'batches.*.roll_codes' => ['required', 'array', 'min:1'],
+            'batches.*.roll_codes.*' => ['required', 'string', 'unique:film_roll_entries,roll_code'],
         ]);
 
         $validator->after(function ($validator) use ($request) {
             $usageFor = $request->input('usage_for');
+            $batches = $request->input('batches', []);
+            $seenCodes = [];
 
-            if ($usageFor === 'car' || $usageFor === 'universal') {
-                if (!$request->filled('category_product_id')) {
-                    $validator->errors()->add('category_product_id', 'Kategori produk mobil wajib dipilih.');
+            foreach ($batches as $i => $batch) {
+                $label = 'Varian #' . ($i + 1);
+
+                if ($usageFor === 'car' || $usageFor === 'universal') {
+                    if (empty($batch['category_product_id'])) {
+                        $validator->errors()->add("batches.$i.category_product_id", "$label: kategori produk mobil wajib dipilih.");
+                    }
+                    if (empty($batch['product_id'])) {
+                        $validator->errors()->add("batches.$i.product_id", "$label: produk / kode kegelapan wajib dipilih.");
+                    }
                 }
 
-                if (!$request->filled('product_id')) {
-                    $validator->errors()->add('product_id', 'Produk mobil / kode kegelapan wajib dipilih.');
+                if ($usageFor === 'building') {
+                    if (empty($batch['category_product_building_id'])) {
+                        $validator->errors()->add("batches.$i.category_product_building_id", "$label: kategori produk gedung wajib dipilih.");
+                    }
+                    if (empty($batch['product_building_id'])) {
+                        $validator->errors()->add("batches.$i.product_building_id", "$label: produk gedung / kode kegelapan wajib dipilih.");
+                    }
                 }
-            }
 
-            if ($usageFor === 'building') {
-                if (!$request->filled('category_product_building_id')) {
-                    $validator->errors()->add('category_product_building_id', 'Kategori produk gedung wajib dipilih.');
+                $qtyRoll = (int) ($batch['qty_roll'] ?? 0);
+                $rollCodes = $batch['roll_codes'] ?? [];
+
+                if ($qtyRoll !== count($rollCodes)) {
+                    $validator->errors()->add("batches.$i.roll_codes", "$label: jumlah kode roll harus sama dengan jumlah roll masuk.");
                 }
 
-                if (!$request->filled('product_building_id')) {
-                    $validator->errors()->add('product_building_id', 'Produk gedung / kode kegelapan wajib dipilih.');
+                foreach ($rollCodes as $code) {
+                    $key = strtoupper(trim((string) $code));
+                    if ($key === '') {
+                        continue;
+                    }
+                    if (isset($seenCodes[$key])) {
+                        $validator->errors()->add("batches.$i.roll_codes", "$label: kode roll \"$code\" duplikat dengan {$seenCodes[$key]}.");
+                    }
+                    $seenCodes[$key] = $label;
                 }
-            }
-
-            $qtyRoll = (int) $request->input('qty_roll', 0);
-            $rollCodes = $request->input('roll_codes', []);
-
-            if ($qtyRoll !== count($rollCodes)) {
-                $validator->errors()->add('roll_codes', 'Jumlah kode roll harus sama dengan jumlah roll masuk.');
             }
         });
 
@@ -153,28 +206,34 @@ class FilmStockController extends Controller
         }
 
         try {
-            $filmStock->addRolls([
-                'branch_id' => (int) $data['branch_id'],
-                'usage_for' => $data['usage_for'],
+            DB::transaction(function () use ($data, $filmStock) {
+                foreach ($data['batches'] as $batch) {
+                    $filmStock->addRolls([
+                        'branch_id' => (int) $data['branch_id'],
+                        'usage_for' => $data['usage_for'],
 
-                'category_product_id' => $data['category_product_id'] ?? null,
-                'product_id' => $data['product_id'] ?? null,
+                        'category_product_id' => $batch['category_product_id'] ?? null,
+                        'product_id' => $batch['product_id'] ?? null,
 
-                'category_product_building_id' => $data['category_product_building_id'] ?? null,
-                'product_building_id' => $data['product_building_id'] ?? null,
+                        'category_product_building_id' => $batch['category_product_building_id'] ?? null,
+                        'product_building_id' => $batch['product_building_id'] ?? null,
 
-                'qty_roll' => (int) $data['qty_roll'],
-                'width_meter' => $data['width_meter'] ?? 1.5,
-                'length_meter' => $data['length_meter'] ?? 30,
+                        'qty_roll' => (int) $batch['qty_roll'],
+                        'width_meter' => $batch['width_meter'] ?? 1.5,
+                        'length_meter' => $batch['length_meter'] ?? 30,
 
-                'roll_codes' => $data['roll_codes'],
-                'received_date' => $data['received_date'] ?? now()->toDateString(),
-                'notes' => $data['notes'] ?? null,
-            ]);
+                        'roll_codes' => $batch['roll_codes'],
+                        'received_date' => $data['received_date'] ?? now()->toDateString(),
+                        'notes' => $data['notes'] ?? null,
+                    ]);
+                }
+            });
+
+            $varianCount = count($data['batches']);
 
             return redirect()
                 ->route('film-stock.index')
-                ->with('success', 'Roll masuk berhasil disimpan dan stock pool berhasil diperbarui.');
+                ->with('success', "Roll masuk berhasil disimpan ({$varianCount} varian) dan stock pool berhasil diperbarui.");
 
         } catch (\Throwable $e) {
             return back()

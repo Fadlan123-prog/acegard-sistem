@@ -60,7 +60,7 @@
             <x-ui.button type="submit" variant="primary" size="sm">
                 <iconify-icon icon="mdi:filter-outline" class="me-1"></iconify-icon>Filter
             </x-ui.button>
-            <x-ui.button href="{{ route('audit-logs.index') }}" variant="outline" size="sm">Reset</x-ui.button>
+            <x-ui.button :href="route('audit-logs.index')" variant="outline" size="sm">Reset</x-ui.button>
         </div>
     </form>
 </x-ui.card>
@@ -111,7 +111,7 @@
                         </td>
                         <td class="small text-muted">{{ $log->branch_name ?? '-' }}</td>
                         <td class="pe-3 text-end">
-                            <x-ui.button href="{{ route('audit-logs.show', $log->id) }}" variant="outline" size="sm">
+                            <x-ui.button :href="route('audit-logs.show', $log->id)" variant="outline" size="sm">
                                 Detail
                             </x-ui.button>
                         </td>

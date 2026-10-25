@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Domain\Commission\CommissionCalculator;
 use App\Domain\Commission\CommissionSplit;
+use App\Domain\Commission\EmployeeCommissionResolver;
 use App\Models\CommissionPeriod;
 use App\Models\Customer;
 use App\Models\Invoice;
@@ -17,6 +18,7 @@ class CommissionReleaseService
         private CommissionService $commissionService,
         private AditCommissionService $aditCommission,
         private CommissionCalculator $calculator,
+        private EmployeeCommissionResolver $employeeResolver,
     ) {}
 
     // ─── Public API ──────────────────────────────────────────────────────────
@@ -38,45 +40,48 @@ class CommissionReleaseService
             return ['rows' => [], 'is_second_car' => false, 'install_type' => null, 'lebaran' => $lebaran];
         }
 
-        $split = $this->calculator->resolveInstallerSplit($customer, $invoice, $lebaran);
+        $split       = $this->calculator->resolveInstallerSplit($customer, $invoice, $lebaran);
+        $invoicePrice = (int) $invoice->price;
         $rows  = [];
 
         $samePerson = $customer->tukang_id && $customer->kenek_id
             && (int) $customer->tukang_id === (int) $customer->kenek_id;
 
         if ($samePerson) {
-            $combined = $split->teknisiAmount + $split->kenekAmount;
-            if ($combined > 0) {
+            $combined = $this->employeeResolver->resolve($customer->tukang, $split->teknisiAmount + $split->kenekAmount, $invoicePrice);
+            if ($combined['amount'] > 0 || $combined['forced']) {
                 $rows[] = [
                     'role'          => 'installer',
                     'employee_name' => $customer->tukang?->name ?? '-',
                     'job_position'  => $customer->tukang?->job_position ?? '-',
-                    'amount'        => $combined,
-                    'note'          => $this->noteFor($split, 'tukang') . ' + Installer 2 (gabung)',
+                    'amount'        => $combined['amount'],
+                    'note'          => $this->noteFor($split, 'tukang') . ' + Installer 2 (gabung)' . ($combined['forced'] ? ' — setting komisi kustom' : ''),
                     'is_second_car' => $split->isSecondCar,
                     'config_key'    => $split->configKey,
                 ];
             }
         } else {
-            if ($customer->tukang_id && $split->teknisiAmount > 0) {
+            $teknisi = $this->employeeResolver->resolve($customer->tukang, $split->teknisiAmount, $invoicePrice);
+            if ($customer->tukang_id && ($teknisi['amount'] > 0 || $teknisi['forced'])) {
                 $rows[] = [
                     'role'          => 'installer',
                     'employee_name' => $customer->tukang?->name ?? '-',
                     'job_position'  => $customer->tukang?->job_position ?? '-',
-                    'amount'        => $split->teknisiAmount,
-                    'note'          => $this->noteFor($split, 'tukang'),
+                    'amount'        => $teknisi['amount'],
+                    'note'          => $this->noteFor($split, 'tukang') . ($teknisi['forced'] ? ' — setting komisi kustom' : ''),
                     'is_second_car' => $split->isSecondCar,
                     'config_key'    => $split->configKey,
                 ];
             }
 
-            if ($customer->kenek_id && $split->kenekAmount > 0) {
+            $kenek = $this->employeeResolver->resolve($customer->kenek, $split->kenekAmount, $invoicePrice);
+            if ($customer->kenek_id && ($kenek['amount'] > 0 || $kenek['forced'])) {
                 $rows[] = [
                     'role'          => 'installer',
                     'employee_name' => $customer->kenek?->name ?? '-',
                     'job_position'  => $customer->kenek?->job_position ?? '-',
-                    'amount'        => $split->kenekAmount,
-                    'note'          => $this->noteFor($split, 'kenek'),
+                    'amount'        => $kenek['amount'],
+                    'note'          => $this->noteFor($split, 'kenek') . ($kenek['forced'] ? ' — setting komisi kustom' : ''),
                     'is_second_car' => $split->isSecondCar,
                     'config_key'    => $split->configKey,
                 ];
@@ -90,15 +95,16 @@ class CommissionReleaseService
                 $mMap = config('commission.marketing', []);
                 $mCat = $mMap[$categoryId] ?? ($mMap['default'] ?? []);
                 $base = $this->calculator->resolveMarketingBase($customer);
-                $mAmt = (int) ($mCat[$base] ?? 0);
+                $defaultMAmt = (int) ($mCat[$base] ?? 0);
+                $marketing = $this->employeeResolver->resolve($customer->marketing, $defaultMAmt, $invoicePrice);
 
-                if ($mAmt > 0) {
+                if ($marketing['amount'] > 0 || $marketing['forced']) {
                     $rows[] = [
                         'role'          => 'marketing',
                         'employee_name' => $customer->marketing?->name ?? '-',
                         'job_position'  => $customer->marketing?->job_position ?? '-',
-                        'amount'        => $mAmt,
-                        'note'          => 'Marketing',
+                        'amount'        => $marketing['amount'],
+                        'note'          => 'Marketing' . ($marketing['forced'] ? ' — setting komisi kustom' : ''),
                         'is_second_car' => false,
                         'config_key'    => $base,
                     ];
@@ -158,6 +164,7 @@ class CommissionReleaseService
             : Carbon::parse($customer->created_at);
         $period      = CommissionPeriod::resolveForDate($installedAt);
         $split       = $this->calculator->resolveInstallerSplit($customer, $invoice, $lebaran);
+        $invoicePrice = (int) $invoice->price;
         $now         = now();
 
         $samePerson = $customer->tukang_id && $customer->kenek_id
@@ -166,14 +173,14 @@ class CommissionReleaseService
         if ($samePerson) {
             // Same employee in both installer slots — one record with combined amount
             // to avoid violating uniq_commission_invoice_emp_role.
-            $combined = $split->teknisiAmount + $split->kenekAmount;
-            if ($combined > 0) {
+            $combined = $this->employeeResolver->resolve($customer->tukang, $split->teknisiAmount + $split->kenekAmount, $invoicePrice);
+            if ($combined['amount'] > 0 || $combined['forced']) {
                 DB::table('commissions')->insert([
                     'employees_id'         => (int) $customer->tukang_id,
                     'customer_id'          => (int) $customer->id,
                     'invoice_id'           => $invoice->id,
                     'commission_period_id' => $period->id,
-                    'amount'               => $combined,
+                    'amount'               => $combined['amount'],
                     'role'                 => 'installer',
                     'status'               => 'eligible',
                     'install_type'         => $split->configKey,
@@ -182,13 +189,14 @@ class CommissionReleaseService
                 ]);
             }
         } else {
-            if ($customer->tukang_id && $split->teknisiAmount > 0) {
+            $teknisi = $this->employeeResolver->resolve($customer->tukang, $split->teknisiAmount, $invoicePrice);
+            if ($customer->tukang_id && ($teknisi['amount'] > 0 || $teknisi['forced'])) {
                 DB::table('commissions')->insert([
                     'employees_id'         => (int) $customer->tukang_id,
                     'customer_id'          => (int) $customer->id,
                     'invoice_id'           => $invoice->id,
                     'commission_period_id' => $period->id,
-                    'amount'               => $split->teknisiAmount,
+                    'amount'               => $teknisi['amount'],
                     'role'                 => 'installer',
                     'status'               => 'eligible',
                     'install_type'         => $split->configKey,
@@ -197,13 +205,14 @@ class CommissionReleaseService
                 ]);
             }
 
-            if ($customer->kenek_id && $split->kenekAmount > 0) {
+            $kenek = $this->employeeResolver->resolve($customer->kenek, $split->kenekAmount, $invoicePrice);
+            if ($customer->kenek_id && ($kenek['amount'] > 0 || $kenek['forced'])) {
                 DB::table('commissions')->insert([
                     'employees_id'         => (int) $customer->kenek_id,
                     'customer_id'          => (int) $customer->id,
                     'invoice_id'           => $invoice->id,
                     'commission_period_id' => $period->id,
-                    'amount'               => $split->kenekAmount,
+                    'amount'               => $kenek['amount'],
                     'role'                 => 'installer',
                     'status'               => 'eligible',
                     'install_type'         => $split->configKey,
@@ -222,6 +231,7 @@ class CommissionReleaseService
                 $customer->id,
                 $invoice->id,
                 $this->calculator->resolveMarketingBase($customer),
+                $invoicePrice,
             );
         }
 

@@ -18,6 +18,9 @@ class UserController extends Controller
         'manager_operasional', 'manager_marketing',
         'marketing', 'finance', 'purchasing',
         'customer_service', 'teknisi', 'kenek',
+        // Restrukturisasi ERP (2026-08)
+        'it_manager', 'development', 'export_import',
+        'strategi_pengembangan', 'designer', 'videographer',
     ];
 
     // Roles whose users bypass the branch middleware (no branch_user row needed)
@@ -26,8 +29,13 @@ class UserController extends Controller
     // Roles that must be linked to an employee record (for data scoping)
     private array $employeeRoles = ['teknisi', 'kenek', 'marketing'];
 
-    // Roles that do NOT need branch assignment
-    private array $noBranchRoles = ['superadmin', 'teknisi', 'kenek'];
+    // Roles that do NOT need branch assignment. IT Manager needs a branch
+    // (inherits Purchasing+Finance's per-branch scoping); the other new
+    // roles are company-wide functions, same as superadmin/teknisi/kenek.
+    private array $noBranchRoles = [
+        'superadmin', 'teknisi', 'kenek',
+        'development', 'export_import', 'strategi_pengembangan', 'designer', 'videographer',
+    ];
 
     public function index(Request $request)
     {
@@ -271,7 +279,26 @@ class UserController extends Controller
         $needsEmployee = in_array($role, $this->employeeRoles);
         $needsBranch   = !in_array($role, $this->noBranchRoles);
 
-        return $request->validate(
+        // Only an existing superadmin may grant (or keep) the superadmin
+        // role on any account, including their own — otherwise any plain
+        // 'admin' account (gated only role:superadmin|admin on this route)
+        // could self-escalate by submitting role=superadmin.
+        $grantableRoles = auth()->user()?->hasRole('superadmin')
+            ? $this->allowedRoles
+            : array_values(array_diff($this->allowedRoles, ['superadmin']));
+
+        if ($role === 'superadmin' && ! in_array('superadmin', $grantableRoles)) {
+            abort(403, 'Hanya superadmin yang dapat memberikan role superadmin.');
+        }
+
+        // A user changing their OWN password must re-confirm their current
+        // one — otherwise a hijacked session (e.g. via any XSS) could be used
+        // to silently change the password and lock the real owner out with
+        // no further proof of identity required (audit finding M-2).
+        $isSelfEdit = $user && (int) $user->id === (int) auth()->id();
+        $requireCurrentPassword = $isSelfEdit && $request->filled('password');
+
+        $validated = $request->validate(
             [
                 'name' => ['required', 'string', 'max:255'],
 
@@ -285,9 +312,13 @@ class UserController extends Controller
                     'string', 'min:6', 'confirmed',
                 ],
 
+                'current_password' => $requireCurrentPassword
+                    ? ['required', 'current_password']
+                    : ['nullable'],
+
                 'role' => [
                     'required', 'string',
-                    Rule::in($this->allowedRoles),
+                    Rule::in($grantableRoles),
                     Rule::exists('roles', 'name'),
                 ],
 
@@ -326,7 +357,11 @@ class UserController extends Controller
                 'branch_ids.min'        => 'Minimal pilih 1 cabang.',
                 'branch_ids.*.exists'   => 'Cabang yang dipilih tidak valid.',
                 'branch_ids.*.distinct' => 'Cabang tidak boleh duplikat.',
+                'current_password.required' => 'Masukkan password Anda saat ini untuk mengubah password.',
+                'current_password.current_password' => 'Password saat ini yang Anda masukkan salah.',
             ]
         );
+
+        return $validated;
     }
 }

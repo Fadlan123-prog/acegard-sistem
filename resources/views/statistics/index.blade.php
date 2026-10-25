@@ -67,80 +67,79 @@
 
     {{-- Total Tahun Ini --}}
     <div class="col-12 col-sm-6 col-lg-3">
-        <x-ui.card class="h-100 bg-primary text-white border-0">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-                <div class="small opacity-75">Total Penjualan {{ $selectedYear }}</div>
-                <iconify-icon icon="solar:chart-bold" class="fs-4 opacity-75"></iconify-icon>
-            </div>
-            <div class="fs-4 fw-bold">Rp {{ number_format($totalYearAmount / 1000000, 1) }}Jt</div>
-            <div class="small opacity-75 mt-1">{{ number_format($totalYearCount) }} transaksi</div>
-            <div class="mt-2 pt-2 border-top border-white border-opacity-25 small">
+        <x-ui.stats-card
+            label="Total Penjualan {{ $selectedYear }}"
+            :value="'Rp '.number_format($totalYearAmount / 1000000, 1).'Jt'"
+            color="purple"
+            icon='<iconify-icon icon="solar:chart-bold"></iconify-icon>'
+            accent
+            class="h-100"
+        >
+            <span class="text-muted" style="font-size:12px">{{ number_format($totalYearCount) }} transaksi</span>
+            <div class="mt-2 pt-2 border-top small">
                 Terkumpul: <strong>Rp {{ number_format($totalYearPaid / 1000000, 1) }}Jt</strong>
             </div>
-        </x-ui.card>
+        </x-ui.stats-card>
     </div>
 
     {{-- Mobil --}}
     <div class="col-12 col-sm-6 col-lg-3">
-        <x-ui.card class="h-100">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-                <div class="small text-muted fw-medium">Penjualan Mobil</div>
-                <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center"
-                     style="width:36px;height:36px">
-                    <iconify-icon icon="solar:car-bold"></iconify-icon>
-                </div>
-            </div>
-            <div class="fs-5 fw-bold text-dark">Rp {{ number_format($carYear['total'] / 1000000, 1) }}Jt</div>
-            <div class="text-muted small mt-1">{{ $carYear['count'] }} transaksi</div>
+        <x-ui.stats-card
+            label="Penjualan Mobil"
+            :value="'Rp '.number_format($carYear['total'] / 1000000, 1).'Jt'"
+            color="blue"
+            icon='<iconify-icon icon="solar:car-bold"></iconify-icon>'
+            accent
+            class="h-100"
+        >
+            <span class="text-muted" style="font-size:12px">{{ $carYear['count'] }} transaksi</span>
             <div class="mt-2 pt-2 border-top small">
                 <span class="text-success">
                     <iconify-icon icon="mdi:checkbox-marked-circle-outline"></iconify-icon>
                     Terkumpul: Rp {{ number_format($carYear['paid'] / 1000000, 1) }}Jt
                 </span>
             </div>
-        </x-ui.card>
+        </x-ui.stats-card>
     </div>
 
     {{-- Gedung --}}
     <div class="col-12 col-sm-6 col-lg-3">
-        <x-ui.card class="h-100">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-                <div class="small text-muted fw-medium">Penjualan Gedung</div>
-                <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center"
-                     style="width:36px;height:36px">
-                    <iconify-icon icon="solar:buildings-bold"></iconify-icon>
-                </div>
-            </div>
-            <div class="fs-5 fw-bold text-dark">Rp {{ number_format($buildingYear['total'] / 1000000, 1) }}Jt</div>
-            <div class="text-muted small mt-1">{{ $buildingYear['count'] }} transaksi</div>
+        <x-ui.stats-card
+            label="Penjualan Gedung"
+            :value="'Rp '.number_format($buildingYear['total'] / 1000000, 1).'Jt'"
+            color="amber"
+            icon='<iconify-icon icon="solar:buildings-bold"></iconify-icon>'
+            accent
+            class="h-100"
+        >
+            <span class="text-muted" style="font-size:12px">{{ $buildingYear['count'] }} transaksi</span>
             <div class="mt-2 pt-2 border-top small">
                 <span class="text-success">
                     <iconify-icon icon="mdi:checkbox-marked-circle-outline"></iconify-icon>
                     Terkumpul: Rp {{ number_format($buildingYear['paid'] / 1000000, 1) }}Jt
                 </span>
             </div>
-        </x-ui.card>
+        </x-ui.stats-card>
     </div>
 
     {{-- PPF --}}
     <div class="col-12 col-sm-6 col-lg-3">
-        <x-ui.card class="h-100">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-                <div class="small text-muted fw-medium">Penjualan PPF</div>
-                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center"
-                     style="width:36px;height:36px">
-                    <iconify-icon icon="solar:shield-bold"></iconify-icon>
-                </div>
-            </div>
-            <div class="fs-5 fw-bold text-dark">Rp {{ number_format($ppfYear['total'] / 1000000, 1) }}Jt</div>
-            <div class="text-muted small mt-1">{{ $ppfYear['count'] }} transaksi</div>
+        <x-ui.stats-card
+            label="Penjualan PPF"
+            :value="'Rp '.number_format($ppfYear['total'] / 1000000, 1).'Jt'"
+            color="green"
+            icon='<iconify-icon icon="solar:shield-bold"></iconify-icon>'
+            accent
+            class="h-100"
+        >
+            <span class="text-muted" style="font-size:12px">{{ $ppfYear['count'] }} transaksi</span>
             <div class="mt-2 pt-2 border-top small">
                 <span class="text-success">
                     <iconify-icon icon="mdi:checkbox-marked-circle-outline"></iconify-icon>
                     Terkumpul: Rp {{ number_format($ppfYear['paid'] / 1000000, 1) }}Jt
                 </span>
             </div>
-        </x-ui.card>
+        </x-ui.stats-card>
     </div>
 
 </div>

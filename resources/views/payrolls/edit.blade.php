@@ -17,7 +17,7 @@
                     {{ \Carbon\Carbon::parse($payroll->month . '-01')->format('M Y') }}
                 </small>
             </div>
-            <x-ui.button href="{{ route('payrolls.show', $payroll->id) }}" variant="secondary" size="sm">
+            <x-ui.button :href="route('payrolls.show', $payroll->id)" variant="secondary" size="sm">
                 Kembali
             </x-ui.button>
         </div>
@@ -34,9 +34,7 @@
         </x-ui.alert>
     @endif
 
-    @if(session('error'))
-        <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-    @endif
+    
 
     <form method="POST" action="{{ route('payrolls.update', $payroll->id) }}">
         @csrf
@@ -166,7 +164,7 @@
                 Simpan Perubahan
             </x-ui.button>
 
-            <x-ui.button href="{{ route('payrolls.show', $payroll->id) }}" variant="outline">
+            <x-ui.button :href="route('payrolls.show', $payroll->id)" variant="outline">
                 Batal
             </x-ui.button>
         </div>

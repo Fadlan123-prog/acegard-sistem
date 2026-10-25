@@ -19,7 +19,7 @@
         </form>
         @endif
     </div>
-    <x-ui.button href="{{ route('bank-accounts.create') }}" variant="primary" size="sm">
+    <x-ui.button :href="route('bank-accounts.create')" variant="primary" size="sm">
         <iconify-icon icon="mdi:plus" class="me-1"></iconify-icon>Tambah Rekening
     </x-ui.button>
 </div>
@@ -28,7 +28,7 @@
 <x-ui.card class="text-center py-5">
     <x-ui.empty-state title="Belum ada rekening bank yang terdaftar." />
     <div class="mt-3">
-        <x-ui.button href="{{ route('bank-accounts.create') }}" variant="primary" size="sm">Tambah Rekening</x-ui.button>
+        <x-ui.button :href="route('bank-accounts.create')" variant="primary" size="sm">Tambah Rekening</x-ui.button>
     </div>
 </x-ui.card>
 @else
@@ -67,10 +67,10 @@
 
             @slot('footer')
                 <div class="d-flex gap-2">
-                    <x-ui.button href="{{ route('bank-accounts.entries', $acc->id) }}" variant="primary" size="sm">
+                    <x-ui.button :href="route('bank-accounts.entries', $acc->id)" variant="primary" size="sm">
                         <iconify-icon icon="mdi:format-list-checks" class="me-1"></iconify-icon>Mutasi & Rekonsiliasi
                     </x-ui.button>
-                    <x-ui.button href="{{ route('bank-accounts.edit', $acc->id) }}" variant="outline" size="sm">
+                    <x-ui.button :href="route('bank-accounts.edit', $acc->id)" variant="outline" size="sm">
                         <iconify-icon icon="mdi:pencil-outline"></iconify-icon>
                     </x-ui.button>
                     <form method="POST" action="{{ route('bank-accounts.destroy', $acc->id) }}">

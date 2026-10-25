@@ -127,7 +127,7 @@
     <table style="width: 100%;">
         <tr>
             <th style="text-align: left;">
-                <img style="width: 15rem;" src="{{ public_path('assets/images/logo.png') }}" alt="Logo">
+                <img style="width: 9.5rem;" src="{{ public_path('assets/frontend/images/new-acegard-logo.webp') }}" alt="Logo">
                 <p style="font-weight: bold; margin-top: 0.75rem;">
                     {{ $branch->address ?? 'Jl. KH. Hasyim Ashari, RT.007/RW.002, Nerogtog, Kec. Cipondoh, Kota Tangerang, Banten 15146' }}
                     <br>
@@ -214,7 +214,7 @@
     <table style="width: 100%;">
         <tbody>
             <tr>
-                <td style="width: 15rem;">Brand</td>
+                <td style="width: 9.5rem;">Brand</td>
                 <td>: {{ $customer->vehicle_brand ?? '-' }}</td>
             </tr>
             <tr>
@@ -328,7 +328,7 @@
 
                 <div style="text-align: center; margin-top: 1rem;">
                     <p style="margin: 0;">SINCERELY,</p>
-                    <img src="{{ public_path('assets/images/blue-logo.png') }}" style="width: 15rem; transform: rotate(-5deg); margin: 0.75rem auto;" alt="cap Acegard">
+                    <img src="{{ public_path('assets/frontend/images/new-acegard-logo.webp') }}" style="width: 9.5rem; transform: rotate(-5deg); margin: 0.75rem auto;" alt="cap Acegard">
                     <p style="margin: 0;">ACEGARD INDONESIA</p>
                 </div>
             </td>

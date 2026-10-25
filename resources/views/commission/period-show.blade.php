@@ -6,13 +6,6 @@
 
 @section('content')
 
-@if(session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-@if(session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
-
 {{-- HEADER --}}
 <div class="row g-3 mb-4">
     <div class="col-md-4">
@@ -75,7 +68,7 @@
 {{-- AKSI BAYAR SEMUA --}}
 @if($totalUnpaid > 0)
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <x-ui.button href="{{ route('commission.periods.index') }}" variant="outline" size="sm">
+    <x-ui.button :href="route('commission.periods.index')" variant="outline" size="sm">
         <iconify-icon icon="mdi:arrow-left" class="me-1"></iconify-icon>Kembali
     </x-ui.button>
     <form method="POST" action="{{ route('commission.periods.pay-all', $period) }}"
@@ -89,7 +82,7 @@
 </div>
 @else
 <div class="mb-3">
-    <x-ui.button href="{{ route('commission.periods.index') }}" variant="outline" size="sm">
+    <x-ui.button :href="route('commission.periods.index')" variant="outline" size="sm">
         <iconify-icon icon="mdi:arrow-left" class="me-1"></iconify-icon>Kembali
     </x-ui.button>
 </div>

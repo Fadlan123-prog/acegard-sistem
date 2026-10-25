@@ -18,17 +18,11 @@
 @endphp
 
 {{-- Flash --}}
-@if (session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-@if (session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
 
 {{-- Back --}}
 <div class="d-flex align-items-center justify-content-between gap-3 mb-4 flex-wrap">
     <div class="d-flex align-items-center gap-3">
-        <x-ui.button href="{{ route('my-leave-requests.index') }}" variant="outline" size="sm">
+        <x-ui.button :href="route('my-leave-requests.index')" variant="outline" size="sm">
             <x-slot name="icon"><svg viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></x-slot>
             Kembali
         </x-ui.button>

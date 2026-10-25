@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Models;
+
+use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class ExportOrder extends Model
+{
+    use Auditable;
+
+    protected $auditModule = 'ExportOrder';
+
+    protected $fillable = [
+        'international_partner_id', 'order_number', 'currency', 'exchange_rate',
+        'subtotal_foreign', 'total_revenue_idr', 'status', 'order_date', 'shipped_date', 'created_by',
+    ];
+
+    protected $casts = [
+        'exchange_rate' => 'decimal:4',
+        'order_date'    => 'date',
+        'shipped_date'  => 'date',
+    ];
+
+    public static array $statusLabels = [
+        'confirmed' => 'Dikonfirmasi',
+        'shipped'   => 'Dikirim',
+        'customs'   => 'Di Bea Cukai',
+        'delivered' => 'Diterima Buyer',
+    ];
+
+    public function partner(): BelongsTo
+    {
+        return $this->belongsTo(InternationalPartner::class, 'international_partner_id');
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(ExportOrderItem::class);
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(ExportOrderDocument::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+}

@@ -5,22 +5,18 @@
 
 @section('content')
 
-@if(session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-
 <x-ui.card>
     @slot('header')
         <div class="d-flex justify-content-between align-items-center">
             <div class="ui-card-title">Invoice Claim #{{ $invoice->invoice_number }}</div>
             <div class="d-flex gap-2">
-                <x-ui.button href="{{ route('admin.claim-invoices.download', $invoice->id) }}" variant="outline" size="sm">
+                <x-ui.button :href="route('admin.claim-invoices.download', $invoice->id)" variant="outline" size="sm">
                     <iconify-icon icon="ic:baseline-download"></iconify-icon> Download
                 </x-ui.button>
-                <x-ui.button href="{{ route('admin.claim-invoices.print', $invoice->id) }}" variant="outline" size="sm">
+                <x-ui.button :href="route('admin.claim-invoices.print', $invoice->id)" variant="outline" size="sm">
                     <iconify-icon icon="mdi:printer-outline"></iconify-icon> Print
                 </x-ui.button>
-                <x-ui.button href="{{ route('admin.claim-invoices.edit', $invoice->id) }}" variant="outline" size="sm">
+                <x-ui.button :href="route('admin.claim-invoices.edit', $invoice->id)" variant="outline" size="sm">
                     <iconify-icon icon="lucide:edit"></iconify-icon> Edit
                 </x-ui.button>
                 <form action="{{ route('admin.claim-invoices.destroy', $invoice->id) }}" method="POST"

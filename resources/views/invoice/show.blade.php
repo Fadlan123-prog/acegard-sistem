@@ -304,7 +304,7 @@
                     <th style="text-align: left;">
                         <img
                             style="width: 15rem; margin-bottom: 1.5rem;"
-                            src="{{ asset('assets/images/logo.png') }}"
+                            src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}"
                             alt="Logo Light"
                             class="hidden dark:block"
                         >
@@ -442,7 +442,7 @@
                         </x-ui.card>
 
                         <x-ui.card class="border-solid border-2 border-black">
-                                <p class="text-center fw-bold text-uppercase mb-0">TYPE OF TRANSACTION : {{ $invoice->type }}</p>
+                                <p class="text-center fw-bold text-uppercase mb-0">TYPE OF TRANSACTION : {{ $invoice->payment_method }}</p>
                         </x-ui.card>
                     </div>
 
@@ -494,7 +494,7 @@
                     <div class="text-center">
                         <h6 class="bg-dark text-white py-2 fw-bold rounded text-uppercase">STATUS : {{ $invoice->status }}</h6>
                         <p class="text-dark mt-2 mb-1">SINCERELY,</p>
-                        <img src="{{ asset('assets/images/blue-logo.png') }}" class="img-fluid" style="width: 15rem; transform: rotate(-5deg);" alt="cap Acegard">
+                        <img src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}" class="img-fluid" style="width: 15rem; transform: rotate(-5deg);" alt="cap Acegard">
                         <p class="text-dark mt-2">ACEGARD INDONESIA</p>
                     </div>
                 </div>

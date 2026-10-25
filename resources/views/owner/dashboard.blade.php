@@ -8,13 +8,15 @@
 
 @php $idr = fn($v) => 'Rp ' . number_format($v, 0, ',', '.'); @endphp
 
+<x-dashboard.birthday-widget :birthdays="$upcomingBirthdays" />
+
 {{-- KPI Cards --}}
 <div class="row g-3 mb-4">
     <div class="col-sm-6 col-xl-3">
         <x-ui.stats-card
             label="Omset Hari Ini"
             :value="$idr($revenueToday)"
-            color="green"
+            color="green" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
             <span class="text-muted" style="font-size:11px">Invoice terbayar lunas</span>
@@ -24,7 +26,7 @@
         <x-ui.stats-card
             label="Omset Bulan Ini"
             :value="$idr($revenueMonth)"
-            color="blue"
+            color="blue" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
             <span class="text-muted" style="font-size:11px">{{ now()->translatedFormat('F Y') }}</span>
@@ -34,7 +36,7 @@
         <x-ui.stats-card
             label="Invoice Belum Lunas"
             :value="number_format($outstandingCount)"
-            color="red"
+            color="red" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
             <span class="text-muted" style="font-size:11px">Sisa: {{ $idr($outstandingAmount) }}</span>
@@ -44,7 +46,7 @@
         <x-ui.stats-card
             label="Total Customer"
             :value="number_format($totalCustomers)"
-            color="purple"
+            color="purple" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
             <span class="text-muted" style="font-size:11px">{{ $totalBranches }} cabang aktif</span>

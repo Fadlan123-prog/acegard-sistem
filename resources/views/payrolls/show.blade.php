@@ -6,14 +6,6 @@
 
 @section('content')
 
-@if(session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-
-@if(session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
-
 @php
     $totalGapok = $payroll->items->sum('monthly_salary');
     $totalProrate = $payroll->items->sum('prorate_salary');
@@ -40,13 +32,13 @@
 
             <div class="d-flex gap-2 flex-wrap">
                 {{-- Slip Gaji --}}
-                <x-ui.button href="{{ route('payrolls.slip.all', $payroll->id) }}" target="_blank" variant="secondary" size="sm">
+                <x-ui.button :href="route('payrolls.slip.all', $payroll->id)" target="_blank" variant="secondary" size="sm">
                     <iconify-icon icon="mdi:file-pdf-box" class="me-1"></iconify-icon>
                     Download Semua Slip
                 </x-ui.button>
 
                 @if($payroll->status === 'draft')
-                    <x-ui.button href="{{ route('payrolls.edit', $payroll->id) }}" variant="success" size="sm">
+                    <x-ui.button :href="route('payrolls.edit', $payroll->id)" variant="success" size="sm">
                         Edit Payroll
                     </x-ui.button>
 
@@ -90,7 +82,7 @@
                     </form>
                 @endif
 
-                <x-ui.button href="{{ route('payrolls.index') }}" variant="secondary" size="sm">
+                <x-ui.button :href="route('payrolls.index')" variant="secondary" size="sm">
                     Kembali
                 </x-ui.button>
             </div>
@@ -100,15 +92,15 @@
     <div class="row mb-4">
 
         <div class="col-md-3 mb-2">
-            <x-ui.stats-card label="Bulan" :value="\Carbon\Carbon::parse($payroll->month . '-01')->format('M Y')" color="blue" />
+            <x-ui.stats-card label="Bulan" :value="\Carbon\Carbon::parse($payroll->month . '-01')->format('M Y')" color="blue" accent />
         </div>
 
         <div class="col-md-3 mb-2">
-            <x-ui.stats-card label="Cabang" :value="$payroll->branch->name ?? '-'" color="blue" />
+            <x-ui.stats-card label="Cabang" :value="$payroll->branch->name ?? '-'" color="blue" accent />
         </div>
 
         <div class="col-md-3 mb-2">
-            <x-ui.stats-card label="Hari Kerja" :value="$payroll->working_days . ' Hari'" color="blue" />
+            <x-ui.stats-card label="Hari Kerja" :value="$payroll->working_days . ' Hari'" color="blue" accent />
         </div>
 
         <div class="col-md-3 mb-2">
@@ -133,19 +125,19 @@
     <div class="row mb-4">
 
         <div class="col-md-3 mb-2">
-            <x-ui.stats-card label="Total Gapok" :value="'Rp' . number_format($totalGapok, 0, ',', '.')" color="blue" />
+            <x-ui.stats-card label="Total Gapok" :value="'Rp' . number_format($totalGapok, 0, ',', '.')" color="blue" accent />
         </div>
 
         <div class="col-md-3 mb-2">
-            <x-ui.stats-card label="Total Prorate" :value="'Rp' . number_format($totalProrate, 0, ',', '.')" color="green" />
+            <x-ui.stats-card label="Total Prorate" :value="'Rp' . number_format($totalProrate, 0, ',', '.')" color="green" accent />
         </div>
 
         <div class="col-md-3 mb-2">
-            <x-ui.stats-card label="Total Potongan" :value="'Rp' . number_format($totalPotonganRokok + $totalKasbon + $totalPotonganAbsen, 0, ',', '.')" color="red" />
+            <x-ui.stats-card label="Total Potongan" :value="'Rp' . number_format($totalPotonganRokok + $totalKasbon + $totalPotonganAbsen, 0, ',', '.')" color="red" accent />
         </div>
 
         <div class="col-md-3 mb-2">
-            <x-ui.stats-card label="Total Gaji Bulat" :value="'Rp' . number_format($totalBulat, 0, ',', '.')" color="green" />
+            <x-ui.stats-card label="Total Gaji Bulat" :value="'Rp' . number_format($totalBulat, 0, ',', '.')" color="green" accent />
         </div>
 
     </div>
@@ -219,7 +211,7 @@
                         <td>{{ $item->notes ?? '-' }}</td>
                         <td>
                             <div class="d-flex gap-1">
-                                <x-ui.button href="{{ route('payrolls.slip', [$payroll->id, $item->id]) }}"
+                                <x-ui.button :href="route('payrolls.slip', [$payroll->id, $item->id])"
                                    target="_blank"
                                    variant="danger-outline"
                                    size="sm"
@@ -231,7 +223,7 @@
                                     $waMsg = urlencode("Halo {$item->employee_name}, berikut slip gaji Anda untuk periode " . \Carbon\Carbon::parse($payroll->month . '-01')->isoFormat('MMMM Y') . ". Mohon dikonfirmasi penerimaan.");
                                     $waLink = "https://wa.me/" . preg_replace('/[^0-9]/', '', $item->employee->phone_number) . "?text={$waMsg}";
                                 @endphp
-                                <x-ui.button href="{{ $waLink }}" target="_blank"
+                                <x-ui.button :href="$waLink" target="_blank"
                                    variant="outline"
                                    size="sm"
                                    title="Kirim via WhatsApp">
@@ -261,6 +253,7 @@
                         <th>Rp{{ number_format($totalPotonganAbsen, 0, ',', '.') }}</th>
                         <th>Rp{{ number_format($totalGaji, 0, ',', '.') }}</th>
                         <th>Rp{{ number_format($totalBulat, 0, ',', '.') }}</th>
+                        <th></th>
                         <th></th>
                     </tr>
                 </tfoot>

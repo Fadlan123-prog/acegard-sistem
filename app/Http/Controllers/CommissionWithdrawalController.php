@@ -6,12 +6,27 @@ use App\Models\Branch;
 use App\Models\Commission;
 use App\Models\CommissionPaymentBatch;
 use App\Services\BranchContext;
+use App\Services\KasbonDeductionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CommissionWithdrawalController extends Controller
 {
-    public function __construct(private BranchContext $branch) {}
+    public function __construct(
+        private BranchContext $branch,
+        private KasbonDeductionService $kasbonDeductions,
+    ) {}
+
+    private function authorizeBatch(CommissionPaymentBatch $batch): void
+    {
+        $branchId = $this->branch->idOrNull();
+        if ($branchId === null) {
+            return; // superadmin — no restriction
+        }
+
+        $batch->loadMissing('employee:id,branch_id');
+        abort_unless((int) ($batch->employee?->branch_id) === (int) $branchId, 403);
+    }
 
     public function index(Request $request)
     {
@@ -38,6 +53,8 @@ class CommissionWithdrawalController extends Controller
 
     public function show(CommissionPaymentBatch $batch)
     {
+        $this->authorizeBatch($batch);
+
         $batch->load([
             'employee:id,name,job_position',
             'creator:id,name',
@@ -54,6 +71,8 @@ class CommissionWithdrawalController extends Controller
 
     public function approve(Request $request, CommissionPaymentBatch $batch)
     {
+        $this->authorizeBatch($batch);
+
         if ($batch->status !== 'draft') {
             return back()->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
         }
@@ -80,6 +99,13 @@ class CommissionWithdrawalController extends Controller
                     'paid_by' => auth()->id(),
                     'updated_at' => $now,
                 ]);
+
+            // Kasbon potong-dari-komisi: tidak mengubah total_amount batch ini
+            // (akurasi histori komisi tetap utuh) — cuma dicatat di ledger,
+            // ditampilkan sebagai "Dipotong Kasbon" terpisah di halaman detail.
+            if ($batch->employee) {
+                $this->kasbonDeductions->applyForCommission($batch->employee, $batch);
+            }
         });
 
         return redirect()
@@ -89,6 +115,8 @@ class CommissionWithdrawalController extends Controller
 
     public function reject(Request $request, CommissionPaymentBatch $batch)
     {
+        $this->authorizeBatch($batch);
+
         if ($batch->status !== 'draft') {
             return back()->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
         }

@@ -27,7 +27,7 @@
                 </small>
             </div>
 
-            <x-ui.button href="{{ route('film-complaints.show', $complaint->id) }}" variant="secondary" size="sm">
+            <x-ui.button :href="route('film-complaints.show', $complaint->id)" variant="secondary" size="sm">
                 Kembali
             </x-ui.button>
         </div>
@@ -59,7 +59,7 @@
 
         <div class="d-flex gap-2 mt-3">
             <x-ui.button type="submit" variant="primary">Simpan Perubahan</x-ui.button>
-            <x-ui.button href="{{ route('film-complaints.show', $complaint->id) }}" variant="outline">Batal</x-ui.button>
+            <x-ui.button :href="route('film-complaints.show', $complaint->id)" variant="outline">Batal</x-ui.button>
         </div>
     </form>
 </x-ui.card>

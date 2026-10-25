@@ -6,10 +6,6 @@
 
 @section('content')
 
-@if(session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
-
 <form action="{{ route('purchase-receipts.store', $purchase->id) }}" method="POST">
 @csrf
 
@@ -19,7 +15,7 @@
             <div class="ui-card-title">Terima Barang (GRN)</div>
             <small class="text-muted">PO: {{ $purchase->purchase_number }} — {{ $purchase->supplier->name ?? '-' }}</small>
         </div>
-        <x-ui.button href="{{ route('purchases.show', $purchase->id) }}" variant="secondary" size="sm">Batal</x-ui.button>
+        <x-ui.button :href="route('purchases.show', $purchase->id)" variant="secondary" size="sm">Batal</x-ui.button>
     @endslot
 
     <div class="row g-3 mb-4">
@@ -108,7 +104,7 @@
             <iconify-icon icon="mdi:check-circle-outline" class="me-1"></iconify-icon>
             Simpan Penerimaan
         </x-ui.button>
-        <x-ui.button href="{{ route('purchases.show', $purchase->id) }}" variant="secondary">Batal</x-ui.button>
+        <x-ui.button :href="route('purchases.show', $purchase->id)" variant="secondary">Batal</x-ui.button>
     @endslot
 
 </x-ui.card>

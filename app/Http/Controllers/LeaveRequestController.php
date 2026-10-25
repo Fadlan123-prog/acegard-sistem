@@ -28,6 +28,52 @@ class LeaveRequestController extends Controller
         return view('leave-requests.index', compact('requests'));
     }
 
+    /** "Jadwal Libur" — who's actually approved to be off, by month. */
+    public function schedule(Request $request)
+    {
+        $year  = max(2020, min(2030, (int) $request->get('year', now()->year)));
+        $month = max(1, min(12, (int) $request->get('month', now()->month)));
+
+        $startOfMonth = Carbon::create($year, $month, 1)->startOfDay();
+        $endOfMonth   = $startOfMonth->copy()->endOfMonth();
+
+        $branchId = $this->branch->id();
+
+        $requests = LeaveRequest::with(['employee', 'branch', 'approver'])
+            ->where('status', 'approved')
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+            // Overlap, not exact match — a leave spanning the month boundary
+            // must still show up on both months it touches.
+            ->where('from_date', '<=', $endOfMonth)
+            ->where('to_date', '>=', $startOfMonth)
+            ->orderBy('from_date')
+            ->get();
+
+        // Build a day => [events] map like JadwalPemasanganController, except a
+        // single leave request contributes one entry PER DAY it covers within
+        // this month (clamped to the month's bounds) — a multi-day leave should
+        // show up on every day cell it spans, not just its start date.
+        $events = [];
+        foreach ($requests as $lr) {
+            $periodStart = $lr->from_date->greaterThan($startOfMonth) ? $lr->from_date : $startOfMonth;
+            $periodEnd   = $lr->to_date->lessThan($endOfMonth) ? $lr->to_date : $endOfMonth;
+
+            foreach (CarbonPeriod::create($periodStart, $periodEnd) as $date) {
+                $events[$date->day][] = [
+                    'item'  => $lr,
+                    'date'  => $date,
+                    'label' => $lr->employee?->name ?? '-',
+                    'sub'   => LeaveRequest::$typeLabels[$lr->leave_type] ?? $lr->leave_type,
+                    'route' => route('leave-requests.show', $lr),
+                    'staff' => $lr->branch?->name ?? '',
+                ];
+            }
+        }
+        $totalEvents = collect($events)->flatten(1)->count();
+
+        return view('leave-requests.schedule', compact('requests', 'year', 'month', 'startOfMonth', 'events', 'totalEvents'));
+    }
+
     public function create()
     {
         $branchId  = $this->branch->id();

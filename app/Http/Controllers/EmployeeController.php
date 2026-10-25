@@ -226,6 +226,7 @@ class EmployeeController extends Controller
                 // HR fields
                 'npwp'              => ['nullable', 'string', 'max:20'],
                 'hire_date'         => ['nullable', 'date'],
+                'birth_date'        => ['nullable', 'date', 'before:today'],
                 'employment_status' => ['nullable', 'in:permanent,contract,probation'],
 
                 // BPJS Ketenagakerjaan

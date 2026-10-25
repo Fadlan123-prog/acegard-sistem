@@ -8,13 +8,15 @@
 
 @php $idr = fn($v) => 'Rp ' . number_format($v, 0, ',', '.'); @endphp
 
+<x-dashboard.birthday-widget :birthdays="$upcomingBirthdays" />
+
 {{-- KPI Cards --}}
 <div class="row g-3 mb-4">
     <div class="col-sm-6 col-xl-3">
         <x-ui.stats-card
             label="Lead Aktif Saya"
             :value="number_format($myLeadsActive)"
-            color="blue"
+            color="blue" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
             <span class="text-muted" style="font-size:11px">Total: {{ number_format($myLeadsTotal) }} lead</span>
@@ -24,7 +26,7 @@
         <x-ui.stats-card
             label="Konversi Bulan Ini"
             :value="$myLeadsWon . ' Won'"
-            color="green"
+            color="green" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
             <span class="text-muted" style="font-size:11px">Dari {{ $myLeadsThisMonth }} lead — {{ $conversionRate }}%</span>
@@ -34,7 +36,7 @@
         <x-ui.stats-card
             label="Komisi Bulan Ini"
             :value="$idr($myCommissionMonth)"
-            color="amber"
+            color="amber" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
             <span class="text-muted" style="font-size:11px">{{ now()->translatedFormat('F Y') }}</span>
@@ -44,7 +46,7 @@
         <x-ui.stats-card
             label="Komisi Belum Dibayar"
             :value="$idr($myCommissionTotal)"
-            color="red"
+            color="red" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
             <span class="text-muted" style="font-size:11px">Status: eligible</span>
@@ -62,7 +64,7 @@
                 <div>
                     <div class="ui-card-title">Perlu Follow Up</div>
                 </div>
-                <x-ui.button href="{{ route('leads.index') }}" variant="outline" size="sm">Lihat Semua</x-ui.button>
+                <x-ui.button :href="route('leads.index')" variant="outline" size="sm">Lihat Semua</x-ui.button>
             </div>
             @endslot
             <div class="table-responsive">
@@ -139,7 +141,7 @@
             @slot('header')
             <div class="d-flex justify-content-between align-items-center">
                 <div class="ui-card-title">Lead Terbaru</div>
-                <x-ui.button href="{{ route('leads.create') }}" variant="primary" size="sm"><iconify-icon icon="mdi:plus" class="me-1"></iconify-icon>Tambah Lead</x-ui.button>
+                <x-ui.button :href="route('leads.create')" variant="primary" size="sm"><iconify-icon icon="mdi:plus" class="me-1"></iconify-icon>Tambah Lead</x-ui.button>
             </div>
             @endslot
             <div class="table-responsive">
@@ -173,7 +175,7 @@
                         <tr>
                             <td colspan="5" class="py-4 text-center">
                                 <x-ui.empty-state title="Belum ada lead" description="Mulai dengan menambah lead baru.">
-                                    <x-ui.button href="{{ route('leads.create') }}" variant="primary" size="sm">Tambah Lead</x-ui.button>
+                                    <x-ui.button :href="route('leads.create')" variant="primary" size="sm">Tambah Lead</x-ui.button>
                                 </x-ui.empty-state>
                             </td>
                         </tr>

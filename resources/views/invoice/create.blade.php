@@ -10,7 +10,7 @@
 <x-ui.card>
   @slot('header')
     <div class="ui-card-title">Form Buat Invoice</div>
-    <x-ui.button href="{{ route('customer.index') }}" variant="secondary" size="sm">Kembali</x-ui.button>
+    <x-ui.button :href="route('customer.index')" variant="secondary" size="sm">Kembali</x-ui.button>
   @endslot
 
   <form action="{{ route('invoice.store') }}" method="POST">

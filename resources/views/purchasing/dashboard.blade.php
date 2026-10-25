@@ -8,13 +8,15 @@
 
 @php $idr = fn($v) => 'Rp ' . number_format($v, 0, ',', '.'); @endphp
 
+<x-dashboard.birthday-widget :birthdays="$upcomingBirthdays" />
+
 {{-- KPI Cards --}}
 <div class="row g-3 mb-4">
     <div class="col-sm-6 col-xl-3">
         <x-ui.stats-card
             label="Pembelian Bulan Ini"
             :value="$idr($purchasesThisMonth)"
-            color="blue"
+            color="blue" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
             <span class="text-muted" style="font-size:11px">{{ number_format($purchasesCount) }} transaksi</span>
@@ -24,7 +26,7 @@
         <x-ui.stats-card
             label="Jumlah Pembelian"
             :value="number_format($purchasesCount)"
-            color="green"
+            color="green" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
             <span class="text-muted" style="font-size:11px">{{ now()->translatedFormat('F Y') }}</span>
@@ -34,20 +36,20 @@
         <x-ui.stats-card
             label="Stok Film Menipis"
             :value="number_format($lowFilmStock)"
-            color="red"
+            color="red" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
-            <span class="text-muted" style="font-size:11px">Sisa &le; 10 meter</span>
+            <span class="text-muted" style="font-size:11px">Sisa ≤ 10 meter</span>
         </x-ui.stats-card>
     </div>
     <div class="col-sm-6 col-xl-3">
         <x-ui.stats-card
             label="Barang Penunjang Habis"
             :value="number_format($lowSupportingGoods)"
-            color="amber"
+            color="amber" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
-            <span class="text-muted" style="font-size:11px">Stok &le; 5</span>
+            <span class="text-muted" style="font-size:11px">Stok ≤ 5</span>
         </x-ui.stats-card>
     </div>
 </div>
@@ -98,7 +100,7 @@
 
     {{-- Low Supporting Goods --}}
     <div class="col-xl-5">
-        <x-ui.card title="Barang Penunjang Menipis" subtitle="Stok &le; 5">
+        <x-ui.card title="Barang Penunjang Menipis" subtitle="Stok ≤ 5">
             @forelse ($lowGoods as $g)
             <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom:1px solid var(--ui-border)">
                 <div>
@@ -117,7 +119,7 @@
 
     {{-- Low Film Stock --}}
     <div class="col-12">
-        <x-ui.card title="Stok Film Menipis" subtitle="Sisa &le; 10 meter">
+        <x-ui.card title="Stok Film Menipis" subtitle="Sisa ≤ 10 meter">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" style="font-size:12px">
                     <thead>

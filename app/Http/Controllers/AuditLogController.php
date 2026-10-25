@@ -59,7 +59,14 @@ class AuditLogController extends Controller
             'modules'      => $modules,
             'branches'     => $branches,
             'isSuperadmin' => $isSuperadmin,
-            'filters'      => $request->only(['branch_id', 'module', 'event', 'from', 'to', 'search']),
+            // array_merge with defaults: the view reads every one of these keys
+            // directly (no ?? fallback), and $request->only() silently omits any
+            // key that wasn't actually submitted — e.g. a fresh page load with no
+            // query string at all throws "Undefined array key" on the first one.
+            'filters'      => array_merge(
+                ['branch_id' => null, 'module' => null, 'event' => null, 'from' => null, 'to' => null, 'search' => null],
+                $request->only(['branch_id', 'module', 'event', 'from', 'to', 'search'])
+            ),
         ]);
     }
 

@@ -10,16 +10,16 @@
 @php $fmtRp = fn($v) => 'Rp '.number_format($v, 0, ',', '.'); @endphp
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3">
-        <x-ui.stats-card label="Total Piutang" :value="$fmtRp($summary['total'])" color="purple" />
+        <x-ui.stats-card label="Total Piutang" :value="$fmtRp($summary['total'])" color="purple" accent />
     </div>
     <div class="col-6 col-lg-3">
-        <x-ui.stats-card label="Sudah Diterima" :value="$fmtRp($summary['paid'])" color="green" />
+        <x-ui.stats-card label="Sudah Diterima" :value="$fmtRp($summary['paid'])" color="green" accent />
     </div>
     <div class="col-6 col-lg-3">
-        <x-ui.stats-card label="Sisa Piutang" :value="$fmtRp($summary['remaining'])" color="amber" />
+        <x-ui.stats-card label="Sisa Piutang" :value="$fmtRp($summary['remaining'])" color="amber" accent />
     </div>
     <div class="col-6 col-lg-3">
-        <x-ui.stats-card label="Jatuh Tempo" :value="$summary['overdue'].' item'" color="red" />
+        <x-ui.stats-card label="Jatuh Tempo" :value="$summary['overdue'].' item'" color="red" accent />
     </div>
 </div>
 
@@ -51,11 +51,11 @@
         </div>
         @endif
         <x-ui.button type="submit" variant="primary" size="sm"><iconify-icon icon="mdi:magnify" class="me-1"></iconify-icon>Cari</x-ui.button>
-        <x-ui.button href="{{ route('piutang.index') }}" variant="outline" size="sm">Reset</x-ui.button>
-        <x-ui.button href="{{ route('piutang.export', request()->only(['branch_id','status'])) }}" variant="outline" size="sm">
+        <x-ui.button :href="route('piutang.index')" variant="outline" size="sm">Reset</x-ui.button>
+        <x-ui.button :href="route('piutang.export', request()->only(['branch_id','status']))" variant="outline" size="sm">
             <iconify-icon icon="mdi:file-excel-outline" class="me-1"></iconify-icon>Export
         </x-ui.button>
-        <x-ui.button href="{{ route('piutang.create') }}" variant="success" size="sm" class="ms-auto">
+        <x-ui.button :href="route('piutang.create')" variant="success" size="sm" class="ms-auto">
             <iconify-icon icon="mdi:plus" class="me-1"></iconify-icon>Catat Piutang
         </x-ui.button>
     </form>
@@ -111,7 +111,10 @@
                     <td class="py-3 text-center">
                         @if ($r->due_date)
                             <span class="{{ $overdue ? 'text-danger fw-semibold' : 'text-muted' }}" style="font-size:12px">
-                                {{ $overdue ? '⚠ ' : '' }}{{ $r->due_date->format('d/m/Y') }}
+                                @if ($overdue)
+                                    <iconify-icon icon="mdi:alert" style="font-size:13px"></iconify-icon>
+                                @endif
+                                {{ $r->due_date->format('d/m/Y') }}
                             </span>
                         @else
                             <span class="text-muted">—</span>
@@ -122,11 +125,11 @@
                     </td>
                     <td class="py-3 pe-4">
                         <div class="d-flex gap-1 justify-content-end">
-                            <x-ui.button href="{{ route('piutang.show', $r->id) }}" variant="outline" size="sm">
+                            <x-ui.button :href="route('piutang.show', $r->id)" variant="outline" size="sm">
                                 <iconify-icon icon="mdi:eye-outline"></iconify-icon>
                             </x-ui.button>
                             @if ($r->status !== 'paid')
-                            <x-ui.button href="{{ route('piutang.show', $r->id) }}#bayar" variant="success" size="sm">
+                            <x-ui.button :href="route('piutang.show', $r->id) . '#bayar'" variant="success" size="sm">
                                 <iconify-icon icon="mdi:currency-usd-circle-outline"></iconify-icon>
                             </x-ui.button>
                             @endif

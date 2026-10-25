@@ -16,7 +16,7 @@
                     Rekap pembelian barang berdasarkan bulan, cabang, supplier, qty, dan harga.
                 </small>
             </div>
-            <x-ui.button href="{{ route('purchases.index') }}" variant="outline" size="sm">
+            <x-ui.button :href="route('purchases.index')" variant="outline" size="sm">
                 Kembali ke Purchasing
             </x-ui.button>
         </div>
@@ -84,7 +84,7 @@
 
             <div class="col-md-12">
                 @if(request('month') || request('branch_id') || request('supplier_id') || request('status'))
-                    <x-ui.button href="{{ route('purchase.reports.monthly') }}" variant="outline" size="sm">
+                    <x-ui.button :href="route('purchase.reports.monthly')" variant="outline" size="sm">
                         Reset Filter
                     </x-ui.button>
                 @endif
@@ -101,7 +101,7 @@
             <x-ui.stats-card
                 label="Periode Laporan"
                 value="{{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}"
-                color="blue"
+                color="blue" accent
             />
         </div>
 
@@ -109,7 +109,7 @@
             <x-ui.stats-card
                 label="Total Qty"
                 value="{{ number_format($totalQty, 2, ',', '.') }}"
-                color="amber"
+                color="amber" accent
             />
         </div>
 
@@ -117,7 +117,7 @@
             <x-ui.stats-card
                 label="Grand Total Purchasing"
                 value="Rp{{ number_format($grandTotal, 0, ',', '.') }}"
-                color="green"
+                color="green" accent
             />
         </div>
 

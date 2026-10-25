@@ -97,7 +97,7 @@
                 <th style="text-align: left;">
                     <img
                         style="width: 15rem; margin-bottom: 1.5rem;"
-                        src="{{ asset('assets/images/logo.png') }}"
+                        src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}"
                         alt="Logo Light"
                         class="hidden dark:block"
                     >
@@ -313,7 +313,7 @@
                         STATUS : {{ $invoice->status }}
                     </h6>
                     <p class="text-dark mt-2 mb-1">SINCERELY,</p>
-                    <img src="{{ asset('assets/images/blue-logo.png') }}"
+                    <img src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}"
                          class="img-fluid"
                          style="width: 15rem; transform: rotate(-5deg);"
                          alt="cap Acegard">

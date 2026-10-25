@@ -6,6 +6,7 @@ use App\Traits\HasBranchScope;
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -88,6 +89,19 @@ class SalesOrder extends Model
     public function isConverted(): bool   { return $this->converted_at !== null; }
     public function hasSpk(): bool        { return $this->spk_number !== null; }
 
+    /**
+     * Kaca Film Gedung and PPF can both have a team of more than 2 people on
+     * the job (pivot `technicians`, no cap) — only car_film stays limited to
+     * a single tukang_id + kenek_id pair. Centralised here because the same
+     * branch used to be written out as `$category === 'building_film'` in
+     * six different places (controller + 2 Blade views) and PPF was missing
+     * from every one of them.
+     */
+    public function assignsMultipleTechnicians(): bool
+    {
+        return in_array($this->category, ['building_film', 'ppf'], true);
+    }
+
     public function getSpkPublicUrlAttribute(): ?string
     {
         return $this->spk_token ? route('spk.public', $this->spk_token) : null;
@@ -139,6 +153,20 @@ class SalesOrder extends Model
     public function marketing(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'marketing_id');
+    }
+
+    /**
+     * Penugasan multi-teknisi — dipakai kategori Kaca Film Gedung (tidak ada kenek,
+     * bisa lebih dari 2 orang). Untuk car_film/ppf, penugasan tetap pakai tukang()/kenek().
+     */
+    public function technicians(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Employee::class,
+            'sales_order_technicians',
+            'sales_order_id',
+            'employee_id'
+        )->withTimestamps();
     }
 
     public function creator(): BelongsTo

@@ -10,7 +10,7 @@
 <x-ui.card class="mb-4">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <p class="mb-0 text-muted small">{{ $products->total() }} produk terdaftar</p>
-        <x-ui.button href="{{ route('ppf-products.create') }}" variant="primary" size="sm">
+        <x-ui.button :href="route('ppf-products.create')" variant="primary" size="sm">
             <iconify-icon icon="mdi:plus" class="me-1"></iconify-icon>Tambah Produk
         </x-ui.button>
     </div>
@@ -68,7 +68,7 @@
                     </td>
                     <td class="py-3 pe-4">
                         <div class="d-flex gap-1 justify-content-end">
-                            <x-ui.button href="{{ route('ppf-products.edit', $p) }}" variant="outline" size="sm" title="Edit">
+                            <x-ui.button :href="route('ppf-products.edit', $p)" variant="outline" size="sm" title="Edit">
                                 <iconify-icon icon="mdi:pencil-outline"></iconify-icon>
                             </x-ui.button>
                             <form method="POST" action="{{ route('ppf-products.destroy', $p) }}">

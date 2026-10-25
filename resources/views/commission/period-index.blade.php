@@ -6,13 +6,6 @@
 
 @section('content')
 
-@if(session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-@if(session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
-
 {{-- INFO ATURAN --}}
 <x-ui.alert type="info" class="mb-4" :dismissible="false">
     <x-slot name="title">Aturan Periode Komisi</x-slot>
@@ -104,7 +97,7 @@
                             @endif
                         </td>
                         <td class="text-center pe-3">
-                            <x-ui.button href="{{ route('commission.periods.show', $p->period_start) }}" variant="outline" size="sm">
+                            <x-ui.button :href="route('commission.periods.show', $p->period_start)" variant="outline" size="sm">
                                 <iconify-icon icon="mdi:eye-outline" class="me-1"></iconify-icon>Detail
                             </x-ui.button>
                         </td>

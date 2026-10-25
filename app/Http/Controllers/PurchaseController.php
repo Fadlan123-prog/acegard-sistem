@@ -122,6 +122,10 @@ class PurchaseController extends Controller
             }
         }
 
+        // Confirming a purchase needs Owner approval — it's saved as draft
+        // and only flips to 'confirmed' once approved (see Purchase::onApprovalDecision()).
+        $needsApproval = $data['status'] === 'confirmed';
+
         DB::beginTransaction();
 
         try {
@@ -140,7 +144,7 @@ class PurchaseController extends Controller
                 'purchase_number' => $purchaseNumber,
                 'purchase_date' => $this->normalizePurchaseDate($data['purchase_date']),
                 'total_amount' => $totalAmount,
-                'status' => $data['status'],
+                'status' => $needsApproval ? 'draft' : $data['status'],
                 'notes' => $data['notes'] ?? null,
             ]);
 
@@ -160,11 +164,17 @@ class PurchaseController extends Controller
                 ]);
             }
 
+            if ($needsApproval) {
+                $purchase->submitForApproval('purchasing_transaction', auth()->id());
+            }
+
             DB::commit();
 
             return redirect()
                 ->route('purchases.index')
-                ->with('success', 'Data purchasing berhasil disimpan.');
+                ->with('success', $needsApproval
+                    ? 'Data purchasing disimpan sebagai draft dan menunggu approval Owner untuk dikonfirmasi.'
+                    : 'Data purchasing berhasil disimpan.');
 
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -261,6 +271,17 @@ class PurchaseController extends Controller
                 ->withInput();
         }
 
+        // Confirming a draft purchase needs Owner approval — it stays draft
+        // and only flips to 'confirmed' once approved (see Purchase::onApprovalDecision()).
+        $needsApproval = $currentStatus === 'draft' && $newStatus === 'confirmed';
+        $existingApprovalRequest = $needsApproval ? $purchase->approvalRequest : null;
+
+        if ($needsApproval && $existingApprovalRequest && $existingApprovalRequest->isPending()) {
+            return back()
+                ->with('error', 'Purchasing ini sedang menunggu approval Owner, tidak bisa disubmit ulang.')
+                ->withInput();
+        }
+
         $user = auth()->user();
 
         if (!$user->hasRole('superadmin')) {
@@ -290,7 +311,7 @@ class PurchaseController extends Controller
                 'purchase_number' => $purchaseNumber,
                 'purchase_date' => $this->normalizePurchaseDate($data['purchase_date']),
                 'total_amount' => $totalAmount,
-                'status' => $data['status'],
+                'status' => $needsApproval ? 'draft' : $data['status'],
                 'notes' => $data['notes'] ?? null,
             ]);
 
@@ -312,11 +333,20 @@ class PurchaseController extends Controller
                 ]);
             }
 
+            if ($needsApproval) {
+                // A previous, already-decided (rejected) request may exist — replace it
+                // so the polymorphic morphOne relation always resolves to the live one.
+                $existingApprovalRequest?->delete();
+                $purchase->submitForApproval('purchasing_transaction', auth()->id());
+            }
+
             DB::commit();
 
             return redirect()
                 ->route('purchases.index')
-                ->with('success', 'Data purchasing berhasil diperbarui.');
+                ->with('success', $needsApproval
+                    ? 'Data purchasing disimpan sebagai draft dan menunggu approval Owner untuk dikonfirmasi.'
+                    : 'Data purchasing berhasil diperbarui.');
 
         } catch (\Throwable $e) {
             DB::rollBack();

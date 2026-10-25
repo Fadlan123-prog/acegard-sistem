@@ -21,9 +21,9 @@ class CommissionRepository
     public static function sourceTypes(): array
     {
         return [
-            'mobil'  => ['label' => 'Kaca Film Mobil', 'icon' => 'ri-car-line',      'color' => '#1d4ed8'],
-            'ppf'    => ['label' => 'PPF',              'icon' => 'ri-shield-line',   'color' => '#0f766e'],
-            'gedung' => ['label' => 'Gedung',           'icon' => 'ri-building-line', 'color' => '#7c3aed'],
+            'mobil'  => ['label' => 'Kaca Film Mobil', 'icon' => 'mdi:car-outline',               'color' => '#1d4ed8'],
+            'ppf'    => ['label' => 'PPF',              'icon' => 'mdi:shield-check-outline',      'color' => '#0f766e'],
+            'gedung' => ['label' => 'Gedung',           'icon' => 'mdi:office-building-outline',   'color' => '#7c3aed'],
         ];
     }
 

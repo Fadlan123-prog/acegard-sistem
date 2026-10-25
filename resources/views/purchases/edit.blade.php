@@ -17,10 +17,6 @@
     </x-ui.alert>
 @endif
 
-@if (session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
-
 <x-ui.card>
     @slot('header')
         <div>
@@ -28,7 +24,7 @@
             <small class="text-muted">{{ $purchase->purchase_number }}</small>
         </div>
         <div class="d-flex gap-2">
-            <x-ui.button href="{{ route('purchases.show', $purchase->id) }}" variant="secondary" size="sm">Kembali</x-ui.button>
+            <x-ui.button :href="route('purchases.show', $purchase->id)" variant="secondary" size="sm">Kembali</x-ui.button>
         </div>
     @endslot
 
@@ -260,7 +256,7 @@
         {{-- Buttons --}}
         <div class="d-flex gap-2 mt-4">
             <x-ui.button type="submit" variant="primary">Simpan Perubahan</x-ui.button>
-            <x-ui.button href="{{ route('purchases.show', $purchase->id) }}" variant="outline">Batal</x-ui.button>
+            <x-ui.button :href="route('purchases.show', $purchase->id)" variant="outline">Batal</x-ui.button>
         </div>
     </form>
 

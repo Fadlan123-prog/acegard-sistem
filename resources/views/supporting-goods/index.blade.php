@@ -62,13 +62,13 @@
         <x-ui.button type="submit" variant="primary" size="sm">
             <iconify-icon icon="mdi:magnify" class="me-1"></iconify-icon>Cari
         </x-ui.button>
-        <x-ui.button href="{{ route('supporting-goods.index') }}" variant="outline" size="sm">Reset</x-ui.button>
+        <x-ui.button :href="route('supporting-goods.index')" variant="outline" size="sm">Reset</x-ui.button>
 
-        <x-ui.button href="{{ route('supporting-goods.export', request()->only(['branch_id','category'])) }}"
+        <x-ui.button :href="route('supporting-goods.export', request()->only(['branch_id','category']))"
                      variant="outline" size="sm">
             <iconify-icon icon="mdi:file-excel-outline" class="me-1"></iconify-icon>Export
         </x-ui.button>
-        <x-ui.button href="{{ route('supporting-goods.create') }}" variant="success" size="sm" class="ms-auto">
+        <x-ui.button :href="route('supporting-goods.create')" variant="success" size="sm" class="ms-auto">
             <iconify-icon icon="mdi:plus" class="me-1"></iconify-icon>Tambah Barang
         </x-ui.button>
     </form>
@@ -154,12 +154,12 @@
                                 <iconify-icon icon="mdi:qrcode-scan"></iconify-icon>
                             </x-ui.button>
                             {{-- Riwayat --}}
-                            <x-ui.button href="{{ route('supporting-goods.history', $good->id) }}"
+                            <x-ui.button :href="route('supporting-goods.history', $good->id)"
                                          variant="outline" size="sm" title="Riwayat">
                                 <iconify-icon icon="mdi:history"></iconify-icon>
                             </x-ui.button>
                             {{-- Edit --}}
-                            <x-ui.button href="{{ route('supporting-goods.edit', $good->id) }}"
+                            <x-ui.button :href="route('supporting-goods.edit', $good->id)"
                                          variant="outline" size="sm" title="Edit">
                                 <iconify-icon icon="mdi:pencil-outline"></iconify-icon>
                             </x-ui.button>

@@ -137,6 +137,15 @@ class CommissionPeriodController extends Controller
             'notes'       => ['nullable', 'string', 'max:500'],
         ]);
 
+        // Same branch restriction payAll() already applies via its query —
+        // pay() takes employee_id directly from the request, so it must be
+        // checked explicitly here to stop cross-branch commission payout.
+        $branchId = $this->branch->idOrNull();
+        if ($branchId !== null) {
+            $employeeBranchId = \App\Models\Employee::where('id', $data['employee_id'])->value('branch_id');
+            abort_unless((int) $employeeBranchId === (int) $branchId, 403);
+        }
+
         $start = Carbon::parse($period)->setDay(16)->startOfDay();
         $end   = $start->copy()->addMonth()->subDay()->endOfDay();
 

@@ -13,16 +13,15 @@
                 <div class="ui-card-title">Pengajuan Cuti / Izin</div>
                 <small class="text-muted">Kelola cuti dan izin karyawan.</small>
             </div>
-            <x-ui.button href="{{ route('leave-requests.create') }}" variant="primary" size="sm">+ Buat Pengajuan</x-ui.button>
+            <div class="d-flex gap-2">
+                <x-ui.button :href="route('leave-requests.schedule')" variant="outline" size="sm">Jadwal Libur</x-ui.button>
+                <x-ui.button :href="route('leave-requests.create')" variant="primary" size="sm">+ Buat Pengajuan</x-ui.button>
+            </div>
         </div>
     @endslot
 
-    @if(session('success'))
-        <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-    @endif
-    @if(session('error'))
-        <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-    @endif
+    
+    
 
     <div class="table-responsive">
         <table class="table table-bordered table-hover">
@@ -58,7 +57,7 @@
                     </td>
                     <td>{{ $lr->created_at->format('d/m/Y') }}</td>
                     <td>
-                        <x-ui.button href="{{ route('leave-requests.show', $lr) }}" variant="secondary" size="sm">Detail</x-ui.button>
+                        <x-ui.button :href="route('leave-requests.show', $lr)" variant="secondary" size="sm">Detail</x-ui.button>
                     </td>
                 </tr>
                 @empty

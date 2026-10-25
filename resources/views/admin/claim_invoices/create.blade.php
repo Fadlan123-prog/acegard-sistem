@@ -8,13 +8,11 @@
     @slot('header')
         <div class="d-flex justify-content-between align-items-center">
             <div class="ui-card-title">Buat Invoice Claim - {{ $claim->claim_number }}</div>
-            <x-ui.button href="{{ route('admin.claims.show', $claim->id) }}" variant="secondary" size="sm">Kembali</x-ui.button>
+            <x-ui.button :href="route('admin.claims.show', $claim->id)" variant="secondary" size="sm">Kembali</x-ui.button>
         </div>
     @endslot
 
-    @if(session('error'))
-        <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-    @endif
+    
 
     <x-ui.alert type="warning" class="mb-3">
         Invoice hanya untuk claim <b>chargeable</b> (cause = user). Subtotal diambil dari charge_amount per item.

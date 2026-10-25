@@ -110,10 +110,10 @@
         <p class="text-muted small mb-0">Ringkasan funnel lead, pipeline sales order, dan jadwal pemasangan</p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
-        <x-ui.button href="{{ route('leads.create') }}" variant="outline" size="sm">
+        <x-ui.button :href="route('leads.create')" variant="outline" size="sm">
             <iconify-icon icon="solar:add-circle-outline"></iconify-icon> Lead Baru
         </x-ui.button>
-        <x-ui.button href="{{ route('sales-orders.index') }}" variant="primary" size="sm">
+        <x-ui.button :href="route('sales-orders.index')" variant="primary" size="sm">
             <iconify-icon icon="solar:bill-list-outline"></iconify-icon> Sales Order
         </x-ui.button>
     </div>
@@ -222,7 +222,7 @@
             @slot('header')
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="ui-card-title">Lead Funnel</div>
-                    <x-ui.button href="{{ route('leads.index') }}" variant="ghost" size="sm">
+                    <x-ui.button :href="route('leads.index')" variant="ghost" size="sm">
                         Lihat semua <iconify-icon icon="mdi:arrow-right"></iconify-icon>
                     </x-ui.button>
                 </div>
@@ -257,7 +257,7 @@
             @slot('header')
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="ui-card-title">Status Quotation</div>
-                    <x-ui.button href="{{ route('quotations.index') }}" variant="ghost" size="sm">
+                    <x-ui.button :href="route('quotations.index')" variant="ghost" size="sm">
                         Lihat semua <iconify-icon icon="mdi:arrow-right"></iconify-icon>
                     </x-ui.button>
                 </div>
@@ -329,7 +329,7 @@
     @slot('header')
         <div class="d-flex align-items-center justify-content-between">
             <div class="ui-card-title">Jadwal Pemasangan — 7 Hari ke Depan</div>
-            <x-ui.button href="{{ route('jadwal.index') }}" variant="ghost" size="sm">
+            <x-ui.button :href="route('jadwal.index')" variant="ghost" size="sm">
                 Kalender lengkap <iconify-icon icon="mdi:arrow-right"></iconify-icon>
             </x-ui.button>
         </div>
@@ -379,7 +379,11 @@
                     <td class="py-3">
                         <x-ui.badge variant="primary" size="sm">{{ $so->category_label }}</x-ui.badge>
                     </td>
-                    <td class="py-3 text-muted small">{{ $so->tukang?->name ?? '—' }}</td>
+                    <td class="py-3 text-muted small">
+                        {{ $so->category === 'building_film'
+                            ? ($so->technicians->pluck('name')->join(', ') ?: '—')
+                            : ($so->tukang?->name ?? '—') }}
+                    </td>
                     <td class="pe-4 py-3">
                         <span class="badge rounded-pill px-3 py-1"
                               style="background:{{ $soStatusBg[$so->status] ?? '#f1f5f9' }};color:{{ $soStatusClr[$so->status] ?? '#64748b' }};font-size:11px;font-weight:600">
@@ -401,7 +405,7 @@
     @slot('header')
         <div class="d-flex align-items-center justify-content-between">
             <div class="ui-card-title">Lead Terbaru</div>
-            <x-ui.button href="{{ route('leads.index') }}" variant="ghost" size="sm">
+            <x-ui.button :href="route('leads.index')" variant="ghost" size="sm">
                 Semua lead <iconify-icon icon="mdi:arrow-right"></iconify-icon>
             </x-ui.button>
         </div>

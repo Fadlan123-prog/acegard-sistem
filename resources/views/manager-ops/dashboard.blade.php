@@ -8,13 +8,15 @@
 
 @php $idr = fn($v) => 'Rp ' . number_format($v, 0, ',', '.'); @endphp
 
+<x-dashboard.birthday-widget :birthdays="$upcomingBirthdays" />
+
 {{-- KPI Cards --}}
 <div class="row g-3 mb-4">
     <div class="col-sm-6 col-xl-3">
         <x-ui.stats-card
             label="Pemasangan Hari Ini"
             :value="number_format($installationsToday)"
-            color="blue"
+            color="blue" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         />
     </div>
@@ -22,7 +24,7 @@
         <x-ui.stats-card
             label="Invoice Menunggu Rilis"
             :value="number_format($pendingRelease)"
-            color="amber"
+            color="amber" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
             <span class="text-muted" style="font-size:11px">Komisi belum dirilis</span>
@@ -32,7 +34,7 @@
         <x-ui.stats-card
             label="Pekerjaan Aktif"
             :value="number_format($activeJobs)"
-            color="green"
+            color="green" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
             <span class="text-muted" style="font-size:11px">Confirmed &amp; In Progress</span>
@@ -42,10 +44,10 @@
         <x-ui.stats-card
             label="Stok Film Menipis"
             :value="number_format($lowStock)"
-            color="red"
+            color="red" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         >
-            <span class="text-muted" style="font-size:11px">Sisa &le; 10 meter</span>
+            <span class="text-muted" style="font-size:11px">Sisa ≤ 10 meter</span>
         </x-ui.stats-card>
     </div>
 </div>
@@ -119,7 +121,11 @@
                         @endphp
                         <tr>
                             <td class="ps-0 py-2 font-monospace text-muted" style="font-size:11px">{{ $so->spk_number ?? '#'.$so->id }}</td>
-                            <td class="py-2" style="font-size:12px">{{ $so->tukang->name ?? '—' }}</td>
+                            <td class="py-2" style="font-size:12px">
+                                {{ $so->category === 'building_film'
+                                    ? ($so->technicians->pluck('name')->join(', ') ?: '—')
+                                    : ($so->tukang->name ?? '—') }}
+                            </td>
                             <td class="py-2 text-center">
                                 <x-ui.badge :variant="$statusVariant" size="sm">
                                     {{ ucfirst(str_replace('_', ' ', $so->status)) }}
@@ -144,7 +150,7 @@
 
     {{-- Low Stock Alerts --}}
     <div class="col-12">
-        <x-ui.card title="Peringatan Stok Film" subtitle="Sisa &le; 10 meter">
+        <x-ui.card title="Peringatan Stok Film" subtitle="Sisa ≤ 10 meter">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" style="font-size:12px">
                     <thead>

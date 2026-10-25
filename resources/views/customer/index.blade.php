@@ -5,15 +5,14 @@
 @section('breadcrumb', 'Customers')
 
 @section('content')
-@if(session('success'))<x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>@endif
-@if(session('error'))<x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>@endif
+
 <x-ui.card>
     @slot('header')
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div class="ui-card-title">Daftar Pelanggan</div>
         <div class="d-flex gap-2">
-            <x-ui.button href="{{ route('customer.export') }}" variant="outline" size="sm">Export Excel</x-ui.button>
-            <x-ui.button href="{{ route('customer.create') }}" variant="primary" size="sm">+ Add Customer</x-ui.button>
+            <x-ui.button :href="route('customer.export')" variant="outline" size="sm">Export Excel</x-ui.button>
+            <x-ui.button :href="route('customer.create')" variant="primary" size="sm">+ Add Customer</x-ui.button>
         </div>
     </div>
     @endslot
@@ -50,7 +49,7 @@
 
             {{-- Tombol reset jika filter aktif --}}
             @if(request('branch_id') || request('search'))
-                <x-ui.button href="{{ route('customer.index') }}" variant="outline">Reset</x-ui.button>
+                <x-ui.button :href="route('customer.index')" variant="outline">Reset</x-ui.button>
             @endif
         </form>
 
@@ -64,7 +63,6 @@
         </form>
 
     </div>
-
 
     <div class="table-responsive">
     <table class="table bordered-table mb-0">
@@ -260,7 +258,7 @@ document.getElementById('viewCustomerModal').addEventListener('show.bs.modal', f
             @endphp
 
             <x-ui.button
-              href="{{ route('customer.warranty.card.download.cp', ['cardNumber' => $customer->card_number, 'cp' => $item->id]) }}"
+              :href="route('customer.warranty.card.download.cp', ['cardNumber' => $customer->card_number, 'cp' => $item->id])"
               variant="success" class="w-100 mb-2"
             >
               download {{ $prodName }}

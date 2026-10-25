@@ -22,14 +22,14 @@
 
 {{-- Status tab filter --}}
 <div class="d-flex gap-2 mb-3 flex-wrap">
-    <x-ui.button href="{{ route('quotations.index', request()->except('status', 'page')) }}"
+    <x-ui.button :href="route('quotations.index', request()->except('status', 'page'))"
         :variant="$activeStatus === '' ? 'primary' : 'outline'" size="sm">
         Semua
         <x-ui.badge variant="neutral" size="sm" class="ms-1">{{ $total }}</x-ui.badge>
     </x-ui.button>
     @foreach($allStatuses as $key => $label)
         @php $count = $statusCounts[$key] ?? 0; @endphp
-        <x-ui.button href="{{ route('quotations.index', array_merge(request()->except('status', 'page'), ['status' => $key])) }}"
+        <x-ui.button :href="route('quotations.index', array_merge(request()->except('status', 'page'), ['status' => $key]))"
             :variant="$activeStatus === $key ? 'primary' : 'outline'" size="sm">
             {{ $label }}
             @if($count)
@@ -43,7 +43,7 @@
     @slot('header')
         <div class="d-flex justify-content-between align-items-center">
             <div class="ui-card-title">Daftar Quotation</div>
-            <x-ui.button href="{{ route('quotations.create') }}" variant="primary" size="sm">+ Buat Quotation</x-ui.button>
+            <x-ui.button :href="route('quotations.create')" variant="primary" size="sm">+ Buat Quotation</x-ui.button>
         </div>
     @endslot
 
@@ -81,7 +81,7 @@
         <x-ui.button type="submit" variant="outline">Cari</x-ui.button>
 
         @if(request()->hasAny(['search', 'category', 'branch_id']))
-            <x-ui.button href="{{ route('quotations.index', request()->only('status')) }}" variant="outline">Reset</x-ui.button>
+            <x-ui.button :href="route('quotations.index', request()->only('status'))" variant="outline">Reset</x-ui.button>
         @endif
     </form>
 

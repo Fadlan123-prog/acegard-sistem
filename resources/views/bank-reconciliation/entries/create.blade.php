@@ -105,7 +105,7 @@
                     <x-ui.button type="submit" variant="primary">
                         <iconify-icon icon="mdi:content-save-outline" class="me-1"></iconify-icon>Simpan Mutasi
                     </x-ui.button>
-                    <x-ui.button href="{{ route('bank-accounts.entries', $account->id) }}" variant="outline">Batal</x-ui.button>
+                    <x-ui.button :href="route('bank-accounts.entries', $account->id)" variant="outline">Batal</x-ui.button>
                 </div>
             </form>
         </x-ui.card>

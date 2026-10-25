@@ -16,12 +16,6 @@
 @endphp
 
 {{-- Flash --}}
-@if (session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-@if (session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
 
 @if ($noEmployee)
     <x-ui.alert type="warning" :dismissible="false">
@@ -31,21 +25,24 @@
 @else
 
 {{-- Jatah Libur Bulanan --}}
+@php
+    $mdIcon = fn (string $name) => '<iconify-icon icon="'.$name.'"></iconify-icon>';
+@endphp
 <div class="row g-3 mb-3">
     @foreach ([
-        ['label' => 'Jatah Libur ' . $liburQuota['month'], 'value' => $liburQuota['quota'], 'icon' => 'mdi:calendar-check-outline', 'color' => 'var(--ui-primary,#3b82f6)'],
-        ['label' => 'Sudah Dipakai',                        'value' => $liburQuota['used'],  'icon' => 'mdi:checkbox-marked-circle-outline','color' => 'var(--ui-amber,#f59e0b)'],
-        ['label' => 'Sisa Libur',                           'value' => $liburQuota['remaining'], 'icon' => 'mdi:clock-outline',
-         'color' => $liburQuota['remaining'] > 0 ? 'var(--ui-green,#10b981)' : 'var(--ui-red,#ef4444)'],
+        ['label' => 'Jatah Libur ' . $liburQuota['month'], 'value' => $liburQuota['quota'], 'icon' => $mdIcon('mdi:calendar-check-outline'), 'color' => 'blue'],
+        ['label' => 'Sudah Dipakai',                        'value' => $liburQuota['used'],  'icon' => $mdIcon('mdi:checkbox-marked-circle-outline'),'color' => 'amber'],
+        ['label' => 'Sisa Libur',                           'value' => $liburQuota['remaining'], 'icon' => $mdIcon('mdi:clock-outline'),
+         'color' => $liburQuota['remaining'] > 0 ? 'green' : 'red'],
     ] as $stat)
     <div class="col-sm-4">
-        <div class="p-3 rounded d-flex align-items-center gap-3" style="background:var(--ui-surface-alt,#f8fafc);border:1px solid var(--ui-border)">
-            <iconify-icon icon="{{ $stat['icon'] }}" style="font-size:22px;color:{{ $stat['color'] }};flex-shrink:0"></iconify-icon>
-            <div>
-                <div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em" class="ui-text-muted">{{ $stat['label'] }}</div>
-                <div class="fw-bold" style="font-size:20px;color:{{ $stat['color'] }}">{{ $stat['value'] }} <span class="fw-normal ui-text-muted" style="font-size:12px">hari</span></div>
-            </div>
-        </div>
+        <x-ui.stats-card
+            :label="$stat['label']"
+            :value="$stat['value'].' hari'"
+            :color="$stat['color']"
+            :icon="$stat['icon']"
+            accent
+        />
     </div>
     @endforeach
 </div>
@@ -59,7 +56,7 @@
                     <div class="ui-text-muted" style="font-size:12px">{{ $employee->name }}</div>
                 @endif
             </div>
-            <x-ui.button href="{{ route('my-leave-requests.create') }}" variant="primary" size="sm">
+            <x-ui.button :href="route('my-leave-requests.create')" variant="primary" size="sm">
                 <iconify-icon icon="mdi:plus" class="me-1"></iconify-icon> Buat Pengajuan
             </x-ui.button>
         </div>
@@ -102,7 +99,7 @@
                 </div>
             </div>
             <div class="d-flex flex-column gap-1 flex-shrink-0">
-                <x-ui.button href="{{ route('my-leave-requests.show', $req->id) }}" variant="outline" size="sm">
+                <x-ui.button :href="route('my-leave-requests.show', $req->id)" variant="outline" size="sm">
                     Detail
                 </x-ui.button>
                 @if ($req->isPending())
@@ -121,7 +118,7 @@
         <x-ui.empty-state
             title="Belum ada pengajuan"
             description="Klik 'Buat Pengajuan' untuk mengajukan cuti, libur, atau izin.">
-            <x-ui.button href="{{ route('my-leave-requests.create') }}" variant="primary" size="sm">
+            <x-ui.button :href="route('my-leave-requests.create')" variant="primary" size="sm">
                 <iconify-icon icon="mdi:plus" class="me-1"></iconify-icon> Buat Pengajuan
             </x-ui.button>
         </x-ui.empty-state>

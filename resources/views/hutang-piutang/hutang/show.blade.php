@@ -95,7 +95,7 @@
 
             @slot('footer')
                 <div class="d-flex gap-2">
-                    <x-ui.button href="{{ route('hutang.edit', $payable->id) }}" variant="outline" size="sm">
+                    <x-ui.button :href="route('hutang.edit', $payable->id)" variant="outline" size="sm">
                         <iconify-icon icon="mdi:pencil-outline" class="me-1"></iconify-icon>Edit
                     </x-ui.button>
                     <form method="POST" action="{{ route('hutang.destroy', $payable->id) }}">
@@ -105,7 +105,7 @@
                             <iconify-icon icon="mdi:trash-can-outline" class="me-1"></iconify-icon>Hapus
                         </x-ui.button>
                     </form>
-                    <x-ui.button href="{{ route('hutang.index') }}" variant="outline" size="sm" class="ms-auto">Kembali</x-ui.button>
+                    <x-ui.button :href="route('hutang.index')" variant="outline" size="sm" class="ms-auto">Kembali</x-ui.button>
                 </div>
             @endslot
         </x-ui.card>
@@ -182,7 +182,8 @@
                                 <th class="py-2 text-muted fw-medium border-bottom">Metode</th>
                                 <th class="py-2 text-end text-muted fw-medium border-bottom">Jumlah</th>
                                 <th class="py-2 text-muted fw-medium border-bottom">Catatan</th>
-                                <th class="py-2 pe-4 text-muted fw-medium border-bottom">Oleh</th>
+                                <th class="py-2 text-muted fw-medium border-bottom">Oleh</th>
+                                <th class="py-2 pe-4 text-muted fw-medium border-bottom">Status</th>
                                 <th class="py-2 pe-4 border-bottom"></th>
                             </tr>
                         </thead>
@@ -194,6 +195,13 @@
                                 <td class="py-2 text-end fw-semibold" style="color:#10b981">{{ $fmtRp($pay->amount) }}</td>
                                 <td class="py-2 text-muted" style="font-size:12px">{{ $pay->notes ?? '—' }}</td>
                                 <td class="py-2 text-muted" style="font-size:12px">{{ $pay->recorder?->name ?? '—' }}</td>
+                                <td class="py-2 pe-4">
+                                    <x-ui.badge size="sm" :variant="match($pay->status) {
+                                        'pending_approval' => 'warning',
+                                        'rejected' => 'danger',
+                                        default => 'success',
+                                    }">{{ \App\Models\DebtPayment::$statusLabels[$pay->status] ?? $pay->status }}</x-ui.badge>
+                                </td>
                                 <td class="py-2 pe-4 text-end">
                                     <form method="POST" action="{{ route('debt-payments.destroy', $pay->id) }}">
                                         @csrf @method('DELETE')

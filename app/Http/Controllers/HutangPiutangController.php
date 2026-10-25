@@ -281,7 +281,7 @@ class HutangPiutangController extends Controller
 
     // ── Payments (shared) ─────────────────────────────────────────────────────
 
-    public function recordPayment(Request $request, string $type, int $id)
+    public function recordPayment(Request $request, int $id, string $type)
     {
         $record = $type === 'hutang'
             ? Payable::findOrFail($id)
@@ -291,6 +291,10 @@ class HutangPiutangController extends Controller
 
         $remaining = $record->remaining();
 
+        // Fast-path UX check against a possibly-stale $remaining — the
+        // authoritative check happens under lockForUpdate() once the Owner
+        // approves (see DebtPayment::onApprovalDecision()), so two payments
+        // approved back-to-back can't overdraw the same outstanding balance.
         $data = $request->validate([
             'amount'         => "required|integer|min:1|max:{$remaining}",
             'payment_date'   => 'required|date',
@@ -298,26 +302,25 @@ class HutangPiutangController extends Controller
             'notes'          => 'nullable|string|max:255',
         ]);
 
-        DB::transaction(function () use ($data, $record) {
-            DebtPayment::create([
-                'payable_type'   => get_class($record),
-                'payable_id'     => $record->id,
-                'amount'         => $data['amount'],
-                'payment_date'   => $data['payment_date'],
-                'payment_method' => $data['payment_method'],
-                'notes'          => $data['notes'] ?? null,
-                'recorded_by'    => auth()->id(),
-            ]);
+        // Pembayaran Hutang/Piutang butuh approval Owner sebelum benar-benar
+        // mengurangi sisa tagihan — dicatat dulu sebagai pending_approval.
+        $payment = DebtPayment::create([
+            'payable_type'   => get_class($record),
+            'payable_id'     => $record->id,
+            'amount'         => $data['amount'],
+            'payment_date'   => $data['payment_date'],
+            'payment_method' => $data['payment_method'],
+            'notes'          => $data['notes'] ?? null,
+            'recorded_by'    => auth()->id(),
+            'status'         => 'pending_approval',
+        ]);
 
-            $newPaid = $record->paid_amount + $data['amount'];
-            $record->update(['paid_amount' => $newPaid]);
-            $this->recalcStatus($record);
-        });
+        $payment->submitForApproval('finance_transaction', auth()->id());
 
         $route = $type === 'hutang' ? 'hutang.show' : 'piutang.show';
 
         return redirect()->route($route, $record->id)
-            ->with('success', 'Pembayaran berhasil dicatat.');
+            ->with('success', 'Pembayaran diajukan dan menunggu approval Owner.');
     }
 
     public function deletePayment(DebtPayment $payment)
@@ -325,9 +328,17 @@ class HutangPiutangController extends Controller
         $record = $payment->payable;
         $this->authorizeRecord($record->branch_id);
 
+        if ($payment->isPendingApproval()) {
+            return back()->with('error',
+                'Pembayaran yang masih menunggu approval tidak bisa dihapus langsung — tolak melalui halaman approval.'
+            );
+        }
+
         DB::transaction(function () use ($payment, $record) {
-            $record->decrement('paid_amount', $payment->amount);
-            $this->recalcStatus($record);
+            if ($payment->status === 'approved') {
+                $record->decrement('paid_amount', $payment->amount);
+                $this->recalcStatus($record);
+            }
             $payment->delete();
         });
 

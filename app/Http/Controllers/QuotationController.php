@@ -242,7 +242,7 @@ class QuotationController extends Controller
 
     private function validateQuotation(Request $request): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'lead_id'          => 'nullable|exists:leads,id',
             'date'             => 'required|date',
             'valid_until'      => 'required|date|after_or_equal:date',
@@ -260,6 +260,19 @@ class QuotationController extends Controller
             'terms'            => 'nullable|string',
             'assigned_to'      => 'nullable|exists:employees,id',
         ]);
+
+        // Data kendaraan hanya relevan untuk kategori mobil/PPF. Form menyembunyikan
+        // field ini via JS saat kategori gedung, tapi input yang disembunyikan tetap
+        // ikut ter-submit — kosongkan di server supaya kategori gedung tidak pernah
+        // menyimpan data kendaraan (mis. sisa nilai lama sebelum kategori diganti).
+        if ($validated['category'] === 'building_film') {
+            $validated['vehicle_brand'] = null;
+            $validated['vehicle_model'] = null;
+            $validated['vehicle_year']  = null;
+            $validated['vehicle_plate'] = null;
+        }
+
+        return $validated;
     }
 
     private function validateItems(Request $request): array

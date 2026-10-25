@@ -112,6 +112,7 @@ class DashboardController extends Controller
             'topTeknisi'     => $this->getTopTeknisi($year, $branchId),
             'stockAlerts'    => $this->getStockAlerts($branchId),
             'plSummary'      => $this->getPlSummary($year, $branchId, $summary),
+            'upcomingBirthdays' => \App\Models\Employee::upcomingBirthdays($branchId),
         ]);
     }
 
@@ -167,6 +168,7 @@ class DashboardController extends Controller
             'topTeknisi'     => $this->getTopTeknisi($year, $activeBranchId),
             'stockAlerts'    => $this->getStockAlerts($activeBranchId),
             'plSummary'      => $this->getPlSummary($year, $activeBranchId, $summary),
+            'upcomingBirthdays' => \App\Models\Employee::upcomingBirthdays($activeBranchId),
         ]);
     }
 
@@ -211,7 +213,7 @@ class DashboardController extends Controller
             ->count();
 
         $upcomingInstallations = SalesOrder::accessibleByUser()
-            ->with(['tukang', 'branch'])
+            ->with(['tukang', 'technicians', 'branch'])
             ->whereNotNull('scheduled_date')
             ->whereBetween('scheduled_date', [today(), today()->addDays(7)])
             ->orderBy('scheduled_date')

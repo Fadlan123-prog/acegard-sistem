@@ -66,25 +66,26 @@
 {{-- KPI Tiles --}}
 <div class="row g-3 mb-4">
     @php
+        $mdIcon = fn (string $name) => '<iconify-icon icon="'.$name.'"></iconify-icon>';
         $kpis = [
-            ['label'=>'Total Pendapatan',      'val'=>$fmtRp($revenue['grand_total']), 'sub'=>$revenue['grand_count'].' transaksi',         'color'=>'#6366f1','bg'=>'rgba(99,102,241,.1)',  'icon'=>'mdi:currency-usd-circle-outline'],
-            ['label'=>'Rata-rata Transaksi',   'val'=>$fmtRp($revenue['avg']),         'sub'=>'per invoice',                                 'color'=>'#10b981','bg'=>'rgba(16,185,129,.1)', 'icon'=>'mdi:chart-bar-stacked'],
-            ['label'=>'Komisi Dibayar',        'val'=>$fmtRp($commissionStats['total_paid']),    'sub'=>$fmtRp($commissionStats['total_eligible']).' eligible', 'color'=>'#f59e0b','bg'=>'rgba(245,158,11,.1)','icon'=>'mdi:account-star-outline'],
-            ['label'=>'Pengeluaran Kas',       'val'=>$fmtRp($pettyCash['out'] + $pettyCash['purchase']), 'sub'=>'petty cash + pembelian',  'color'=>'#ef4444','bg'=>'rgba(239,68,68,.1)',  'icon'=>'mdi:wallet-outline'],
+            ['label'=>'Total Pendapatan',      'val'=>$fmtRp($revenue['grand_total']), 'sub'=>$revenue['grand_count'].' transaksi',         'color'=>'purple','icon'=>$mdIcon('mdi:currency-usd-circle-outline')],
+            ['label'=>'Rata-rata Transaksi',   'val'=>$fmtRp($revenue['avg']),         'sub'=>'per invoice',                                 'color'=>'green', 'icon'=>$mdIcon('mdi:chart-bar-stacked')],
+            ['label'=>'Komisi Dibayar',        'val'=>$fmtRp($commissionStats['total_paid']),    'sub'=>$fmtRp($commissionStats['total_eligible']).' eligible', 'color'=>'amber','icon'=>$mdIcon('mdi:account-star-outline')],
+            ['label'=>'Pengeluaran Kas',       'val'=>$fmtRp($pettyCash['out'] + $pettyCash['purchase']), 'sub'=>'petty cash + pembelian',  'color'=>'red',   'icon'=>$mdIcon('mdi:wallet-outline')],
         ];
     @endphp
     @foreach ($kpis as $k)
     <div class="col-6 col-lg-3">
-        <x-ui.card class="h-100">
-            <div class="d-flex align-items-center gap-3 mb-2">
-                <div style="width:40px;height:40px;border-radius:10px;background:{{ $k['bg'] }};display:flex;align-items:center;justify-content:center;color:{{ $k['color'] }};font-size:18px;flex-shrink:0">
-                    <iconify-icon icon="{{ $k['icon'] }}"></iconify-icon>
-                </div>
-                <div class="text-muted" style="font-size:11px">{{ $k['label'] }}</div>
-            </div>
-            <div class="fw-bold" style="font-size:16px;color:{{ $k['color'] }}">{{ $k['val'] }}</div>
-            <div class="text-muted" style="font-size:11px">{{ $k['sub'] }}</div>
-        </x-ui.card>
+        <x-ui.stats-card
+            :label="$k['label']"
+            :value="$k['val']"
+            :color="$k['color']"
+            :icon="$k['icon']"
+            accent
+            class="h-100"
+        >
+            <span class="text-muted" style="font-size:11px">{{ $k['sub'] }}</span>
+        </x-ui.stats-card>
     </div>
     @endforeach
 </div>
@@ -213,25 +214,23 @@
     <div class="row g-3">
         @php
             $pcRows = [
-                ['Kas Masuk',    $pettyCash['in'],       '#10b981', 'mdi:arrow-down-circle-outline'],
-                ['Pengeluaran',  $pettyCash['out'],       '#ef4444', 'mdi:arrow-up-circle-outline'],
-                ['Pembelian',    $pettyCash['purchase'],  '#f59e0b', 'mdi:cart-outline'],
+                ['Kas Masuk',    $pettyCash['in'],       'green', $mdIcon('mdi:arrow-down-circle-outline')],
+                ['Pengeluaran',  $pettyCash['out'],       'red',   $mdIcon('mdi:arrow-up-circle-outline')],
+                ['Pembelian',    $pettyCash['purchase'],  'amber', $mdIcon('mdi:cart-outline')],
                 ['Net Kas',      $pettyCash['in'] - $pettyCash['out'] - $pettyCash['purchase'],
-                                 $pettyCash['in'] >= $pettyCash['out'] + $pettyCash['purchase'] ? '#10b981' : '#ef4444',
-                                 'mdi:scale-balance'],
+                                 $pettyCash['in'] >= $pettyCash['out'] + $pettyCash['purchase'] ? 'green' : 'red',
+                                 $mdIcon('mdi:scale-balance')],
             ];
         @endphp
         @foreach ($pcRows as [$lbl, $val, $col, $icon])
         <div class="col-6 col-lg-3">
-            <div class="d-flex align-items-center gap-3">
-                <div style="width:36px;height:36px;border-radius:8px;background:{{ $col }}1a;display:flex;align-items:center;justify-content:center;color:{{ $col }};font-size:16px;flex-shrink:0">
-                    <iconify-icon icon="{{ $icon }}"></iconify-icon>
-                </div>
-                <div>
-                    <div class="text-muted" style="font-size:11px">{{ $lbl }}</div>
-                    <div class="fw-bold" style="color:{{ $col }};font-size:14px">{{ $fmtRp($val) }}</div>
-                </div>
-            </div>
+            <x-ui.stats-card
+                :label="$lbl"
+                :value="$fmtRp($val)"
+                :color="$col"
+                :icon="$icon"
+                accent
+            />
         </div>
         @endforeach
     </div>

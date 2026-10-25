@@ -86,11 +86,14 @@ class FinanceDashboardController extends Controller
             ->limit(8)
             ->get();
 
+        $upcomingBirthdays = \App\Models\Employee::upcomingBirthdays($branchId);
+
         return view('finance.dashboard', compact(
             'outstandingInvoices', 'outstandingAmount',
             'commissionEligible', 'commissionEligibleCount',
             'totalHutang', 'totalPiutang',
             'pendingInvoices', 'commissionsToPay', 'hutangDue',
+            'upcomingBirthdays',
         ));
     }
 }

@@ -16,7 +16,25 @@ class PayrollCalculatorService
     public function __construct(
         private readonly OvertimeService $overtime,
         private readonly BpjsCalculatorService $bpjs,
+        private readonly KasbonDeductionService $kasbonDeductions,
     ) {}
+
+    /**
+     * Applies this period's kasbon installment (if any) for every employee
+     * BEFORE the SalaryAdjustment rows are read below, so buildPayrollItemData()
+     * picks up the freshly-written amount via adjustment->kasbon. Uses
+     * monthly_salary (not the prorated/attendance-adjusted salary) as the 50%
+     * cap basis — that figure is only computed per-employee further down in
+     * buildPayrollItemData(), so using it here would be circular. Safe to call
+     * on every generate()/refresh(): KasbonDeductionService is idempotent per
+     * (kasbon, month).
+     */
+    private function applyKasbonInstallments(\Illuminate\Support\Collection $employees, string $month): void
+    {
+        foreach ($employees as $employee) {
+            $this->kasbonDeductions->applyForPayroll($employee, $month, (int) ($employee->monthly_salary ?? 0));
+        }
+    }
 
     public function generate(
         int     $branchId,
@@ -57,6 +75,8 @@ class PayrollCalculatorService
                 ->get()
                 ->groupBy('employee_id');
 
+            $this->applyKasbonInstallments($employees, $month);
+
             $adjustmentsMap = SalaryAdjustment::whereIn('employee_id', $employees->pluck('id'))
                 ->where('month', $month)
                 ->get()
@@ -95,6 +115,8 @@ class PayrollCalculatorService
                 ->whereBetween('attendance_date', [$startDate->toDateString(), $endDate->toDateString()])
                 ->get()
                 ->groupBy('employee_id');
+
+            $this->applyKasbonInstallments($employees, $payroll->month);
 
             $adjustmentsMap = SalaryAdjustment::whereIn('employee_id', $employees->pluck('id'))
                 ->where('month', $payroll->month)

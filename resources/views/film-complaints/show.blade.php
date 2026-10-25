@@ -6,14 +6,6 @@
 
 @section('content')
 
-@if(session('success'))
-    <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-@endif
-
-@if(session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
-
 <x-ui.card>
     @slot('header')
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -25,10 +17,10 @@
             </div>
 
             <div class="d-flex gap-2">
-                <x-ui.button href="{{ route('film-complaints.edit', $complaint->id) }}" variant="outline" size="sm">
+                <x-ui.button :href="route('film-complaints.edit', $complaint->id)" variant="outline" size="sm">
                     <iconify-icon icon="mdi:pencil-outline" class="me-1"></iconify-icon>Edit
                 </x-ui.button>
-                <x-ui.button href="{{ route('film-complaints.index') }}" variant="secondary" size="sm">
+                <x-ui.button :href="route('film-complaints.index')" variant="secondary" size="sm">
                     Kembali
                 </x-ui.button>
             </div>

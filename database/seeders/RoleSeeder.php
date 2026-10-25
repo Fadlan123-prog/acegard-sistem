@@ -6,9 +6,6 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use App\Models\Branch;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 
 class RoleSeeder extends Seeder
 {
@@ -52,6 +49,14 @@ class RoleSeeder extends Seeder
         Role::firstOrCreate(['name' => 'teknisi']);
         Role::firstOrCreate(['name' => 'kenek']);
 
+        // ── Restrukturisasi ERP (2026-08) ──────────────────────────────
+        $itManager            = Role::firstOrCreate(['name' => 'it_manager']);
+        $development          = Role::firstOrCreate(['name' => 'development']);
+        $exportImport         = Role::firstOrCreate(['name' => 'export_import']);
+        $strategiPengembangan = Role::firstOrCreate(['name' => 'strategi_pengembangan']);
+        Role::firstOrCreate(['name' => 'designer']);
+        Role::firstOrCreate(['name' => 'videographer']);
+
         // ── Role → permission matrix ──────────────────────────────────
         $superadmin->syncPermissions($permissionList);
 
@@ -92,42 +97,25 @@ class RoleSeeder extends Seeder
             'view_all_customers',
         ]);
 
-        // ── Fixed users (superadmin + existing admin) ─────────────────
-        $superUser = User::firstOrCreate(
-            ['email' => 'acegard@acegard.id'],
-            ['name' => 'Acegard Admin', 'password' => Hash::make('Acegard.21')]
-        );
-        $superUser->syncRoles([$superadmin]);
+        // IT Manager saat ini merangkap Purchasing & Finance sekaligus (satu
+        // role gabungan, bukan satu akun dengan banyak role — lihat analisis
+        // restrukturisasi ERP). Permission-nya union dari kedua role itu.
+        $itManager->syncPermissions([
+            'manage_purchases', 'manage_film_stock',
+            'view_all_commissions', 'manage_finance', 'manage_hutang', 'view_reports',
+        ]);
 
-        $adminUser = User::firstOrCreate(
-            ['email' => 'acegard.jambi@acegard.id'],
-            ['name' => 'Admin Cabang Jambi', 'password' => Hash::make('Acegard.Jambi21')]
-        );
-        $adminUser->syncRoles([$admin]);
+        // Development, Export & Import, Strategi Pengembangan, Designer,
+        // Videographer: tidak butuh permission granular tambahan — akses
+        // dibatasi lewat role middleware per route/controller, sama seperti
+        // pola role 'marketing' di atas.
+        $development->syncPermissions([]);
+        $exportImport->syncPermissions([]);
+        $strategiPengembangan->syncPermissions([]);
 
-        // ── Demo users per role — only when at least one branch exists ─
-        $defaultBranch = Branch::orderBy('id')->first();
-
-        if ($defaultBranch) {
-            $demoUsers = [
-                ['email' => 'owner@acegard.id',      'name' => 'Demo Owner',             'role' => 'owner'],
-                ['email' => 'mgrops@acegard.id',     'name' => 'Demo Manajer Operasional','role' => 'manager_operasional'],
-                ['email' => 'mgrmkt@acegard.id',     'name' => 'Demo Manajer Marketing', 'role' => 'manager_marketing'],
-                ['email' => 'marketing@acegard.id',  'name' => 'Demo Marketing',         'role' => 'marketing'],
-                ['email' => 'finance@acegard.id',    'name' => 'Demo Finance',           'role' => 'finance'],
-                ['email' => 'purchasing@acegard.id', 'name' => 'Demo Purchasing',        'role' => 'purchasing'],
-                ['email' => 'cs@acegard.id',         'name' => 'Demo Customer Service',  'role' => 'customer_service'],
-            ];
-
-            foreach ($demoUsers as $data) {
-                $u = User::firstOrCreate(
-                    ['email' => $data['email']],
-                    ['name' => $data['name'], 'password' => Hash::make('Acegard.21')]
-                );
-                $u->syncRoles([$data['role']]);
-                // Assign to default branch without removing any existing branch assignments
-                $u->branches()->syncWithoutDetaching([$defaultBranch->id]);
-            }
-        }
+        // Roles & permissions only — never create user accounts here.
+        // Fixed-credential accounts must not exist in any seeder that can
+        // reach a production database. See DevAccountSeeder (local/testing
+        // only) and `php artisan app:create-superadmin` for production.
     }
 }

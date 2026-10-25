@@ -35,6 +35,42 @@
 [data-theme="dark"] .cust-nav li a .cn-icon { background:var(--dark-3); color:var(--neutral-400); }
 [data-theme="dark"] .cust-section-head .sec-title { color:var(--neutral-100); }
 [data-theme="dark"] .items-tbl th { background:var(--dark-3); }
+
+/* Picker multi-teknisi (kategori Gedung) */
+.tech-picker { position:relative; }
+.tech-picker-trigger { width:100%; min-height:42px; display:flex; align-items:center; cursor:pointer; }
+.tech-picker-trigger[aria-expanded="true"] { border-color:var(--primary-600); box-shadow:0 0 0 .2rem var(--primary-light); }
+.tech-chip-row { display:flex; flex-wrap:wrap; align-items:center; gap:6px; width:100%; }
+.tech-placeholder { color:var(--neutral-500); font-size:14px; }
+.tech-chip {
+    display:inline-flex; align-items:center; gap:4px; max-width:100%;
+    background:var(--primary-light); color:var(--primary-600);
+    border-radius:999px; padding:3px 4px 3px 12px; font-size:13px; font-weight:600; line-height:1.5;
+}
+.tech-chip span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tech-chip-remove {
+    display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
+    width:22px; height:22px; border:none; border-radius:50%; background:transparent;
+    color:var(--primary-600); font-size:15px; cursor:pointer; padding:0;
+}
+.tech-chip-remove:hover,.tech-chip-remove:focus-visible { background:rgba(0,0,0,.08); outline:none; }
+.tech-picker-panel {
+    position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:30;
+    background:var(--white); border:1px solid var(--border-color); border-radius:10px;
+    box-shadow:0 12px 28px rgba(20,20,43,.14); max-height:280px; overflow-y:auto; padding:6px;
+}
+.tech-picker-option {
+    display:flex; align-items:center; gap:12px; min-height:44px; padding:8px 10px;
+    border-radius:8px; cursor:pointer; font-size:14px; color:var(--neutral-900);
+}
+.tech-picker-option:hover,.tech-picker-option:focus-within { background:var(--neutral-50); }
+.tech-picker-checkbox { width:18px; height:18px; flex-shrink:0; cursor:pointer; accent-color:var(--primary-600); }
+
+[data-theme="dark"] .tech-placeholder { color:var(--neutral-400); }
+[data-theme="dark"] .tech-picker-panel { background:var(--dark-2); border-color:var(--border-color); }
+[data-theme="dark"] .tech-picker-option { color:var(--neutral-100); }
+[data-theme="dark"] .tech-picker-option:hover,[data-theme="dark"] .tech-picker-option:focus-within { background:var(--dark-3); }
+[data-theme="dark"] .tech-chip-remove:hover { background:rgba(255,255,255,.12); }
 </style>
 @endpush
 
@@ -235,37 +271,16 @@
                 <div class="sec-icon"><iconify-icon icon="mdi:account-multiple-outline"></iconify-icon></div>
                 <div>
                     <p class="sec-title">Penugasan Tim</p>
-                    <p class="sec-desc">Teknisi, kenek, dan marketing yang menangani pekerjaan ini</p>
+                    <p class="sec-desc">Marketing/PIC yang menangani pekerjaan ini</p>
                 </div>
             </div>
             <div class="cust-section-body">
+                {{-- Teknisi/kenek (mobil/PPF) atau daftar teknisi (gedung) SENGAJA tidak
+                     diisi di sini — baru bisa ditugaskan setelah SO dikonfirmasi, lewat
+                     tombol "Tugaskan Teknisi/Kenek" di halaman detail SO. Ini menjamin
+                     urutan konfirmasi-dulu-baru-assign dan jadi satu-satunya jalur
+                     penugasan (termasuk untuk reassign). --}}
                 <div class="row g-3">
-                    <div class="col-md-4">
-                        <x-ui.form-field label="Teknisi / Tukang" name="tukang_id">
-                            <select name="tukang_id" class="form-select">
-                                <option value="">— Tidak ditugaskan —</option>
-                                @foreach($employees as $emp)
-                                    <option value="{{ $emp->id }}"
-                                        {{ old('tukang_id', $isEdit ? $salesOrder->tukang_id : '') == $emp->id ? 'selected' : '' }}>
-                                        {{ $emp->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </x-ui.form-field>
-                    </div>
-                    <div class="col-md-4">
-                        <x-ui.form-field label="Kenek" name="kenek_id">
-                            <select name="kenek_id" class="form-select">
-                                <option value="">— Tidak ditugaskan —</option>
-                                @foreach($employees as $emp)
-                                    <option value="{{ $emp->id }}"
-                                        {{ old('kenek_id', $isEdit ? $salesOrder->kenek_id : '') == $emp->id ? 'selected' : '' }}>
-                                        {{ $emp->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </x-ui.form-field>
-                    </div>
                     <div class="col-md-4">
                         <x-ui.form-field label="Marketing / PIC" name="marketing_id">
                             <select name="marketing_id" class="form-select">
@@ -445,7 +460,10 @@
     }
 
     // Seed items
-    var seedItems = {!! $isEdit && $existingItems->isNotEmpty()
+    // Js::from() (not ->toJson() wrapped in a raw Blade echo) HEX-escapes <, >, &, ' so a
+    // description/specifications value containing a closing script tag can't break
+    // out of this inline script block (stored XSS — see audit finding H-10).
+    var seedItems = {!! \Illuminate\Support\Js::from($isEdit && $existingItems->isNotEmpty()
         ? $existingItems->map(fn($i) => [
             'description'      => $i->description,
             'specifications'   => $i->specifications,
@@ -453,7 +471,7 @@
             'quantity'         => $i->quantity,
             'unit_price'       => $i->unit_price,
             'discount_percent' => $i->discount_percent,
-          ])->toJson()
+          ])
         : ($quotation && $quotation->items->isNotEmpty()
             ? $quotation->items->map(fn($i) => [
                 'description'      => $i->description,
@@ -462,8 +480,8 @@
                 'quantity'         => $i->quantity,
                 'unit_price'       => $i->unit_price,
                 'discount_percent' => $i->discount_percent,
-              ])->toJson()
-            : '[]')
+              ])
+            : []))
     !!};
     if (seedItems.length) { seedItems.forEach(addRow); } else { addRow(); }
 

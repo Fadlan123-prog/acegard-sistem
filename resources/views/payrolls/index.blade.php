@@ -16,19 +16,15 @@
                     Daftar payroll bulanan berdasarkan cabang.
                 </small>
             </div>
-            <x-ui.button href="{{ route('payrolls.create') }}" variant="primary" size="sm">
+            <x-ui.button :href="route('payrolls.create')" variant="primary" size="sm">
                 + Generate Payroll
             </x-ui.button>
         </div>
     @endslot
 
-    @if(session('success'))
-        <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-    @endif
+    
 
-    @if(session('error'))
-        <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-    @endif
+    
 
     <form method="GET" action="{{ route('payrolls.index') }}" class="row g-2 mb-4 align-items-end">
 
@@ -70,7 +66,7 @@
             </x-ui.button>
 
             @if(request()->query())
-                <x-ui.button href="{{ route('payrolls.index') }}" variant="outline">
+                <x-ui.button :href="route('payrolls.index')" variant="outline">
                     Reset
                 </x-ui.button>
             @endif
@@ -141,12 +137,12 @@
                         <td>
                             <div class="d-flex gap-1">
 
-                                <x-ui.button href="{{ route('payrolls.show', $payroll->id) }}" variant="outline" size="sm">
+                                <x-ui.button :href="route('payrolls.show', $payroll->id)" variant="outline" size="sm">
                                     Detail
                                 </x-ui.button>
 
                                 @if($payroll->status === 'draft')
-                                    <x-ui.button href="{{ route('payrolls.edit', $payroll->id) }}" variant="success" size="sm">
+                                    <x-ui.button :href="route('payrolls.edit', $payroll->id)" variant="success" size="sm">
                                         Edit
                                     </x-ui.button>
                                 @endif

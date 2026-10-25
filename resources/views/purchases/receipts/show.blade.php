@@ -13,7 +13,7 @@
                 <div class="ui-card-title">Penerimaan Barang (GRN)</div>
                 <small class="text-muted">{{ $receipt->receipt_number }}</small>
             </div>
-            <x-ui.button href="{{ route('purchases.show', $receipt->purchase_id) }}" variant="secondary" size="sm">
+            <x-ui.button :href="route('purchases.show', $receipt->purchase_id)" variant="secondary" size="sm">
                 Kembali ke PO
             </x-ui.button>
         </div>
@@ -21,16 +21,24 @@
 
     <div class="row mb-4">
         <div class="col-md-3 mb-2">
-            <div class="border rounded p-3 h-100">
-                <small class="text-muted d-block">No GRN</small>
-                <h6 class="mb-0 fw-semibold">{{ $receipt->receipt_number }}</h6>
-            </div>
+            <x-ui.stats-card
+                label="No GRN"
+                :value="$receipt->receipt_number"
+                color="blue"
+                icon='<iconify-icon icon="mdi:receipt-text-outline"></iconify-icon>'
+                accent
+                class="h-100"
+            />
         </div>
         <div class="col-md-3 mb-2">
-            <div class="border rounded p-3 h-100">
-                <small class="text-muted d-block">Tanggal Terima</small>
-                <h6 class="mb-0">{{ $receipt->receipt_date?->format('d-m-Y') }}</h6>
-            </div>
+            <x-ui.stats-card
+                label="Tanggal Terima"
+                :value="$receipt->receipt_date?->format('d-m-Y') ?? '-'"
+                color="purple"
+                icon='<iconify-icon icon="mdi:calendar-outline"></iconify-icon>'
+                accent
+                class="h-100"
+            />
         </div>
         <div class="col-md-3 mb-2">
             <div class="border rounded p-3 h-100">
@@ -45,10 +53,14 @@
             </div>
         </div>
         <div class="col-md-3 mb-2">
-            <div class="border rounded p-3 h-100">
-                <small class="text-muted d-block">Diterima Oleh</small>
-                <h6 class="mb-0">{{ $receipt->receiver?->name ?? '-' }}</h6>
-            </div>
+            <x-ui.stats-card
+                label="Diterima Oleh"
+                :value="$receipt->receiver?->name ?? '-'"
+                color="green"
+                icon='<iconify-icon icon="mdi:account-check-outline"></iconify-icon>'
+                accent
+                class="h-100"
+            />
         </div>
     </div>
 

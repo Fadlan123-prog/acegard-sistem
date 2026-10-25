@@ -11,21 +11,16 @@
         <div class="d-flex justify-content-between align-items-center">
             <div class="ui-card-title">Daftar Purchasing</div>
             <div class="d-flex gap-2">
-                <x-ui.button href="{{ route('purchase.reports.monthly') }}" variant="outline" size="sm">Report Bulanan</x-ui.button>
-                <x-ui.button href="{{ route('purchases.create') }}" variant="primary" size="sm">+ Add Purchasing</x-ui.button>
+                <x-ui.button :href="route('purchase.reports.monthly')" variant="outline" size="sm">Report Bulanan</x-ui.button>
+                <x-ui.button :href="route('purchases.create')" variant="primary" size="sm">+ Add Purchasing</x-ui.button>
             </div>
         </div>
     @endslot
 
     {{-- Alert --}}
-    @if(session('success'))
-        <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-    @endif
+    
 
-    @if(session('error'))
-        <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-    @endif
-
+    
 
     {{-- Filter --}}
     <form method="GET"
@@ -100,31 +95,29 @@
             <x-ui.button type="submit" variant="outline" size="sm">Filter</x-ui.button>
 
             @if(request('search') || request('from') || request('to') || request('branch_id') || request('status') || request('supplier_id'))
-                <x-ui.button href="{{ route('purchases.index') }}" variant="secondary" size="sm">Reset</x-ui.button>
+                <x-ui.button :href="route('purchases.index')" variant="secondary" size="sm">Reset</x-ui.button>
             @endif
         </div>
     </form>
 
-
     {{-- Summary (filtered totals — not page-only) --}}
     <div class="row mb-4">
         <div class="col-md-4 mb-2">
-            <x-ui.stats-card label="Total Purchasing (Filter)" :value="number_format($totals->total_count ?? 0)" color="blue">
+            <x-ui.stats-card label="Total Purchasing (Filter)" :value="number_format($totals->total_count ?? 0)" color="blue" accent>
                 <span>PO</span>
             </x-ui.stats-card>
         </div>
 
         <div class="col-md-4 mb-2">
-            <x-ui.stats-card label="Total Item (Filter)" :value="number_format($totals->total_items ?? 0)" color="amber">
+            <x-ui.stats-card label="Total Item (Filter)" :value="number_format($totals->total_items ?? 0)" color="amber" accent>
                 <span>Item</span>
             </x-ui.stats-card>
         </div>
 
         <div class="col-md-4 mb-2">
-            <x-ui.stats-card label="Total Nilai (Filter)" :value="'Rp' . number_format($totals->total_amount ?? 0, 0, ',', '.')" color="green" />
+            <x-ui.stats-card label="Total Nilai (Filter)" :value="'Rp' . number_format($totals->total_amount ?? 0, 0, ',', '.')" color="green" accent />
         </div>
     </div>
-
 
     {{-- Table --}}
     <div class="table-responsive" style="max-height: 520px; overflow-y: auto; overflow-x: auto;">

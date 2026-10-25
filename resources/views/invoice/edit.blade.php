@@ -16,14 +16,10 @@
   </x-ui.alert>
 @endif
 
-@if (session('error'))
-  <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
-
 <x-ui.card>
   @slot('header')
     <div class="ui-card-title">Form Edit Invoice</div>
-    <x-ui.button href="{{ route('customer.index') }}" variant="secondary" size="sm">Kembali</x-ui.button>
+    <x-ui.button :href="route('customer.index')" variant="secondary" size="sm">Kembali</x-ui.button>
   @endslot
 
   <form action="{{ route('invoice.update', $invoice->id) }}" method="POST">

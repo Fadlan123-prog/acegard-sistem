@@ -11,7 +11,7 @@
         <h5 class="mb-0">Daftar Pelanggan</h5>
         <div class="d-flex gap-2">
             <x-ui.button href="#" variant="outline" size="sm">Export Excel</x-ui.button>
-            <x-ui.button href="{{ route('customer.building.create') }}" variant="primary" size="sm">+ Add Customer</x-ui.button>
+            <x-ui.button :href="route('customer.building.create')" variant="primary" size="sm">+ Add Customer</x-ui.button>
         </div>
     </div>
     @endslot
@@ -39,7 +39,7 @@
             @endif
 
             @if(request('branch_id') || request('search'))
-                <x-ui.button href="{{ route('customer.building.index') }}" variant="outline">Reset</x-ui.button>
+                <x-ui.button :href="route('customer.building.index')" variant="outline">Reset</x-ui.button>
             @endif
         </form>
 

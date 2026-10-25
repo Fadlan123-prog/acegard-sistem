@@ -22,16 +22,12 @@
                 <div class="ui-card-title">Claim {{ $claim->claim_number }}</div>
                 <div class="small text-muted">Tipe: {{ $typeLabel }} | Card: {{ $claim->card_number }}</div>
             </div>
-            <x-ui.button href="{{ route('admin.claims.index') }}" variant="secondary" size="sm">Kembali</x-ui.button>
+            <x-ui.button :href="route('admin.claims.index')" variant="secondary" size="sm">Kembali</x-ui.button>
         </div>
     @endslot
 
-    @if(session('success'))
-        <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-    @endif
-    @if(session('error'))
-        <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-    @endif
+    
+    
 
     <div class="d-flex flex-wrap gap-2 mb-3">
         <x-ui.badge :variant="$cls">STATUS: {{ strtoupper($claim->status) }}</x-ui.badge>
@@ -180,10 +176,10 @@
 
             <div class="d-flex gap-2">
                 @if($claim->invoice)
-                    <x-ui.button href="{{ route('admin.claim-invoices.show', $claim->invoice->id) }}" variant="success" size="sm">Lihat Invoice</x-ui.button>
+                    <x-ui.button :href="route('admin.claim-invoices.show', $claim->invoice->id)" variant="success" size="sm">Lihat Invoice</x-ui.button>
                 @else
                     @if($claim->is_chargeable)
-                        <x-ui.button href="{{ route('admin.claim-invoices.create', $claim->id) }}" variant="danger" size="sm">+ Buat Invoice</x-ui.button>
+                        <x-ui.button :href="route('admin.claim-invoices.create', $claim->id)" variant="danger" size="sm">+ Buat Invoice</x-ui.button>
                     @else
                         <x-ui.button variant="secondary" size="sm" disabled>Gratis (No Invoice)</x-ui.button>
                     @endif

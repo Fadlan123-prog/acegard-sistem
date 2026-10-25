@@ -18,14 +18,14 @@
 
     <script type="application/ld+json">
     {
-      "@context": "https://schema.org",
-      "@type": "Product",
+      "@@context": "https://schema.org",
+      "@@type": "Product",
       "name": "Kaca Film Mobil Acegard",
-      "brand": { "@type": "Brand", "name": "Acegard" },
+      "brand": { "@@type": "Brand", "name": "Acegard" },
       "description": "Promo kaca film mobil premium Acegard dengan teknologi nano ceramic, perlindungan UV hingga 99%, dan Night Vision. Garansi resmi 5–7 tahun.",
       "image": "{{ asset('assets/promotion/images/promotion-car/og-image.jpg') }}",
       "offers": {
-        "@type": "Offer",
+        "@@type": "Offer",
         "priceCurrency": "IDR",
         "price": "2100000",
         "availability": "https://schema.org/InStock",
@@ -44,7 +44,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;600&display=swap" rel="stylesheet">
 
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
         new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -68,55 +68,48 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="container-fluid hero d-flex flex-column justify-content-center p-0" style="background-image:url('{{ asset('assets/promotion/images/promotion-car/hero-car.webp') }}')">
             <div class="container px-5 w-full h-auto">
                 <div class="d-flex flex-column justify-content-center py-5">
-                    <img src="{{ asset('assets/promotion/images/promotion-car/acegard-logo.webp') }}" alt="Acegard" class="mb-5">
-                    <h1 class="plus-jakarta-sans-600">Kaca Film Mobil Terbaik – Tolak Panas, Anti UV & Night Vision</h1>
-                    <p class="plus-jakarta-sans-400">Jaga kenyamanan berkendara dengan kaca film berkualitas tinggi</p>
-                    <a href="https://wa.me/628212003331?text=Halo%20Acegard%2C%20saya%20ingin%20tanya%20promo%20kaca%20film%20mobil" class="btn btn-primary whatsapp-btn">Konsultasi Sekarang</a>
+                    <img src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}" alt="Acegard" class="mb-5" style="filter: brightness(0) invert(1);">
+                    <h1 class="plus-jakarta-sans-600">Kaca Film Mobil untuk Kenyamanan Berkendara.</h1>
+                    <span class="protection-label plus-jakarta-sans-600">Acegard Protection Standard</span>
 
-                    <div class="feature-list plus-jakarta-sans-400">
-                        <div class="feature-item">
-                            <img src="{{ asset('assets/promotion/images/promotion-car/checkbox.webp') }}" loading="lazy" alt="Checklist" class="icon">
-                            <span><strong><span class="highlight">1700+</span> </strong> Pelanggan Puas</span>
-                        </div>
-                        <div class="feature-item">
-                            <img src="{{ asset('assets/promotion/images/promotion-car/checkbox.webp') }}" loading="lazy" alt="Checklist" class="icon">
-                            <span><strong><span class="highlight">99,9%</span></strong> Tolak Panas</span>
-                        </div>
-                        <div class="feature-item">
-                            <img src="{{ asset('assets/promotion/images/promotion-car/checkbox.webp') }}" loading="lazy" alt="Checklist" class="icon">
-                            <span><strong><span class="highlight">4,9 Rating</span></strong> di Tokopedia</span>
-                        </div>
-                        <div class="feature-item">
-                            <img src="{{ asset('assets/promotion/images/promotion-car/checkbox.webp') }}" loading="lazy" alt="Checklist" class="icon">
-                            <span><strong><span class="highlight">5 Tahun</span></strong> Jaminan Garansi</span>
-                        </div>
+                    <div class="hero-stats plus-jakarta-sans-600">
+                        <span class="hero-stat">IRR &ge;99%</span>
+                        <span class="hero-stat-divider"></span>
+                        <span class="hero-stat">UVR &ge;99%</span>
+                        <span class="hero-stat-divider"></span>
+                        <span class="hero-stat">TSER hingga 95%</span>
                     </div>
+
+                    <p class="plus-jakarta-sans-400">IRR &amp; UVR minimal 99% menjadi standar setiap seri ACEGARD</p>
+                    <p class="hero-footnote plus-jakarta-sans-400">*TSER hingga 95% pada seri tertinggi.</p>
+
+                    <a href="https://wa.me/628212003331?text=Halo%20Acegard%2C%20saya%20ingin%20tanya%20promo%20kaca%20film%20mobil" class="btn btn-primary whatsapp-btn">Konsultasi Sekarang</a>
                 </div>
             </div>
         </div>
 
         <div class="container-fluid adventage my-5">
-            <h1 class="text-center">Keunggulan Kaca Film Acegard</h1>
+            <h2 class="text-center">Keunggulan Kaca Film Acegard</h2>
 
             <div class="row justify-content-center align-items-stretch text-center">
                 <div class="col-12 col-lg-6 ps-0">
                     <img src="{{ asset('assets/promotion/images/promotion-car/adventage-image-1.webp') }}" loading="lazy" alt="Tolak Panas & Night Vision">
-                    <h4>Tolak Panas & Night Vision Terbaik</h4>
+                    <h3>Tolak Panas & Night Vision Terbaik</h3>
                     <p>Kaca film mobil Acegard mampu menolak panas secara efisien, dengan tingkat penolakan sinar inframerah hingga 99% dan perlindungan sinar UV hingga 99%. Menggunakan 7 layer chemical, termasuk 2 lapisan ceramic, kaca film ini memastikan kenyamanan berkendara tanpa rasa panas berlebih.</p>
                 </div>
                 <div class="col-12 col-lg-6 pe-0">
                     <img src="{{ asset('assets/promotion/images/promotion-car/adventage-image-3.webp') }}" loading="lazy" alt="Material Ceramic">
-                    <h4>Material Ceramic Yang Kuat & Tahan Lama</h4>
+                    <h3>Material Ceramic Yang Kuat & Tahan Lama</h3>
                     <p>Berbeda dengan kaca film ceramic biasa yang hanya menggunakan silica, diambil langsung dari Korea kaca film Acegard menggabungkan mineral tin dan tungsten untuk ketahanan lebih lama. Kaca film tidak mudah pudar, menjaga kualitas tampilan dan perlindungan kaca mobil Anda.</p>
                 </div>
                 <div class="col-12 col-lg-6 ps-0">
                     <img src="{{ asset('assets/promotion/images/promotion-car/vision.webp') }}" loading="lazy" alt="Night Vision">
-                    <h4>Teknologi Night Vision – Jernih di Malam Hari</h4>
+                    <h3>Teknologi Night Vision – Jernih di Malam Hari</h3>
                     <p>Dengan teknologi Night Vision, kaca film Acegard tetap bening dan anti buram di malam hari. Memberikan visibilitas tinggi dalam kondisi minim cahaya, sehingga pandangan tetap jernih tanpa silau saat berkendara di malam hari.</p>
                 </div>
                 <div class="col-12 col-lg-6 pe-0">
                     <img src="{{ asset('assets/promotion/images/promotion-car/adventage-image-4.webp') }}" loading="lazy" alt="Garansi Resmi">
-                    <h4>Bergaransi Resmi hingga 7 Tahun</h4>
+                    <h3>Bergaransi Resmi hingga 7 Tahun</h3>
                     <p>Bergaransi resmi 5 tahun untuk tipe Notch UV400 dan 7 tahun untuk tipe 4K Alpha Pro, Garansi ini meliputi jika kaca film tidak menempel pada kaca dan warna yang luntur. Garansi Acegard terdaftar resmi dalam situs Acegard.id.</p>
                 </div>
             </div>
@@ -125,10 +118,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="container-fluid features">
             <div class="row align-items-center">
                 <div class="col-12 col-lg-6 ps-0">
-                    <h1>Fitur Kaca Film Acegard</h1>
+                    <h2>Fitur Kaca Film Acegard</h2>
                 </div>
                 <div class="col-12 col-lg-6 pe-0 d-flex justify-content-center justify-content-lg-end">
-                    <img src="{{ asset('assets/promotion/images/promotion-car/acegard-logo-black.png') }}" loading="lazy" alt="Acegard Black Logo">
+                    <img src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}" loading="lazy" alt="Acegard Black Logo">
                 </div>
             </div>
 
@@ -187,7 +180,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
 
         <div class="container review-coment">
-            <h1 class="text-center py-5 plus-jakarta-sans-600">Apa kata mereka?</h1>
+            <h2 class="text-center py-5 plus-jakarta-sans-600">Apa kata mereka?</h2>
 
             <div class="row justify-content-center align-center">
                 <div class="col-12 col-lg-6 center-image">
@@ -206,18 +199,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
 
         <div class="container-fluid price-spesification">
-            <h1>Spesifikasi Produk dan Harga</h1>
-            <img src="{{ asset('assets/promotion/images/promotion-car/notch-uv-spesification.webp') }}" loading="lazy" alt="Spesifikasi Notch UV400">
-            <img src="{{ asset('assets/promotion/images/promotion-car/4k-spesification.webp') }}" loading="lazy" alt="Spesifikasi 4K Alpha Pro">
+            <h2>Spesifikasi Produk dan Harga</h2>
+            <img src="{{ asset('assets/frontend/images/price-BM.png') }}" loading="lazy" alt="Spesifikasi Black Master">
+            <img src="{{ asset('assets/frontend/images/price-NV.png') }}" loading="lazy" alt="Spesifikasi Notch UV400">
+            <img src="{{ asset('assets/frontend/images/price-4K.png') }}" loading="lazy" alt="Spesifikasi 4K Alpha Pro">
         </div>
 
         <div class="container-fluid slot-section d-flex justify-content-center align-items-center flex-column text-center">
-            <h1 class="slot-title">Tunggu apalagi?</h1>
-            <h2 class="slot-subtitle">Dapatkan Penawaran Terbaik khusus hari ini!</h2>
+            <h2 class="slot-title">Tunggu apalagi?</h2>
+            <p class="slot-subtitle">Dapatkan Penawaran Terbaik khusus hari ini!</p>
             <p class="slot-desc">
                 <span class="blue-text">slot terbatas</span> setiap harinya dan dapatkan <span class="blue-text">promo spesial</span> khusus bulan ini
             </p>
-            <h1 id="countdown" class="slot-remaining">2100</h1>
+            <div id="countdown" class="slot-remaining">2100</div>
             <p class="slot-remaining-subtitle">Slot Promo Spesial Tersedia</p>
             <div class="slot-line"></div>
         </div>
@@ -249,7 +243,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <div class="container-fluid warranty" style="background-image:url('{{ asset('assets/promotion/images/promotion-car/warranty-background.webp') }}')">
             <div class="container text-warranty">
-                <h1>Claim Garansi dimana saja dan kapan saja!</h1>
+                <h2>Claim Garansi dimana saja dan kapan saja!</h2>
                 <p>
                     kami membuat sistem garansi yang memudahkan customer untuk klaim garansi yang tersedia di website resmi Acegard.id <br><br>
                     Hubungi kami hari ini untuk pemasangan kaca film mobil di wilayah Jabodetabek & Bandung — gratis home service & garansi hingga 7 tahun
@@ -260,59 +254,59 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="container-fluid faq__section">
             <div class="row">
                 <div class="col-12 col-lg-6 justify-content-center align-content-center headline__faq">
-                    <h1 class="lato-black">Frequently Asked Question</h1>
-                    <p class="lato-regular">Acegard sangat mementingkan kepuasan konsumen dan klien untuk menjaga integritas brand yang unggul.</p>
+                    <h2 class="plus-jakarta-sans-600">Frequently Asked Question</h2>
+                    <p class="plus-jakarta-sans-400">Acegard sangat mementingkan kepuasan konsumen dan klien untuk menjaga integritas brand yang unggul.</p>
                 </div>
                 <div class="col-12 col-lg-6 justify-content-center align-content-center">
                     <div class="accordion custom-accordion" id="faqAccordion">
                         <div class="accordion-item">
-                            <h2 class="accordion-header">
+                            <h3 class="accordion-header">
                                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" aria-expanded="true" aria-controls="faq1">
-                                    <span class="lato-bold">Apakah kaca film Acegard membuat pandangan dari dalam mobil menjadi gelap?</span>
+                                    <span class="plus-jakarta-sans-600">Apakah kaca film Acegard membuat pandangan dari dalam mobil menjadi gelap?</span>
                                 </button>
-                            </h2>
+                            </h3>
                             <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
                                 <div class="accordion-body">
-                                    <h5 class="lato-regular">Tidak. Kaca film Acegard menggunakan teknologi Night Vision, sehingga meskipun dari luar terlihat gelap, dari dalam tetap memiliki visibilitas yang baik, terutama di malam hari.</h5>
+                                    <p class="plus-jakarta-sans-400">Tidak. Kaca film Acegard menggunakan teknologi Night Vision, sehingga meskipun dari luar terlihat gelap, dari dalam tetap memiliki visibilitas yang baik, terutama di malam hari.</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="accordion-item">
-                            <h2 class="accordion-header">
+                            <h3 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" aria-expanded="false" aria-controls="faq2">
-                                    <span class="lato-bold">Apakah saya mendapatkan garansi?</span>
+                                    <span class="plus-jakarta-sans-600">Apakah saya mendapatkan garansi?</span>
                                 </button>
-                            </h2>
+                            </h3>
                             <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                                 <div class="accordion-body">
-                                    <h5 class="lato-regular">Garansi di berikan bersamaan dengan invoice dengan nomor garansi yang tertera dan bisa melakukan pengecekan garansi di website acegard.id.</h5>
+                                    <p class="plus-jakarta-sans-400">Garansi di berikan bersamaan dengan invoice dengan nomor garansi yang tertera dan bisa melakukan pengecekan garansi di website acegard.id.</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="accordion-item">
-                            <h2 class="accordion-header">
+                            <h3 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3" aria-expanded="false" aria-controls="faq3">
-                                    <span class="lato-bold">Garansi seperti apa yang dapat saya klaim?</span>
+                                    <span class="plus-jakarta-sans-600">Garansi seperti apa yang dapat saya klaim?</span>
                                 </button>
-                            </h2>
+                            </h3>
                             <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                                 <div class="accordion-body">
-                                    <h5 class="lato-regular">Garansi dapat di klaim jika pemasangan tidak rapi, Cacat pada produk, kaca film tidak lengket ke kaca, warna memudar.</h5>
+                                    <p class="plus-jakarta-sans-400">Garansi dapat di klaim jika pemasangan tidak rapi, Cacat pada produk, kaca film tidak lengket ke kaca, warna memudar.</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="accordion-item">
-                            <h2 class="accordion-header">
+                            <h3 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4" aria-expanded="false" aria-controls="faq4">
-                                    <span class="lato-bold">Pengerjaan Berapa lama?</span>
+                                    <span class="plus-jakarta-sans-600">Pengerjaan Berapa lama?</span>
                                 </button>
-                            </h2>
+                            </h3>
                             <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                                 <div class="accordion-body">
-                                    <h5 class="lato-regular">Pengerjaan Kaca Film tergantung kondisi kaca film lama, jika kaca film sudah terlalu lama maka pengerjaan akan lebih lama bisa memakan waktu 4-5 jam.</h5>
+                                    <p class="plus-jakarta-sans-400">Pengerjaan Kaca Film tergantung kondisi kaca film lama, jika kaca film sudah terlalu lama maka pengerjaan akan lebih lama bisa memakan waktu 4-5 jam.</p>
                                 </div>
                             </div>
                         </div>
@@ -374,7 +368,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
       window.onload = startCountdown;
     </script>
-    
+
     <script>
 (function () {
   // Pastikan dataLayer ada

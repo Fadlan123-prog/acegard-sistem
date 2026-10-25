@@ -11,9 +11,6 @@
         <ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
     </x-ui.alert>
 @endif
-@if(session('error'))
-    <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-@endif
 
 @php
     $roleConfig = [
@@ -146,7 +143,7 @@
                                     <iconify-icon icon="mdi:account-switch-outline" class="me-1"></iconify-icon>
                                     Pindahkan Komisi
                                 </x-ui.button>
-                                <x-ui.button href="{{ route('commission.index') }}" variant="outline">
+                                <x-ui.button :href="route('commission.index')" variant="outline">
                                     Batal
                                 </x-ui.button>
                             </div>

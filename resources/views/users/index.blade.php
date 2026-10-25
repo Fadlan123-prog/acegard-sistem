@@ -9,20 +9,16 @@
     @slot('header')
         <div class="d-flex justify-content-between align-items-center">
             <div class="ui-card-title">Daftar User</div>
-            <x-ui.button href="{{ route('users.create') }}" variant="primary" size="sm">
+            <x-ui.button :href="route('users.create')" variant="primary" size="sm">
                 + Add User
             </x-ui.button>
         </div>
     @endslot
 
     {{-- Alert --}}
-    @if(session('success'))
-        <x-ui.alert type="success" class="mb-3">{{ session('success') }}</x-ui.alert>
-    @endif
+    
 
-    @if(session('error'))
-        <x-ui.alert type="danger" class="mb-3">{{ session('error') }}</x-ui.alert>
-    @endif
+    
 
     {{-- Search, Filter, Bulk Delete --}}
     <div class="d-flex justify-content-between align-items-center flex-wrap mb-3 gap-2">
@@ -57,7 +53,7 @@
             <x-ui.button type="submit" variant="outline">Search</x-ui.button>
 
             @if(request('branch_id') || request('search'))
-                <x-ui.button href="{{ route('users.index') }}" variant="secondary">Reset</x-ui.button>
+                <x-ui.button :href="route('users.index')" variant="secondary">Reset</x-ui.button>
             @endif
         </form>
 
@@ -194,7 +190,6 @@
     @slot('footer'){{ $users->withQueryString()->links() }}@endslot
 </x-ui.card>
 
-
 {{-- Modal Detail User --}}
 @foreach ($users as $user)
     <div class="modal fade"
@@ -266,7 +261,6 @@
         </div>
     </div>
 @endforeach
-
 
 {{-- Script Bulk Checkbox --}}
 @include('partials.bulk-delete-script')

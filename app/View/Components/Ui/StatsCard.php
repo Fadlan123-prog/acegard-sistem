@@ -8,6 +8,7 @@ class StatsCard extends Component
 {
     public string $iconColorClass;
     public string $trendClass;
+    public string $accentClass;
 
     public function __construct(
         public string  $label          = '',
@@ -16,6 +17,7 @@ class StatsCard extends Component
         public string  $trendDirection = 'neutral',
         public ?string $icon           = null,
         public string  $color          = 'blue',
+        public bool    $accent         = false,
     ) {
         $this->iconColorClass = match ($color) {
             'green'  => 'si-green',
@@ -30,6 +32,14 @@ class StatsCard extends Component
             'down' => 'ui-stats-trend down',
             default => 'ui-stats-trend',
         };
+
+        $this->accentClass = $accent ? match ($color) {
+            'green'  => 'ui-stats-accent-green',
+            'amber'  => 'ui-stats-accent-amber',
+            'red'    => 'ui-stats-accent-red',
+            'purple' => 'ui-stats-accent-purple',
+            default  => 'ui-stats-accent-blue',
+        } : '';
     }
 
     public function render()
