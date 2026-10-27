@@ -97,6 +97,16 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+
+        // Undangan setelah admin menyetujui pendaftaran sales: berlaku 48 jam
+        // (kandidat mungkin baru membuka email besok). Tabel TERPISAH dari
+        // reset biasa supaya masa berlaku keduanya tidak bisa tertukar.
+        'sales_invitations' => [
+            'provider' => 'users',
+            'table' => 'sales_invitation_tokens',
+            'expire' => 2880,
+            'throttle' => 60,
+        ],
     ],
 
     /*

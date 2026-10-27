@@ -62,7 +62,28 @@ class LoginController extends Controller
             );
         }
 
+        // Akun sales hasil pendaftaran baru boleh masuk setelah admin approve.
+        // Tanpa ini, pendaftar yang sudah punya password (lewat tautan atur
+        // password atau diisi admin) bisa login sebelum disetujui.
+        if (! $user->isSalesAccountActive()) {
+            return $this->logoutWithError(
+                $request,
+                'account',
+                'Akun Anda belum aktif. Menunggu persetujuan admin.'
+            );
+        }
+
         $request->session()->forget('active_branch_id');
+        $request->session()->forget('must_change_password');
+
+        // Password sementara dari admin → wajib diganti sebelum memakai sistem.
+        // Sesi hanya boleh membuka halaman ganti password (EnsurePasswordIsFresh).
+        if ($user->must_change_password) {
+            session(['must_change_password' => true]);
+            AuditService::logLogin($user, $request);
+
+            return redirect()->route('password.change');
+        }
 
         // Superadmin
         if ($user->hasRole('superadmin')) {

@@ -172,6 +172,21 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
+// Lupa password & atur password dari undangan (publik). Hanya akun role
+// config('password_setup.self_service_roles') yang benar-benar dikirimi tautan.
+Route::middleware('guest')->controller(\App\Http\Controllers\PasswordResetController::class)->group(function () {
+    Route::get('/lupa-password', 'showForgotForm')->name('password.request');
+    Route::post('/lupa-password', 'sendLink')->middleware('throttle:password-link')->name('password.email');
+    Route::get('/atur-password/{token}', 'showResetForm')->name('password.reset');
+    Route::post('/atur-password', 'reset')->middleware('throttle:password-reset')->name('password.update');
+});
+
+// Ganti password (wajib untuk akun dengan password sementara dari admin).
+Route::middleware('auth')->controller(\App\Http\Controllers\PasswordChangeController::class)->group(function () {
+    Route::get('/ganti-password', 'show')->name('password.change');
+    Route::post('/ganti-password', 'update')->middleware('throttle:5,1')->name('password.change.update');
+});
+
 // Pendaftaran sales mandiri lewat kode referral — publik, tidak perlu login
 // (kandidat belum punya akun). Akun yang terbentuk tetap nonaktif sampai
 // admin approve, sama seperti jalur sponsor-merekrut yang sudah ada.
@@ -1043,6 +1058,7 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin'])
         Route::get('/pending', 'pendingApprovals')->name('pending');
         Route::post('/{profile}/approve', 'approve')->name('approve');
         Route::post('/{profile}/reject', 'reject')->name('reject');
+        Route::post('/{profile}/resend-invite', 'resendInvite')->name('resend-invite')->middleware('throttle:6,1');
     });
 
 Route::middleware(['auth', 'role:superadmin|admin'])

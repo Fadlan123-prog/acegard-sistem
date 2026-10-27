@@ -102,7 +102,7 @@
                                     <input class="form-check-input border border-neutral-300" type="checkbox" value="" id="remeber">
                                     <label class="form-check-label" for="remeber">Remember me </label>
                                 </div>
-                                <a  href="javascript:void(0)" class="text-primary-600 fw-medium">Forgot Password?</a>
+                                <a  href="{{ route('password.request') }}" class="text-primary-600 fw-medium">Lupa Password?</a>
                             </div>
                         </div>
 

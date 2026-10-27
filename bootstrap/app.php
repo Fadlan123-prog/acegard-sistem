@@ -21,6 +21,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
 
+        // Akun dengan password sementara dari admin dikunci ke halaman ganti password.
+        $middleware->appendToGroup('web', \App\Http\Middleware\EnsurePasswordIsFresh::class);
+
         // Deliberately NOT calling trustProxies() here (audit finding M-14).
         // If Hostinger fronts the app with a reverse proxy/load balancer,
         // REMOTE_ADDR is the proxy's own IP, not the visitor's — which makes

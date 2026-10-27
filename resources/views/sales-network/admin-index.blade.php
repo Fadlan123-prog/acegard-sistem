@@ -27,6 +27,7 @@
                     <th>Sponsor</th>
                     <th>Cabang</th>
                     <th>Status</th>
+                    <th style="width:170px">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -42,9 +43,19 @@
                             {{ \App\Models\SalesNetworkProfile::$statusLabels[$profile->status] ?? $profile->status }}
                         </x-ui.badge>
                     </td>
+                    <td>
+                        @if($profile->isActive() && isset($needsInvite[$profile->employee_id]))
+                            <form method="POST" action="{{ route('sales-network.resend-invite', $profile) }}">
+                                @csrf
+                                <x-ui.button type="submit" variant="outline" size="sm">
+                                    <iconify-icon icon="mdi:email-fast-outline"></iconify-icon> Kirim ulang undangan
+                                </x-ui.button>
+                            </form>
+                        @endif
+                    </td>
                 </tr>
                 @empty
-                <tr><td colspan="6" class="py-5"><x-ui.empty-state title="Belum ada anggota jaringan." /></td></tr>
+                <tr><td colspan="7" class="py-5"><x-ui.empty-state title="Belum ada anggota jaringan." /></td></tr>
                 @endforelse
             </tbody>
         </table>

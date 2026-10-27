@@ -44,6 +44,16 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($key);
         });
 
+        // Lupa-password & penukaran token: dikunci per email+IP (bukan IP saja,
+        // karena trustProxies sengaja tidak diaktifkan — lihat bootstrap/app.php).
+        // Pengiriman tautan juga dibatasi 1x/60 detik per akun oleh broker.
+        RateLimiter::for('password-link', function (Request $request) {
+            return Limit::perMinute(3)->by('pwlink|' . Str::lower((string) $request->input('email')) . '|' . $request->ip());
+        });
+
+        RateLimiter::for('password-reset', function (Request $request) {
+            return Limit::perMinute(5)->by('pwreset|' . Str::lower((string) $request->input('email')) . '|' . $request->ip());
+        });
     }
 }
 
