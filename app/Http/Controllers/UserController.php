@@ -21,13 +21,15 @@ class UserController extends Controller
         // Restrukturisasi ERP (2026-08)
         'it_manager', 'development', 'export_import',
         'strategi_pengembangan', 'designer', 'videographer',
+        // Referral & Hierarki Sales (2026-10)
+        'sales',
     ];
 
     // Roles whose users bypass the branch middleware (no branch_user row needed)
     private array $staffRoles = ['teknisi', 'kenek'];
 
     // Roles that must be linked to an employee record (for data scoping)
-    private array $employeeRoles = ['teknisi', 'kenek', 'marketing'];
+    private array $employeeRoles = ['teknisi', 'kenek', 'marketing', 'sales'];
 
     // Roles that do NOT need branch assignment. IT Manager needs a branch
     // (inherits Purchasing+Finance's per-branch scoping); the other new

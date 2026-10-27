@@ -94,6 +94,29 @@ class Employee extends Model
         return $this->hasMany(EmployeeHealthBalance::class);
     }
 
+    /** Keanggotaan jaringan referral sales milik karyawan ini (kalau ada). */
+    public function salesNetworkProfile()
+    {
+        return $this->hasOne(SalesNetworkProfile::class);
+    }
+
+    /** Karyawan lain yang disponsori langsung oleh karyawan ini (lewat sales_network_profiles.sponsor_id). */
+    public function sponsoredRecruits()
+    {
+        return $this->hasMany(SalesNetworkProfile::class, 'sponsor_id');
+    }
+
+    public function salesTransactions()
+    {
+        return $this->hasMany(SalesTransaction::class, 'sales_employee_id');
+    }
+
+    /** Akun login milik karyawan ini (kalau ada) — dipakai untuk cek role Spatie (sales/marketing/dst). */
+    public function user()
+    {
+        return $this->hasOne(User::class);
+    }
+
     /**
      * Karyawan aktif yang ulang tahunnya jatuh dalam N hari ke depan (termasuk
      * hari ini), diurutkan dari yang paling dekat. birth_date berulang tiap

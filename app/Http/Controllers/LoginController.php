@@ -50,6 +50,8 @@ class LoginController extends Controller
             // Restrukturisasi ERP (2026-08)
             'it_manager', 'development', 'export_import',
             'strategi_pengembangan', 'designer', 'videographer',
+            // Referral & Hierarki Sales (2026-10)
+            'sales',
         ];
 
         if (!$user->hasAnyRole($allowedRoles)) {
@@ -114,6 +116,10 @@ class LoginController extends Controller
 
         if ($user->hasAnyRole(['marketing', 'manager_marketing'])) {
             return redirect()->intended(route('marketing.dashboard'));
+        }
+
+        if ($user->hasRole('sales')) {
+            return redirect()->intended(route('sales.dashboard'));
         }
 
         if ($user->hasRole('customer_service')) {

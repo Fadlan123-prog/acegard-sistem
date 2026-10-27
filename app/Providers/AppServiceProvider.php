@@ -21,6 +21,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Domain\Commission\CommissionCalculator::class,
             fn () => new \App\Domain\Commission\CommissionCalculator(config('commission'))
         );
+
+        $this->app->bind(
+            \App\Domain\Sales\SalesCommissionCalculator::class,
+            fn () => new \App\Domain\Sales\SalesCommissionCalculator(config('sales_commission'))
+        );
     }
 
     public function boot(): void
@@ -38,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
 
             return Limit::perMinute(5)->by($key);
         });
+
     }
 }
 

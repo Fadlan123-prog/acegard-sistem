@@ -123,6 +123,11 @@
                         </div> --}}
 
                     </form>
+
+                    <div class="text-center mt-24">
+                        <span class="text-secondary-light">Punya kode referral sales/marketing? </span>
+                        <a href="{{ route('sales-network.public-register') }}" class="text-primary-600 fw-medium">Daftar sebagai Sales</a>
+                    </div>
                 </div>
             </div>
         </div>
