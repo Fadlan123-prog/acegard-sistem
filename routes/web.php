@@ -653,6 +653,10 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|owner|manager
             Route::put('/{commission}/move', 'moveUpdate')->name('move.update');
             Route::patch('/{commission}/toggle-active', 'toggleActive')->name('toggle-active');
         });
+
+        Route::middleware('role:superadmin|admin|owner|manager_operasional|finance')
+            ->get('/building-meters', [\App\Http\Controllers\BuildingMeterReportController::class, 'index'])
+            ->name('commission.building-meters');
     });
 
 

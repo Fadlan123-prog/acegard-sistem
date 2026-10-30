@@ -266,6 +266,49 @@
               <input type="text" name="applicator" class="form-control"
                      value="{{ old('applicator', $customer->applicator) }}">
             </div>
+            <div class="col-md-12" id="techMetersBox">
+              <label class="form-label">Meter per Teknisi <span class="text-muted small">(dasar komisi gedung, tanpa kenek)</span></label>
+              <div class="table-responsive">
+                <table class="table table-sm align-middle mb-2">
+                  <thead><tr><th>Teknisi</th><th style="width:220px">Kategori Film</th><th style="width:130px">Meter</th><th style="width:50px"></th></tr></thead>
+                  <tbody id="techMetersBody"></tbody>
+                </table>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="addTechMeter">+ Tambah teknisi</button>
+              <div class="form-text">Catat berapa meter yang dikerjakan tiap teknisi. Komisi = meter × tarif kategori, dibayar saat invoice lunas. Total meter per kategori tidak boleh melebihi meter produk; sisa yang belum dialokasikan tidak dikomisi.</div>
+              @error('technician_meters')<div class="text-danger small">{{ $message }}</div>@enderror
+              @error('technician_meters.*')<div class="text-danger small">{{ $message }}</div>@enderror
+              @php
+                $__techRows = old('technician_meters', $customer->technicianMeters->map(fn ($r) => ['employee_id' => $r->employee_id, 'category_product_building_id' => $r->category_product_building_id, 'meters' => $r->meters])->all());
+              @endphp
+              <script>
+              (function () {
+                const employees = @json($employees->map(fn ($e) => ['id' => $e->id, 'label' => $e->name . ($e->job_position ? ' — ' . $e->job_position : '')])->values());
+                const categories = @json($categories->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])->values());
+                const rows = @json(array_values($__techRows));
+                const body = document.getElementById('techMetersBody');
+                let idx = 0;
+                function opt(list, key, sel, ph) {
+                  return '<option value="">' + ph + '</option>' + list.map(x => '<option value="' + x.id + '"' + (String(x.id) === String(sel) ? ' selected' : '') + '>' + (x.label || x.name) + '</option>').join('');
+                }
+                function addRow(r) {
+                  r = r || {};
+                  const i = idx++;
+                  const tr = document.createElement('tr');
+                  tr.innerHTML =
+                    '<td><select name="technician_meters[' + i + '][employee_id]" class="form-select form-select-sm" required>' + opt(employees, 'id', r.employee_id, '— Pilih teknisi —') + '</select></td>' +
+                    '<td><select name="technician_meters[' + i + '][category_product_building_id]" class="form-select form-select-sm" required>' + opt(categories, 'id', r.category_product_building_id, '— Pilih kategori —') + '</select></td>' +
+                    '<td><input type="number" step="0.01" min="0.01" name="technician_meters[' + i + '][meters]" class="form-control form-control-sm" value="' + (r.meters ?? '') + '" required></td>' +
+                    '<td><button type="button" class="btn btn-sm btn-outline-danger">&times;</button></td>';
+                  tr.querySelector('button').addEventListener('click', () => tr.remove());
+                  body.appendChild(tr);
+                }
+                rows.forEach(addRow);
+                document.getElementById('addTechMeter').addEventListener('click', () => addRow());
+              })();
+              </script>
+            </div>
+
           </div>
         </div>
       </div>

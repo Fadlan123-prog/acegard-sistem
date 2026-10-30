@@ -32,6 +32,11 @@ class CustomerBuilding extends Model
         return $this->hasMany(CustomerBuildingProduct::class);
     }
 
+    public function technicianMeters()
+    {
+        return $this->hasMany(CustomerBuildingTechnicianMeter::class, 'customer_building_id');
+    }
+
     public function part(){
         return $this->hasManyThrough(Part::class, ProductBuilding::class);
     }

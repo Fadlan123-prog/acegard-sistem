@@ -146,6 +146,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Komisi Teknisi Gedung (per meter)
+    |--------------------------------------------------------------------------
+    | Key = category_product_building.id. Tanpa kenek: pool = Σ(meter × tarif),
+    | dibagi rata ke teknisi yang ditugaskan di customer gedung.
+    | 1 = 4K ALPHA PRO, 2 = NOTCH UV 400, 3 = BLACK MASTER, 4 = FLEX ONE WAY.
+    | Sunblast (Rp10.000/m) belum ada sebagai kategori — tambahkan kategorinya
+    | di category_product_building lalu isi ID-nya di sini.
+    */
+
+    'building_per_meter' => [
+        1 => 40000,
+        2 => 30000,
+        3 => 25000,
+        4 => 15000,
+    ],
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Prioritas Kategori Marketing
     |--------------------------------------------------------------------------
     | Bila satu customer punya beberapa kategori produk, dipakai kategori yang

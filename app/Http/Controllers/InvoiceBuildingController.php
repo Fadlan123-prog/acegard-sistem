@@ -423,6 +423,9 @@ class InvoiceBuildingController extends Controller
                 'waste_percent'     => $wastePercent,
             ]);
 
+            // Komisi teknisi gedung (per meter) — eligible saat lunas
+            app(\App\Services\BuildingCommissionService::class)->release($invoice->fresh());
+
             // Potong stok saat pelunasan
             if ($customer && $customer->products->isNotEmpty()) {
                 $buildingProducts = $customer->products->map(fn ($p) => [
