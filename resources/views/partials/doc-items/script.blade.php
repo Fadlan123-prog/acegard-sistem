@@ -196,9 +196,9 @@
             row.querySelector('.desc-input').value                 = data.description     || '';
             row.querySelector('[name$="[specifications]"]').value = data.specifications  || '';
             row.querySelector('[name$="[unit]"]').value           = data.unit            || 'unit';
-            row.querySelector('.item-qty').value                  = data.quantity        || 1;
-            row.querySelector('.item-price').value                = data.unit_price      || 0;
-            row.querySelector('.item-disc').value                 = data.discount_percent|| 0;
+            row.querySelector('.item-qty').value                  = Number(data.quantity) || 1;   // '12.00' -> 12
+            row.querySelector('.item-price').value                = Math.round(Number(data.unit_price) || 0);   // harga rupiah bulat: '2500000.00' -> 2500000
+            row.querySelector('.item-disc').value                 = Number(data.discount_percent) || 0;
         }
         syncPicker(row, !!data);
         applyMode(row);

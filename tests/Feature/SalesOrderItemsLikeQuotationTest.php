@@ -111,4 +111,25 @@ class SalesOrderItemsLikeQuotationTest extends TestCase
         $this->actingAs($admin)->get(route('sales-orders.create'))
             ->assertOk()->assertSee('pack-card', false)->assertSee('Tambah bagian', false)->assertSee('desc-picker', false);
     }
+
+    public function test_prices_and_discount_seeded_from_a_quotation_are_whole_rupiah_without_decimals(): void
+    {
+        $this->seedCatalog();
+        $branch = Branch::factory()->create();
+        $admin = $this->userWithRole('admin', $branch);
+        $this->actingAs($admin)->post(route('quotations.store'), array_merge($this->payload($branch, [
+            'description' => 'Fullset', 'unit_price' => 3800000,
+            'film_lines' => [['part_id' => 1, 'category_id' => 1, 'product_id' => 1]],
+        ]), ['valid_until' => now()->addDays(14)->toDateString(), 'discount_amount' => 300000]))->assertSessionHasNoErrors();
+        $quotation = Quotation::first();
+
+        $page = $this->actingAs($admin)->get(route('sales-orders.create', ['from_quotation' => $quotation->id]))->assertOk();
+        $html = $page->getContent();
+
+        $this->assertStringNotContainsString('3800000.00', $html);
+        $this->assertStringNotContainsString('300000.00', $html);
+        $this->assertStringContainsString('name="discount_amount"', $html);
+        $this->assertMatchesRegularExpression('/name="discount_amount"[^>]*value="300000"/s', $html, 'diskon quotation ikut terbawa ke SO sebagai bilangan bulat');
+        $this->assertStringContainsString('step="1"', $html);
+    }
 }

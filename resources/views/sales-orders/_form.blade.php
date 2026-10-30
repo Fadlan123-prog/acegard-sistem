@@ -324,8 +324,8 @@
                                 <td class="text-end border-0" style="width:150px">
                                     <input type="number" name="discount_amount" id="discountInput"
                                            class="form-control form-control-sm text-end"
-                                           value="{{ old('discount_amount', $isEdit ? $salesOrder->discount_amount : 0) }}"
-                                           min="0" step="1000">
+                                           value="{{ old('discount_amount', (int) round((float) ($isEdit ? $salesOrder->discount_amount : ($quotation->discount_amount ?? 0)))) }}"
+                                           min="0" step="1">
                                 </td>
                             </tr>
                             <tr class="table-light">
@@ -373,7 +373,7 @@
 @include('partials.doc-items.script', ['seedItems' => ($isEdit && $existingItems->isNotEmpty() ? $existingItems : ($quotation && $quotation->items->isNotEmpty() ? $quotation->items : collect()))->map(fn($i) => [
     'description' => $i->description, 'specifications' => $i->specifications, 'film_lines' => $i->film_lines,
     'vehicle_label' => $i->vehicle_label, 'vehicle_plate' => $i->vehicle_plate, 'unit' => $i->unit,
-    'quantity' => $i->quantity, 'unit_price' => $i->unit_price, 'discount_percent' => $i->discount_percent,
+    'quantity' => (float) $i->quantity, 'unit_price' => (int) round((float) $i->unit_price), 'discount_percent' => (float) $i->discount_percent,
 ])->all()])
 <script>
 (function(){

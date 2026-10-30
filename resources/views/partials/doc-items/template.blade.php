@@ -47,7 +47,7 @@
             </select>
         </td>
         <td class="qty-td"><input type="number" name="items[__IDX__][quantity]" class="form-control form-control-sm item-qty" value="1" min="0.01" step="0.01" required></td>
-        <td><div class="price-wrap"><span aria-hidden="true">Rp</span><input type="number" name="items[__IDX__][unit_price]" class="form-control form-control-sm item-price" value="0" min="0" step="1000" required inputmode="numeric" aria-label="Harga"></div></td>
+        <td><div class="price-wrap"><span aria-hidden="true">Rp</span><input type="number" name="items[__IDX__][unit_price]" class="form-control form-control-sm item-price" value="0" min="0" step="1" required inputmode="numeric" aria-label="Harga"></div></td>
         <td class="disc-td"><input type="number" name="items[__IDX__][discount_percent]" class="form-control form-control-sm item-disc" value="0" min="0" max="100" step="0.5"></td>
         <td class="text-end item-subtotal-cell align-middle"><span class="item-subtotal">Rp 0</span></td>
         <td class="text-center align-middle">
