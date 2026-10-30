@@ -145,6 +145,11 @@ body { font-family:'Helvetica Neue',Arial,sans-serif; font-size:10pt; color:#1a1
                 <span class="val" style="font-size:11pt;letter-spacing:1pt">{{ strtoupper($salesOrder->vehicle_plate) }}</span>
             </p>
             @endif
+            @if($salesOrder->usesFilmSelection() && $salesOrder->film_label)
+            <p style="margin-top:3pt"><span class="lbl">Tipe Film / Kegelapan</span><br>
+                <span class="val">{{ $salesOrder->film_label }}</span>
+            </p>
+            @endif
         </div>
 
         <div class="info-box">

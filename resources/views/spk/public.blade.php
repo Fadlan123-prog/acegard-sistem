@@ -133,6 +133,12 @@ body { font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; ba
                 </span>
             </div>
             @endif
+            @if($salesOrder->usesFilmSelection() && $salesOrder->film_label)
+            <div class="info-row">
+                <span class="lbl">Tipe Film / Kegelapan</span>
+                <span class="val">{{ $salesOrder->film_label }}</span>
+            </div>
+            @endif
         </div>
         @endif
 

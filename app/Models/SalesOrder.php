@@ -21,7 +21,7 @@ class SalesOrder extends Model
         'date', 'scheduled_date',
         'prospect_name', 'prospect_phone', 'prospect_email', 'prospect_address',
         'category', 'vehicle_brand', 'vehicle_model', 'vehicle_year', 'vehicle_plate',
-        'tukang_id', 'kenek_id', 'marketing_id',
+        'tukang_id', 'kenek_id', 'marketing_id', 'film_category_id', 'film_product_id',
         'subtotal', 'discount_amount', 'total_amount',
         'status', 'confirmed_at', 'in_progress_at', 'completed_at', 'cancelled_at', 'cancel_reason',
         'converted_to_type', 'converted_to_id', 'converted_at',
@@ -97,6 +97,59 @@ class SalesOrder extends Model
      * six different places (controller + 2 Blade views) and PPF was missing
      * from every one of them.
      */
+    /** Kategori yang memilih tipe film & kegelapan (mobil / gedung). */
+    public function usesFilmSelection(): bool
+    {
+        return in_array($this->category, ['car_film', 'building_film'], true);
+    }
+
+    public function filmCategoryModel(): ?string
+    {
+        return match ($this->category) {
+            'car_film'      => \App\Models\CategoryProduct::class,
+            'building_film' => \App\Models\CategoryProductBuilding::class,
+            default         => null,
+        };
+    }
+
+    public function filmProductModel(): ?string
+    {
+        return match ($this->category) {
+            'car_film'      => \App\Models\Product::class,
+            'building_film' => \App\Models\ProductBuilding::class,
+            default         => null,
+        };
+    }
+
+    public function getFilmCategoryAttribute()
+    {
+        $m = $this->filmCategoryModel();
+
+        return ($m && $this->film_category_id) ? $m::find($this->film_category_id) : null;
+    }
+
+    public function getFilmProductAttribute()
+    {
+        $m = $this->filmProductModel();
+
+        return ($m && $this->film_product_id) ? $m::find($this->film_product_id) : null;
+    }
+
+    /** Contoh: "Premium — AP50 (20%)" */
+    public function getFilmLabelAttribute(): ?string
+    {
+        $cat = $this->film_category;
+        $prod = $this->film_product;
+
+        if (! $cat && ! $prod) {
+            return null;
+        }
+
+        $prodLabel = $prod ? trim($prod->name . ($prod->description ? ' (' . $prod->description . ')' : '')) : null;
+
+        return trim(implode(' — ', array_filter([$cat?->name, $prodLabel])));
+    }
+
     public function assignsMultipleTechnicians(): bool
     {
         return in_array($this->category, ['building_film', 'ppf'], true);
