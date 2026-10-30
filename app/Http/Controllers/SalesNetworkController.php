@@ -145,6 +145,7 @@ class SalesNetworkController extends Controller
     public function pendingApprovals()
     {
         $profiles = SalesNetworkProfile::with(['employee.branch', 'employee.user', 'sponsor'])
+            ->tap(fn ($q) => $this->scopeProfiles($q))
             ->where('status', 'pending_approval')
             ->latest()
             ->paginate(20);
@@ -162,6 +163,7 @@ class SalesNetworkController extends Controller
      */
     public function approve(Request $request, SalesNetworkProfile $profile)
     {
+        $this->authorizeProfile($profile);
         abort_unless($profile->status === 'pending_approval', 422, 'Pendaftaran ini sudah diproses.');
 
         $manual = $request->input('password_mode') === 'manual';
@@ -233,6 +235,7 @@ class SalesNetworkController extends Controller
     /** Kirim ulang undangan — hanya untuk sales aktif yang belum pernah memilih passwordnya. */
     public function resendInvite(Request $request, SalesNetworkProfile $profile)
     {
+        $this->authorizeProfile($profile);
         abort_unless($profile->isActive(), 422, 'Hanya anggota aktif yang bisa dikirimi undangan.');
 
         $user = User::where('employee_id', $profile->employee_id)->first();
@@ -281,6 +284,7 @@ class SalesNetworkController extends Controller
 
     public function reject(Request $request, SalesNetworkProfile $profile)
     {
+        $this->authorizeProfile($profile);
         abort_unless($profile->status === 'pending_approval', 422, 'Pendaftaran ini sudah diproses.');
 
         $employee = $profile->employee;
@@ -299,6 +303,7 @@ class SalesNetworkController extends Controller
     public function adminIndex()
     {
         $profiles = SalesNetworkProfile::with(['employee.branch', 'sponsor'])
+            ->tap(fn ($q) => $this->scopeProfiles($q))
             ->latest()
             ->paginate(20);
 
@@ -324,12 +329,14 @@ class SalesNetworkController extends Controller
     public function adminCreate()
     {
         $employees = Employee::whereDoesntHave('salesNetworkProfile')
+            ->tap(fn ($q) => $this->scopeEmployees($q))
             ->whereHas('user', fn ($q) => $q->whereHas('roles', fn ($r) => $r->whereIn('name', ['sales', 'marketing'])))
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
 
         $sponsorCandidates = SalesNetworkProfile::with('employee')
+            ->tap(fn ($q) => $this->scopeProfiles($q))
             ->where('status', 'active')
             ->get();
 
@@ -343,6 +350,14 @@ class SalesNetworkController extends Controller
             'sponsor_id'  => ['nullable', 'exists:employees,id'],
         ]);
 
+        $user = $request->user();
+        $employee = Employee::findOrFail($data['employee_id']);
+        abort_unless($user->canAccessBranch($employee->branch_id !== null ? (int) $employee->branch_id : null), 403, 'Karyawan cabang lain.');
+        if (! empty($data['sponsor_id'])) {
+            $sponsor = Employee::findOrFail($data['sponsor_id']);
+            abort_unless($user->canAccessBranch($sponsor->branch_id !== null ? (int) $sponsor->branch_id : null), 403, 'Sponsor cabang lain.');
+        }
+
         SalesNetworkProfile::create([
             'employee_id'   => $data['employee_id'],
             'referral_code' => $this->generateReferralCode(),
@@ -355,6 +370,36 @@ class SalesNetworkController extends Controller
 
         return redirect()->route('sales-network.admin-index')
             ->with('success', 'Anggota jaringan berhasil ditambahkan.');
+    }
+
+    /** Admin terikat cabang karyawan; superadmin/owner lintas cabang. */
+    private function authorizeProfile(SalesNetworkProfile $profile): void
+    {
+        $branchId = $profile->employee?->branch_id;
+
+        abort_unless(
+            auth()->user()->canAccessBranch($branchId !== null ? (int) $branchId : null),
+            403,
+            'Anggota jaringan cabang lain.'
+        );
+    }
+
+    private function scopeProfiles($query): void
+    {
+        $user = auth()->user();
+
+        if (! $user->hasAnyRole(['superadmin', 'owner'])) {
+            $query->whereHas('employee', fn ($e) => $e->whereIn('branch_id', $user->accessibleBranchIds()));
+        }
+    }
+
+    private function scopeEmployees($query): void
+    {
+        $user = auth()->user();
+
+        if (! $user->hasAnyRole(['superadmin', 'owner'])) {
+            $query->whereIn('branch_id', $user->accessibleBranchIds());
+        }
     }
 
     private function generateReferralCode(): string

@@ -12,6 +12,12 @@ class CustomerExport implements FromCollection
     */
     public function collection()
     {
-        return Customer::all();
+        $user = auth()->user();
+
+        // Non-superadmin/owner: hanya cabang yang boleh diakses user.
+        return Customer::query()
+            ->when(! $user || ! $user->hasAnyRole(['superadmin', 'owner']),
+                fn ($q) => $q->whereIn('branch_id', $user ? $user->accessibleBranchIds() : []))
+            ->get();
     }
 }

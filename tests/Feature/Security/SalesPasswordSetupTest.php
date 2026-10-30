@@ -61,6 +61,8 @@ class SalesPasswordSetupTest extends TestCase
         $branch = Branch::factory()->create();
         $admin = $this->userWithRole('admin', $branch);
         $admin->update(['password' => Hash::make($password)]);
+        // Admin terikat cabang: beri akses ke cabang sales yang sudah dibuat test.
+        $admin->branches()->syncWithoutDetaching(Branch::pluck('id')->all());
 
         return $admin;
     }
