@@ -18,11 +18,12 @@ class InstallTypeResolver
         int $tukangId,
         string $baseType,
         bool $hasPanoramic = false,
-        \DateTimeInterface|string|null $forDate = null
+        \DateTimeInterface|string|null $forDate = null,
+        ?array $partIds = null
     ): string {
         $date = $forDate ? Carbon::parse($forDate)->toDateString() : Carbon::today()->toDateString();
         if ($baseType === 'skkb') return $hasPanoramic ? 'skkb_panoramic' : 'skkb';
-        if ($baseType === 'dsp')  return $hasPanoramic ? 'dsp_panoramic'  : 'dsp';
+        if ($baseType === 'dsp')  return ($hasPanoramic && $this->dspDouble($partIds)) ? 'dsp_panoramic' : 'dsp';
 
         $countToday = DB::table('customers')
             ->where('tukang_id', $tukangId)
@@ -49,11 +50,12 @@ class InstallTypeResolver
         string $baseType,
         bool $hasPanoramic = false,
         ?int $excludeCustomerId = null,
-        \DateTimeInterface|string|null $forDate = null
+        \DateTimeInterface|string|null $forDate = null,
+        ?array $partIds = null
     ): string {
         $date = $forDate ? Carbon::parse($forDate)->toDateString() : Carbon::today()->toDateString();
         if ($baseType === 'skkb') return $hasPanoramic ? 'skkb_panoramic' : 'skkb';
-        if ($baseType === 'dsp')  return $hasPanoramic ? 'dsp_panoramic'  : 'dsp';
+        if ($baseType === 'dsp')  return ($hasPanoramic && $this->dspDouble($partIds)) ? 'dsp_panoramic' : 'dsp';
 
         $q = DB::table('customers')
             ->where('tukang_id', $tukangId)
@@ -80,5 +82,17 @@ class InstallTypeResolver
             $countToday === 1 => 'fullset_ekstra',
             default           => 'fullset_ekstra_plus',
         };
+    }
+
+    /** D/S/P dihitung 2× hanya bila bagian yang dipasang persis kaca depan + panoramic. */
+    private function dspDouble(?array $partIds): bool
+    {
+        if ($partIds === null) {
+            return true; // pemanggil tidak memberi daftar bagian: perilaku lama
+        }
+
+        $names = DB::table('parts')->whereIn('id', array_filter($partIds))->pluck('name')->all();
+
+        return \App\Domain\Commission\CommissionCalculator::isWindshieldPlusPanoramicOnly($names);
     }
 }

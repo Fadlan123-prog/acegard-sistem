@@ -225,6 +225,7 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
             $request->boolean('has_panoramic'),
             $customer->id,
             $request->install_date,
+            collect($request->input('products', []))->pluck('part_id')->map(fn ($v) => (int) $v)->all(),
         );
 
         // Stock deduction dipindah ke saat pelunasan invoice (InvoiceController::recordPelunasan)
@@ -399,6 +400,7 @@ public function edit(Customer $customer)
             $request->boolean('has_panoramic'),
             $customer->id,
             $request->install_date,
+            collect($request->input('products', []))->pluck('part_id')->map(fn ($v) => (int) $v)->all(),
         );
 
         // === Sync marketing + Adit override jika sudah dirilis dan marketing berubah ===
@@ -687,7 +689,10 @@ public function edit(Customer $customer)
         $kenekId      = $request->integer('kenek_id')  ?: null;
         $forDate      = $request->filled('date') ? Carbon::parse($request->input('date')) : Carbon::today();
 
-        $finalType = $resolver->decideFromBase($tukangId ?: 0, $installType, $hasPanoramic, $forDate);
+        $finalType = $resolver->decideFromBase(
+            $tukangId ?: 0, $installType, $hasPanoramic, $forDate,
+            $request->has('part_ids') ? array_map('intval', (array) $request->input('part_ids')) : null,
+        );
 
         try {
             $preview = $commissionSync->previewSplit(

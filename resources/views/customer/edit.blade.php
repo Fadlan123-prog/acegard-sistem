@@ -691,7 +691,7 @@
         panoHint.textContent = type === 'dsp' ? 'Komisi D/S/P reguler.' : 'Komisi Fullset reguler.';
       } else {
         panoHint.textContent = type === 'dsp'
-          ? 'Komisi D/S/P + Panoramic (2× rate).'
+          ? 'Komisi 2× D/S/P hanya bila bagian terpasang = kaca depan + panoramic saja; selain itu 1× D/S/P.'
           : 'Komisi mengikuti aturan panoramic.';
       }
     }
@@ -769,9 +769,21 @@
         badge.classList.toggle('bg-primary', tot === 100);
       }
     }
+    // D/S/P dihitung 2× hanya bila bagian terpilih persis: kaca depan + panoramic.
+    function dspWindshieldPlusPanoramicOnly() {
+      const names = new Set();
+      document.querySelectorAll('select[name$="[part_id]"]').forEach(sel => {
+        const t = (sel.options[sel.selectedIndex]?.text || '').toLowerCase().trim();
+        if (t && sel.value) names.add(t);
+      });
+      if (names.size !== 2) return false;
+      const list = [...names];
+      return list.some(n => n.includes('windshield')) && list.some(n => n.includes('pano') || n.includes('sunroof'));
+    }
     function currentKey() {
       const it = installTypeEl?.value; if (!it) return null;
-      if (it === 'skkb' || it === 'dsp') return it;
+      if (it === 'skkb') return it;
+      if (it === 'dsp') return (panoOn?.checked && dspWindshieldPlusPanoramicOnly()) ? 'dsp_panoramic' : 'dsp';
       return panoOn?.checked ? 'full_panoramic' : 'fullset';
     }
     function calcPool() {
@@ -801,6 +813,7 @@
     function updateAll() { if (isCustom()) normalize(); updateBars(); updatePreview(); }
 
     window._custUpdatePreview = updatePreview;
+    document.addEventListener('change', e => { if (e.target.matches?.('select[name$="[part_id]"]')) updatePreview(); });
 
     [shareAuto, shareCustom].forEach(el => el?.addEventListener('change', toggleMode));
     normalizeEl?.addEventListener('change', updateAll);

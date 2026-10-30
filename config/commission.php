@@ -35,10 +35,12 @@ return [
         'dsp_50'    => ['teknisi' => 25000, 'kenek' => 25000],
         'dsp_solo'  => ['teknisi' => 50000, 'kenek' => 50000],
 
-        // ── D / S / P + Panoramic (base + 30k/15k) ──────────────────────────
-        'dsp_panoramic'      => ['teknisi' => 65000,  'kenek' => 30000],   // dsp + 30k/15k
-        'dsp_panoramic_50'   => ['teknisi' => 47500,  'kenek' => 47500],   // (dsp_50 pool + 45k) ÷ 2
-        'dsp_panoramic_solo' => ['teknisi' => 95000,  'kenek' => 95000],   // dsp_solo pool + 45k
+        // ── D / S / P + Panoramic = 2× D/S/P ────────────────────────────────
+        // Hanya bila bagian yang dipasang persis kaca depan + panoramic
+        // (CommissionCalculator::isWindshieldPlusPanoramicOnly). Salah satunya saja = 1× D/S/P.
+        'dsp_panoramic'      => ['teknisi' => 70000,  'kenek' => 30000],   // 2 × dsp
+        'dsp_panoramic_50'   => ['teknisi' => 50000,  'kenek' => 50000],   // 2 × dsp_50
+        'dsp_panoramic_solo' => ['teknisi' => 100000, 'kenek' => 100000],  // 2 × dsp_solo
 
         // ── SKKB ─────────────────────────────────────────────────────────────
         'skkb'      => ['teknisi' => 49000, 'kenek' => 21000],
@@ -82,7 +84,7 @@ return [
 
         // ── Lebaran (2× rate standard) ───────────────────────────────────────
         'dsp_lebaran'                        => ['teknisi' => 70000,  'kenek' => 30000],
-        'dsp_panoramic_lebaran'              => ['teknisi' => 130000, 'kenek' => 60000],   // 2× dsp_panoramic
+        'dsp_panoramic_lebaran'              => ['teknisi' => 140000, 'kenek' => 60000],   // 2× dsp_lebaran × 2
         'skkb_lebaran'                       => ['teknisi' => 98000,  'kenek' => 42000],
         'skkb_panoramic_lebaran'             => ['teknisi' => 158000, 'kenek' => 72000],   // 2× skkb_panoramic
         'fullset_lebaran'                    => ['teknisi' => 140000, 'kenek' => 60000],

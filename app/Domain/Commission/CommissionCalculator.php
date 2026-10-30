@@ -143,13 +143,35 @@ final class CommissionCalculator
             if (str_starts_with($installType, 'fullset')) {
                 return 'full_panoramic';
             }
-            // Kaca depan + panoramic = 2× D/S/P
-            if ($installType === 'dsp') {
+            // Kaca depan + panoramic SAJA = 2× D/S/P. Hanya depan, hanya panoramic,
+            // atau ditambah kaca lain tetap 1× D/S/P.
+            if ($installType === 'dsp' && self::isWindshieldPlusPanoramicOnly(
+                $customer->customerProducts->map(fn ($cp) => (string) $cp->part?->name)->all()
+            )) {
                 return 'dsp_panoramic';
             }
         }
 
         return $installType;
+    }
+
+    /**
+     * True hanya bila bagian yang dipasang persis: kaca depan (windshield) + sunroof/panoramic.
+     *
+     * @param  array<int,string>  $partNames
+     */
+    public static function isWindshieldPlusPanoramicOnly(array $partNames): bool
+    {
+        $names = array_unique(array_filter(array_map(fn ($n) => strtolower(trim($n)), $partNames)));
+
+        if (count($names) !== 2) {
+            return false;
+        }
+
+        $hasWindshield = (bool) array_filter($names, fn ($n) => str_contains($n, 'windshield'));
+        $hasPanoramic  = (bool) array_filter($names, fn ($n) => str_contains($n, 'pano') || str_contains($n, 'sunroof'));
+
+        return $hasWindshield && $hasPanoramic;
     }
 
     /**

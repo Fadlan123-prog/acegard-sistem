@@ -33,7 +33,10 @@ class MarketingCommissionTest extends TestCase
             DB::table('category_products')->insert(['id' => $id, 'name' => "C$id", 'duration' => 5, 'created_at' => now(), 'updated_at' => now()]);
             DB::table('products')->insert(['id' => $id, 'category_id' => $id, 'name' => "P$id", 'created_at' => now(), 'updated_at' => now()]);
         }
-        DB::table('parts')->insert(['id' => 1, 'name' => 'Depan', 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('parts')->insert([
+            ['id' => 1, 'name' => 'WINDSHIELD', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 2, 'name' => 'SUNROOF/PANORAMIC', 'created_at' => now(), 'updated_at' => now()],
+        ]);
     }
 
     private function invoice(array $customer = [], array $categories = [1]): Invoice
@@ -48,6 +51,14 @@ class MarketingCommissionTest extends TestCase
             DB::table('customer_product')->insert([
                 'customer_id' => $c->id, 'product_id' => $cat, 'part_id' => 1, 'category_product_id' => $cat,
                 'created_at' => now(), 'updated_at' => now(),
+            ]);
+        }
+
+        // D/S/P + panoramic dihitung 2× hanya bila bagian = kaca depan + panoramic.
+        if (($customer['install_type'] ?? null) === 'dsp' && ($customer['has_panoramic'] ?? false)) {
+            DB::table('customer_product')->insert([
+                'customer_id' => $c->id, 'product_id' => $categories[0], 'part_id' => 2,
+                'category_product_id' => $categories[0], 'created_at' => now(), 'updated_at' => now(),
             ]);
         }
 
