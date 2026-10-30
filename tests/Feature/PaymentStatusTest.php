@@ -76,4 +76,18 @@ class PaymentStatusTest extends TestCase
         $this->actingAs($this->userWithRole('teknisi'))->get(route('finance.payment-status'))->assertForbidden();
         $this->actingAs($this->userWithRole('marketing', $branch))->get(route('finance.payment-status'))->assertForbidden();
     }
+
+    public function test_page_renders_empty_and_filled_states(): void
+    {
+        $branch = Branch::factory()->create();
+        $finance = $this->userWithRole('finance', $branch);
+
+        $this->actingAs($finance)->get(route('finance.payment-status'))
+            ->assertOk()->assertSee('Tidak ada invoice yang cocok');
+
+        $this->carInvoice($branch, 'Budi Santoso');
+
+        $this->actingAs($finance)->get(route('finance.payment-status'))
+            ->assertOk()->assertSee('Budi Santoso')->assertSee('Belum bayar')->assertSee('Total belum terbayar');
+    }
 }
