@@ -98,6 +98,7 @@ class LeaveRequestController extends Controller
         ]);
 
         $employee  = Employee::findOrFail($validated['employee_id']);
+        abort_unless(Auth::user()->canAccessBranch($employee->branch_id !== null ? (int) $employee->branch_id : null), 403, 'Karyawan cabang lain.');
         $from      = Carbon::parse($validated['from_date']);
         $to        = Carbon::parse($validated['to_date']);
         $days      = $from->diffInDays($to) + 1;
@@ -119,12 +120,14 @@ class LeaveRequestController extends Controller
 
     public function show(LeaveRequest $leaveRequest)
     {
+        $this->authorizeLeave($leaveRequest);
         $leaveRequest->load(['employee', 'branch', 'requester', 'approver']);
         return view('leave-requests.show', compact('leaveRequest'));
     }
 
     public function approve(Request $request, LeaveRequest $leaveRequest)
     {
+        $this->authorizeLeave($leaveRequest);
         if (!$leaveRequest->isPending()) {
             return back()->with('error', 'Hanya pengajuan pending yang dapat disetujui.');
         }
@@ -168,6 +171,7 @@ class LeaveRequestController extends Controller
 
     public function reject(Request $request, LeaveRequest $leaveRequest)
     {
+        $this->authorizeLeave($leaveRequest);
         if (!$leaveRequest->isPending()) {
             return back()->with('error', 'Hanya pengajuan pending yang dapat ditolak.');
         }
@@ -186,6 +190,7 @@ class LeaveRequestController extends Controller
 
     public function cancel(LeaveRequest $leaveRequest)
     {
+        $this->authorizeLeave($leaveRequest);
         if (!$leaveRequest->isPending()) {
             return back()->with('error', 'Hanya pengajuan pending yang dapat dibatalkan.');
         }
@@ -193,6 +198,15 @@ class LeaveRequestController extends Controller
         $leaveRequest->update(['status' => 'cancelled']);
 
         return back()->with('success', 'Pengajuan cuti dibatalkan.');
+    }
+
+    private function authorizeLeave(LeaveRequest $leaveRequest): void
+    {
+        abort_unless(
+            Auth::user()->canAccessBranch($leaveRequest->branch_id !== null ? (int) $leaveRequest->branch_id : null),
+            403,
+            'Pengajuan cuti cabang lain.'
+        );
     }
 
     private function dailySalary(Employee $employee): int

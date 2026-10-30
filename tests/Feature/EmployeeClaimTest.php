@@ -17,7 +17,7 @@ use Tests\TestCase;
 /**
  * End-to-end test of the generic approval system (Phase 1) wired through the
  * real employee_claim flow (Phase 3): submit -> Manager Operasional approves
- * (1 step, company-wide — no branch match required) -> Finance disburses via
+ * (1 step; approver harus satu cabang dengan pengaju) -> Finance disburses via
  * Petty Cash. Also covers rejection and the health-balance deduction path.
  */
 class EmployeeClaimTest extends TestCase
@@ -40,8 +40,8 @@ class EmployeeClaimTest extends TestCase
 
         $branch = Branch::factory()->create();
         [$teknisi, $employee] = $this->makeTeknisiUser($branch);
-        $manager = $this->userWithRole('manager_operasional');
-        $finance = $this->userWithRole('finance');
+        $manager = $this->userWithRole('manager_operasional', $branch);
+        $finance = $this->userWithRole('finance', $branch);
 
         Notification::fake();
 
@@ -94,8 +94,8 @@ class EmployeeClaimTest extends TestCase
 
         $branch = Branch::factory()->create();
         [$teknisi] = $this->makeTeknisiUser($branch);
-        $manager = $this->userWithRole('manager_operasional');
-        $finance = $this->userWithRole('finance');
+        $manager = $this->userWithRole('manager_operasional', $branch);
+        $finance = $this->userWithRole('finance', $branch);
 
         $this->actingAs($teknisi)->post(route('my-claims.store'), [
             'type'   => 'bensin',
@@ -123,7 +123,7 @@ class EmployeeClaimTest extends TestCase
 
         $branch = Branch::factory()->create();
         [$teknisi, $employee] = $this->makeTeknisiUser($branch);
-        $manager = $this->userWithRole('manager_operasional');
+        $manager = $this->userWithRole('manager_operasional', $branch);
 
         EmployeeHealthBalance::create([
             'employee_id'      => $employee->id,

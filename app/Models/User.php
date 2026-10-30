@@ -96,9 +96,8 @@ class User extends Authenticatable
     }
 
     /**
-     * Kebijakan cabang: superadmin lintas cabang; peran lain (admin, manager,
-     * owner, dll.) hanya cabang yang terdaftar di branch_user. Owner lintas
-     * cabang dengan cara ditugaskan ke semua cabang.
+     * Kebijakan cabang (keputusan 2026-10-30): superadmin dan owner lintas
+     * cabang; peran lain (admin, manager, dll.) hanya cabang di branch_user.
      */
     public function canAccessBranch(?int $branchId): bool
     {
@@ -106,7 +105,7 @@ class User extends Authenticatable
             return false;
         }
 
-        if ($this->hasRole('superadmin')) {
+        if ($this->hasAnyRole(['superadmin', 'owner'])) {
             return true;
         }
 

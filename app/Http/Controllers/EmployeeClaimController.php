@@ -89,7 +89,10 @@ class EmployeeClaimController extends Controller
     /** Finance: daftar klaim yang sudah disetujui Manager, siap dicairkan. */
     public function readyForDisbursement()
     {
+        $user = auth()->user();
+
         $claims = EmployeeClaim::with(['employee', 'branch'])
+            ->when(! $user->hasAnyRole(['superadmin', 'owner']), fn ($q) => $q->whereIn('branch_id', $user->accessibleBranchIds()))
             ->where('status', 'approved')
             ->latest()
             ->paginate(20);
@@ -100,6 +103,11 @@ class EmployeeClaimController extends Controller
     /** Finance: cairkan klaim — bikin PettyCashTransaction 'out' otomatis terisi dari data klaim. */
     public function disburse(Request $request, EmployeeClaim $claim)
     {
+        abort_unless(
+            $request->user()->canAccessBranch($claim->branch_id !== null ? (int) $claim->branch_id : null),
+            403,
+            'Klaim cabang lain.'
+        );
         abort_unless($claim->status === 'approved', 404, 'Klaim ini belum disetujui atau sudah dicairkan.');
 
         DB::transaction(function () use ($claim, $request) {
