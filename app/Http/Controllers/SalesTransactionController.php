@@ -7,6 +7,7 @@ use App\Models\SalesTransaction;
 use App\Services\InvoiceCalculationService;
 use App\Services\SalesCommissionReleaseService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SalesTransactionController extends Controller
 {
@@ -62,6 +63,27 @@ class SalesTransactionController extends Controller
         ]);
 
         $product = SalesProduct::findOrFail($data['sales_product_id']);
+
+        // Diskon dibatasi (persen dari harga produk) dan DP tak boleh melebihi
+        // total — sales tidak boleh mengatur harga/pembayaran sampai nol.
+        $maxDiscount = (int) floor($product->price * (float) config('sales.max_discount_percent', 20) / 100);
+        if (($data['discount'] ?? 0) > $maxDiscount) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'discount' => 'Diskon melebihi batas maksimal Rp ' . number_format($maxDiscount, 0, ',', '.') . '.',
+            ]);
+        }
+        $totalAfterDiscount = max(0, $product->price - ($data['discount'] ?? 0));
+        if (($data['downpayment'] ?? 0) > $totalAfterDiscount) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'downpayment' => 'DP tidak boleh melebihi total harga.',
+            ]);
+        }
+        // Pelunasan/penandaan lunas hanya oleh admin; sales tidak bisa langsung membuat transaksi lunas.
+        if ($request->user()->hasRole('sales') && $totalAfterDiscount > 0 && ($data['downpayment'] ?? 0) >= $totalAfterDiscount) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'downpayment' => 'Pelunasan dicatat oleh admin. Isi DP lebih kecil dari total.',
+            ]);
+        }
         $priceCalc = $this->calc->calculate($product->price, $data['discount'] ?? 0, $data['downpayment'] ?? 0);
 
         $status = match (true) {
@@ -104,6 +126,8 @@ class SalesTransactionController extends Controller
     public function recordPayment(Request $request, SalesTransaction $salesTransaction)
     {
         $this->authorizeAccess($salesTransaction);
+        // Pencatatan pembayaran = konfirmasi uang masuk → bukan oleh sales sendiri.
+        abort_if($request->user()->hasRole('sales'), 403, 'Pembayaran dicatat oleh admin.');
         abort_if($salesTransaction->isPaidOff(), 422, 'Transaksi sudah lunas.');
 
         $data = $request->validate([
@@ -128,10 +152,17 @@ class SalesTransactionController extends Controller
     public function releaseCommission(Request $request, SalesTransaction $salesTransaction, SalesCommissionReleaseService $service)
     {
         $this->authorizeAccess($salesTransaction);
-        abort_unless($salesTransaction->isPaidOff(), 422, 'Pelunasan belum tercatat.');
-        abort_if($salesTransaction->commission_released_at, 422, 'Komisi untuk transaksi ini sudah dirilis.');
+        // Sales tidak boleh merilis komisinya sendiri.
+        abort_if($request->user()->hasRole('sales'), 403, 'Komisi dirilis oleh admin.');
 
-        $service->release($salesTransaction, $request->user()->id);
+        DB::transaction(function () use ($salesTransaction, $service, $request) {
+            $locked = SalesTransaction::whereKey($salesTransaction->id)->lockForUpdate()->firstOrFail();
+
+            abort_unless($locked->isPaidOff(), 422, 'Pelunasan belum tercatat.');
+            abort_if($locked->commission_released_at, 422, 'Komisi untuk transaksi ini sudah dirilis.');
+
+            $service->release($locked, $request->user()->id);
+        });
 
         return back()->with('success', 'Komisi berhasil dirilis.');
     }
@@ -152,7 +183,6 @@ class SalesTransactionController extends Controller
             return;
         }
 
-        $allowedBranchIds = $user->branches()->pluck('branches.id')->all();
-        abort_unless(in_array($transaction->branch_id, $allowedBranchIds), 403);
+        abort_unless($user->canAccessBranch($transaction->branch_id !== null ? (int) $transaction->branch_id : null), 403);
     }
 }

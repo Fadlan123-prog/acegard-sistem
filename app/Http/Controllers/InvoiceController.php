@@ -51,10 +51,10 @@ class InvoiceController extends Controller
         $data = $request->validate([
             'customer_id'    => ['required', 'exists:customers,id'],
             'price'          => ['required', 'integer', 'min:' . config('pricing.minimum_transaction_amount')],
-            'discount'       => ['nullable', 'integer', 'min:0'],
-            'downpayment'    => ['nullable', 'integer', 'min:0'],
+            'discount'       => ['nullable', 'integer', 'min:0', 'lte:price'],
+            'downpayment'    => ['nullable', 'integer', 'min:0', 'lte:price'],
             'payment_method' => ['nullable', 'in:cash,credit,transfer,tokopedia'],
-            'status'         => ['required', 'in:paid,unpaid,partial'],
+            'status'         => ['required', 'in:unpaid,partial'],   // 'paid' hanya lewat Catat Pelunasan (QC + stok + lock)
             'invoice_number' => ['nullable', 'string', 'max:255', 'unique:invoices,invoice_number'],
             'invoice_date'   => ['required', 'date'],
         ], [
@@ -186,10 +186,10 @@ class InvoiceController extends Controller
         $data = $request->validate([
             'customer_id'    => ['required', 'exists:customers,id'],
             'price'          => ['required', 'integer', 'min:0'],
-            'discount'       => ['nullable', 'integer', 'min:0'],
-            'downpayment'    => ['nullable', 'integer', 'min:0'],
+            'discount'       => ['nullable', 'integer', 'min:0', 'lte:price'],
+            'downpayment'    => ['nullable', 'integer', 'min:0', 'lte:price'],
             'payment_method' => ['nullable', 'in:cash,credit,transfer,tokopedia'],
-            'status'         => ['required', 'in:paid,unpaid,partial'],
+            'status'         => ['required', 'in:unpaid,partial'],   // 'paid' hanya lewat Catat Pelunasan (QC + stok + lock)
             'invoice_number' => [
                 'nullable',
                 'string',

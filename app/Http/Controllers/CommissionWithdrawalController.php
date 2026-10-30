@@ -81,18 +81,40 @@ class CommissionWithdrawalController extends Controller
             'notes' => ['nullable', 'string', 'max:500'],
         ]);
 
-        DB::transaction(function () use ($batch, $request) {
+        $error = null;
+
+        DB::transaction(function () use ($batch, $request, &$error) {
             $now = now();
 
-            $batch->update([
-                'status'  => 'paid',
-                'paid_by' => auth()->id(),
-                'paid_at' => $now,
-                'notes'   => $request->input('notes'),
+            $locked = CommissionPaymentBatch::whereKey($batch->id)->lockForUpdate()->firstOrFail();
+
+            if ($locked->status !== 'draft') {
+                $error = 'Pengajuan ini sudah diproses sebelumnya.';
+                return;
+            }
+
+            // Hitung ulang dari komisi yang MASIH eligible & aktif: komisi yang
+            // dibatalkan/dinonaktifkan sejak pengajuan dibuat tidak boleh ikut dibayar.
+            $rows = Commission::where('commission_payment_batch_id', $locked->id)
+                ->where('status', 'eligible')
+                ->where('is_active', true)
+                ->lockForUpdate()
+                ->get(['id', 'amount']);
+
+            if ($rows->isEmpty()) {
+                $error = 'Tidak ada komisi eligible aktif di pengajuan ini. Tolak pengajuan lalu ajukan ulang.';
+                return;
+            }
+
+            $locked->update([
+                'status'       => 'paid',
+                'paid_by'      => auth()->id(),
+                'paid_at'      => $now,
+                'notes'        => $request->input('notes'),
+                'total_amount' => (int) $rows->sum('amount'),
             ]);
 
-            Commission::where('commission_payment_batch_id', $batch->id)
-                ->where('status', 'eligible')
+            Commission::whereIn('id', $rows->pluck('id'))
                 ->update([
                     'status'  => 'paid',
                     'paid_at' => $now,
@@ -103,10 +125,14 @@ class CommissionWithdrawalController extends Controller
             // Kasbon potong-dari-komisi: tidak mengubah total_amount batch ini
             // (akurasi histori komisi tetap utuh) — cuma dicatat di ledger,
             // ditampilkan sebagai "Dipotong Kasbon" terpisah di halaman detail.
-            if ($batch->employee) {
-                $this->kasbonDeductions->applyForCommission($batch->employee, $batch);
+            if ($locked->employee) {
+                $this->kasbonDeductions->applyForCommission($locked->employee, $locked);
             }
         });
+
+        if ($error) {
+            return back()->with('error', $error);
+        }
 
         return redirect()
             ->route('commission.withdrawals.index')
