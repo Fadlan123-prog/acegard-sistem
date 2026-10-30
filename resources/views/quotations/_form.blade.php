@@ -327,8 +327,12 @@
 {{-- Row template --}}
 <template id="itemRowTemplate">
     <tr class="item-row">
-        <td><input type="text" name="items[__IDX__][description]" class="form-control form-control-sm" placeholder="Nama produk / layanan" required></td>
-        <td><input type="text" name="items[__IDX__][specifications]" class="form-control form-control-sm" placeholder="Opsional"></td>
+        <td>
+            {{-- Pilih dari katalog produk (seperti form invoice/customer) atau "Lainnya" untuk mengetik sendiri --}}
+            <select class="form-select form-select-sm desc-picker" aria-label="Pilih produk"></select>
+            <input type="text" name="items[__IDX__][description]" class="form-control form-control-sm mt-1 desc-input" placeholder="Nama produk / layanan" hidden>
+        </td>
+        <td><input type="text" name="items[__IDX__][specifications]" class="form-control form-control-sm spec-input" placeholder="Otomatis dari produk, bisa diubah"></td>
         <td>
             <select name="items[__IDX__][unit]" class="form-select form-select-sm">
                 <option value="unit">unit</option>
@@ -379,10 +383,52 @@
         document.getElementById('displayTotal').textContent    = fmt(sub - disc);
     }
 
+    // Katalog produk per kategori quotation: [{group, items:[{label, spec}]}]
+    const CATALOG = {!! \Illuminate\Support\Js::from((new \App\Services\QuotationCatalog)->build()) !!};
+    const MANUAL = '__manual__';
+
+    function currentCatalog(){
+        const cat = document.getElementById('categorySelect')?.value || 'car_film';
+        return CATALOG[cat] || [];
+    }
+
+    function buildPicker(select, selectedLabel){
+        select.innerHTML = '';
+        select.add(new Option('— Pilih produk —', ''));
+        currentCatalog().forEach(g => {
+            const og = document.createElement('optgroup'); og.label = g.group;
+            g.items.forEach(it => { const o = new Option(it.label, it.label); o.dataset.spec = it.spec || ''; og.appendChild(o); });
+            select.appendChild(og);
+        });
+        select.add(new Option('Lainnya (ketik manual)…', MANUAL));
+        if (selectedLabel) {
+            const has = Array.from(select.options).some(o => o.value === selectedLabel);
+            select.value = has ? selectedLabel : MANUAL;
+        }
+    }
+
+    function syncPicker(row, keepSpec){
+        const picker = row.querySelector('.desc-picker');
+        const desc = row.querySelector('.desc-input');
+        const spec = row.querySelector('.spec-input');
+        picker.required = true;   // yang divalidasi browser adalah select yang terlihat
+        if (picker.value === MANUAL) {
+            desc.hidden = false; desc.required = true;
+            if (Array.from(picker.options).some(o => o.value === desc.value)) desc.value = '';
+        } else {
+            desc.hidden = true; desc.required = false;
+            desc.value = picker.value;
+            const opt = picker.selectedOptions[0];
+            if (!keepSpec && opt && opt.dataset.spec !== undefined && picker.value) spec.value = opt.dataset.spec;
+        }
+    }
+
     function addRow(data){
         const html = tmpl.innerHTML.replace(/__IDX__/g, rowIdx++);
         body.insertAdjacentHTML('beforeend', html);
         const row = body.lastElementChild;
+        buildPicker(row.querySelector('.desc-picker'), data ? (data.description || '') : '');
+        row.querySelector('.desc-picker').addEventListener('change', () => { syncPicker(row, false); recalc(); });
 
         if(data){
             row.querySelector('[name$="[description]"]').value    = data.description     || '';
@@ -392,6 +438,7 @@
             row.querySelector('.item-price').value                = data.unit_price      || 0;
             row.querySelector('.item-disc').value                 = data.discount_percent|| 0;
         }
+        syncPicker(row, !!data);
 
         row.querySelectorAll('input,select').forEach(el => el.addEventListener('input', recalc));
         row.querySelector('.remove-row-btn').addEventListener('click', () => { row.remove(); recalc(); });
@@ -425,6 +472,15 @@
     }
     document.getElementById('categorySelect')?.addEventListener('change', function(){
         toggleVehicle();
+        // Katalog berubah mengikuti kategori: bangun ulang pilihan produk, pertahankan baris yang diketik manual.
+        body.querySelectorAll('.item-row').forEach(row => {
+            const picker = row.querySelector('.desc-picker');
+            const manual = picker.value === MANUAL;
+            const current = row.querySelector('.desc-input').value;
+            buildPicker(picker, '');
+            if (manual && current) { picker.value = MANUAL; } else { picker.value = ''; row.querySelector('.desc-input').value = ''; row.querySelector('.spec-input').value = ''; }
+            syncPicker(row, true);
+        });
         // Kategori gedung tidak butuh data kendaraan — kosongkan supaya tidak ada
         // sisa nilai lama yang ikut ter-submit walau field-nya disembunyikan
         // (server juga menjaga hal yang sama, ini cuma agar form tidak membingungkan).
