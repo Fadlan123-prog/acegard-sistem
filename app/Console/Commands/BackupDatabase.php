@@ -37,7 +37,7 @@ class BackupDatabase extends Command
 
         // Dua langkah (dump lalu gzip) agar tidak bergantung pada `pipefail` shell.
         $dump = new Process([
-            env('MYSQLDUMP_PATH', 'mysqldump'),
+            config('backup.mysqldump_path'),
             '--single-transaction', '--quick', '--routines', '--no-tablespaces',
             '--host=' . $conn['host'], '--port=' . $conn['port'], '--user=' . $conn['username'],
             '--result-file=' . $sql,
@@ -73,12 +73,12 @@ class BackupDatabase extends Command
         @chmod($path, 0600);
         $this->info('Backup OK: ' . $file . ' (' . number_format(filesize($path) / 1024, 1) . ' KB)');
 
-        if ($copyDisk = env('BACKUP_COPY_DISK')) {
+        if ($copyDisk = config('backup.copy_disk')) {
             Storage::disk($copyDisk)->put($file, fopen($path, 'r'));
             $this->info("Salinan dikirim ke disk '{$copyDisk}'.");
         }
 
-        $keepDays = (int) ($this->option('keep') ?: env('BACKUP_KEEP_DAYS', 14));
+        $keepDays = (int) ($this->option('keep') ?: config('backup.keep_days'));
         $cutoff   = now()->subDays($keepDays)->getTimestamp();
         foreach ($disk->files($dir) as $old) {
             if (str_ends_with($old, '.sql.gz') && $disk->lastModified($old) < $cutoff) {
