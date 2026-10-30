@@ -655,6 +655,10 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|owner|manager
         });
 
         Route::middleware('role:superadmin|admin|owner|manager_operasional|finance')
+            ->get('/payment-status', [\App\Http\Controllers\PaymentStatusController::class, 'index'])
+            ->name('finance.payment-status');
+
+        Route::middleware('role:superadmin|admin|owner|manager_operasional|finance')
             ->get('/building-meters', [\App\Http\Controllers\BuildingMeterReportController::class, 'index'])
             ->name('commission.building-meters');
     });

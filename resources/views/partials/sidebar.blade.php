@@ -504,6 +504,7 @@
                 <ul class="sidebar-submenu">
                     <li><a href="{{ route('hutang.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Hutang ke Vendor</a></li>
                     <li><a href="{{ route('piutang.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Piutang dari Pelanggan</a></li>
+                    <li><a href="{{ route('finance.payment-status') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Status Pembayaran Customer</a></li>
                 </ul>
             </li>
             <li>
@@ -799,6 +800,7 @@
                 <ul class="sidebar-submenu">
                     <li><a href="{{ route('hutang.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Hutang ke Vendor</a></li>
                     <li><a href="{{ route('piutang.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Piutang dari Pelanggan</a></li>
+                    <li><a href="{{ route('finance.payment-status') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Status Pembayaran Customer</a></li>
                 </ul>
             </li>
 
