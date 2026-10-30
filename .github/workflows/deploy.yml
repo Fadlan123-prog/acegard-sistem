@@ -18,6 +18,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Deploy tanpa FTP_APP_DIR dulu mengunggah SELURUH aplikasi (app/, config/, vendor/,
+      # database/) ke web root. Sekarang dihentikan: atur document root ke <app>/public dan
+      # isi secret FTP_APP_DIR sebelum deploy (audit PR-H2).
+      - name: Abort if FTP_APP_DIR is not configured
+        if: ${{ env.FTP_APP_DIR == '' }}
+        run: |
+          echo "::error::Secret FTP_APP_DIR belum diisi. Deploy dihentikan agar source aplikasi tidak terunggah ke web root."
+          exit 1
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -92,26 +101,3 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: ${{ secrets.FTP_SERVER_DIR }}
           local-dir: deploy_public/
-
-      # Fallback: original single-directory deploy, used only until
-      # FTP_APP_DIR is configured (see comment above). Once it's set, this
-      # step is skipped so the two steps above take over.
-      - name: "Deploy (legacy, single directory — configure FTP_APP_DIR to retire this)"
-        if: ${{ env.FTP_APP_DIR == '' }}
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
-          # File & folder yang TIDAK dikirim ke server
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/tests/**
-            .env
-            .env.example
-            .editorconfig
-            phpunit.xml
-            README.md

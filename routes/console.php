@@ -15,3 +15,6 @@ Schedule::command('notify:scheduled')->dailyAt('07:00');
 // active employee (carries forward the previous year's allocation; history
 // is never overwritten, see ResetHealthBalances).
 Schedule::command('claims:reset-health-balances')->yearlyOn(1, 1, '00:30');
+
+// Backup database harian 02:00 (lihat docs/DEPLOY-HOSTINGER.md untuk salinan off-server & uji restore).
+Schedule::command('backup:database')->dailyAt('02:00')->withoutOverlapping();
