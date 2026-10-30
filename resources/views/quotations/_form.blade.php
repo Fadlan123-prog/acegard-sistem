@@ -243,10 +243,10 @@
                             <tr>
                                 <th style="min-width:200px" id="thDesc">Deskripsi / Produk</th>
                                 <th style="min-width:150px" id="thSpec">Spesifikasi</th>
-                                <th style="width:80px">Satuan</th>
-                                <th style="width:70px">Qty</th>
-                                <th style="width:130px">Harga Satuan (Rp)</th>
-                                <th style="width:70px">Disc%</th>
+                                <th style="width:80px" id="thUnit">Satuan</th>
+                                <th style="width:70px" id="thQty">Qty</th>
+                                <th style="width:130px" id="thPrice">Harga Satuan (Rp)</th>
+                                <th style="width:70px" id="thDisc">Disc%</th>
                                 <th style="width:130px" class="text-end">Subtotal (Rp)</th>
                                 <th style="width:40px"></th>
                             </tr>
@@ -344,8 +344,8 @@
         <td class="spec-td">
             <input type="text" name="items[__IDX__][specifications]" class="form-control form-control-sm spec-input generic-spec" placeholder="Otomatis dari produk, bisa diubah">
         </td>
-        <td>
-            <select name="items[__IDX__][unit]" class="form-select form-select-sm">
+        <td class="unit-td">
+            <select name="items[__IDX__][unit]" class="form-select form-select-sm item-unit">
                 <option value="unit">unit</option>
                 <option value="m2">m²</option>
                 <option value="pcs">pcs</option>
@@ -353,9 +353,9 @@
                 <option value="meter">meter</option>
             </select>
         </td>
-        <td><input type="number" name="items[__IDX__][quantity]" class="form-control form-control-sm item-qty" value="1" min="0.01" step="0.01" required></td>
+        <td class="qty-td"><input type="number" name="items[__IDX__][quantity]" class="form-control form-control-sm item-qty" value="1" min="0.01" step="0.01" required></td>
         <td><input type="number" name="items[__IDX__][unit_price]" class="form-control form-control-sm item-price" value="0" min="0" step="1000" required></td>
-        <td><input type="number" name="items[__IDX__][discount_percent]" class="form-control form-control-sm item-disc" value="0" min="0" max="100" step="0.5"></td>
+        <td class="disc-td"><input type="number" name="items[__IDX__][discount_percent]" class="form-control form-control-sm item-disc" value="0" min="0" max="100" step="0.5"></td>
         <td class="text-end item-subtotal-cell align-middle"><span class="item-subtotal">Rp 0</span></td>
         <td class="text-center align-middle">
             <button type="button" class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center border-0 remove-row-btn" title="Hapus">
@@ -506,6 +506,13 @@
         row.querySelector('.generic-desc').hidden = car;
         const gspec = row.querySelector('.generic-spec'); gspec.disabled = car;
         row.querySelector('.spec-td').hidden = car;
+        // Paket mobil: satu harga paket — satuan/qty/diskon baris tidak dipakai (selalu 1 paket, tanpa diskon baris).
+        ['.unit-td', '.qty-td', '.disc-td'].forEach(sel => { row.querySelector(sel).hidden = car; });
+        if (car) {
+            row.querySelector('.item-unit').value = 'paket';
+            row.querySelector('.item-qty').value = 1;
+            row.querySelector('.item-disc').value = 0;
+        }
         row.querySelector('.desc-td').colSpan = car ? 2 : 1;
         row.querySelector('.desc-picker').disabled = car;
         row.querySelector('.desc-picker').required = !car;
@@ -520,6 +527,8 @@
         th.textContent = car ? 'Paket Kaca Film (Part / Kategori / Produk)' : 'Deskripsi / Produk';
         th.colSpan = car ? 2 : 1;
         ts.hidden = car; ts.textContent = 'Spesifikasi';
+        ['thUnit', 'thQty', 'thDisc'].forEach(id => { document.getElementById(id).hidden = car; });
+        document.getElementById('thPrice').textContent = car ? 'Harga Paket (Rp)' : 'Harga Satuan (Rp)';
         body.querySelectorAll('.item-row').forEach(applyMode);
     }
 

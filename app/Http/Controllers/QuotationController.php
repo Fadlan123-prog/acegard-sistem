@@ -315,6 +315,10 @@ class QuotationController extends Controller
 
             $package = $catalog->composeCarPackage($lines, $item['description'] ?? null);
             $items[$i]['film_lines']     = $package['lines'];
+            // Paket mobil = satu harga paket: 1 paket, tanpa diskon baris (diskon ada di tingkat quotation).
+            $items[$i]['unit']             = 'paket';
+            $items[$i]['quantity']         = 1;
+            $items[$i]['discount_percent'] = 0;
             $items[$i]['description']    = $package['description'];
             $items[$i]['specifications'] = $package['specifications'];
         }

@@ -81,7 +81,7 @@ class QuotationProductPickerTest extends TestCase
         $admin = $this->userWithRole('admin', $branch);
 
         $this->actingAs($admin)->post(route('quotations.store'), $this->payload($branch, [
-            'description' => 'Fullset',
+            'description' => 'Fullset', 'quantity' => 5, 'discount_percent' => 50,   // dikirim paksa: harus diabaikan untuk paket mobil
             'film_lines' => [
                 ['part_id' => 1, 'category_id' => 1, 'product_id' => 1],   // depan: Notch NV70
                 ['part_id' => 6, 'category_id' => 1, 'product_id' => 1],   // panoramic: sama -> digabung
@@ -98,6 +98,9 @@ class QuotationProductPickerTest extends TestCase
         );
         $this->assertCount(3, $item->film_lines);
         $this->assertSame(2500000.0, (float) $item->unit_price, 'satu harga untuk seluruh paket');
+        $this->assertSame('paket', $item->unit);
+        $this->assertSame(1.0, (float) $item->quantity);
+        $this->assertSame(0.0, (float) $item->discount_percent);
     }
 
     public function test_package_without_a_title_gets_a_default_name(): void
