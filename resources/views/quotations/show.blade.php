@@ -256,15 +256,15 @@
                         <iconify-icon icon="mdi:checkbox-marked-circle-outline" class="me-1"></iconify-icon> Quotation diterima! Buat customer:
                     </x-ui.alert>
                     @if($quotation->category === 'car_film')
-                        <x-ui.button :href="route('customer.create') }}?from_quotation={{ $quotation->id" variant="success" size="sm">
+                        <x-ui.button :href="route('customer.create', ['from_quotation' => $quotation->id])" variant="success" size="sm">
                             <iconify-icon icon="mdi:account-plus-outline" class="me-1"></iconify-icon> Buat Customer Kaca Film
                         </x-ui.button>
                     @elseif($quotation->category === 'building_film')
-                        <x-ui.button :href="route('customer.building.create') }}?from_quotation={{ $quotation->id" variant="success" size="sm">
+                        <x-ui.button :href="route('customer.building.create', ['from_quotation' => $quotation->id])" variant="success" size="sm">
                             <iconify-icon icon="mdi:office-building-outline" class="me-1"></iconify-icon> Buat Customer Gedung
                         </x-ui.button>
                     @elseif($quotation->category === 'ppf')
-                        <x-ui.button :href="route('ppf-customers.create') }}?from_quotation={{ $quotation->id" variant="success" size="sm">
+                        <x-ui.button :href="route('ppf-customers.create', ['from_quotation' => $quotation->id])" variant="success" size="sm">
                             <iconify-icon icon="mdi:car-outline" class="me-1"></iconify-icon> Buat Customer PPF
                         </x-ui.button>
                     @endif

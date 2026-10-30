@@ -1,8 +1,8 @@
 @extends('layout.index')
 
-@section('title', 'Penugasan Pekerjaan')
+@section('title', 'Monitoring Pekerjaan & QC')
 @section('route-breadcrumb', route('work-orders.index'))
-@section('breadcrumb', 'Penugasan Pekerjaan')
+@section('breadcrumb', 'Monitoring Pekerjaan & QC')
 
 @section('content')
 
@@ -152,6 +152,11 @@
                                 {{ $customer->vehicle_brand }} {{ $customer->vehicle_model }}
                                 &bull; {{ $customer->plat_number }}
                             </div>
+                            @if ($so = $sourceSalesOrders->get($customer->id))
+                                <a href="{{ route('sales-orders.show', $so->id) }}" class="small text-primary-600">
+                                    <iconify-icon icon="mdi:file-document-outline"></iconify-icon> {{ $so->so_number }}
+                                </a>
+                            @endif
                         </td>
                         @if ($isSuperadmin)
                             <td class="small text-muted">{{ $customer->branch?->name ?? '-' }}</td>

@@ -415,7 +415,7 @@
             <li>
                 <a href="{{ route('work-orders.index') }}">
                     <iconify-icon icon="solar:clipboard-list-outline" class="menu-icon"></iconify-icon>
-                    <span>Penugasan Kerja</span>
+                    <span>Monitoring Pekerjaan</span>
                 </a>
             </li>
             <li class="dropdown">
@@ -606,7 +606,7 @@
             <li>
                 <a href="{{ route('work-orders.index') }}">
                     <iconify-icon icon="solar:clipboard-list-outline" class="menu-icon"></iconify-icon>
-                    <span>Penugasan Kerja</span>
+                    <span>Monitoring Pekerjaan</span>
                 </a>
             </li>
 

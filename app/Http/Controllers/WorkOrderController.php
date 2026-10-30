@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Branch;
 use App\Models\Customer;
 use App\Models\Employee;
+use App\Models\SalesOrder;
 use App\Models\Commission;
 use App\Models\User;
 use App\Notifications\JobAssigned;
@@ -63,6 +64,13 @@ class WorkOrderController extends Controller
 
         $customers = $query->latest()->paginate(20)->withQueryString();
 
+        // Customer yang berasal dari SO: relasinya tersimpan di SO (converted_to_*).
+        $sourceSalesOrders = SalesOrder::query()
+            ->where('converted_to_type', Customer::class)
+            ->whereIn('converted_to_id', $customers->pluck('id'))
+            ->get(['id', 'so_number', 'converted_to_id'])
+            ->keyBy('converted_to_id');
+
         $branches  = $isSuperadmin ? Branch::orderBy('name')->get(['id', 'name', 'city']) : collect();
         $employees = Employee::where('is_active', true)->orderBy('name')->get(['id', 'name', 'job_position', 'branch_id']);
 
@@ -72,8 +80,9 @@ class WorkOrderController extends Controller
         }
 
         return view('work-orders.index', [
-            'title'         => 'Penugasan Pekerjaan',
+            'title'         => 'Monitoring Pekerjaan & QC',
             'customers'     => $customers,
+            'sourceSalesOrders' => $sourceSalesOrders,
             'branches'      => $branches,
             'employees'     => $employees,
             'isSuperadmin'  => $isSuperadmin,
@@ -100,12 +109,12 @@ class WorkOrderController extends Controller
 
         $validated = $request->validate(
             [
-                'tukang_id' => ['nullable', 'integer', Rule::exists('employees', 'id')],
-                'kenek_id'  => ['nullable', 'integer', Rule::exists('employees', 'id')],
+                'tukang_id' => ['nullable', 'integer', Rule::exists('employees', 'id')->where('branch_id', $customer->branch_id)],
+                'kenek_id'  => ['nullable', 'integer', Rule::exists('employees', 'id')->where('branch_id', $customer->branch_id)],
             ],
             [
-                'tukang_id.exists' => 'Teknisi yang dipilih tidak valid.',
-                'kenek_id.exists'  => 'Kenek yang dipilih tidak valid.',
+                'tukang_id.exists' => 'Teknisi yang dipilih tidak valid atau bukan dari cabang customer ini.',
+                'kenek_id.exists'  => 'Kenek yang dipilih tidak valid atau bukan dari cabang customer ini.',
             ]
         );
 

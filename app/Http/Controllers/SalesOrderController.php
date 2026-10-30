@@ -273,6 +273,10 @@ class SalesOrderController extends Controller
             'SO harus dikonfirmasi terlebih dahulu sebelum menugaskan teknisi/kenek.'
         );
 
+        // Setelah SO dikonversi ke Customer/Invoice, penugasan hanya diubah lewat
+        // Monitoring Pekerjaan (WorkOrderController::assign) agar komisi ikut tertangani.
+        abort_if($salesOrder->isConverted(), 422, 'SO sudah dikonversi ke Customer. Ganti teknisi lewat menu Monitoring Pekerjaan.');
+
         if ($salesOrder->assignsMultipleTechnicians()) {
             $data = $request->validate([
                 'technicians'   => 'nullable|array',
