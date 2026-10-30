@@ -528,7 +528,6 @@ class InvoiceController extends Controller
         $view = $this->resolveInvoiceViewForBranch($keys);
 
         // Debug sementara kalau mau cek
-        // dd($branch?->name, $branch?->city, $keys, $view);
 
         $publicPath = public_path();
 

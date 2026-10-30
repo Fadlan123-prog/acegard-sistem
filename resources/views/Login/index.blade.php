@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wowdash - Bootstrap 5 Admin Dashboard HTML Template</title>
+    <title>Login - Acegard Sistem</title>
     <link rel="icon" type="image/png"  href="{{ asset('assets/images/favicon.png') }}" sizes="16x16">
     <!-- remix icon font css  -->
     <link rel="stylesheet"  href="{{ asset('assets/css/remixicon.css') }}">
@@ -99,7 +99,7 @@
                         <div class="">
                             <div class="d-flex justify-content-between gap-2">
                                 <div class="form-check style-check d-flex align-items-center">
-                                    <input class="form-check-input border border-neutral-300" type="checkbox" value="" id="remeber">
+                                    <input class="form-check-input border border-neutral-300" type="checkbox" name="remember" value="1" id="remeber">
                                     <label class="form-check-label" for="remeber">Remember me </label>
                                 </div>
                                 <a  href="{{ route('password.request') }}" class="text-primary-600 fw-medium">Lupa Password?</a>
