@@ -279,7 +279,11 @@ class QuotationController extends Controller
     {
         $request->validate([
             'items'                   => 'required|array|min:1',
-            'items.*.description'     => 'required|string|max:255',
+            'items.*.part_ids'        => 'nullable|array',
+            'items.*.part_ids.*'      => 'integer|exists:parts,id',
+            'items.*.film_category_id'=> 'nullable|integer|exists:category_products,id',
+            'items.*.film_product_id' => 'nullable|integer|exists:products,id',
+            'items.*.description'     => 'required_without:items.*.part_ids|nullable|string|max:255',
             'items.*.specifications'  => 'nullable|string',
             'items.*.unit'            => 'required|string|max:30',
             'items.*.quantity'        => 'required|numeric|min:0.01',
@@ -287,7 +291,44 @@ class QuotationController extends Controller
             'items.*.discount_percent'=> 'nullable|numeric|min:0|max:100',
         ]);
 
-        return $request->input('items', []);
+        $items = $request->input('items', []);
+
+        // Baris kaca film mobil: deskripsi & spesifikasi disusun dari bagian kaca + tipe + kegelapan.
+        if ($request->input('category') === 'car_film') {
+            $catalog = app(\App\Services\QuotationCatalog::class);
+
+            foreach ($items as $i => $item) {
+                $partIds = array_filter((array) ($item['part_ids'] ?? []));
+                if (! $partIds) {
+                    $items[$i]['part_ids'] = null;
+                    $items[$i]['film_category_id'] = null;
+                    $items[$i]['film_product_id'] = null;
+                    continue;
+                }
+
+                $categoryId = ! empty($item['film_category_id']) ? (int) $item['film_category_id'] : null;
+                $productId  = ! empty($item['film_product_id']) ? (int) $item['film_product_id'] : null;
+
+                if ($productId && ! \App\Models\Product::where('id', $productId)->where('category_id', $categoryId)->exists()) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        "items.$i.film_product_id" => 'Persentase kegelapan tidak sesuai dengan tipe film yang dipilih.',
+                    ]);
+                }
+
+                $composed = $catalog->composeCarItem($partIds, $categoryId, $productId);
+                $items[$i]['part_ids'] = array_values(array_map('intval', $partIds));
+                $items[$i]['film_category_id'] = $categoryId;
+                $items[$i]['film_product_id'] = $productId;
+                $items[$i]['description'] = $composed['description'] ?? ($item['description'] ?? 'Kaca film');
+                $items[$i]['specifications'] = $composed['specifications'] ?? ($item['specifications'] ?? null);
+            }
+        } else {
+            foreach ($items as $i => $item) {
+                $items[$i]['part_ids'] = $items[$i]['film_category_id'] = $items[$i]['film_product_id'] = null;
+            }
+        }
+
+        return $items;
     }
 
     private function syncItems(Quotation $quotation, array $items): void
@@ -305,6 +346,9 @@ class QuotationController extends Controller
                 'sort_order'       => $index,
                 'description'      => $item['description'],
                 'specifications'   => $item['specifications'] ?? null,
+                'part_ids'         => $item['part_ids'] ?? null,
+                'film_category_id' => $item['film_category_id'] ?? null,
+                'film_product_id'  => $item['film_product_id'] ?? null,
                 'unit'             => $item['unit'] ?? 'unit',
                 'quantity'         => $qty,
                 'unit_price'       => $price,

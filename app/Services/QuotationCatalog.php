@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\CategoryProduct;
 use App\Models\CategoryProductBuilding;
+use App\Models\Part;
 use App\Models\PpfProduct;
 use App\Models\Product;
 use App\Models\ProductBuilding;
@@ -59,5 +60,59 @@ class QuotationCatalog
         })->all();
 
         return $items ? [['group' => 'PPF', 'items' => $items]] : [];
+    }
+
+    /** Label bagian kaca yang mudah dibaca untuk pelanggan. */
+    public static function partLabel(string $name): string
+    {
+        $n = strtolower(trim($name));
+
+        return match (true) {
+            str_contains($n, 'windshield')   => 'Kaca Depan',
+            str_contains($n, 'first row')    => 'Samping Baris 1',
+            str_contains($n, 'second row')   => 'Samping Baris 2',
+            str_contains($n, 'third row')    => 'Samping Baris 3',
+            str_contains($n, 'rear')         => 'Kaca Belakang',
+            str_contains($n, 'sunroof'), str_contains($n, 'pano') => 'Sunroof / Panoramic',
+            default                          => ucwords(strtolower($name)),
+        };
+    }
+
+    /** Data terstruktur untuk baris quotation mobil: bagian kaca, tipe film, dan kode+kegelapan. */
+    public function carStructured(): array
+    {
+        return [
+            'parts' => Part::orderBy('id')->get()->map(fn ($p) => ['id' => $p->id, 'label' => self::partLabel($p->name)])->all(),
+            'types' => CategoryProduct::orderBy('name')->get()->map(fn ($c) => [
+                'id'       => $c->id,
+                'name'     => $c->name,
+                'products' => Product::where('category_id', $c->id)->orderBy('name')->get()
+                    ->map(fn ($p) => ['id' => $p->id, 'label' => trim($p->name . ($p->description ? ' — kegelapan ' . $p->description : ''))])->all(),
+            ])->all(),
+        ];
+    }
+
+    /**
+     * Susun deskripsi & spesifikasi baris mobil dari pilihan terstruktur (dihitung di server, bukan dipercaya dari browser).
+     *
+     * @param  array<int,int|string>  $partIds
+     * @return array{description:?string,specifications:?string}
+     */
+    public function composeCarItem(array $partIds, ?int $categoryId, ?int $productId): array
+    {
+        $parts = Part::whereIn('id', array_map('intval', $partIds))->orderBy('id')->get()
+            ->map(fn ($p) => self::partLabel($p->name))->all();
+
+        $spec = null;
+        if ($categoryId) {
+            $cat = CategoryProduct::find($categoryId);
+            $prod = $productId ? Product::where('id', $productId)->where('category_id', $categoryId)->first() : null;
+            $spec = trim(($cat?->name ?? '') . ($prod ? ' ' . $prod->name . ($prod->description ? ' (kegelapan ' . $prod->description . ')' : '') : ''));
+        }
+
+        return [
+            'description'    => $parts ? implode(', ', $parts) : null,
+            'specifications' => $spec ?: null,
+        ];
     }
 }

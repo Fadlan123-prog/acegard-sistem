@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class QuotationItem extends Model
 {
     protected $fillable = [
-        'quotation_id', 'sort_order', 'description', 'specifications',
+        'quotation_id', 'sort_order', 'description', 'specifications', 'part_ids', 'film_category_id', 'film_product_id',
         'unit', 'quantity', 'unit_price', 'discount_percent', 'subtotal',
     ];
 
     protected $casts = [
+        'part_ids'         => 'array',
         'quantity'         => 'decimal:2',
         'unit_price'       => 'decimal:2',
         'discount_percent' => 'decimal:2',

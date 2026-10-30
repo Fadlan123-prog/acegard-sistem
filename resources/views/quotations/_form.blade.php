@@ -241,8 +241,8 @@
                     <table class="table table-bordered items-tbl mb-0" id="itemsTable">
                         <thead>
                             <tr>
-                                <th style="min-width:200px">Deskripsi / Produk</th>
-                                <th style="min-width:150px">Spesifikasi</th>
+                                <th style="min-width:200px" id="thDesc">Deskripsi / Produk</th>
+                                <th style="min-width:150px" id="thSpec">Spesifikasi</th>
                                 <th style="width:80px">Satuan</th>
                                 <th style="width:70px">Qty</th>
                                 <th style="width:130px">Harga Satuan (Rp)</th>
@@ -328,11 +328,23 @@
 <template id="itemRowTemplate">
     <tr class="item-row">
         <td>
-            {{-- Pilih dari katalog produk (seperti form invoice/customer) atau "Lainnya" untuk mengetik sendiri --}}
-            <select class="form-select form-select-sm desc-picker" aria-label="Pilih produk"></select>
-            <input type="text" name="items[__IDX__][description]" class="form-control form-control-sm mt-1 desc-input" placeholder="Nama produk / layanan" hidden>
+            {{-- Mobil: centang bagian kaca yang dipasang --}}
+            <div class="car-parts" hidden></div>
+            {{-- Gedung/PPF: pilih dari katalog produk atau "Lainnya" untuk mengetik sendiri --}}
+            <div class="generic-desc">
+                <select class="form-select form-select-sm desc-picker" aria-label="Pilih produk"></select>
+                <input type="text" name="items[__IDX__][description]" class="form-control form-control-sm mt-1 desc-input" placeholder="Nama produk / layanan" hidden>
+            </div>
         </td>
-        <td><input type="text" name="items[__IDX__][specifications]" class="form-control form-control-sm spec-input" placeholder="Otomatis dari produk, bisa diubah"></td>
+        <td>
+            {{-- Mobil: tipe film + persentase kegelapan --}}
+            <div class="car-film" hidden>
+                <select name="items[__IDX__][film_category_id]" class="form-select form-select-sm film-type" aria-label="Tipe film" disabled></select>
+                <select name="items[__IDX__][film_product_id]" class="form-select form-select-sm film-product mt-1" aria-label="Persentase kegelapan" disabled></select>
+                <div class="form-text car-summary"></div>
+            </div>
+            <input type="text" name="items[__IDX__][specifications]" class="form-control form-control-sm spec-input generic-spec" placeholder="Otomatis dari produk, bisa diubah">
+        </td>
         <td>
             <select name="items[__IDX__][unit]" class="form-select form-select-sm">
                 <option value="unit">unit</option>
@@ -423,12 +435,86 @@
         }
     }
 
+    // ── Mobil: bagian kaca + tipe film + persentase kegelapan (seperti form customer/invoice) ──
+    const CAR = {!! \Illuminate\Support\Js::from((new \App\Services\QuotationCatalog)->carStructured()) !!};
+    function isCar(){ return (document.getElementById('categorySelect')?.value || 'car_film') === 'car_film'; }
+
+    function buildCarRow(row, data){
+        const partsBox = row.querySelector('.car-parts');
+        const idx = row.querySelector('.film-type').name.match(/items\[(\d+)\]/)[1];
+        const chosen = (data && data.part_ids) ? data.part_ids.map(Number) : [];
+        partsBox.innerHTML = '<div class="small text-muted mb-1">Bagian kaca yang dipasang:</div>' +
+            CAR.parts.map(p => '<div class="form-check"><input class="form-check-input part-check" type="checkbox" name="items['+idx+'][part_ids][]" value="'+p.id+'" id="part_'+idx+'_'+p.id+'"'+(chosen.includes(p.id)?' checked':'')+'><label class="form-check-label small" for="part_'+idx+'_'+p.id+'">'+p.label+'</label></div>').join('');
+
+        const type = row.querySelector('.film-type');
+        type.innerHTML = '<option value="">— Tipe film —</option>' + CAR.types.map(t => '<option value="'+t.id+'">'+t.name+'</option>').join('');
+        if (data && data.film_category_id) type.value = String(data.film_category_id);
+        fillProducts(row, data && data.film_product_id);
+
+        type.addEventListener('change', () => { fillProducts(row); updateCarSummary(row); });
+        row.querySelector('.film-product').addEventListener('change', () => updateCarSummary(row));
+        partsBox.querySelectorAll('.part-check').forEach(c => c.addEventListener('change', () => { syncPartsRequired(row); updateCarSummary(row); }));
+        syncPartsRequired(row); updateCarSummary(row);
+        // Quotation lama (sebelum ada pilihan bagian kaca): tampilkan isi sebelumnya sebagai acuan.
+        if (data && !data.part_ids && data.description) {
+            row.querySelector('.car-summary').textContent = 'Sebelumnya: ' + data.description + (data.specifications ? ' · ' + data.specifications : '') + ' — pilih ulang bagian kaca.';
+        }
+    }
+
+    function fillProducts(row, selected){
+        const prod = row.querySelector('.film-product');
+        const t = CAR.types.find(x => String(x.id) === row.querySelector('.film-type').value);
+        prod.innerHTML = '<option value="">— Kegelapan —</option>' + (t ? t.products.map(p => '<option value="'+p.id+'">'+p.label+'</option>').join('') : '');
+        if (selected) prod.value = String(selected);
+    }
+
+    function syncPartsRequired(row){
+        const boxes = row.querySelectorAll('.part-check');
+        const any = Array.from(boxes).some(b => b.checked);
+        boxes.forEach(b => b.required = isCar() && !any);   // minimal satu bagian kaca
+    }
+
+    function updateCarSummary(row){
+        const parts = Array.from(row.querySelectorAll('.part-check:checked')).map(c => c.nextElementSibling.textContent);
+        const t = row.querySelector('.film-type').selectedOptions[0]?.text || '';
+        const p = row.querySelector('.film-product').selectedOptions[0]?.text || '';
+        const el = row.querySelector('.car-summary');
+        if (el && parts.length === 0 && el.textContent.startsWith('Sebelumnya:')) return;
+        if (el) el.textContent = parts.length ? parts.join(', ') + (t && row.querySelector('.film-type').value ? ' · ' + t : '') + (p && row.querySelector('.film-product').value ? ' · ' + p : '') : '';
+    }
+
+    function applyMode(row){
+        const car = isCar();
+        row.querySelector('.car-parts').hidden = !car;
+        row.querySelector('.car-film').hidden = !car;
+        row.querySelector('.generic-desc').hidden = car;
+        row.querySelector('.generic-spec').hidden = car;
+        row.querySelector('.generic-spec').disabled = car;
+        const type = row.querySelector('.film-type'), prod = row.querySelector('.film-product');
+        type.disabled = !car; prod.disabled = !car; type.required = car; prod.required = car;
+        row.querySelectorAll('.part-check').forEach(b => { b.disabled = !car; });
+        row.querySelector('.desc-picker').disabled = car;
+        row.querySelector('.desc-picker').required = !car;
+        const desc = row.querySelector('.desc-input');
+        desc.disabled = car;
+        if (car) { desc.required = false; } else { syncPicker(row, true); }
+        syncPartsRequired(row);
+    }
+
+    function applyModeAll(){
+        const car = isCar();
+        document.getElementById('thDesc').textContent = car ? 'Bagian Kaca' : 'Deskripsi / Produk';
+        document.getElementById('thSpec').textContent = car ? 'Tipe Film & Kegelapan' : 'Spesifikasi';
+        body.querySelectorAll('.item-row').forEach(applyMode);
+    }
+
     function addRow(data){
         const html = tmpl.innerHTML.replace(/__IDX__/g, rowIdx++);
         body.insertAdjacentHTML('beforeend', html);
         const row = body.lastElementChild;
         buildPicker(row.querySelector('.desc-picker'), data ? (data.description || '') : '');
         row.querySelector('.desc-picker').addEventListener('change', () => { syncPicker(row, false); recalc(); });
+        buildCarRow(row, data);
 
         if(data){
             row.querySelector('[name$="[description]"]').value    = data.description     || '';
@@ -439,6 +525,7 @@
             row.querySelector('.item-disc').value                 = data.discount_percent|| 0;
         }
         syncPicker(row, !!data);
+        applyMode(row);
 
         row.querySelectorAll('input,select').forEach(el => el.addEventListener('input', recalc));
         row.querySelector('.remove-row-btn').addEventListener('click', () => { row.remove(); recalc(); });
@@ -453,6 +540,9 @@
         ? $existingItems->map(fn($i) => [
             'description'      => $i->description,
             'specifications'   => $i->specifications,
+            'part_ids'         => $i->part_ids,
+            'film_category_id' => $i->film_category_id,
+            'film_product_id'  => $i->film_product_id,
             'unit'             => $i->unit,
             'quantity'         => $i->quantity,
             'unit_price'       => $i->unit_price,
@@ -460,6 +550,7 @@
           ])
         : []) !!};
     if (seedItems.length) { seedItems.forEach(addRow); } else { addRow(); }
+    applyModeAll();
 
     document.getElementById('addRowBtn').addEventListener('click', () => addRow());
     discIn.addEventListener('input', recalc);
@@ -473,7 +564,9 @@
     document.getElementById('categorySelect')?.addEventListener('change', function(){
         toggleVehicle();
         // Katalog berubah mengikuti kategori: bangun ulang pilihan produk, pertahankan baris yang diketik manual.
+        applyModeAll();
         body.querySelectorAll('.item-row').forEach(row => {
+            if (isCar()) return;
             const picker = row.querySelector('.desc-picker');
             const manual = picker.value === MANUAL;
             const current = row.querySelector('.desc-input').value;
