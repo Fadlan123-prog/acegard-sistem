@@ -97,7 +97,9 @@ class CustomerController extends Controller
             ? SalesOrder::find($request->integer('from_so'))
             : null;
 
-        return view('customer.create', compact('categories', 'products', 'parts', 'employees', 'fromSo'));
+        $fromLead = $fromSo ? null : app(\App\Services\LeadConversion::class)->find($request->integer('from_lead') ?: null);
+
+        return view('customer.create', compact('categories', 'products', 'parts', 'employees', 'fromSo', 'fromLead'));
     }
 public function store(Request $request, InstallTypeResolver $resolver, CommissionService $commission, CustomerCommissionSyncService $commissionSync, FilmStockPoolService $filmStock)
 {
@@ -239,6 +241,10 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
                 'converted_to_id'   => $customer->id,
                 'converted_at'      => now(),
             ]);
+        }
+
+        if (! $fromSo) {
+            app(\App\Services\LeadConversion::class)->markConverted($request->integer('from_lead') ?: null, $customer);
         }
 
         return redirect()

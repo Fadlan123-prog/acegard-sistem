@@ -84,7 +84,10 @@ class CustomerPpfController extends Controller
             ? SalesOrder::find($request->integer('from_so'))
             : null;
 
+        $fromLead = $fromSo ? null : app(\App\Services\LeadConversion::class)->find($request->integer('from_lead') ?: null);
+
         return view('customer.ppf.create', compact(
+            'fromLead',
             'branches',
             'employees',
             'ppfProducts',
@@ -243,6 +246,10 @@ class CustomerPpfController extends Controller
                 $installation->technicians()->sync($ins['technicians']);
             }
         });
+
+        if (! $request->filled('from_so')) {
+            app(\App\Services\LeadConversion::class)->markConverted($request->integer('from_lead') ?: null, $customer);
+        }
 
         if ($request->filled('from_so')) {
             $so = SalesOrder::find($request->integer('from_so'));

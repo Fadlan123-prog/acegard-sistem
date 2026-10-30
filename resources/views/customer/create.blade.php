@@ -201,8 +201,16 @@
     </x-ui.alert>
     @endif
 
-    <form action="{{ route('customer.store') }}" method="POST" id="customerForm">
+        @if(isset($fromLead) && $fromLead)
+    <x-ui.alert type="info" class="mb-3" :dismissible="false">
+        <x-slot name="title">Diisi dari Lead <strong>{{ $fromLead->name }}</strong></x-slot>
+        Data lead sudah diisi otomatis (tanpa perlu quotation). Lengkapi data yang masih kosong lalu simpan; lead akan ditandai terkonversi.
+    </x-ui.alert>
+    @endif
+
+<form action="{{ route('customer.store') }}" method="POST" id="customerForm">
       @csrf
+      @if(isset($fromLead) && $fromLead)<input type="hidden" name="from_lead" value="{{ $fromLead->id }}">@endif
       @if(isset($fromSo) && $fromSo)
       <input type="hidden" name="from_so" value="{{ $fromSo->id }}">
       @endif
@@ -231,7 +239,7 @@
             <div class="col-md-6">
               <label class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
               <input type="text" name="name" class="form-control" required
-                     value="{{ old('name', $fromSo?->prospect_name) }}" placeholder="Nama pemilik kendaraan">
+                     value="{{ old('name', $fromSo?->prospect_name ?? $fromLead?->name) }}" placeholder="Nama pemilik kendaraan">
             </div>
             <div class="col-md-6">
               <label class="form-label">Nomor WhatsApp <span class="text-danger">*</span></label>
@@ -240,23 +248,23 @@
                 <input type="tel" class="fi-display" id="phone_display"
                        placeholder="812 3456 7890" autocomplete="off">
                 <input type="hidden" name="phone_number" id="phone_hidden"
-                       value="{{ old('phone_number', $fromSo?->prospect_phone) }}">
+                       value="{{ old('phone_number', $fromSo?->prospect_phone ?? $fromLead?->phone) }}">
               </div>
             </div>
             <div class="col-md-6">
               <label class="form-label">Email</label>
               <input type="email" name="email" class="form-control"
-                     value="{{ old('email', $fromSo?->prospect_email) }}" placeholder="email@contoh.com">
+                     value="{{ old('email', $fromSo?->prospect_email ?? $fromLead?->email) }}" placeholder="email@contoh.com">
             </div>
             <div class="col-md-6">
               <label class="form-label">Alamat</label>
               <input type="text" name="address" class="form-control"
-                     value="{{ old('address', $fromSo?->prospect_address) }}" placeholder="Alamat lengkap">
+                     value="{{ old('address', $fromSo?->prospect_address ?? $fromLead?->address) }}" placeholder="Alamat lengkap">
             </div>
             <div class="col-md-6">
               <label class="form-label">Kota</label>
               <input type="text" name="city" class="form-control"
-                     value="{{ old('city') }}" placeholder="Jakarta">
+                     value="{{ old('city', $fromLead?->city) }}" placeholder="Jakarta">
             </div>
             <div class="col-md-6">
               <label class="form-label">Negara</label>
@@ -286,17 +294,17 @@
             <div class="col-md-6">
               <label class="form-label">Merek Kendaraan</label>
               <input type="text" name="vehicle_brand" class="form-control"
-                     value="{{ old('vehicle_brand', $fromSo?->vehicle_brand) }}" placeholder="Toyota">
+                     value="{{ old('vehicle_brand', $fromSo?->vehicle_brand ?? $fromLead?->vehicle_brand) }}" placeholder="Toyota">
             </div>
             <div class="col-md-6">
               <label class="form-label">Model Kendaraan</label>
               <input type="text" name="vehicle_model" class="form-control"
-                     value="{{ old('vehicle_model', $fromSo?->vehicle_model) }}" placeholder="Avanza">
+                     value="{{ old('vehicle_model', $fromSo?->vehicle_model ?? $fromLead?->vehicle_model) }}" placeholder="Avanza">
             </div>
             <div class="col-md-6">
               <label class="form-label">Tahun Kendaraan</label>
               <input type="number" name="vehicle_year" class="form-control"
-                     value="{{ old('vehicle_year', $fromSo?->vehicle_year) }}" placeholder="{{ date('Y') }}">
+                     value="{{ old('vehicle_year', $fromSo?->vehicle_year ?? $fromLead?->vehicle_year) }}" placeholder="{{ date('Y') }}">
             </div>
             <div class="col-md-6">
               <label class="form-label fw-semibold">Tanggal Pemasangan <span class="text-danger">*</span></label>

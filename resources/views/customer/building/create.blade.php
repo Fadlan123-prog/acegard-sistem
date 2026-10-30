@@ -177,8 +177,16 @@
     </x-ui.alert>
     @endif
 
-    <form action="{{ route('customer.building.store') }}" method="POST">
+        @if(isset($fromLead) && $fromLead)
+    <x-ui.alert type="info" class="mb-3" :dismissible="false">
+        <x-slot name="title">Diisi dari Lead <strong>{{ $fromLead->name }}</strong></x-slot>
+        Data lead sudah diisi otomatis (tanpa perlu quotation). Lengkapi data yang masih kosong lalu simpan; lead akan ditandai terkonversi.
+    </x-ui.alert>
+    @endif
+
+<form action="{{ route('customer.building.store') }}" method="POST">
       @csrf
+      @if(isset($fromLead) && $fromLead)<input type="hidden" name="from_lead" value="{{ $fromLead->id }}">@endif
       @if(isset($fromSo) && $fromSo)
       <input type="hidden" name="from_so" value="{{ $fromSo->id }}">
       @endif
@@ -209,7 +217,7 @@
             <div class="col-md-6">
               <label class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
               <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
-                     value="{{ old('name', $fromSo?->prospect_name) }}" placeholder="Nama pemilik / PIC gedung" required>
+                     value="{{ old('name', $fromSo?->prospect_name ?? $fromLead?->name) }}" placeholder="Nama pemilik / PIC gedung" required>
               @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-6">
@@ -218,26 +226,26 @@
                 <span class="fi-badge"><span class="wa-dot"></span>+62</span>
                 <input type="tel" id="phone_display" placeholder="812 3456 7890" autocomplete="off">
                 <input type="hidden" name="phone_number" id="phone_hidden"
-                       value="{{ old('phone_number', $fromSo?->prospect_phone) }}">
+                       value="{{ old('phone_number', $fromSo?->prospect_phone ?? $fromLead?->phone) }}">
               </div>
               @error('phone_number')<div class="text-danger" style="font-size:.85em;margin-top:4px">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-6">
               <label class="form-label">Email</label>
               <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                     value="{{ old('email', $fromSo?->prospect_email) }}" placeholder="email@contoh.com">
+                     value="{{ old('email', $fromSo?->prospect_email ?? $fromLead?->email) }}" placeholder="email@contoh.com">
               @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-6">
               <label class="form-label">Alamat Gedung</label>
               <input type="text" name="address" class="form-control @error('address') is-invalid @enderror"
-                     value="{{ old('address', $fromSo?->prospect_address) }}" placeholder="Alamat lengkap gedung">
+                     value="{{ old('address', $fromSo?->prospect_address ?? $fromLead?->address) }}" placeholder="Alamat lengkap gedung">
               @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-6">
               <label class="form-label">Kota</label>
               <input type="text" name="city" class="form-control @error('city') is-invalid @enderror"
-                     value="{{ old('city') }}" placeholder="Jakarta">
+                     value="{{ old('city', $fromLead?->city) }}" placeholder="Jakarta">
               @error('city')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-6">

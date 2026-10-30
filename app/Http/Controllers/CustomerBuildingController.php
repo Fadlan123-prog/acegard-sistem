@@ -60,7 +60,9 @@ class CustomerBuildingController extends Controller
         $employees = \App\Models\Employee::where('branch_id', $branchId)->where('is_active', true)->orderBy('name')->get(['id', 'name', 'job_position']);
         $fromSo?->loadMissing('technicians');
 
-        return view('customer.building.create', compact('branches', 'categories', 'products', 'fromSo', 'employees'));
+        $fromLead = $fromSo ? null : app(\App\Services\LeadConversion::class)->find($request->integer('from_lead') ?: null);
+
+        return view('customer.building.create', compact('branches', 'categories', 'products', 'fromSo', 'employees', 'fromLead'));
     }
 
     public function store(Request $request, FilmStockPoolService $filmStock)
@@ -110,13 +112,13 @@ class CustomerBuildingController extends Controller
                 'wsn'          => $request->wsn,
                 'card_number'  => $cardNumber, // ✅ pakai hasil generate
                 'name'         => $request->name,
-                'email'        => $request->email,
+                'email'        => $request->email ?? '',
                 'phone_number' => $request->phone_number,
-                'address'      => $request->address,
-                'dealer_name'  => $request->dealer_name,
-                'applicator'   => $request->applicator,
-                'city'         => $request->city,
-                'country'      => $request->country,
+                'address'      => $request->address ?? '',
+                'dealer_name'  => $request->dealer_name ?? '',
+                'applicator'   => $request->applicator ?? '',
+                'city'         => $request->city ?? '',
+                'country'      => $request->country ?? '',
                 'marketing_id' => $request->filled('marketing_id') ? (int) $request->marketing_id : null,
             ]);
 
@@ -146,6 +148,10 @@ class CustomerBuildingController extends Controller
             // Stock deduction dipindah ke saat pelunasan invoice (InvoiceBuildingController::recordPelunasan)
 
             DB::commit();
+
+            if (! $request->filled('from_so')) {
+                app(\App\Services\LeadConversion::class)->markConverted($request->integer('from_lead') ?: null, $customer);
+            }
 
             if ($request->filled('from_so')) {
                 $so = SalesOrder::find($request->integer('from_so'));
@@ -237,13 +243,13 @@ class CustomerBuildingController extends Controller
                 'wsn' => $request->wsn,
                 'card_number' => $request->card_number,
                 'name' => $request->name,
-                'email' => $request->email,
+                'email' => $request->email ?? '',
                 'phone_number' => $request->phone_number,
-                'address' => $request->address,
-                'dealer_name' => $request->dealer_name,
-                'applicator' => $request->applicator,
-                'city' => $request->city,
-                'country' => $request->country,
+                'address' => $request->address ?? '',
+                'dealer_name' => $request->dealer_name ?? '',
+                'applicator' => $request->applicator ?? '',
+                'city' => $request->city ?? '',
+                'country' => $request->country ?? '',
                 'marketing_id' => $request->filled('marketing_id') ? (int) $request->marketing_id : null,
             ]);
 
