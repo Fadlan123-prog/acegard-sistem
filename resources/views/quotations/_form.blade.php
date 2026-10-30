@@ -27,7 +27,33 @@
 /* Items table */
 .items-tbl th { font-size:12px; font-weight:600; color:var(--neutral-500); background:var(--neutral-50); }
 .items-tbl td { vertical-align:middle; }
-.item-subtotal-cell { font-weight:600; color:var(--primary-600); }
+.item-subtotal-cell { font-weight:700; color:var(--primary-600); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.items-tbl td { padding:12px; }
+.item-price { text-align:right; font-variant-numeric:tabular-nums; }
+
+/* Paket kaca film mobil */
+.pack-card { border:1px solid var(--border-color); border-left:4px solid var(--primary-600); border-radius:10px; padding:14px; background:var(--white); }
+.pack-card .pack-label { font-size:12px; font-weight:600; color:var(--neutral-600); margin-bottom:4px; display:block; }
+.pack-head { display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--neutral-500); margin:14px 0 6px; }
+.pack-head::after { content:""; flex:1; height:1px; background:var(--border-color); }
+.pack-cols { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 36px; gap:8px; font-size:11.5px; font-weight:600; color:var(--neutral-500); margin-bottom:4px; }
+.pack-line { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 36px; gap:8px; align-items:center; margin-bottom:8px; }
+.pack-line .remove-line { width:36px; height:36px; padding:0; display:inline-flex; align-items:center; justify-content:center; }
+.pack-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.pack-chip { display:inline-flex; align-items:center; gap:6px; background:var(--primary-50, #eff6ff); color:var(--primary-700, #1d4ed8); border-radius:999px; padding:3px 10px; font-size:12px; font-weight:600; }
+.pack-chip small { font-weight:500; color:var(--neutral-600); }
+.pack-legacy { margin-top:10px; font-size:12px; color:#92400e; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:6px 10px; }
+.price-wrap { position:relative; }
+.price-wrap > span { position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:12px; color:var(--neutral-500); pointer-events:none; }
+.price-wrap > .item-price { padding-left:32px; }
+@media (max-width: 767.98px) {
+  .pack-cols { display:none; }
+  .pack-line { grid-template-columns:1fr 36px; }
+  .pack-line .line-part { grid-column:1 / -1; }
+  .pack-line .line-type, .pack-line .line-product { grid-column:1 / 2; }
+  .pack-line .remove-line { grid-row:2 / 4; grid-column:2; align-self:center; }
+}
+[data-theme="dark"] .pack-card { background:var(--dark-2); }
 
 [data-theme="dark"] .cust-section,[data-theme="dark"] .cust-action-bar { background:var(--dark-2); }
 [data-theme="dark"] .cust-section-head { background:var(--dark-3); }
@@ -241,7 +267,7 @@
                     <table class="table table-bordered items-tbl mb-0" id="itemsTable">
                         <thead>
                             <tr>
-                                <th style="min-width:200px" id="thDesc">Deskripsi / Produk</th>
+                                <th style="min-width:260px" id="thDesc">Deskripsi / Produk</th>
                                 <th style="min-width:150px" id="thSpec">Spesifikasi</th>
                                 <th style="width:80px" id="thUnit">Satuan</th>
                                 <th style="width:70px" id="thQty">Qty</th>
@@ -329,15 +355,30 @@
     <tr class="item-row">
         <td class="desc-td">
             {{-- Mobil: satu paket = daftar bagian kaca (Part / Kategori / Produk) dengan satu harga --}}
-            <div class="car-pack" hidden>
-                <div class="row g-2 mb-2">
-                    <div class="col-md-5"><input type="text" name="items[__IDX__][vehicle_label]" class="form-control form-control-sm pack-vehicle" placeholder="Kendaraan (merek / model), opsional" maxlength="120" disabled></div>
-                    <div class="col-md-3"><input type="text" name="items[__IDX__][vehicle_plate]" class="form-control form-control-sm pack-plate" placeholder="Plat nomor" maxlength="20" disabled></div>
-                    <div class="col-md-4"><input type="text" name="items[__IDX__][description]" class="form-control form-control-sm pack-title" placeholder="Nama paket (mis. Fullset, D/S/P)" disabled></div>
+            <div class="car-pack pack-card" hidden>
+                <div class="row g-2">
+                    <div class="col-md-5">
+                        <label class="pack-label">Kendaraan <span class="text-muted fw-normal">(merek / model, opsional)</span></label>
+                        <input type="text" name="items[__IDX__][vehicle_label]" class="form-control form-control-sm pack-vehicle" placeholder="Contoh: Toyota Avanza" maxlength="120" disabled>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <label class="pack-label">Plat nomor</label>
+                        <input type="text" name="items[__IDX__][vehicle_plate]" class="form-control form-control-sm pack-plate" placeholder="B 1234 XYZ" maxlength="20" disabled>
+                    </div>
+                    <div class="col-md-4 col-6">
+                        <label class="pack-label">Nama paket</label>
+                        <input type="text" name="items[__IDX__][description]" class="form-control form-control-sm pack-title" placeholder="Fullset / D-S-P" disabled>
+                    </div>
                 </div>
-                <div class="pack-lines mt-2"></div>
-                <button type="button" class="btn btn-outline-primary btn-sm add-line">+ Tambah Produk</button>
-                <div class="form-text car-summary"></div>
+
+                <div class="pack-head">Bagian kaca &amp; film</div>
+                <div class="pack-cols" aria-hidden="true"><span>Part</span><span>Kategori</span><span>Produk</span><span></span></div>
+                <div class="pack-lines"></div>
+                <button type="button" class="btn btn-outline-primary btn-sm add-line">
+                    <iconify-icon icon="mdi:plus" class="me-1" aria-hidden="true"></iconify-icon>Tambah bagian
+                </button>
+                <div class="pack-chips car-chips" aria-live="polite"></div>
+                <div class="pack-legacy car-legacy" hidden></div>
             </div>
             {{-- Gedung/PPF: pilih dari katalog produk atau "Lainnya" untuk mengetik sendiri --}}
             <div class="generic-desc">
@@ -358,7 +399,7 @@
             </select>
         </td>
         <td class="qty-td"><input type="number" name="items[__IDX__][quantity]" class="form-control form-control-sm item-qty" value="1" min="0.01" step="0.01" required></td>
-        <td><input type="number" name="items[__IDX__][unit_price]" class="form-control form-control-sm item-price" value="0" min="0" step="1000" required></td>
+        <td><div class="price-wrap"><span aria-hidden="true">Rp</span><input type="number" name="items[__IDX__][unit_price]" class="form-control form-control-sm item-price" value="0" min="0" step="1000" required inputmode="numeric" aria-label="Harga"></div></td>
         <td class="disc-td"><input type="number" name="items[__IDX__][discount_percent]" class="form-control form-control-sm item-disc" value="0" min="0" max="100" step="0.5"></td>
         <td class="text-end item-subtotal-cell align-middle"><span class="item-subtotal">Rp 0</span></td>
         <td class="text-center align-middle">
@@ -453,12 +494,12 @@
     function addLine(row, line){
         const idx = row.dataset.idx, k = row._lineIdx = (row._lineIdx || 0) + 1;
         const div = document.createElement('div');
-        div.className = 'row g-2 align-items-end mb-2 pack-line';
+        div.className = 'pack-line';
         div.innerHTML =
-            '<div class="col-md-4"><label class="form-label small mb-1">Part</label><select name="items['+idx+'][film_lines]['+k+'][part_id]" class="form-select form-select-sm line-part">' + opts(CAR.parts, '— Part —') + '</select></div>' +
-            '<div class="col-md-4"><label class="form-label small mb-1">Kategori</label><select name="items['+idx+'][film_lines]['+k+'][category_id]" class="form-select form-select-sm line-type">' + opts(CAR.types, '— Kategori —', 'name') + '</select></div>' +
-            '<div class="col-md-3"><label class="form-label small mb-1">Produk</label><select name="items['+idx+'][film_lines]['+k+'][product_id]" class="form-select form-select-sm line-product"><option value="">— Produk —</option></select></div>' +
-            '<div class="col-md-1 text-end"><button type="button" class="btn btn-outline-danger btn-sm remove-line" title="Hapus bagian">&times;</button></div>';
+            '<select name="items['+idx+'][film_lines]['+k+'][part_id]" class="form-select form-select-sm line-part" aria-label="Part">' + opts(CAR.parts, '— Part —') + '</select>' +
+            '<select name="items['+idx+'][film_lines]['+k+'][category_id]" class="form-select form-select-sm line-type" aria-label="Kategori">' + opts(CAR.types, '— Kategori —', 'name') + '</select>' +
+            '<select name="items['+idx+'][film_lines]['+k+'][product_id]" class="form-select form-select-sm line-product" aria-label="Produk"><option value="">— Produk —</option></select>' +
+            '<button type="button" class="btn btn-outline-danger btn-sm remove-line" aria-label="Hapus bagian"><iconify-icon icon="mdi:trash-can-outline" aria-hidden="true"></iconify-icon></button>';
         row.querySelector('.pack-lines').appendChild(div);
 
         const part = div.querySelector('.line-part'), type = div.querySelector('.line-type'), prod = div.querySelector('.line-product');
@@ -489,7 +530,7 @@
         // Quotation mobil lama (sebelum ada rincian bagian): tampilkan isi sebelumnya sebagai acuan.
         if (data && !(data.film_lines && data.film_lines.length) && data.description) {
             row.querySelector('.pack-title').value = data.description;
-            row.querySelector('.car-summary').dataset.legacy = 'Sebelumnya: ' + data.description + (data.specifications ? ' · ' + data.specifications : '') + ' — rinci ulang bagian kaca.';
+            row.querySelector('.car-legacy').dataset.note = 'Sebelumnya: ' + data.description + (data.specifications ? ' · ' + data.specifications : '') + ' — rinci ulang bagian kaca di atas.';
         } else if (data && data.description) {
             row.querySelector('.pack-title').value = data.description;
         }
@@ -497,14 +538,28 @@
     }
 
     function updateCarSummary(row){
-        const el = row.querySelector('.car-summary');
-        if (!el) return;
-        const lines = Array.from(row.querySelectorAll('.pack-line')).map(l => {
+        const chips = row.querySelector('.car-chips'), legacy = row.querySelector('.car-legacy');
+        if (!chips) return;
+        // Gabungkan bagian dengan tipe+produk sama (sama seperti teks dokumen di server).
+        const groups = new Map();
+        row.querySelectorAll('.pack-line').forEach(l => {
             const part = l.querySelector('.line-part'), type = l.querySelector('.line-type'), prod = l.querySelector('.line-product');
-            if (!part.value) return null;
-            return part.selectedOptions[0].text + (type.value ? ' · ' + type.selectedOptions[0].text : '') + (prod.value ? ' ' + prod.selectedOptions[0].text : '');
-        }).filter(Boolean);
-        el.textContent = lines.length ? lines.join('  |  ') : (el.dataset.legacy || '');
+            if (!part.value) return;
+            const film = (type.value ? type.selectedOptions[0].text : '') + (prod.value ? ' ' + prod.selectedOptions[0].text : '');
+            const key = film || '—';
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key).push(part.selectedOptions[0].text);
+        });
+        chips.innerHTML = '';
+        groups.forEach((parts, film) => {
+            const c = document.createElement('span'); c.className = 'pack-chip';
+            c.appendChild(document.createTextNode([...new Set(parts)].join(', ')));
+            if (film !== '—') { const s = document.createElement('small'); s.textContent = film; c.appendChild(s); }
+            chips.appendChild(c);
+        });
+        const note = legacy.dataset.note || '';
+        legacy.hidden = !(note && groups.size === 0);
+        legacy.textContent = note;
     }
 
     function applyMode(row){
