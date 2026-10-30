@@ -93,26 +93,37 @@ class QuotationCatalog
     }
 
     /**
-     * Susun deskripsi & spesifikasi baris mobil dari pilihan terstruktur (dihitung di server, bukan dipercaya dari browser).
+     * Susun deskripsi & spesifikasi paket kaca film mobil dari daftar bagian
+     * (dihitung di server, bukan dipercaya dari browser). Bagian dengan tipe+kegelapan sama digabung.
      *
-     * @param  array<int,int|string>  $partIds
-     * @return array{description:?string,specifications:?string}
+     * @param  array<int,array{part_id:int|string,category_id:int|string,product_id:int|string}>  $lines
+     * @return array{description:string,specifications:string,lines:array}
      */
-    public function composeCarItem(array $partIds, ?int $categoryId, ?int $productId): array
+    public function composeCarPackage(array $lines, ?string $title = null): array
     {
-        $parts = Part::whereIn('id', array_map('intval', $partIds))->orderBy('id')->get()
-            ->map(fn ($p) => self::partLabel($p->name))->all();
+        $parts = Part::pluck('name', 'id');
+        $cats  = CategoryProduct::pluck('name', 'id');
+        $prods = Product::get()->keyBy('id');
 
-        $spec = null;
-        if ($categoryId) {
-            $cat = CategoryProduct::find($categoryId);
-            $prod = $productId ? Product::where('id', $productId)->where('category_id', $categoryId)->first() : null;
-            $spec = trim(($cat?->name ?? '') . ($prod ? ' ' . $prod->name . ($prod->description ? ' (kegelapan ' . $prod->description . ')' : '') : ''));
+        $groups = [];
+        $normalized = [];
+        foreach ($lines as $l) {
+            $partId = (int) $l['part_id'];
+            $catId  = (int) $l['category_id'];
+            $prodId = (int) $l['product_id'];
+            $normalized[] = ['part_id' => $partId, 'category_id' => $catId, 'product_id' => $prodId];
+
+            $p = $prods->get($prodId);
+            $film = trim(($cats[$catId] ?? '') . ' ' . ($p->name ?? '') . ($p && $p->description ? " (kegelapan {$p->description})" : ''));
+            $groups[$film][] = self::partLabel((string) ($parts[$partId] ?? ''));
         }
 
+        $spec = collect($groups)->map(fn ($labels, $film) => implode(', ', array_unique($labels)) . ': ' . $film)->implode('; ');
+
         return [
-            'description'    => $parts ? implode(', ', $parts) : null,
-            'specifications' => $spec ?: null,
+            'description'    => trim((string) $title) !== '' ? trim((string) $title) : 'Paket Kaca Film Mobil',
+            'specifications' => \Illuminate\Support\Str::limit($spec, 250, '…'),
+            'lines'          => $normalized,
         ];
     }
 }

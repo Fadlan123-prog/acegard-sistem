@@ -71,7 +71,36 @@ class QuotationProductPickerTest extends TestCase
         ]);
     }
 
-    public function test_car_item_records_glass_parts_film_type_and_darkness_and_composes_text_on_the_server(): void
+    public function test_car_package_records_each_glass_part_with_its_own_type_and_darkness(): void
+    {
+        $this->seedCatalog();
+        $this->seedParts();
+        DB::table('category_products')->insert(['id' => 2, 'name' => 'BLACK MASTER', 'duration' => 5, 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('products')->insert(['id' => 2, 'category_id' => 2, 'name' => 'BM35', 'description' => '40%', 'created_at' => now(), 'updated_at' => now()]);
+        $branch = Branch::factory()->create();
+        $admin = $this->userWithRole('admin', $branch);
+
+        $this->actingAs($admin)->post(route('quotations.store'), $this->payload($branch, [
+            'description' => 'Fullset',
+            'film_lines' => [
+                ['part_id' => 1, 'category_id' => 1, 'product_id' => 1],   // depan: Notch NV70
+                ['part_id' => 6, 'category_id' => 1, 'product_id' => 1],   // panoramic: sama -> digabung
+                ['part_id' => 2, 'category_id' => 2, 'product_id' => 2],   // samping: Black Master BM35
+            ],
+            'specifications' => 'teks palsu dari browser',
+        ]))->assertSessionHasNoErrors();
+
+        $item = \App\Models\QuotationItem::first();
+        $this->assertSame('Fullset', $item->description);
+        $this->assertSame(
+            'Kaca Depan, Sunroof / Panoramic: NOTCH UV 400 NV70 (kegelapan 20%); Samping Baris 1: BLACK MASTER BM35 (kegelapan 40%)',
+            $item->specifications, 'disusun server; bagian dengan tipe+kegelapan sama digabung'
+        );
+        $this->assertCount(3, $item->film_lines);
+        $this->assertSame(2500000.0, (float) $item->unit_price, 'satu harga untuk seluruh paket');
+    }
+
+    public function test_package_without_a_title_gets_a_default_name(): void
     {
         $this->seedCatalog();
         $this->seedParts();
@@ -79,16 +108,10 @@ class QuotationProductPickerTest extends TestCase
         $admin = $this->userWithRole('admin', $branch);
 
         $this->actingAs($admin)->post(route('quotations.store'), $this->payload($branch, [
-            'part_ids' => [1, 6], 'film_category_id' => 1, 'film_product_id' => 1,
-            'description' => 'teks palsu dari browser', 'specifications' => 'teks palsu',
+            'film_lines' => [['part_id' => 1, 'category_id' => 1, 'product_id' => 1]],
         ]))->assertSessionHasNoErrors();
 
-        $item = \App\Models\QuotationItem::first();
-        $this->assertSame([1, 6], $item->part_ids);
-        $this->assertSame(1, (int) $item->film_category_id);
-        $this->assertSame(1, (int) $item->film_product_id);
-        $this->assertSame('Kaca Depan, Sunroof / Panoramic', $item->description, 'disusun server, bukan dari browser');
-        $this->assertSame('NOTCH UV 400 NV70 (kegelapan 20%)', $item->specifications);
+        $this->assertSame('Paket Kaca Film Mobil', \App\Models\QuotationItem::first()->description);
     }
 
     public function test_darkness_must_belong_to_the_selected_film_type(): void
@@ -100,10 +123,22 @@ class QuotationProductPickerTest extends TestCase
         $admin = $this->userWithRole('admin', $branch);
 
         $this->actingAs($admin)->post(route('quotations.store'), $this->payload($branch, [
-            'part_ids' => [1], 'film_category_id' => 2, 'film_product_id' => 1,   // NV70 bukan milik Black Master
-        ]))->assertSessionHasErrors('items.0.film_product_id');
+            'film_lines' => [['part_id' => 1, 'category_id' => 2, 'product_id' => 1]],   // NV70 bukan milik Black Master
+        ]))->assertSessionHasErrors('items.0.film_lines.0.product_id');
 
         $this->assertSame(0, \App\Models\QuotationItem::count());
+    }
+
+    public function test_every_glass_part_line_needs_part_type_and_darkness(): void
+    {
+        $this->seedCatalog();
+        $this->seedParts();
+        $branch = Branch::factory()->create();
+        $admin = $this->userWithRole('admin', $branch);
+
+        $this->actingAs($admin)->post(route('quotations.store'), $this->payload($branch, [
+            'film_lines' => [['part_id' => 1, 'category_id' => 1]],
+        ]))->assertSessionHasErrors('items.0.film_lines.0.product_id');
     }
 
     public function test_non_car_quotations_ignore_glass_part_fields(): void
@@ -115,13 +150,12 @@ class QuotationProductPickerTest extends TestCase
 
         $this->actingAs($admin)->post(route('quotations.store'), $this->payload($branch, [
             'description' => 'FLEX ONE WAY — Silver Grey', 'specifications' => 'Kegelapan 80%',
-            'part_ids' => [1], 'film_category_id' => 1, 'film_product_id' => 1,
+            'film_lines' => [['part_id' => 1, 'category_id' => 1, 'product_id' => 1]],
         ], 'building_film'))->assertSessionHasNoErrors();
 
         $item = \App\Models\QuotationItem::first();
         $this->assertSame('FLEX ONE WAY — Silver Grey', $item->description);
-        $this->assertNull($item->part_ids);
-        $this->assertNull($item->film_product_id);
+        $this->assertNull($item->film_lines);
     }
 
     public function test_editing_a_car_quotation_reloads_the_saved_selection(): void
@@ -130,10 +164,10 @@ class QuotationProductPickerTest extends TestCase
         $this->seedParts();
         $branch = Branch::factory()->create();
         $admin = $this->userWithRole('admin', $branch);
-        $this->actingAs($admin)->post(route('quotations.store'), $this->payload($branch, ['part_ids' => [1, 2], 'film_category_id' => 1, 'film_product_id' => 1]));
+        $this->actingAs($admin)->post(route('quotations.store'), $this->payload($branch, ['description' => 'Fullset', 'film_lines' => [['part_id' => 1, 'category_id' => 1, 'product_id' => 1], ['part_id' => 2, 'category_id' => 1, 'product_id' => 1]]]));
         $quotation = \App\Models\Quotation::first();
 
         $page = $this->actingAs($admin)->get(route('quotations.edit', $quotation))->assertOk();
-        $page->assertSee('part_ids', false)->assertSee('film_product_id', false)->assertSee('Samping Baris 1', false);
+        $page->assertSee('film_lines', false)->assertSee('Samping Baris 1', false)->assertSee('Fullset', false);
     }
 }

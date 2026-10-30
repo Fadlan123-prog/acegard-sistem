@@ -327,22 +327,21 @@
 {{-- Row template --}}
 <template id="itemRowTemplate">
     <tr class="item-row">
-        <td>
-            {{-- Mobil: centang bagian kaca yang dipasang --}}
-            <div class="car-parts" hidden></div>
+        <td class="desc-td">
+            {{-- Mobil: satu paket = daftar bagian kaca (Part / Kategori / Produk) dengan satu harga --}}
+            <div class="car-pack" hidden>
+                <input type="text" name="items[__IDX__][description]" class="form-control form-control-sm pack-title" placeholder="Nama paket (mis. Fullset, D/S/P, Kaca Depan)" disabled>
+                <div class="pack-lines mt-2"></div>
+                <button type="button" class="btn btn-outline-primary btn-sm add-line">+ Tambah Produk</button>
+                <div class="form-text car-summary"></div>
+            </div>
             {{-- Gedung/PPF: pilih dari katalog produk atau "Lainnya" untuk mengetik sendiri --}}
             <div class="generic-desc">
                 <select class="form-select form-select-sm desc-picker" aria-label="Pilih produk"></select>
                 <input type="text" name="items[__IDX__][description]" class="form-control form-control-sm mt-1 desc-input" placeholder="Nama produk / layanan" hidden>
             </div>
         </td>
-        <td>
-            {{-- Mobil: tipe film + persentase kegelapan --}}
-            <div class="car-film" hidden>
-                <select name="items[__IDX__][film_category_id]" class="form-select form-select-sm film-type" aria-label="Tipe film" disabled></select>
-                <select name="items[__IDX__][film_product_id]" class="form-select form-select-sm film-product mt-1" aria-label="Persentase kegelapan" disabled></select>
-                <div class="form-text car-summary"></div>
-            </div>
+        <td class="spec-td">
             <input type="text" name="items[__IDX__][specifications]" class="form-control form-control-sm spec-input generic-spec" placeholder="Otomatis dari produk, bisa diubah">
         </td>
         <td>
@@ -435,76 +434,92 @@
         }
     }
 
-    // ── Mobil: bagian kaca + tipe film + persentase kegelapan (seperti form customer/invoice) ──
+    // ── Mobil: paket = daftar bagian kaca (Part / Kategori / Produk) seperti form customer, satu harga ──
     const CAR = {!! \Illuminate\Support\Js::from((new \App\Services\QuotationCatalog)->carStructured()) !!};
     function isCar(){ return (document.getElementById('categorySelect')?.value || 'car_film') === 'car_film'; }
 
-    function buildCarRow(row, data){
-        const partsBox = row.querySelector('.car-parts');
-        const idx = row.querySelector('.film-type').name.match(/items\[(\d+)\]/)[1];
-        const chosen = (data && data.part_ids) ? data.part_ids.map(Number) : [];
-        partsBox.innerHTML = '<div class="small text-muted mb-1">Bagian kaca yang dipasang:</div>' +
-            CAR.parts.map(p => '<div class="form-check"><input class="form-check-input part-check" type="checkbox" name="items['+idx+'][part_ids][]" value="'+p.id+'" id="part_'+idx+'_'+p.id+'"'+(chosen.includes(p.id)?' checked':'')+'><label class="form-check-label small" for="part_'+idx+'_'+p.id+'">'+p.label+'</label></div>').join('');
+    function opts(list, ph, labelKey){ return '<option value="">' + ph + '</option>' + list.map(x => '<option value="' + x.id + '">' + (x[labelKey || 'label'] || x.name) + '</option>').join(''); }
 
-        const type = row.querySelector('.film-type');
-        type.innerHTML = '<option value="">— Tipe film —</option>' + CAR.types.map(t => '<option value="'+t.id+'">'+t.name+'</option>').join('');
-        if (data && data.film_category_id) type.value = String(data.film_category_id);
-        fillProducts(row, data && data.film_product_id);
+    function fillProducts(prodSel, typeId, selected){
+        const t = CAR.types.find(x => String(x.id) === String(typeId));
+        prodSel.innerHTML = opts(t ? t.products : [], '— Produk —');
+        if (selected) prodSel.value = String(selected);
+    }
 
-        type.addEventListener('change', () => { fillProducts(row); updateCarSummary(row); });
-        row.querySelector('.film-product').addEventListener('change', () => updateCarSummary(row));
-        partsBox.querySelectorAll('.part-check').forEach(c => c.addEventListener('change', () => { syncPartsRequired(row); updateCarSummary(row); }));
-        syncPartsRequired(row); updateCarSummary(row);
-        // Quotation lama (sebelum ada pilihan bagian kaca): tampilkan isi sebelumnya sebagai acuan.
-        if (data && !data.part_ids && data.description) {
-            row.querySelector('.car-summary').textContent = 'Sebelumnya: ' + data.description + (data.specifications ? ' · ' + data.specifications : '') + ' — pilih ulang bagian kaca.';
+    function addLine(row, line){
+        const idx = row.dataset.idx, k = row._lineIdx = (row._lineIdx || 0) + 1;
+        const div = document.createElement('div');
+        div.className = 'row g-2 align-items-end mb-2 pack-line';
+        div.innerHTML =
+            '<div class="col-md-4"><label class="form-label small mb-1">Part</label><select name="items['+idx+'][film_lines]['+k+'][part_id]" class="form-select form-select-sm line-part">' + opts(CAR.parts, '— Part —') + '</select></div>' +
+            '<div class="col-md-4"><label class="form-label small mb-1">Kategori</label><select name="items['+idx+'][film_lines]['+k+'][category_id]" class="form-select form-select-sm line-type">' + opts(CAR.types, '— Kategori —', 'name') + '</select></div>' +
+            '<div class="col-md-3"><label class="form-label small mb-1">Produk</label><select name="items['+idx+'][film_lines]['+k+'][product_id]" class="form-select form-select-sm line-product"><option value="">— Produk —</option></select></div>' +
+            '<div class="col-md-1 text-end"><button type="button" class="btn btn-outline-danger btn-sm remove-line" title="Hapus bagian">&times;</button></div>';
+        row.querySelector('.pack-lines').appendChild(div);
+
+        const part = div.querySelector('.line-part'), type = div.querySelector('.line-type'), prod = div.querySelector('.line-product');
+        if (line) { part.value = String(line.part_id || ''); type.value = String(line.category_id || ''); fillProducts(prod, type.value, line.product_id); }
+        type.addEventListener('change', () => { fillProducts(prod, type.value); updateCarSummary(row); });
+        [part, prod].forEach(el => el.addEventListener('change', () => updateCarSummary(row)));
+        div.querySelector('.remove-line').addEventListener('click', () => {
+            if (row.querySelectorAll('.pack-line').length > 1) { div.remove(); updateCarSummary(row); }
+        });
+        applyLineMode(div);
+        updateCarSummary(row);
+    }
+
+    function applyLineMode(div){
+        const car = isCar();
+        div.querySelectorAll('select').forEach(sel => { sel.disabled = !car; sel.required = car; });
+    }
+
+    function buildCarRow(row, data, idx){
+        row.dataset.idx = idx;
+        row.querySelector('.add-line').addEventListener('click', () => addLine(row));
+        const lines = (data && data.film_lines) ? data.film_lines : [];
+        if (lines.length) { lines.forEach(l => addLine(row, l)); } else { addLine(row); }
+        // Quotation mobil lama (sebelum ada rincian bagian): tampilkan isi sebelumnya sebagai acuan.
+        if (data && !(data.film_lines && data.film_lines.length) && data.description) {
+            row.querySelector('.pack-title').value = data.description;
+            row.querySelector('.car-summary').dataset.legacy = 'Sebelumnya: ' + data.description + (data.specifications ? ' · ' + data.specifications : '') + ' — rinci ulang bagian kaca.';
+        } else if (data && data.description) {
+            row.querySelector('.pack-title').value = data.description;
         }
-    }
-
-    function fillProducts(row, selected){
-        const prod = row.querySelector('.film-product');
-        const t = CAR.types.find(x => String(x.id) === row.querySelector('.film-type').value);
-        prod.innerHTML = '<option value="">— Kegelapan —</option>' + (t ? t.products.map(p => '<option value="'+p.id+'">'+p.label+'</option>').join('') : '');
-        if (selected) prod.value = String(selected);
-    }
-
-    function syncPartsRequired(row){
-        const boxes = row.querySelectorAll('.part-check');
-        const any = Array.from(boxes).some(b => b.checked);
-        boxes.forEach(b => b.required = isCar() && !any);   // minimal satu bagian kaca
+        updateCarSummary(row);
     }
 
     function updateCarSummary(row){
-        const parts = Array.from(row.querySelectorAll('.part-check:checked')).map(c => c.nextElementSibling.textContent);
-        const t = row.querySelector('.film-type').selectedOptions[0]?.text || '';
-        const p = row.querySelector('.film-product').selectedOptions[0]?.text || '';
         const el = row.querySelector('.car-summary');
-        if (el && parts.length === 0 && el.textContent.startsWith('Sebelumnya:')) return;
-        if (el) el.textContent = parts.length ? parts.join(', ') + (t && row.querySelector('.film-type').value ? ' · ' + t : '') + (p && row.querySelector('.film-product').value ? ' · ' + p : '') : '';
+        if (!el) return;
+        const lines = Array.from(row.querySelectorAll('.pack-line')).map(l => {
+            const part = l.querySelector('.line-part'), type = l.querySelector('.line-type'), prod = l.querySelector('.line-product');
+            if (!part.value) return null;
+            return part.selectedOptions[0].text + (type.value ? ' · ' + type.selectedOptions[0].text : '') + (prod.value ? ' ' + prod.selectedOptions[0].text : '');
+        }).filter(Boolean);
+        el.textContent = lines.length ? lines.join('  |  ') : (el.dataset.legacy || '');
     }
 
     function applyMode(row){
         const car = isCar();
-        row.querySelector('.car-parts').hidden = !car;
-        row.querySelector('.car-film').hidden = !car;
+        row.querySelector('.car-pack').hidden = !car;
+        row.querySelector('.pack-title').disabled = !car;
         row.querySelector('.generic-desc').hidden = car;
-        row.querySelector('.generic-spec').hidden = car;
-        row.querySelector('.generic-spec').disabled = car;
-        const type = row.querySelector('.film-type'), prod = row.querySelector('.film-product');
-        type.disabled = !car; prod.disabled = !car; type.required = car; prod.required = car;
-        row.querySelectorAll('.part-check').forEach(b => { b.disabled = !car; });
+        const gspec = row.querySelector('.generic-spec'); gspec.disabled = car;
+        row.querySelector('.spec-td').hidden = car;
+        row.querySelector('.desc-td').colSpan = car ? 2 : 1;
         row.querySelector('.desc-picker').disabled = car;
         row.querySelector('.desc-picker').required = !car;
-        const desc = row.querySelector('.desc-input');
-        desc.disabled = car;
+        const desc = row.querySelector('.desc-input'); desc.disabled = car;
         if (car) { desc.required = false; } else { syncPicker(row, true); }
-        syncPartsRequired(row);
+        row.querySelectorAll('.pack-line').forEach(applyLineMode);
     }
 
     function applyModeAll(){
         const car = isCar();
-        document.getElementById('thDesc').textContent = car ? 'Bagian Kaca' : 'Deskripsi / Produk';
-        document.getElementById('thSpec').textContent = car ? 'Tipe Film & Kegelapan' : 'Spesifikasi';
+        const th = document.getElementById('thDesc'), ts = document.getElementById('thSpec');
+        th.textContent = car ? 'Paket Kaca Film (Part / Kategori / Produk)' : 'Deskripsi / Produk';
+        th.colSpan = car ? 2 : 1;
+        ts.hidden = car; ts.textContent = 'Spesifikasi';
         body.querySelectorAll('.item-row').forEach(applyMode);
     }
 
@@ -514,10 +529,10 @@
         const row = body.lastElementChild;
         buildPicker(row.querySelector('.desc-picker'), data ? (data.description || '') : '');
         row.querySelector('.desc-picker').addEventListener('change', () => { syncPicker(row, false); recalc(); });
-        buildCarRow(row, data);
+        buildCarRow(row, data, rowIdx - 1);
 
         if(data){
-            row.querySelector('[name$="[description]"]').value    = data.description     || '';
+            row.querySelector('.desc-input').value                 = data.description     || '';
             row.querySelector('[name$="[specifications]"]').value = data.specifications  || '';
             row.querySelector('[name$="[unit]"]').value           = data.unit            || 'unit';
             row.querySelector('.item-qty').value                  = data.quantity        || 1;
@@ -540,9 +555,7 @@
         ? $existingItems->map(fn($i) => [
             'description'      => $i->description,
             'specifications'   => $i->specifications,
-            'part_ids'         => $i->part_ids,
-            'film_category_id' => $i->film_category_id,
-            'film_product_id'  => $i->film_product_id,
+            'film_lines'       => $i->film_lines,
             'unit'             => $i->unit,
             'quantity'         => $i->quantity,
             'unit_price'       => $i->unit_price,

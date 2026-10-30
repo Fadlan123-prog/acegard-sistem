@@ -279,11 +279,11 @@ class QuotationController extends Controller
     {
         $request->validate([
             'items'                   => 'required|array|min:1',
-            'items.*.part_ids'        => 'nullable|array',
-            'items.*.part_ids.*'      => 'integer|exists:parts,id',
-            'items.*.film_category_id'=> 'nullable|integer|exists:category_products,id',
-            'items.*.film_product_id' => 'nullable|integer|exists:products,id',
-            'items.*.description'     => 'required_without:items.*.part_ids|nullable|string|max:255',
+            'items.*.film_lines'                => 'nullable|array',
+            'items.*.film_lines.*.part_id'      => 'required|integer|exists:parts,id',
+            'items.*.film_lines.*.category_id'  => 'required|integer|exists:category_products,id',
+            'items.*.film_lines.*.product_id'   => 'required|integer|exists:products,id',
+            'items.*.description'     => 'required_without:items.*.film_lines|nullable|string|max:255',
             'items.*.specifications'  => 'nullable|string',
             'items.*.unit'            => 'required|string|max:30',
             'items.*.quantity'        => 'required|numeric|min:0.01',
@@ -293,39 +293,30 @@ class QuotationController extends Controller
 
         $items = $request->input('items', []);
 
-        // Baris kaca film mobil: deskripsi & spesifikasi disusun dari bagian kaca + tipe + kegelapan.
-        if ($request->input('category') === 'car_film') {
-            $catalog = app(\App\Services\QuotationCatalog::class);
+        // Paket kaca film mobil: deskripsi & spesifikasi disusun server dari daftar bagian + tipe + kegelapan.
+        $catalog = app(\App\Services\QuotationCatalog::class);
 
-            foreach ($items as $i => $item) {
-                $partIds = array_filter((array) ($item['part_ids'] ?? []));
-                if (! $partIds) {
-                    $items[$i]['part_ids'] = null;
-                    $items[$i]['film_category_id'] = null;
-                    $items[$i]['film_product_id'] = null;
-                    continue;
-                }
+        foreach ($items as $i => $item) {
+            $lines = array_values(array_filter((array) ($item['film_lines'] ?? [])));
 
-                $categoryId = ! empty($item['film_category_id']) ? (int) $item['film_category_id'] : null;
-                $productId  = ! empty($item['film_product_id']) ? (int) $item['film_product_id'] : null;
+            if ($request->input('category') !== 'car_film' || ! $lines) {
+                $items[$i]['film_lines'] = null;
+                continue;
+            }
 
-                if ($productId && ! \App\Models\Product::where('id', $productId)->where('category_id', $categoryId)->exists()) {
+            foreach ($lines as $j => $l) {
+                $ok = \App\Models\Product::where('id', (int) $l['product_id'])->where('category_id', (int) $l['category_id'])->exists();
+                if (! $ok) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
-                        "items.$i.film_product_id" => 'Persentase kegelapan tidak sesuai dengan tipe film yang dipilih.',
+                        "items.$i.film_lines.$j.product_id" => 'Persentase kegelapan tidak sesuai dengan tipe film yang dipilih.',
                     ]);
                 }
+            }
 
-                $composed = $catalog->composeCarItem($partIds, $categoryId, $productId);
-                $items[$i]['part_ids'] = array_values(array_map('intval', $partIds));
-                $items[$i]['film_category_id'] = $categoryId;
-                $items[$i]['film_product_id'] = $productId;
-                $items[$i]['description'] = $composed['description'] ?? ($item['description'] ?? 'Kaca film');
-                $items[$i]['specifications'] = $composed['specifications'] ?? ($item['specifications'] ?? null);
-            }
-        } else {
-            foreach ($items as $i => $item) {
-                $items[$i]['part_ids'] = $items[$i]['film_category_id'] = $items[$i]['film_product_id'] = null;
-            }
+            $package = $catalog->composeCarPackage($lines, $item['description'] ?? null);
+            $items[$i]['film_lines']     = $package['lines'];
+            $items[$i]['description']    = $package['description'];
+            $items[$i]['specifications'] = $package['specifications'];
         }
 
         return $items;
@@ -346,9 +337,7 @@ class QuotationController extends Controller
                 'sort_order'       => $index,
                 'description'      => $item['description'],
                 'specifications'   => $item['specifications'] ?? null,
-                'part_ids'         => $item['part_ids'] ?? null,
-                'film_category_id' => $item['film_category_id'] ?? null,
-                'film_product_id'  => $item['film_product_id'] ?? null,
+                'film_lines'       => $item['film_lines'] ?? null,
                 'unit'             => $item['unit'] ?? 'unit',
                 'quantity'         => $qty,
                 'unit_price'       => $price,
