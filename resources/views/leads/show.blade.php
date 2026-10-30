@@ -116,7 +116,7 @@
                     @if($lead->follow_up_date)
                         @php
                             $isToday = $lead->follow_up_date->isToday();
-                            $isPast  = $lead->follow_up_date->isPast() && !$isToday;
+                            $isPast  = $lead->follow_up_date->isBeforeToday() && !$isToday;
                         @endphp
                         <span class="{{ $isToday ? 'text-warning fw-bold' : ($isPast && !in_array($lead->status, ['won','lost']) ? 'text-danger' : '') }}">
                             {{ $lead->follow_up_date->format('d M Y') }}

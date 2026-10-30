@@ -125,7 +125,7 @@
                     </td>
                     <td class="small">{{ $q->date->format('d M Y') }}</td>
                     <td class="small">
-                        @php $expired = $q->valid_until->isPast() && !in_array($q->status, ['accepted','rejected']); @endphp
+                        @php $expired = $q->valid_until->isBeforeToday() && !in_array($q->status, ['accepted','rejected']); @endphp
                         <span class="{{ $expired ? 'text-danger' : 'text-muted' }}">
                             {{ $q->valid_until->format('d M Y') }}
                         </span>

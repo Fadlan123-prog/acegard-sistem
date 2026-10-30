@@ -100,7 +100,7 @@ class Quotation extends Model
 
     public function resolvedStatus(): string
     {
-        if ($this->status === 'sent' && $this->valid_until->isPast()) {
+        if ($this->status === 'sent' && $this->valid_until->isBeforeToday()) {
             return 'expired';
         }
         return $this->status;

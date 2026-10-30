@@ -31,7 +31,7 @@ class OwnerMonitoringController extends Controller
             ->groupBy('status')
             ->pluck('total', 'status');
         $overdueCreativeTasks = CreativeTask::whereNotNull('due_date')
-            ->where('due_date', '<', now())
+            ->where('due_date', '<', today())
             ->whereNotIn('status', ['done'])
             ->count();
 

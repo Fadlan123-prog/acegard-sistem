@@ -30,7 +30,7 @@ class EmployeeDocument extends Model
 
     public function isExpired(): bool
     {
-        return $this->expires_at && $this->expires_at->isPast();
+        return $this->expires_at && $this->expires_at->isBeforeToday();
     }
 
     public function isExpiringSoon(int $days = 30): bool

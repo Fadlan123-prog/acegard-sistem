@@ -68,7 +68,7 @@ return [
     |
     */
 
-    'timezone' => 'Asia/Jakarta',
+    'timezone' => env('APP_TIMEZONE', 'Asia/Jakarta'),   // WIB (UTC+7); ubah hanya bila lokasi usaha berpindah zona
 
     /*
     |--------------------------------------------------------------------------

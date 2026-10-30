@@ -32,6 +32,10 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrapFive();
 
+        // Tanggal jatuh tempo/jadwal berjenis date (00:00): "terlambat" hanya bila harinya sudah lewat
+        // menurut waktu aplikasi (WIB), bukan sejak pukul 00:00 pada hari itu sendiri.
+        \Illuminate\Support\Carbon::macro('isBeforeToday', fn () => $this->copy()->startOfDay()->lt(now()->startOfDay()));
+
         // Throttle publik butuh IP pengunjung asli bila ada reverse proxy (config app.trusted_proxies).
         if ($proxies = array_values(array_filter(array_map('trim', explode(',', (string) config('app.trusted_proxies')))))) {
             \Illuminate\Http\Middleware\TrustProxies::at($proxies === ['*'] ? '*' : $proxies);

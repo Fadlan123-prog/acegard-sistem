@@ -59,7 +59,7 @@
                 </div>
                 <div class="col-sm-3">
                     <div class="text-muted small mb-1">Berlaku s/d</div>
-                    @php $expired = $quotation->valid_until->isPast() && !in_array($quotation->status, ['accepted','rejected']); @endphp
+                    @php $expired = $quotation->valid_until->isBeforeToday() && !in_array($quotation->status, ['accepted','rejected']); @endphp
                     <div class="fw-semibold {{ $expired ? 'text-danger' : '' }}">
                         {{ $quotation->valid_until->format('d M Y') }}
                         @if($expired)

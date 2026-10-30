@@ -125,7 +125,7 @@
                     <td class="small">{{ $so->date->format('d M Y') }}</td>
                     <td class="small">
                         @if($so->scheduled_date)
-                            @php $isPast = $so->scheduled_date->isPast() && !in_array($so->status, ['completed','cancelled']); @endphp
+                            @php $isPast = $so->scheduled_date->isBeforeToday() && !in_array($so->status, ['completed','cancelled']); @endphp
                             <span class="{{ $isPast ? 'text-danger' : 'text-muted' }}">
                                 {{ $so->scheduled_date->format('d M Y') }}
                             </span>

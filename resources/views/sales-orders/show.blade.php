@@ -103,7 +103,7 @@
                 <div class="col-sm-3">
                     <div class="text-muted small mb-1">Jadwal Pasang</div>
                     @if($salesOrder->scheduled_date)
-                        @php $overdue = $salesOrder->scheduled_date->isPast() && !in_array($salesOrder->status, ['completed','cancelled']); @endphp
+                        @php $overdue = $salesOrder->scheduled_date->isBeforeToday() && !in_array($salesOrder->status, ['completed','cancelled']); @endphp
                         <div class="fw-semibold {{ $overdue ? 'text-danger' : '' }}">
                             {{ $salesOrder->scheduled_date->format('d M Y') }}
                             @if($overdue)
