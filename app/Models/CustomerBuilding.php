@@ -12,7 +12,7 @@ class CustomerBuilding extends Model
     protected $table = 'customer_building';
 
     protected $fillable = [
-        'branch_id', 'wsn', 'card_number', 'name', 'email',
+        'branch_id', 'marketing_id', 'wsn', 'card_number', 'name', 'email',
         'phone_number', 'address', 'dealer_name', 'applicator',
         'city', 'country', 'warantee_start', 'warantee_end', 'warantee_duration'
     ];
@@ -20,6 +20,11 @@ class CustomerBuilding extends Model
     public function branch()
     {
         return $this->belongsTo(Branch::class);
+    }
+
+    public function marketing()
+    {
+        return $this->belongsTo(Employee::class, 'marketing_id');
     }
 
     public function invoices()

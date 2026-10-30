@@ -76,6 +76,8 @@ class CustomerBuildingController extends Controller
             'applicator'   => 'nullable|string',
             'city'         => 'nullable|string',
             'country'      => 'nullable|string',
+            'marketing_id'                                     => ['nullable', 'integer', \Illuminate\Validation\Rule::exists('employees', 'id')
+                ->where('branch_id', auth()->user()->branches->first()->id ?? 1)->where('is_active', true)],
             'technician_meters'                                => 'nullable|array',
             'technician_meters.*.employee_id'                  => ['required', 'integer', \Illuminate\Validation\Rule::exists('employees', 'id')
                 ->where('branch_id', auth()->user()->branches->first()->id ?? 1)->where('is_active', true)],
@@ -115,6 +117,7 @@ class CustomerBuildingController extends Controller
                 'applicator'   => $request->applicator,
                 'city'         => $request->city,
                 'country'      => $request->country,
+                'marketing_id' => $request->filled('marketing_id') ? (int) $request->marketing_id : null,
             ]);
 
             $createdBuildingProducts = [];
@@ -207,6 +210,8 @@ class CustomerBuildingController extends Controller
             'applicator' => 'nullable|string',
             'city' => 'nullable|string',
             'country' => 'nullable|string',
+            'marketing_id'                                     => ['nullable', 'integer', \Illuminate\Validation\Rule::exists('employees', 'id')
+                ->where('branch_id', $customer->branch_id)->where('is_active', true)],
             'technician_meters'                                => 'nullable|array',
             'technician_meters.*.employee_id'                  => ['required', 'integer', \Illuminate\Validation\Rule::exists('employees', 'id')
                 ->where('branch_id', $customer->branch_id)->where('is_active', true)],
@@ -239,6 +244,7 @@ class CustomerBuildingController extends Controller
                 'applicator' => $request->applicator,
                 'city' => $request->city,
                 'country' => $request->country,
+                'marketing_id' => $request->filled('marketing_id') ? (int) $request->marketing_id : null,
             ]);
 
             // Update data produk

@@ -199,4 +199,42 @@ class BuildingCommissionTest extends TestCase
 
         $this->assertSame(2, $customer->technicianMeters()->count());
     }
+
+    public function test_building_marketing_is_paid_per_meter_of_the_whole_job_by_category(): void
+    {
+        // 10 m 4K (25.000) + 5 m Notch (20.000) + 4 m BM (15.000) + 2 m Flex (10.000) = 250.000+100.000+60.000+20.000
+        [$invoice, , $customer] = $this->job([1 => 10, 2 => 5, 3 => 4, 4 => 2], [], 0);
+        $marketing = Employee::factory()->create(['branch_id' => $this->branch->id, 'job_position' => 'Marketing']);
+        $customer->update(['marketing_id' => $marketing->id]);
+
+        $this->release($invoice->fresh());
+
+        $row = DB::table('commissions')->where('invoice_building_id', $invoice->id)->where('role', 'marketing')->first();
+        $this->assertSame($marketing->id, (int) $row->employees_id);
+        $this->assertSame(430000, (int) $row->amount);
+        $this->assertSame('eligible', $row->status);
+    }
+
+    public function test_marketing_is_independent_of_technician_allocation_and_idempotent(): void
+    {
+        [$invoice, , $customer] = $this->job([1 => 20], [[0, 1, 5]], 1); // teknisi hanya 5 dari 20 m
+        $marketing = Employee::factory()->create(['branch_id' => $this->branch->id, 'job_position' => 'Marketing']);
+        $customer->update(['marketing_id' => $marketing->id]);
+
+        $this->release($invoice->fresh());
+        $this->release($invoice->fresh());
+
+        $rows = DB::table('commissions')->where('invoice_building_id', $invoice->id)->where('role', 'marketing')->get();
+        $this->assertCount(1, $rows);
+        $this->assertSame(500000, (int) $rows[0]->amount, 'semua 20 m x 25.000');
+    }
+
+    public function test_no_marketing_means_no_marketing_row(): void
+    {
+        [$invoice] = $this->job([1 => 20], [], 0);
+
+        $this->release($invoice);
+
+        $this->assertSame(0, DB::table('commissions')->where('invoice_building_id', $invoice->id)->where('role', 'marketing')->count());
+    }
 }

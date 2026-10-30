@@ -167,6 +167,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Komisi Marketing Gedung (per meter)
+    |--------------------------------------------------------------------------
+    | Key = category_product_building.id. Dasar = SELURUH meter produk customer
+    | gedung (bukan meter alokasi teknisi). Dibayar ke marketing_id customer gedung
+    | saat invoice lunas. Sunblast (Rp10.000/m) belum ada sebagai kategori.
+    */
+
+    'building_marketing_per_meter' => [
+        1 => 25000,   // 4K Alpha Pro
+        2 => 20000,   // Notch UV400
+        3 => 15000,   // Black Master
+        4 => 10000,   // Flex One Way
+    ],
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Prioritas Kategori Marketing
     |--------------------------------------------------------------------------
     | Bila satu customer punya beberapa kategori produk, dipakai kategori yang

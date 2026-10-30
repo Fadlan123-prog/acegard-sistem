@@ -274,6 +274,18 @@
               @error('applicator')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
+            <div class="col-md-6">
+              <label class="form-label">Marketing <span class="text-muted small">(komisi per meter, dibayar saat lunas)</span></label>
+              <select name="marketing_id" class="form-select">
+                <option value="">— Tidak ada —</option>
+                @foreach($employees as $e)
+                  @if($e->job_position === 'Marketing')
+                    <option value="{{ $e->id }}" {{ (string) old('marketing_id', $fromSo?->marketing_id) === (string) $e->id ? 'selected' : '' }}>{{ $e->name }}</option>
+                  @endif
+                @endforeach
+              </select>
+              @error('marketing_id')<div class="text-danger small">{{ $message }}</div>@enderror
+            </div>
             <div class="col-md-12" id="techMetersBox">
               <label class="form-label">Meter per Teknisi <span class="text-muted small">(dasar komisi gedung, tanpa kenek)</span></label>
               <div class="table-responsive">
