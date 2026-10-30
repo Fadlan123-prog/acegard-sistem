@@ -200,14 +200,11 @@ class PublicWarrantyController extends Controller
 
         $this->requireVerified($type, (int) $data['id']);
 
-        // generate nomor claim
-        $claimNumber = $this->generateClaimNumber();
 
         if ($type === 'building_film') {
             $b = CustomerBuilding::where('id',$data['id'])->where('card_number',$card)->firstOrFail();
 
-            $claim = WarrantyClaim::create([
-                'claim_number' => $claimNumber,
+            $claim = $this->createClaim([
                 'claim_date'   => now()->toDateString(),
                 'warranty_type'=> 'building_film',
                 'warrantable_type' => get_class($b),
@@ -236,8 +233,7 @@ class PublicWarrantyController extends Controller
             $c = Customer::with(['customerProducts.part','customerProducts.product','customerProducts.categoryProduct'])
                 ->where('id',$data['id'])->where('card_number',$card)->firstOrFail();
 
-            $claim = WarrantyClaim::create([
-                'claim_number' => $claimNumber,
+            $claim = $this->createClaim([
                 'claim_date'   => now()->toDateString(),
                 'warranty_type'=> 'car_film',
                 'warrantable_type' => get_class($c),
@@ -308,8 +304,7 @@ class PublicWarrantyController extends Controller
                 }
             }
 
-            $claim = WarrantyClaim::create([
-                'claim_number' => $claimNumber,
+            $claim = $this->createClaim([
                 'claim_date'   => now()->toDateString(),
                 'warranty_type'=> 'ppf',
                 'warrantable_type' => get_class($ins),
@@ -365,16 +360,16 @@ class PublicWarrantyController extends Controller
         );
     }
 
-    protected function generateClaimNumber(): string
+    /** Nomor klaim = MAX+1 per bulan; diulang bila dua pelanggan mengirim klaim bersamaan. */
+    protected function createClaim(array $attributes): WarrantyClaim
     {
-        $prefix = 'CLM-'.now()->format('Ym').'-';
-        $last = WarrantyClaim::where('claim_number','like',$prefix.'%')
-            ->orderByDesc('id')->value('claim_number');
+        $docs = app(\App\Services\DocumentNumberService::class);
+        $prefix = 'CLM-' . now()->format('Ym') . '-';
 
-        $next = 1;
-        if ($last) $next = ((int)substr($last,-4)) + 1;
-
-        return $prefix . str_pad((string)$next, 4, '0', STR_PAD_LEFT);
+        return $docs->retryOnDuplicate(fn () => WarrantyClaim::create(array_merge(
+            ['claim_number' => $docs->nextSequential('warranty_claims', 'claim_number', $prefix)],
+            $attributes
+        )));
     }
 
     protected function ppfPanelLabels(): array

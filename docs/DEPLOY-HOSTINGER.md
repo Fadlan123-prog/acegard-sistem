@@ -35,3 +35,20 @@ Jika `public_html` bukan salinan `public/`, ubah `index.php` agar `require __DIR
 
 ## 5. Pasca-deploy (smoke test)
 Login tiap peran; buat customer -> invoice -> DP -> pelunasan; rilis komisi; cek halaman garansi publik; kirim email reset password; cek `storage/logs`.
+
+## 6. Banyak pengguna bersamaan (kapasitas)
+**Hasil uji lokal** (PHP 8 worker, 30 akun berbeda login tepat bersamaan, lalu membuka halaman): semua login berhasil,
+tiap akun hanya melihat namanya sendiri (sesi terpisah di tabel `sessions`), tidak ada error. Halaman setelah login
+menjawab sekitar 0,1–0,7 detik. Tidak ada pembatasan "satu akun satu sesi": akun berbeda (dan perangkat berbeda) boleh aktif bersamaan.
+
+Yang perlu diperhatikan di Hostinger shared:
+- **Login adalah langkah paling berat** (bcrypt, `BCRYPT_ROUNDS=12` ≈ 0,3–1 detik CPU per login). 30 login dalam detik yang sama bisa
+  melambat; login biasanya bergantian sehingga aman. Jangan turunkan di bawah 10.
+- **Pembatas login** 5x/menit per kombinasi email+IP: aman untuk kantor satu IP karena kuncinya per email. Salah password 5x memblokir akun itu 1 menit.
+- **Cache opcode & konfigurasi**: aktifkan OPcache (hPanel → PHP Configuration) dan jalankan `config:cache route:cache view:cache` setiap deploy.
+- **Session/cache di database** (tanpa Redis): tabel `sessions`, `cache`, `cache_locks` dibersihkan otomatis; pantau ukurannya bulanan.
+- **Batas proses**: paket shared membatasi proses PHP bersamaan (Entry Processes). Bila halaman lambat/503 saat jam sibuk, cek
+  hPanel → Resource Usage; pertimbangkan naik paket / Cloud.
+- Nomor dokumen (invoice PPF, klaim garansi, pengajuan pencairan) kini aman bila dua orang menyimpan bersamaan.
+- Index database baru ditambah lewat migrasi `2026_10_31_120000_add_performance_indexes` (jalankan `php artisan migrate --force`).
+- Skrip uji beban login: `docs/loadtest/concurrent_login.py` (hanya lokal/staging, JANGAN ke production).

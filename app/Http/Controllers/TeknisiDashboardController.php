@@ -301,6 +301,11 @@ class TeknisiDashboardController extends Controller
             }
 
             $batchNumber = 'WD-' . $nowWib->format('Ym') . '-' . strtoupper(substr($employee->name, 0, 3)) . '-' . $employee->id;
+            // Pengajuan yang pernah ditolak/disetujui pada bulan yang sama tidak boleh bentrok nomor.
+            $baseNumber = $batchNumber;
+            for ($n = 2; CommissionPaymentBatch::where('batch_number', $batchNumber)->exists(); $n++) {
+                $batchNumber = $baseNumber . '-' . $n;
+            }
 
             $batch = CommissionPaymentBatch::create([
                 'employee_id'     => $employee->id,

@@ -77,26 +77,27 @@ class PpfInvoiceController extends Controller
                 ->with('success', 'Invoice ini baru saja tersimpan.');
         }
 
-        // generate invoice number (simple)
+        $docs = app(\App\Services\DocumentNumberService::class);
         $dateStr = now()->format('Ymd');
-        $seq = str_pad((string) (PpfInvoice::where('invoice_number', 'like', "PPF-$dateStr-%")->count() + 1), 4, '0', STR_PAD_LEFT);
-        $invoiceNumber = "PPF-$dateStr-$seq";
 
-        $invoice = PpfInvoice::create([
-            'branch_id' => $installation->branch_id,
-            'customer_ppf_id' => $installation->customer_ppf_id,
-            'customer_ppf_installation_id' => $installation->id,
-            'invoice_number' => $invoiceNumber,
-            'invoice_date' => $data['invoice_date'] ?? now()->toDateString(),
-            'payment_method' => $data['payment_method'],
-            'price' => $price,
-            'discount' => $discount,
-            'downpayment' => $downpayment,
-            'total_price' => $total,
-            'remaining_payment' => $remaining,
-            'status' => $status,
-            'notes' => $data['notes'] ?? null,
-        ]);
+        // Nomor = MAX+1 (aman setelah invoice dihapus) dan diulang bila dua admin menyimpan bersamaan.
+        $invoice = $docs->retryOnDuplicate(function () use ($docs, $dateStr, $installation, $price, $discount, $downpayment, $total, $remaining, $status, $data) {
+            return PpfInvoice::create([
+                'branch_id' => $installation->branch_id,
+                'customer_ppf_id' => $installation->customer_ppf_id,
+                'customer_ppf_installation_id' => $installation->id,
+                'invoice_number' => $docs->nextSequential('ppf_invoices', 'invoice_number', "PPF-$dateStr-"),
+                'invoice_date' => $data['invoice_date'] ?? now()->toDateString(),
+                'payment_method' => $data['payment_method'],
+                'price' => $price,
+                'discount' => $discount,
+                'downpayment' => $downpayment,
+                'total_price' => $total,
+                'remaining_payment' => $remaining,
+                'status' => $status,
+                'notes' => $data['notes'] ?? null,
+            ]);
+        });
 
         return redirect()->route('ppf-invoices.show', $invoice->id)
             ->with('success', 'Invoice PPF berhasil dibuat.');

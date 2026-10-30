@@ -78,6 +78,43 @@ final class DocumentNumberService
     }
 
     /**
+     * Nomor berurutan {prefix}{0001}: urutan = MAX yang ada + 1 (bukan COUNT, sehingga aman setelah
+     * ada data yang dihapus). Dua request bersamaan bisa menghasilkan nomor sama; pembungkus
+     * retryOnDuplicate() memakai ulang generator ini bila unique constraint menolak insert.
+     */
+    public function nextSequential(string $table, string $column, string $prefix, int $pad = 4): string
+    {
+        $max = DB::table($table)
+            ->where($column, 'like', $prefix . '%')
+            ->selectRaw("MAX(CAST(SUBSTRING({$column}, ?) AS UNSIGNED)) as m", [strlen($prefix) + 1])
+            ->value('m');
+
+        return $prefix . str_pad((string) ((int) $max + 1), $pad, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Jalankan $create (yang memanggil generator nomor di dalamnya) dan ulangi bila terjadi
+     * tabrakan nomor unik akibat dua request bersamaan.
+     *
+     * @template T
+     * @param  callable():T  $create
+     * @return T
+     */
+    public function retryOnDuplicate(callable $create, int $attempts = 5)
+    {
+        for ($i = 1; ; $i++) {
+            try {
+                return $create();
+            } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+                if ($i >= $attempts) {
+                    throw $e;
+                }
+                usleep(random_int(20_000, 120_000));
+            }
+        }
+    }
+
+    /**
      * Generates a number in the format: {PREFIX}-{YYMMDD}-{4-digit-random}
      * Example: INV-260706-4271
      */
