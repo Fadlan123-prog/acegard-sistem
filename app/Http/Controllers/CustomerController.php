@@ -420,7 +420,7 @@ public function edit(Customer $customer)
                 // jadi harus dijalankan ulang setelah marketing berubah.
                 // Reload relasi supaya AditCommissionService membaca marketing yang baru.
                 $invoice->load('customer.marketing');
-                $aditCommission->sync($invoice, $invoice->price);
+                $aditCommission->sync($invoice, (int) $invoice->total_price);
             }
         }
 

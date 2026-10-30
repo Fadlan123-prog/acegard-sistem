@@ -77,6 +77,7 @@ class CommissionRepository
             ->leftJoin('employees as e', 'e.id', '=', 'c.employees_id')
             ->leftJoin('customers as cu', 'cu.id', '=', 'c.customer_id')
             ->whereIn('c.role', $roles)
+            ->where('c.is_active', true)
             ->when($branchId, fn($q) => $q->where(function ($w) use ($branchId) {
                 $w->where('cu.branch_id', $branchId)->orWhere('c.branch_id', $branchId);
             }))

@@ -47,6 +47,7 @@ class CommissionEligibilityService
         DB::table('commissions')
             ->where('invoice_id', $invoice->id)
             ->where('status', '!=', 'paid')
+            ->whereNull('commission_payment_batch_id')   // komisi yang sudah diajukan tidak diturunkan
             ->update([
                 'status' => 'pending',
                 'eligible_at' => null,

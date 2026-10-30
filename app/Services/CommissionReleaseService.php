@@ -41,7 +41,7 @@ class CommissionReleaseService
         }
 
         $split       = $this->calculator->resolveInstallerSplit($customer, $invoice, $lebaran);
-        $invoicePrice = (int) $invoice->price;
+        $invoicePrice = (int) $invoice->total_price; // dasar komisi = harga setelah diskon
         $rows  = [];
 
         $samePerson = $customer->tukang_id && $customer->kenek_id
@@ -149,6 +149,8 @@ class CommissionReleaseService
             ->where('customer_id', $customer->id)
             ->whereNull('invoice_id')
             ->whereIn('role', ['installer', 'marketing', 'adit_override', 'teknisi', 'kenek'])
+            ->where('status', '!=', 'paid')
+            ->whereNull('commission_payment_batch_id')
             ->delete();
 
         // Hapus komisi prematur yang dibuat saat assignment (role teknisi/kenek dari WorkOrderController)
@@ -164,7 +166,7 @@ class CommissionReleaseService
             : Carbon::parse($customer->created_at);
         $period      = CommissionPeriod::resolveForDate($installedAt);
         $split       = $this->calculator->resolveInstallerSplit($customer, $invoice, $lebaran);
-        $invoicePrice = (int) $invoice->price;
+        $invoicePrice = (int) $invoice->total_price; // dasar komisi = harga setelah diskon
         $now         = now();
 
         $samePerson = $customer->tukang_id && $customer->kenek_id
@@ -236,7 +238,7 @@ class CommissionReleaseService
         }
 
         // Adit override
-        $this->aditCommission->sync($invoice, $invoice->price);
+        $this->aditCommission->sync($invoice, (int) $invoice->total_price);
 
         // Stamp period on any commission rows for this invoice that weren't set above
         // (covers marketing from upsertCommission and adit_override from updateOrInsert)

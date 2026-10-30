@@ -200,7 +200,7 @@ class CommissionService
                 $customer->id,
                 $invoice->id,
                 $baseType,
-                (int) $invoice->price,
+                (int) $invoice->total_price,
             );
         }
     }
@@ -312,7 +312,9 @@ class CommissionService
         $adminRate      = (float) ($ppfCfg['admin_rate']      ?? 0.02);
         $marketingFixed = (int)   ($ppfCfg['marketing_fixed'] ?? 500000);
 
-        $adminEmployees = \App\Models\Employee::where('ppf_admin_commission', true)->get();
+        $adminEmployees = \App\Models\Employee::where('ppf_admin_commission', true)
+            ->where('branch_id', $invoice->branch_id)   // admin PPF hanya untuk cabang invoice
+            ->get();
 
         // Use invoice_date as the installation date so commissions fall into the
         // correct period, not the date the release button was clicked.

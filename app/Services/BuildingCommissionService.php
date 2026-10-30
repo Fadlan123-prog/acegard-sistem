@@ -50,7 +50,7 @@ class BuildingCommissionService
         $created = [];
 
         foreach ($perEmployee as $employeeId => $default) {
-            $resolved = $this->employeeResolver->resolve($employees[$employeeId] ?? null, $default, (int) $invoice->price);
+            $resolved = $this->employeeResolver->resolve($employees[$employeeId] ?? null, $default, (int) $invoice->total_price);
 
             if ($resolved['amount'] <= 0 && ! $resolved['forced']) {
                 continue;
@@ -96,7 +96,7 @@ class BuildingCommissionService
             $default += (int) round((float) $row->meters * (int) ($rates[$row->category_product_building_id] ?? 0));
         }
 
-        $resolved = $this->employeeResolver->resolve($customer->marketing, $default, (int) $invoice->price);
+        $resolved = $this->employeeResolver->resolve($customer->marketing, $default, (int) $invoice->total_price);
 
         if ($resolved['amount'] <= 0 && ! $resolved['forced']) {
             return;

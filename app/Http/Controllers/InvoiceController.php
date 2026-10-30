@@ -386,6 +386,11 @@ class InvoiceController extends Controller
         }
 
         $lebaran = $request->boolean('lebaran');
+        // Tarif Lebaran (2x) hanya boleh diaktifkan superadmin/owner dan dicatat di log.
+        abort_if($lebaran && ! auth()->user()->hasAnyRole(['superadmin', 'owner']), 403, 'Hanya superadmin/owner yang boleh memakai tarif Lebaran.');
+        if ($lebaran) {
+            Log::warning('[Komisi] Tarif Lebaran dipakai', ['invoice_id' => $invoice->id, 'user_id' => auth()->id()]);
+        }
 
         try {
             DB::beginTransaction();
@@ -426,6 +431,11 @@ class InvoiceController extends Controller
         }
 
         $lebaran = $request->boolean('lebaran');
+        // Tarif Lebaran (2x) hanya boleh diaktifkan superadmin/owner dan dicatat di log.
+        abort_if($lebaran && ! auth()->user()->hasAnyRole(['superadmin', 'owner']), 403, 'Hanya superadmin/owner yang boleh memakai tarif Lebaran.');
+        if ($lebaran) {
+            Log::warning('[Komisi] Tarif Lebaran dipakai', ['invoice_id' => $invoice->id, 'user_id' => auth()->id()]);
+        }
 
         try {
             DB::beginTransaction();

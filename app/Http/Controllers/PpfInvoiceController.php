@@ -188,7 +188,20 @@ class PpfInvoiceController extends Controller
         $invoice = \App\Models\PpfInvoice::findOrFail($id);
         $this->authorizeBranch($invoice->branch_id);
 
-        $invoice->delete();
+        // Komisi yang sudah dibayar / masuk pencairan membuat invoice tidak boleh dihapus.
+        $locked = DB::table('commissions')->where('ppf_invoice_id', $invoice->id)
+            ->where(fn ($q) => $q->where('status', 'paid')->orWhereNotNull('commission_payment_batch_id'))
+            ->exists();
+
+        if ($locked) {
+            return back()->with('error', 'Invoice PPF tidak bisa dihapus: komisinya sudah dibayarkan / masuk pencairan.');
+        }
+
+        DB::transaction(function () use ($invoice) {
+            // Komisi yang belum dibayar ikut dibatalkan agar tidak jadi yatim yang bisa dicairkan.
+            DB::table('commissions')->where('ppf_invoice_id', $invoice->id)->delete();
+            $invoice->delete();
+        });
 
         // balik ke halaman customer/installation sesuai preferensi
         return redirect()
@@ -268,8 +281,19 @@ class PpfInvoiceController extends Controller
             return back()->with('error', 'Invoice void tidak bisa dirilis komisinya.');
         }
 
+        if ($invoice->status !== 'paid') {
+            return back()->with('error', 'Komisi PPF baru bisa dirilis setelah invoice lunas.');
+        }
+
         DB::beginTransaction();
         try {
+            // Baca ulang di bawah lock agar klik ganda / dua admin tidak merilis dua kali.
+            $locked = \App\Models\PpfInvoice::whereKey($invoice->id)->lockForUpdate()->firstOrFail();
+            if ($locked->commission_released_at || $locked->status !== 'paid') {
+                DB::rollBack();
+                return back()->with('error', 'Komisi PPF sudah dirilis atau invoice belum lunas.');
+            }
+
             $this->commissionService->createPpfCommissions($invoice);
 
             $invoice->update([
