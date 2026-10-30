@@ -25,9 +25,11 @@ class PublicWarrantyController extends Controller
     {
         $data = $request->validate([
             'card_number' => ['required','string','max:255'],
+            'phone_last4' => ['required','digits:4'],
         ]);
 
         $card = trim($data['card_number']);
+        $last4 = $data['phone_last4'];
         $matches = [];
 
         // 1) Mobil film (customers.card_number)
@@ -35,7 +37,7 @@ class PublicWarrantyController extends Controller
             ->where('card_number', $card)
             ->first();
 
-        if ($car) {
+        if ($car && $this->phoneMatches($car->phone_number, $last4)) {
             $matches[] = [
                 'type' => 'car_film',
                 'id'   => $car->id,
@@ -49,7 +51,7 @@ class PublicWarrantyController extends Controller
             ->where('card_number', $card)
             ->first();
 
-        if ($bld) {
+        if ($bld && $this->phoneMatches($bld->phone_number, $last4)) {
             $matches[] = [
                 'type' => 'building_film',
                 'id'   => $bld->id,
@@ -67,7 +69,7 @@ class PublicWarrantyController extends Controller
             ->where('card_number', $card)
             ->first();
 
-        if ($ppfCustomer) {
+        if ($ppfCustomer && $this->phoneMatches($ppfCustomer->phone, $last4)) {
             $matches[] = [
                 'type' => 'ppf',
                 'id'   => $ppfCustomer->id, // catatan: ini customer_ppf id
@@ -77,7 +79,12 @@ class PublicWarrantyController extends Controller
         }
 
         if (count($matches) === 0) {
-            return back()->with('error', 'Card Number tidak ditemukan.')->withInput();
+            // Pesan sama untuk kartu salah / HP salah: tidak membocorkan keberadaan kartu.
+            return back()->with('error', 'Data garansi tidak ditemukan. Periksa Card Number dan 4 digit terakhir nomor HP.')->withInput($request->only('card_number'));
+        }
+
+        foreach ($matches as $m) {
+            $this->markVerified($m['type'], (int) $m['id']);
         }
 
         // kalau ketemu lebih dari 1 (card number dipakai lintas kategori), tampilkan pick
@@ -105,6 +112,8 @@ class PublicWarrantyController extends Controller
         $type = $request->type;
         $id   = (int) $request->id;
         $card = trim($request->card_number);
+
+        $this->requireVerified($type, $id);
 
         if ($type === 'car_film') {
             $data = Customer::with([
@@ -188,6 +197,8 @@ class PublicWarrantyController extends Controller
 
         $card = trim($data['card_number']);
         $type = $data['type'];
+
+        $this->requireVerified($type, (int) $data['id']);
 
         // generate nomor claim
         $claimNumber = $this->generateClaimNumber();
@@ -331,6 +342,29 @@ class PublicWarrantyController extends Controller
             ->with('success', "Claim berhasil dikirim. Nomor Claim: {$claim->claim_number}");
     }
 
+    private function phoneMatches(?string $phone, string $last4): bool
+    {
+        $digits = preg_replace('/\D+/', '', (string) $phone);
+
+        return strlen($digits) >= 4 && hash_equals(substr($digits, -4), $last4);
+    }
+
+    private function markVerified(string $type, int $id): void
+    {
+        session()->put('warranty_verified', array_values(array_unique(
+            array_merge((array) session('warranty_verified', []), ["{$type}:{$id}"])
+        )));
+    }
+
+    private function requireVerified(string $type, int $id): void
+    {
+        abort_unless(
+            in_array("{$type}:{$id}", (array) session('warranty_verified', []), true),
+            403,
+            'Silakan cek garansi lewat halaman pencarian terlebih dahulu.'
+        );
+    }
+
     protected function generateClaimNumber(): string
     {
         $prefix = 'CLM-'.now()->format('Ym').'-';
@@ -401,6 +435,8 @@ class PublicWarrantyController extends Controller
     if (!in_array($type, ['car_film','building_film','ppf'], true)) {
         abort(404);
     }
+
+    $this->requireVerified($type, $id);
 
     // Load data sesuai type (harus match id + card_number)
     if ($type === 'car_film') {
