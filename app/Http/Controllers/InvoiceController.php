@@ -266,8 +266,6 @@ class InvoiceController extends Controller
             return back()->with('error', 'Pelunasan sudah dicatat dan stok sudah dipotong sebelumnya.');
         }
 
-        // Pelunasan done but stock deduction failed previously — allow stock-only retry.
-        $paymentAlreadyRecorded = $invoice->isStep2Done();
 
         $data = $request->validate([
             'payment_method' => ['nullable', 'in:cash,credit,transfer,tokopedia'],
@@ -278,17 +276,21 @@ class InvoiceController extends Controller
         // Tahap 1: Catat pembayaran — commit terpisah agar tidak ikut rollback jika stok gagal
         try {
             DB::beginTransaction();
-            if (!$paymentAlreadyRecorded) {
-                $invoice->update([
+            // Baca ulang dengan lock: dua request bersamaan (double-click) tidak boleh
+            // sama-sama mencatat pelunasan.
+            $locked = Invoice::lockForUpdate()->findOrFail($invoice->id);
+            if (!$locked->isStep2Done()) {
+                $locked->update([
                     'remaining_payment' => 0,
                     'status'            => 'paid',
                     'paid_at'           => $now,
                     'pelunasan_at'      => $now,
                     'pelunasan_by'      => auth()->id(),
-                    'payment_method'    => $data['payment_method'] ?? $invoice->payment_method,
+                    'payment_method'    => $data['payment_method'] ?? $locked->payment_method,
                 ]);
             }
             DB::commit();
+            $invoice->refresh();
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->with('error', 'Gagal mencatat pelunasan: ' . $e->getMessage());
@@ -311,11 +313,15 @@ class InvoiceController extends Controller
                     ])->toArray();
 
                     DB::beginTransaction();
-                    $this->filmStock->consumeForCar($customer, $carProducts, $customer->install_type ?? 'fullset');
-                    $invoice->update([
-                        'stock_deducted_at' => $now,
-                        'stock_deducted_by' => auth()->id(),
-                    ]);
+                    // Cek ulang di bawah lock agar stok tidak terpotong dua kali.
+                    $lockedForStock = Invoice::lockForUpdate()->findOrFail($invoice->id);
+                    if (!$lockedForStock->isStockDeducted()) {
+                        $this->filmStock->consumeForCar($customer, $carProducts, $customer->install_type ?? 'fullset');
+                        $lockedForStock->update([
+                            'stock_deducted_at' => $now,
+                            'stock_deducted_by' => auth()->id(),
+                        ]);
+                    }
                     DB::commit();
                 }
             } catch (\Throwable $e) {
@@ -413,6 +419,16 @@ class InvoiceController extends Controller
             DB::beginTransaction();
 
             $locked = Invoice::lockForUpdate()->findOrFail($invoice->id);
+
+            // Komisi yang sudah dibayar / masuk batch pencairan tidak boleh dihapus.
+            $alreadyPaidOut = DB::table('commissions')
+                ->where('invoice_id', $locked->id)
+                ->where(fn ($q) => $q->where('status', 'paid')->orWhereNotNull('commission_payment_batch_id'))
+                ->exists();
+            if ($alreadyPaidOut) {
+                DB::rollBack();
+                return back()->with('error', 'Komisi invoice ini sudah dibayarkan/masuk batch pencairan, tidak bisa dirilis ulang.');
+            }
 
             // Hapus semua komisi lama untuk invoice ini
             DB::table('commissions')
