@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class SalesOrderItem extends Model
 {
     protected $fillable = [
-        'sales_order_id', 'sort_order', 'description', 'specifications',
+        'sales_order_id', 'sort_order', 'description', 'specifications', 'film_lines', 'vehicle_label', 'vehicle_plate',
         'unit', 'quantity', 'unit_price', 'discount_percent', 'subtotal',
     ];
 
     protected $casts = [
+        'film_lines'       => 'array',
         'quantity'         => 'float',
         'discount_percent' => 'float',
     ];

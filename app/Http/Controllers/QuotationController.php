@@ -277,59 +277,17 @@ class QuotationController extends Controller
 
     private function validateItems(Request $request): array
     {
-        $request->validate([
+        $request->validate(array_merge([
             'items'                   => 'required|array|min:1',
-            'items.*.vehicle_label'             => 'nullable|string|max:120',
-            'items.*.vehicle_plate'             => 'nullable|string|max:20',
-            'items.*.film_lines'                => 'nullable|array',
-            'items.*.film_lines.*.part_id'      => 'required|integer|exists:parts,id',
-            'items.*.film_lines.*.category_id'  => 'required|integer|exists:category_products,id',
-            'items.*.film_lines.*.product_id'   => 'required|integer|exists:products,id',
             'items.*.description'     => 'required_without:items.*.film_lines|nullable|string|max:255',
             'items.*.specifications'  => 'nullable|string',
             'items.*.unit'            => 'required|string|max:30',
             'items.*.quantity'        => 'required|numeric|min:0.01',
             'items.*.unit_price'      => 'required|numeric|min:0',
             'items.*.discount_percent'=> 'nullable|numeric|min:0|max:100',
-        ]);
+        ], \App\Services\QuotationCatalog::packageRules()));
 
-        $items = $request->input('items', []);
-
-        // Paket kaca film mobil: deskripsi & spesifikasi disusun server dari daftar bagian + tipe + kegelapan.
-        $catalog = app(\App\Services\QuotationCatalog::class);
-
-        foreach ($items as $i => $item) {
-            $lines = array_values(array_filter((array) ($item['film_lines'] ?? [])));
-
-            if ($request->input('category') !== 'car_film' || ! $lines) {
-                $items[$i]['film_lines'] = null;
-                $items[$i]['vehicle_label'] = $items[$i]['vehicle_plate'] = null;
-                continue;
-            }
-
-            $items[$i]['vehicle_label'] = trim((string) ($item['vehicle_label'] ?? '')) ?: null;
-            $items[$i]['vehicle_plate'] = strtoupper(trim((string) ($item['vehicle_plate'] ?? ''))) ?: null;
-
-            foreach ($lines as $j => $l) {
-                $ok = \App\Models\Product::where('id', (int) $l['product_id'])->where('category_id', (int) $l['category_id'])->exists();
-                if (! $ok) {
-                    throw \Illuminate\Validation\ValidationException::withMessages([
-                        "items.$i.film_lines.$j.product_id" => 'Persentase kegelapan tidak sesuai dengan tipe film yang dipilih.',
-                    ]);
-                }
-            }
-
-            $package = $catalog->composeCarPackage($lines, $item['description'] ?? null);
-            $items[$i]['film_lines']     = $package['lines'];
-            // Paket mobil = satu harga paket: 1 paket, tanpa diskon baris (diskon ada di tingkat quotation).
-            $items[$i]['unit']             = 'paket';
-            $items[$i]['quantity']         = 1;
-            $items[$i]['discount_percent'] = 0;
-            $items[$i]['description']    = $package['description'];
-            $items[$i]['specifications'] = $package['specifications'];
-        }
-
-        return $items;
+        return app(\App\Services\QuotationCatalog::class)->normalizeItems($request->input('items', []), $request->input('category'));
     }
 
     private function syncItems(Quotation $quotation, array $items): void

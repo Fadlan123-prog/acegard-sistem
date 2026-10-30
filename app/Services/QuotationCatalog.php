@@ -126,4 +126,56 @@ class QuotationCatalog
             'lines'          => $normalized,
         ];
     }
+
+    /** Aturan validasi tambahan untuk rincian paket mobil (dipakai Quotation dan Sales Order). */
+    public static function packageRules(): array
+    {
+        return [
+            'items.*.vehicle_label'            => 'nullable|string|max:120',
+            'items.*.vehicle_plate'            => 'nullable|string|max:20',
+            'items.*.film_lines'               => 'nullable|array',
+            'items.*.film_lines.*.part_id'     => 'required|integer|exists:parts,id',
+            'items.*.film_lines.*.category_id' => 'required|integer|exists:category_products,id',
+            'items.*.film_lines.*.product_id'  => 'required|integer|exists:products,id',
+        ];
+    }
+
+    /**
+     * Normalisasi baris dokumen setelah validasi: untuk kategori mobil dengan film_lines, deskripsi,
+     * spesifikasi, satuan (paket), qty (1), dan diskon baris (0) disusun/dipaksa server; kategori lain
+     * membuang data paket & kendaraan. Melempar ValidationException bila kegelapan bukan milik tipe film.
+     */
+    public function normalizeItems(array $items, ?string $category): array
+    {
+        foreach ($items as $i => $item) {
+            $lines = array_values(array_filter((array) ($item['film_lines'] ?? [])));
+
+            if ($category !== 'car_film' || ! $lines) {
+                $items[$i]['film_lines'] = null;
+                $items[$i]['vehicle_label'] = $items[$i]['vehicle_plate'] = null;
+                continue;
+            }
+
+            $items[$i]['vehicle_label'] = trim((string) ($item['vehicle_label'] ?? '')) ?: null;
+            $items[$i]['vehicle_plate'] = strtoupper(trim((string) ($item['vehicle_plate'] ?? ''))) ?: null;
+
+            foreach ($lines as $j => $l) {
+                if (! Product::where('id', (int) $l['product_id'])->where('category_id', (int) $l['category_id'])->exists()) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        "items.$i.film_lines.$j.product_id" => 'Persentase kegelapan tidak sesuai dengan tipe film yang dipilih.',
+                    ]);
+                }
+            }
+
+            $package = $this->composeCarPackage($lines, $item['description'] ?? null);
+            $items[$i]['film_lines']       = $package['lines'];
+            $items[$i]['description']      = $package['description'];
+            $items[$i]['specifications']   = $package['specifications'];
+            $items[$i]['unit']             = 'paket';
+            $items[$i]['quantity']         = 1;
+            $items[$i]['discount_percent'] = 0;
+        }
+
+        return $items;
+    }
 }

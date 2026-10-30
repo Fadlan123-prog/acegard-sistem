@@ -443,6 +443,9 @@ class SalesOrderController extends Controller
                 'sort_order'       => $idx,
                 'description'      => $item['description'],
                 'specifications'   => $item['specifications'] ?? null,
+                'film_lines'       => $item['film_lines'] ?? null,
+                'vehicle_label'    => $item['vehicle_label'] ?? null,
+                'vehicle_plate'    => $item['vehicle_plate'] ?? null,
                 'unit'             => $item['unit'] ?? 'unit',
                 'quantity'         => $qty,
                 'unit_price'       => $price,
@@ -478,16 +481,16 @@ class SalesOrderController extends Controller
 
     private function validateItems(Request $request): array
     {
-        $request->validate([
+        $request->validate(array_merge([
             'items'                    => 'required|array|min:1',
-            'items.*.description'      => 'required|string|max:255',
+            'items.*.description'      => 'required_without:items.*.film_lines|nullable|string|max:255',
             'items.*.specifications'   => 'nullable|string|max:255',
             'items.*.unit'             => 'nullable|string|max:20',
             'items.*.quantity'         => 'required|numeric|min:0.01',
             'items.*.unit_price'       => 'required|integer|min:0',
             'items.*.discount_percent' => 'nullable|numeric|min:0|max:100',
-        ]);
+        ], \App\Services\QuotationCatalog::packageRules()));
 
-        return $request->input('items', []);
+        return app(\App\Services\QuotationCatalog::class)->normalizeItems($request->input('items', []), $request->input('category'));
     }
 }
