@@ -133,6 +133,13 @@ class InvoiceBuildingController extends Controller
         $totalPrice       = $priceCalc['total_price'];
         $remainingPayment = $priceCalc['remaining_payment'];
 
+        if ($priceCalc['discount'] > $priceCalc['price']) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['discount' => 'Diskon tidak boleh melebihi total harga.']);
+        }
+        if ($data['status'] === 'paid' && $priceCalc['remaining_payment'] > 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['status' => 'Status Lunas hanya boleh bila DP sudah menutup total harga.']);
+        }
+
         // Guard against accidental double-submit creating two near-identical
         // invoices for the same job (see InvoiceController::store() — same pattern).
         $recentDuplicate = InvoiceBuilding::where('customer_building_id', $customer->id)
@@ -312,6 +319,13 @@ class InvoiceBuildingController extends Controller
         $downPayment      = $priceCalc['downpayment'];
         $totalPrice       = $priceCalc['total_price'];
         $remainingPayment = $priceCalc['remaining_payment'];
+
+        if ($priceCalc['discount'] > $priceCalc['price']) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['discount' => 'Diskon tidak boleh melebihi total harga.']);
+        }
+        if ($data['status'] === 'paid' && $priceCalc['remaining_payment'] > 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['status' => 'Status Lunas hanya boleh bila DP sudah menutup total harga.']);
+        }
 
         $invoiceNumber = !empty($data['invoice_number'])
             ? $data['invoice_number']

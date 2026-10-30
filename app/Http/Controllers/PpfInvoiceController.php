@@ -53,6 +53,10 @@ class PpfInvoiceController extends Controller
         $discount = (int)($data['discount'] ?? 0);
         $downpayment = (int)($data['downpayment'] ?? 0);
 
+        if ($discount > $price) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['discount' => 'Diskon tidak boleh melebihi harga.']);
+        }
+
         $total = max(0, $price - $discount);
         $remaining = max(0, $total - $downpayment);
 
@@ -145,8 +149,16 @@ class PpfInvoiceController extends Controller
         $discount   = (int)($data['discount'] ?? 0);
         $downpay    = (int)($data['downpayment'] ?? 0);
 
+        if ($discount > $price) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['discount' => 'Diskon tidak boleh melebihi harga.']);
+        }
+
         $total      = max(0, $price - $discount);
         $remaining  = max(0, $total - $downpay);
+
+        if ($data['status'] === 'paid' && $remaining > 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['status' => 'Status Lunas hanya boleh bila DP sudah menutup total harga.']);
+        }
 
         // kalau status void, biasanya angka bisa tetap (audit), tapi payment dianggap 0.
         if ($data['status'] === 'void') {
