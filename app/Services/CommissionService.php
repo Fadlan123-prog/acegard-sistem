@@ -335,19 +335,37 @@ class CommissionService
             $totalPrice, $teknisiRate, $detailerRate, $adminRate, $marketingFixed,
             $adminEmployees, $period, $installedAt, $now
         ) {
-            // First technician = Teknisi (3%), remaining = Detailer (2% each).
-            // Based on pivot order; applies to 1–4 technicians per installation.
-            // Per-employee commission setting (none/percentage) overrides the default rate.
-            foreach ($technicians as $index => $tech) {
-                $isFirst = ($index === 0);
-                $defaultAmount = (int) round($totalPrice * ($isFirst ? $teknisiRate : $detailerRate));
-                $resolved = $this->employeeResolver->resolve($tech, $defaultAmount, $totalPrice);
+            // Pool PPF 11% dari total_price (setelah diskon). Tidak ada teknisi utama: semua
+            // teknisi PPF sama rata. Peran ditentukan jabatan karyawan ('Detailer' = detailer).
+            //   - Tim lengkap (3 teknisi + detailer): tiap teknisi 3%, detailer 2% = 11%.
+            //   - Teknisi < 3 dan ada detailer: detailer +1% (3%), sisa pool dibagi rata ke teknisi.
+            //   - Tanpa detailer: teknisi membagi 9% (bagian detailer 2% tidak dibayarkan).
+            [$teknisiList, $detailerList] = $this->splitPpfTeam($technicians);
+            $teknisiAmounts  = [];
+            $detailerAmounts = [];
+            $this->ppfTeamAmounts($totalPrice, $teknisiList->count(), $detailerList->count(), $teknisiAmounts, $detailerAmounts);
+
+            foreach ($teknisiList->values() as $i => $tech) {
+                $resolved = $this->employeeResolver->resolve($tech, $teknisiAmounts[$i], $totalPrice);
                 $this->upsertPpfCommission([
                     'employees_id'  => (int) $tech->id,
                     'ppf_invoice_id'=> $invoice->id,
                     'branch_id'     => $invoice->branch_id,
                     'amount'        => $resolved['amount'],
-                    'role'          => $isFirst ? 'teknisi' : 'detailer',
+                    'role'          => 'teknisi',
+                    'install_type'  => $installation->install_type ?? 'ppf',
+                    'installed_at'  => $installedAt,
+                ]);
+            }
+
+            foreach ($detailerList->values() as $i => $tech) {
+                $resolved = $this->employeeResolver->resolve($tech, $detailerAmounts[$i], $totalPrice);
+                $this->upsertPpfCommission([
+                    'employees_id'  => (int) $tech->id,
+                    'ppf_invoice_id'=> $invoice->id,
+                    'branch_id'     => $invoice->branch_id,
+                    'amount'        => $resolved['amount'],
+                    'role'          => 'detailer',
                     'install_type'  => $installation->install_type ?? 'ppf',
                     'installed_at'  => $installedAt,
                 ]);
@@ -408,6 +426,58 @@ class CommissionService
             'ppf_invoice_id'  => $invoice->id,
             'technician_count'=> $technicians->count(),
         ]);
+    }
+
+
+    /**
+     * Pisahkan tim PPF: jabatan mengandung 'detailer' = detailer, selain itu teknisi PPF.
+     * Urutan memakai id karyawan agar deterministik (bukan urutan pivot).
+     *
+     * @return array{0:\Illuminate\Support\Collection,1:\Illuminate\Support\Collection}
+     */
+    public function splitPpfTeam($technicians): array
+    {
+        $isDetailer = fn ($t) => str_contains(strtolower((string) $t->job_position), 'detailer');
+
+        return [
+            $technicians->reject($isDetailer)->sortBy('id')->values(),
+            $technicians->filter($isDetailer)->sortBy('id')->values(),
+        ];
+    }
+
+    /**
+     * Nominal komisi PPF per orang. Total pool 11% dari total_price; sisa pembulatan ke orang pertama.
+     *
+     * @param  array<int,int>  $teknisiOut
+     * @param  array<int,int>  $detailerOut
+     */
+    public function ppfTeamAmounts(int $totalPrice, int $teknisiCount, int $detailerCount, array &$teknisiOut, array &$detailerOut): void
+    {
+        $cfg   = config('commission.ppf', []);
+        $full  = (int) ($cfg['full_team_size'] ?? 3);
+        $pool  = (int) round($totalPrice * (float) ($cfg['pool_rate'] ?? 0.11));
+        $base  = (int) round($totalPrice * (float) ($cfg['detailer_rate'] ?? 0.02));
+        $short = (int) round($totalPrice * (float) ($cfg['detailer_rate_short'] ?? 0.03));
+
+        $detailerShare = $detailerCount > 0 ? ($teknisiCount < $full ? $short : $base) : 0;
+        $teknisiPool   = $pool - ($detailerCount > 0 ? $detailerShare : $base);
+
+        $teknisiOut  = $this->splitEvenly($teknisiPool, $teknisiCount);
+        $detailerOut = $this->splitEvenly($detailerShare, $detailerCount);
+    }
+
+    /** @return array<int,int> */
+    private function splitEvenly(int $amount, int $count): array
+    {
+        if ($count <= 0) {
+            return [];
+        }
+
+        $each = intdiv($amount, $count);
+        $parts = array_fill(0, $count, $each);
+        $parts[0] += $amount - ($each * $count);
+
+        return $parts;
     }
 
 

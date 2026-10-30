@@ -159,6 +159,9 @@ class CustomerPpfController extends Controller
         // ✅ validasi tambahan: kalau install_type=partial, panels wajib minimal 1
         $validator->after(function($v) use ($request) {
             $installs = $request->input('installations', []);
+            foreach ($this->ppfTeamLimitErrors($installs) as $field => $msg) {
+                $v->errors()->add($field, $msg);
+            }
             foreach ($installs as $i => $ins) {
                 $type = $ins['install_type'] ?? null;
                 $panels = $ins['panels'] ?? [];
@@ -374,6 +377,9 @@ class CustomerPpfController extends Controller
         // - kalau installations.*.id ada, pastikan milik customer ini
         $validator->after(function($v) use ($request, $ppfCustomer) {
             $installs = $request->input('installations', []);
+            foreach ($this->ppfTeamLimitErrors($installs) as $field => $msg) {
+                $v->errors()->add($field, $msg);
+            }
             foreach ($installs as $i => $ins) {
                 $type   = $ins['install_type'] ?? null;
                 $panels = $ins['panels'] ?? [];
@@ -536,4 +542,28 @@ class CustomerPpfController extends Controller
     }
 
 
+
+    /**
+     * Maks 3 teknisi PPF (jabatan bukan Detailer) per instalasi; detailer tidak dihitung.
+     *
+     * @return array<string,string>  key field => pesan
+     */
+    private function ppfTeamLimitErrors(array $installations): array
+    {
+        $errors = [];
+        $max = (int) config('commission.ppf.full_team_size', 3);
+
+        foreach ($installations as $i => $ins) {
+            $ids = array_map('intval', (array) ($ins['technicians'] ?? []));
+            $teknisi = \App\Models\Employee::whereIn('id', $ids)
+                ->where(fn ($q) => $q->whereNull('job_position')->orWhere('job_position', 'not like', '%detailer%'))
+                ->count();
+
+            if ($teknisi > $max) {
+                $errors["installations.$i.technicians"] = "Maksimal {$max} teknisi PPF per instalasi (detailer tidak dihitung).";
+            }
+        }
+
+        return $errors;
+    }
 }

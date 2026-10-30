@@ -559,7 +559,7 @@
                             @endforeach
                           </div>
                         </div>
-                        <div class="form-text mt-1">Centang untuk memilih. Maksimal 4 teknisi per instalasi.</div>
+                        <div class="form-text mt-1">Centang untuk memilih. Maksimal 3 teknisi PPF + detailer (total 4). Peran mengikuti jabatan karyawan: jabatan "Detailer" = detailer; semua teknisi PPF dibayar sama rata dari pool 11%.</div>
                       </div>
                     </div>
 

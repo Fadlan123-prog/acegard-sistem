@@ -208,16 +208,21 @@ return [
     | Komisi PPF (Paint Protection Film)
     |--------------------------------------------------------------------------
     |
-    | teknisi_rate  : % dari total_price invoice → untuk tukang_id instalasi
-    | detailer_rate : % dari total_price invoice → untuk kenek_id instalasi
+    | pool_rate     : 11% dari total_price invoice (setelah diskon), dibagi ke tim instalasi
+    | detailer_rate : bagian detailer pada tim lengkap; detailer_rate_short bila teknisi < full_team_size
     | marketing_fixed : nominal tetap → untuk marketing_id customer PPF
     |
     */
 
     'ppf' => [
-        'teknisi_rate'    => 0.03,    // 3%
-        'detailer_rate'   => 0.02,    // 2%
-        'admin_rate'      => 0.02,    // 2% — employees with ppf_admin_commission = true
+        // Pool teknisi PPF = 11% dari total_price (setelah diskon), semua teknisi sama rata:
+        //   tim lengkap (3 teknisi + detailer): 3% per teknisi, detailer 2%.
+        //   teknisi < 3 dan ada detailer: detailer 3% (+1%), sisa pool dibagi rata ke teknisi.
+        'pool_rate'           => 0.11,
+        'detailer_rate'       => 0.02,
+        'detailer_rate_short' => 0.03,
+        'full_team_size'      => 3,
+        'admin_rate'      => 0.02,    // 2% — employees with ppf_admin_commission = true (per cabang)
         'marketing_fixed' => 500000,  // Rp500.000
     ],
 
