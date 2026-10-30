@@ -68,6 +68,7 @@
       <select name="status" class="form-select" required>
         <option value="unpaid"  {{ old('status')==='unpaid' ? 'selected' : '' }}>Belum Lunas</option>
         <option value="partial" {{ old('status')==='partial' ? 'selected' : '' }}>Sebagian</option>
+        <option value="paid"    {{ old('status')==='paid' ? 'selected' : '' }}>Lunas</option>
       </select>
     </x-ui.form-field>
 

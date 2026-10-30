@@ -125,6 +125,10 @@
         <option value="partial" {{ $selectedStatus === 'partial' ? 'selected' : '' }}>
           Sebagian
         </option>
+
+        <option value="paid" {{ $selectedStatus === 'paid' ? 'selected' : '' }}>
+          Lunas
+        </option>
       </select>
     </x-ui.form-field>
 

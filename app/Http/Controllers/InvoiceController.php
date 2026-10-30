@@ -54,7 +54,7 @@ class InvoiceController extends Controller
             'discount'       => ['nullable', 'integer', 'min:0', 'lte:price'],
             'downpayment'    => ['nullable', 'integer', 'min:0', 'lte:price'],
             'payment_method' => ['nullable', 'in:cash,credit,transfer,tokopedia'],
-            'status'         => ['required', 'in:unpaid,partial'],   // 'paid' hanya lewat Catat Pelunasan (QC + stok + lock)
+            'status'         => ['required', 'in:paid,unpaid,partial'],
             'invoice_number' => ['nullable', 'string', 'max:255', 'unique:invoices,invoice_number'],
             'invoice_date'   => ['required', 'date'],
         ], [
@@ -71,6 +71,12 @@ class InvoiceController extends Controller
         $downpayment      = $priceCalc['downpayment'];
         $totalPrice       = $priceCalc['total_price'];
         $remainingPayment = $priceCalc['remaining_payment'];
+
+        if ($data['status'] === 'paid' && $priceCalc['remaining_payment'] > 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'status' => 'Status Lunas hanya boleh bila DP sudah menutup total harga.',
+            ]);
+        }
 
         // Guard against accidental double-submit (double-click / form resubmit) creating
         // two near-identical invoices for the same job. Customers can legitimately have
@@ -189,7 +195,7 @@ class InvoiceController extends Controller
             'discount'       => ['nullable', 'integer', 'min:0', 'lte:price'],
             'downpayment'    => ['nullable', 'integer', 'min:0', 'lte:price'],
             'payment_method' => ['nullable', 'in:cash,credit,transfer,tokopedia'],
-            'status'         => ['required', 'in:unpaid,partial'],   // 'paid' hanya lewat Catat Pelunasan (QC + stok + lock)
+            'status'         => ['required', 'in:paid,unpaid,partial'],
             'invoice_number' => [
                 'nullable',
                 'string',
@@ -207,6 +213,12 @@ class InvoiceController extends Controller
         $downpayment      = $priceCalc['downpayment'];
         $totalPrice       = $priceCalc['total_price'];
         $remainingPayment = $priceCalc['remaining_payment'];
+
+        if ($data['status'] === 'paid' && $priceCalc['remaining_payment'] > 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'status' => 'Status Lunas hanya boleh bila DP sudah menutup total harga.',
+            ]);
+        }
 
         $invoiceNumber = !empty($data['invoice_number'])
             ? $data['invoice_number']

@@ -107,7 +107,7 @@ class CommissionIntegrityTest extends TestCase
         $this->actingAs($admin)->post(route('sales-transactions.release-commission', $trx->id))->assertStatus(422);
     }
 
-    public function test_invoice_cannot_be_created_as_paid_and_discount_cannot_exceed_price(): void
+    public function test_invoice_paid_requires_full_downpayment_and_discount_cannot_exceed_price(): void
     {
         $branch = Branch::factory()->create();
         $customer = Customer::factory()->create(['branch_id' => $branch->id]);
