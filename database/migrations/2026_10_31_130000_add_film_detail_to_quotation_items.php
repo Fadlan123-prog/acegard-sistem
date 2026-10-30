@@ -12,13 +12,16 @@ return new class extends Migration
         // (bagian kaca + tipe film + persentase kegelapan), satu harga untuk seluruh paket.
         Schema::table('quotation_items', function (Blueprint $table) {
             $table->json('film_lines')->nullable()->after('specifications');
+            // Kendaraan per paket (satu quotation bisa memuat beberapa mobil); hanya tampilan dokumen.
+            $table->string('vehicle_label', 120)->nullable()->after('film_lines');
+            $table->string('vehicle_plate', 20)->nullable()->after('vehicle_label');
         });
     }
 
     public function down(): void
     {
         Schema::table('quotation_items', function (Blueprint $table) {
-            $table->dropColumn('film_lines');
+            $table->dropColumn(['film_lines', 'vehicle_label', 'vehicle_plate']);
         });
     }
 };

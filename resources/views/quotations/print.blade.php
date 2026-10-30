@@ -163,6 +163,9 @@
             <tr>
                 <td class="center">{{ $i + 1 }}</td>
                 <td>
+                    @if($item->vehicle_label || $item->vehicle_plate)
+                        <div class="item-vehicle" style="font-weight:bold">Kendaraan: {{ trim($item->vehicle_label . ($item->vehicle_plate ? ' · ' . $item->vehicle_plate : ''), ' ·') }}</div>
+                    @endif
                     <div class="item-desc">{{ $item->description }}</div>
                     @if($item->specifications)
                         <div class="item-spec">{{ $item->specifications }}</div>

@@ -141,7 +141,14 @@
                     <tbody>
                         @forelse($quotation->items as $item)
                         <tr>
-                            <td class="fw-semibold">{{ $item->description }}</td>
+                            <td class="fw-semibold">
+                                @if($item->vehicle_label || $item->vehicle_plate)
+                                    <div class="small text-primary fw-semibold mb-1">
+                                        <iconify-icon icon="mdi:car-outline" class="me-1"></iconify-icon>{{ trim($item->vehicle_label . ($item->vehicle_plate ? ' · ' . $item->vehicle_plate : ''), ' ·') }}
+                                    </div>
+                                @endif
+                                {{ $item->description }}
+                            </td>
                             <td class="small text-muted">{{ $item->specifications ?? '—' }}</td>
                             <td class="text-center small">{{ $item->unit }}</td>
                             <td class="text-center">{{ rtrim(rtrim(number_format($item->quantity, 2), '0'), '.') }}</td>

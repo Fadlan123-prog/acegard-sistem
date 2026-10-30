@@ -279,6 +279,8 @@ class QuotationController extends Controller
     {
         $request->validate([
             'items'                   => 'required|array|min:1',
+            'items.*.vehicle_label'             => 'nullable|string|max:120',
+            'items.*.vehicle_plate'             => 'nullable|string|max:20',
             'items.*.film_lines'                => 'nullable|array',
             'items.*.film_lines.*.part_id'      => 'required|integer|exists:parts,id',
             'items.*.film_lines.*.category_id'  => 'required|integer|exists:category_products,id',
@@ -301,8 +303,12 @@ class QuotationController extends Controller
 
             if ($request->input('category') !== 'car_film' || ! $lines) {
                 $items[$i]['film_lines'] = null;
+                $items[$i]['vehicle_label'] = $items[$i]['vehicle_plate'] = null;
                 continue;
             }
+
+            $items[$i]['vehicle_label'] = trim((string) ($item['vehicle_label'] ?? '')) ?: null;
+            $items[$i]['vehicle_plate'] = strtoupper(trim((string) ($item['vehicle_plate'] ?? ''))) ?: null;
 
             foreach ($lines as $j => $l) {
                 $ok = \App\Models\Product::where('id', (int) $l['product_id'])->where('category_id', (int) $l['category_id'])->exists();
@@ -342,6 +348,8 @@ class QuotationController extends Controller
                 'description'      => $item['description'],
                 'specifications'   => $item['specifications'] ?? null,
                 'film_lines'       => $item['film_lines'] ?? null,
+                'vehicle_label'    => $item['vehicle_label'] ?? null,
+                'vehicle_plate'    => $item['vehicle_plate'] ?? null,
                 'unit'             => $item['unit'] ?? 'unit',
                 'quantity'         => $qty,
                 'unit_price'       => $price,

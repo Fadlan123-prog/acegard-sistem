@@ -330,7 +330,11 @@
         <td class="desc-td">
             {{-- Mobil: satu paket = daftar bagian kaca (Part / Kategori / Produk) dengan satu harga --}}
             <div class="car-pack" hidden>
-                <input type="text" name="items[__IDX__][description]" class="form-control form-control-sm pack-title" placeholder="Nama paket (mis. Fullset, D/S/P, Kaca Depan)" disabled>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-5"><input type="text" name="items[__IDX__][vehicle_label]" class="form-control form-control-sm pack-vehicle" placeholder="Kendaraan (merek / model), opsional" maxlength="120" disabled></div>
+                    <div class="col-md-3"><input type="text" name="items[__IDX__][vehicle_plate]" class="form-control form-control-sm pack-plate" placeholder="Plat nomor" maxlength="20" disabled></div>
+                    <div class="col-md-4"><input type="text" name="items[__IDX__][description]" class="form-control form-control-sm pack-title" placeholder="Nama paket (mis. Fullset, D/S/P)" disabled></div>
+                </div>
                 <div class="pack-lines mt-2"></div>
                 <button type="button" class="btn btn-outline-primary btn-sm add-line">+ Tambah Produk</button>
                 <div class="form-text car-summary"></div>
@@ -476,6 +480,10 @@
     function buildCarRow(row, data, idx){
         row.dataset.idx = idx;
         row.querySelector('.add-line').addEventListener('click', () => addLine(row));
+        if (data) {
+            row.querySelector('.pack-vehicle').value = data.vehicle_label || '';
+            row.querySelector('.pack-plate').value = data.vehicle_plate || '';
+        }
         const lines = (data && data.film_lines) ? data.film_lines : [];
         if (lines.length) { lines.forEach(l => addLine(row, l)); } else { addLine(row); }
         // Quotation mobil lama (sebelum ada rincian bagian): tampilkan isi sebelumnya sebagai acuan.
@@ -503,6 +511,8 @@
         const car = isCar();
         row.querySelector('.car-pack').hidden = !car;
         row.querySelector('.pack-title').disabled = !car;
+        row.querySelector('.pack-vehicle').disabled = !car;
+        row.querySelector('.pack-plate').disabled = !car;
         row.querySelector('.generic-desc').hidden = car;
         const gspec = row.querySelector('.generic-spec'); gspec.disabled = car;
         row.querySelector('.spec-td').hidden = car;
@@ -565,6 +575,8 @@
             'description'      => $i->description,
             'specifications'   => $i->specifications,
             'film_lines'       => $i->film_lines,
+            'vehicle_label'    => $i->vehicle_label,
+            'vehicle_plate'    => $i->vehicle_plate,
             'unit'             => $i->unit,
             'quantity'         => $i->quantity,
             'unit_price'       => $i->unit_price,

@@ -173,4 +173,42 @@ class QuotationProductPickerTest extends TestCase
         $page = $this->actingAs($admin)->get(route('quotations.edit', $quotation))->assertOk();
         $page->assertSee('film_lines', false)->assertSee('Samping Baris 1', false)->assertSee('Fullset', false);
     }
+
+    public function test_each_car_package_can_carry_its_own_vehicle_and_it_shows_on_the_documents(): void
+    {
+        $this->seedCatalog();
+        $this->seedParts();
+        $branch = Branch::factory()->create();
+        $admin = $this->userWithRole('admin', $branch);
+        $payload = $this->payload($branch, [
+            'description' => 'Fullset', 'vehicle_label' => 'Toyota Avanza', 'vehicle_plate' => 'b 1234 xy',
+            'film_lines' => [['part_id' => 1, 'category_id' => 1, 'product_id' => 1]],
+        ]);
+        $payload['items'][] = ['description' => 'D/S/P', 'vehicle_label' => 'Honda Brio', 'vehicle_plate' => 'B 9 ZZ', 'unit' => 'paket',
+            'quantity' => 1, 'unit_price' => 1800000, 'discount_percent' => 0,
+            'film_lines' => [['part_id' => 2, 'category_id' => 1, 'product_id' => 1]]];
+
+        $this->actingAs($admin)->post(route('quotations.store'), $payload)->assertSessionHasNoErrors();
+
+        $items = \App\Models\QuotationItem::orderBy('sort_order')->get();
+        $this->assertSame(['Toyota Avanza', 'B 1234 XY'], [$items[0]->vehicle_label, $items[0]->vehicle_plate]);
+        $this->assertSame('Honda Brio', $items[1]->vehicle_label);
+
+        $quotation = \App\Models\Quotation::first();
+        $this->actingAs($admin)->get(route('quotations.show', $quotation))->assertSee('Toyota Avanza · B 1234 XY')->assertSee('Honda Brio · B 9 ZZ');
+        $this->actingAs($admin)->get(route('quotations.print', $quotation))->assertSee('Kendaraan: Toyota Avanza · B 1234 XY', false);
+    }
+
+    public function test_vehicle_per_package_is_ignored_outside_car_film(): void
+    {
+        $this->seedCatalog();
+        $branch = Branch::factory()->create();
+        $admin = $this->userWithRole('admin', $branch);
+
+        $this->actingAs($admin)->post(route('quotations.store'), $this->payload($branch, [
+            'description' => 'FLEX ONE WAY — Silver Grey', 'vehicle_label' => 'Toyota', 'vehicle_plate' => 'B 1',
+        ], 'building_film'))->assertSessionHasNoErrors();
+
+        $this->assertNull(\App\Models\QuotationItem::first()->vehicle_label);
+    }
 }
