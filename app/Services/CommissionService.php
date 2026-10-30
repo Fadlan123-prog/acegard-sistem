@@ -169,6 +169,44 @@ class CommissionService
 
 
     /**
+     * Ganti marketing pada invoice yang komisinya sudah dirilis. Tarif memakai tipe
+     * pemasangan customer saat ini (bukan tebakan 'fullset'). Ditolak bila komisi marketing
+     * lama sudah dibayar atau masuk batch pencairan.
+     *
+     * @throws \DomainException
+     */
+    public function reassignMarketingAfterRelease(\App\Models\Invoice $invoice, \App\Models\Customer $customer, ?int $newMarketingId): void
+    {
+        $locked = DB::table('commissions')
+            ->where('invoice_id', $invoice->id)
+            ->where('role', 'marketing')
+            ->lockForUpdate()
+            ->get();
+
+        if ($locked->contains(fn ($c) => $c->status === 'paid' || $c->commission_payment_batch_id !== null)) {
+            throw new \DomainException('Komisi marketing invoice ini sudah dibayarkan/masuk batch pencairan, marketing tidak bisa diganti.');
+        }
+
+        DB::table('commissions')
+            ->where('invoice_id', $invoice->id)
+            ->where('role', 'marketing')
+            ->delete();
+
+        if ($newMarketingId) {
+            $baseType = app(\App\Domain\Commission\CommissionCalculator::class)->resolveMarketingBase($customer);
+
+            $this->createMarketingForCustomerAutoCategory(
+                $newMarketingId,
+                $customer->id,
+                $invoice->id,
+                $baseType,
+                (int) $invoice->price,
+            );
+        }
+    }
+
+
+    /**
      * Menentukan kategori produk yang dipakai untuk komisi marketing.
      */
     public function resolveMarketingCategoryId(int $customerId): ?int

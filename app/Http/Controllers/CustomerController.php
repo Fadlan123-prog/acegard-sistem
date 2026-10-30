@@ -405,28 +405,13 @@ public function edit(Customer $customer)
         if ($oldMarketingId !== $newMarketingId) {
             $invoice = $customer->invoice;
             if ($invoice && $invoice->commission_released_at) {
-                // Ambil install_type dari komisi marketing lama (sudah dalam format base: fullset/dsp/skkb)
-                $oldRow   = DB::table('commissions')
-                    ->where('invoice_id', $invoice->id)
-                    ->where('role', 'marketing')
-                    ->first();
-                $baseType = $oldRow?->install_type ?? 'fullset';
+                // Ganti penerima komisi marketing; ditolak bila sudah dibayar / masuk batch pencairan.
+                try {
+                    $commission->reassignMarketingAfterRelease($invoice, $customer->fresh(), $newMarketingId);
+                } catch (\DomainException $e) {
+                    DB::rollBack();
 
-                // Hapus komisi marketing lama
-                DB::table('commissions')
-                    ->where('invoice_id', $invoice->id)
-                    ->where('role', 'marketing')
-                    ->delete();
-
-                // Buat komisi marketing baru untuk marketing yang baru
-                if ($newMarketingId) {
-                    $commission->createMarketingForCustomerAutoCategory(
-                        $newMarketingId,
-                        $customer->id,
-                        $invoice->id,
-                        $baseType,
-                        (int) $invoice->price,
-                    );
+                    return back()->withInput()->with('error', $e->getMessage());
                 }
 
                 // Sync Adit override — triggernya dari marketing,
