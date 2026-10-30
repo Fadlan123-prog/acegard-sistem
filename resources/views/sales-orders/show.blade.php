@@ -194,7 +194,13 @@
                 </div>
                 @endif
 
-                @if($salesOrder->usesFilmSelection() && $salesOrder->film_label)
+                @php $filmBreakdown = $salesOrder->filmBreakdown(); @endphp
+                @if($filmBreakdown)
+                <div class="col-12">
+                    <div class="text-muted small mb-1">Tipe Film &amp; Kegelapan per Bagian Kaca</div>
+                    @include('sales-orders._film-breakdown', ['breakdown' => $filmBreakdown, 'variant' => 'web'])
+                </div>
+                @elseif($salesOrder->usesFilmSelection() && $salesOrder->film_label)
                 <div class="col-sm-6">
                     <div class="text-muted small mb-1">Tipe Film &amp; Kegelapan</div>
                     <div class="fw-semibold">{{ $salesOrder->film_label }}</div>
@@ -550,7 +556,13 @@
                         </p>
                     @endif
 
-                    @if($salesOrder->usesFilmSelection())
+                    @php $filmBreakdown = $salesOrder->filmBreakdown(); @endphp
+                    @if($filmBreakdown)
+                        <hr>
+                        <div class="fw-semibold mb-1">Tipe Film &amp; Kegelapan per Bagian Kaca</div>
+                        <p class="text-muted small mb-2">Diambil dari rincian harga SO. Untuk mengubahnya, edit rincian harga di Sales Order.</p>
+                        @include('sales-orders._film-breakdown', ['breakdown' => $filmBreakdown, 'variant' => 'web'])
+                    @elseif($salesOrder->usesFilmSelection())
                         <hr>
                         <x-ui.form-field label="Tipe Kaca Film" name="film_category_id">
                             <select name="film_category_id" id="filmCategory" class="form-select">

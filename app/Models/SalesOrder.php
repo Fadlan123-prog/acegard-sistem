@@ -150,6 +150,50 @@ class SalesOrder extends Model
         return trim(implode(' — ', array_filter([$cat?->name, $prodLabel])));
     }
 
+    /**
+     * Rincian film per bagian kaca dari paket mobil di rincian harga SO, berurutan dari kaca depan
+     * sampai panoramic. Bagian yang tidak dipasang bernilai null. Kosong bila SO tidak punya paket mobil.
+     *
+     * @return array<int,array{vehicle:string,package:string,parts:array<int,array{label:string,film:?string}>}>
+     */
+    public function filmBreakdown(): array
+    {
+        if ($this->category !== 'car_film') {
+            return [];
+        }
+
+        $items = ($this->relationLoaded('items') ? $this->items : $this->items()->get())
+            ->filter(fn ($i) => ! empty($i->film_lines));
+
+        if ($items->isEmpty()) {
+            return [];
+        }
+
+        $parts = \App\Models\Part::orderBy('id')->get();
+        $cats  = \App\Models\CategoryProduct::pluck('name', 'id');
+        $prods = \App\Models\Product::get()->keyBy('id');
+
+        return $items->map(function ($item) use ($parts, $cats, $prods) {
+            $byPart = collect($item->film_lines)->keyBy('part_id');
+
+            return [
+                'vehicle' => trim(trim((string) $item->vehicle_label) . ($item->vehicle_plate ? ' · ' . $item->vehicle_plate : ''), ' ·'),
+                'package' => (string) $item->description,
+                'parts'   => $parts->map(function ($p) use ($byPart, $cats, $prods) {
+                    $line = $byPart->get($p->id);
+                    $film = null;
+                    if ($line) {
+                        $prod = $prods->get((int) $line['product_id']);
+                        $film = trim(($cats[(int) $line['category_id']] ?? '') . ' ' . ($prod->name ?? '')
+                            . ($prod && $prod->description ? " (kegelapan {$prod->description})" : ''));
+                    }
+
+                    return ['label' => \App\Services\QuotationCatalog::partLabel($p->name), 'film' => $film];
+                })->all(),
+            ];
+        })->values()->all();
+    }
+
     public function assignsMultipleTechnicians(): bool
     {
         return in_array($this->category, ['building_film', 'ppf'], true);

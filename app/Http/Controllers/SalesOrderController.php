@@ -362,7 +362,8 @@ class SalesOrderController extends Controller
      */
     private function validatedFilm(Request $request, SalesOrder $salesOrder): ?array
     {
-        if (! $salesOrder->usesFilmSelection()) {
+        // Rincian per bagian kaca dari rincian harga SO adalah sumber kebenaran; pilihan tunggal tidak dipakai.
+        if (! $salesOrder->usesFilmSelection() || $salesOrder->filmBreakdown()) {
             return null;
         }
 

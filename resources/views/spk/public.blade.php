@@ -112,7 +112,7 @@ body { font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; ba
         </div>
 
         {{-- Kendaraan --}}
-        @if($salesOrder->vehicle_brand || $salesOrder->vehicle_plate)
+        @if($salesOrder->vehicle_brand || $salesOrder->vehicle_plate || $salesOrder->filmBreakdown())
         <div class="section">
             <div class="section-label">
                 {{ $salesOrder->category === 'building_film' ? 'Data Bangunan' : 'Data Kendaraan' }}
@@ -133,7 +133,13 @@ body { font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; ba
                 </span>
             </div>
             @endif
-            @if($salesOrder->usesFilmSelection() && $salesOrder->film_label)
+            @php $filmBreakdown = $salesOrder->filmBreakdown(); @endphp
+            @if($filmBreakdown)
+            <div class="info-row" style="display:block">
+                <span class="lbl">Tipe Film / Kegelapan per Bagian Kaca</span>
+                @include('sales-orders._film-breakdown', ['breakdown' => $filmBreakdown, 'variant' => 'print'])
+            </div>
+            @elseif($salesOrder->usesFilmSelection() && $salesOrder->film_label)
             <div class="info-row">
                 <span class="lbl">Tipe Film / Kegelapan</span>
                 <span class="val">{{ $salesOrder->film_label }}</span>
