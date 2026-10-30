@@ -95,6 +95,30 @@ class User extends Authenticatable
         return $this->belongsToMany(Branch::class, 'branch_user', 'user_id', 'branch_id')->withTimestamps();
     }
 
+    /**
+     * Kebijakan cabang: superadmin lintas cabang; peran lain (admin, manager,
+     * owner, dll.) hanya cabang yang terdaftar di branch_user. Owner lintas
+     * cabang dengan cara ditugaskan ke semua cabang.
+     */
+    public function canAccessBranch(?int $branchId): bool
+    {
+        if ($branchId === null) {
+            return false;
+        }
+
+        if ($this->hasRole('superadmin')) {
+            return true;
+        }
+
+        return $this->branches()->where('branches.id', $branchId)->exists();
+    }
+
+    /** @return array<int,int> */
+    public function accessibleBranchIds(): array
+    {
+        return $this->branches()->pluck('branches.id')->map(fn ($id) => (int) $id)->all();
+    }
+
     public function employee()
     {
         return $this->belongsTo(Employee::class);

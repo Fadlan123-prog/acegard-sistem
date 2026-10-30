@@ -45,6 +45,7 @@ class UserController extends Controller
         $branchId = $request->get('branch_id');
 
         $users = User::query()
+            ->tap(fn ($q) => $this->scopeManageable($q))
             ->with(['branches:id,name,city', 'roles:id,name'])
             ->withCount('branches')
             ->when($search !== '', function ($query) use ($search) {
@@ -64,6 +65,7 @@ class UserController extends Controller
 
         $branches = Branch::query()
             ->select('id', 'name', 'city')
+            ->when(! auth()->user()->hasRole('superadmin'), fn ($q) => $q->whereIn('id', auth()->user()->accessibleBranchIds()))
             ->orderBy('name')
             ->get();
 
@@ -82,6 +84,7 @@ class UserController extends Controller
     {
         $branches = Branch::query()
             ->select('id', 'name', 'city')
+            ->when(! auth()->user()->hasRole('superadmin'), fn ($q) => $q->whereIn('id', auth()->user()->accessibleBranchIds()))
             ->orderBy('name')
             ->get();
 
@@ -145,10 +148,13 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        $this->authorizeManage($user);
+
         $user->load(['branches:id,name,city', 'roles:id,name', 'employee:id,name,job_position']);
 
         $branches = Branch::query()
             ->select('id', 'name', 'city')
+            ->when(! auth()->user()->hasRole('superadmin'), fn ($q) => $q->whereIn('id', auth()->user()->accessibleBranchIds()))
             ->orderBy('name')
             ->get();
 
@@ -177,7 +183,11 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        $this->authorizeManage($user);
+
         $validated = $this->validateUser($request, $user);
+
+        $passwordChanged = ! empty($validated['password']);
 
         DB::transaction(function () use ($validated, $user) {
             $needsEmployee = in_array($validated['role'], $this->employeeRoles);
@@ -204,6 +214,10 @@ class UserController extends Controller
             }
         });
 
+        if ($passwordChanged) {
+            $this->revokeSessions($user);
+        }
+
         return redirect()
             ->route('users.index')
             ->with('success', 'User berhasil diperbarui.');
@@ -211,6 +225,8 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        $this->authorizeManage($user);
+
         if ((int) auth()->id() === (int) $user->id) {
             return back()->with('error', 'Anda tidak dapat menghapus akun sendiri.');
         }
@@ -259,6 +275,7 @@ class UserController extends Controller
 
         DB::transaction(function () use ($idsToDelete) {
             $users = User::query()
+                ->tap(fn ($q) => $this->scopeManageable($q))
                 ->whereIn('id', $idsToDelete)
                 ->get();
 
@@ -274,6 +291,44 @@ class UserController extends Controller
             ->with('success', 'User terpilih berhasil dihapus.');
     }
 
+    /** Non-superadmin: hanya user yang beririsan cabang dan bukan superadmin/owner. */
+    private function scopeManageable($query): void
+    {
+        $actor = auth()->user();
+
+        if ($actor->hasRole('superadmin')) {
+            return;
+        }
+
+        $query->whereDoesntHave('roles', fn ($r) => $r->whereIn('name', ['superadmin', 'owner']))
+            ->whereHas('branches', fn ($b) => $b->whereIn('branches.id', $actor->accessibleBranchIds()));
+    }
+
+    private function authorizeManage(User $target): void
+    {
+        $actor = auth()->user();
+
+        if ($actor->hasRole('superadmin') || (int) $actor->id === (int) $target->id) {
+            return;
+        }
+
+        abort_if($target->hasAnyRole(['superadmin', 'owner']), 403, 'Tidak boleh mengelola akun ini.');
+
+        $shared = array_intersect($actor->accessibleBranchIds(), $target->accessibleBranchIds());
+        abort_if($shared === [], 403, 'User ini bukan dari cabang Anda.');
+    }
+
+    /** Cabut semua sesi aktif user (session driver database) setelah password diganti. */
+    private function revokeSessions(User $user): void
+    {
+        if (config('session.driver') === 'database') {
+            DB::table(config('session.table', 'sessions'))
+                ->where('user_id', $user->id)
+                ->when((int) $user->id === (int) auth()->id(), fn ($q) => $q->where('id', '!=', session()->getId()))
+                ->delete();
+        }
+    }
+
     private function validateUser(Request $request, ?User $user = null): array
     {
         $userId        = $user?->id;
@@ -287,10 +342,10 @@ class UserController extends Controller
         // could self-escalate by submitting role=superadmin.
         $grantableRoles = auth()->user()?->hasRole('superadmin')
             ? $this->allowedRoles
-            : array_values(array_diff($this->allowedRoles, ['superadmin']));
+            : array_values(array_diff($this->allowedRoles, ['superadmin', 'owner']));
 
-        if ($role === 'superadmin' && ! in_array('superadmin', $grantableRoles)) {
-            abort(403, 'Hanya superadmin yang dapat memberikan role superadmin.');
+        if (in_array($role, ['superadmin', 'owner'], true) && ! in_array($role, $grantableRoles)) {
+            abort(403, 'Hanya superadmin yang dapat memberikan role superadmin/owner.');
         }
 
         // A user changing their OWN password must re-confirm their current
@@ -340,6 +395,11 @@ class UserController extends Controller
                 'branch_ids.*' => [
                     'integer', 'distinct',
                     Rule::exists('branches', 'id'),
+                    function ($attribute, $value, $fail) {
+                        if (! auth()->user()->canAccessBranch((int) $value)) {
+                            $fail('Anda tidak boleh menugaskan user ke cabang ini.');
+                        }
+                    },
                 ],
             ],
             [
