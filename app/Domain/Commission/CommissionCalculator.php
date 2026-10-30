@@ -263,7 +263,7 @@ final class CommissionCalculator
      */
     private function resolveMarketingCategoryId(Customer $customer): int|string
     {
-        $priorities = $this->config['marketing_category_priority'] ?? [2, 1];
+        $priorities = $this->config['marketing_category_priority'] ?? [3, 2, 1];
 
         foreach ($priorities as $catId) {
             $hasCategory = $customer->customerProducts->contains(

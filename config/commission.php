@@ -100,7 +100,9 @@ return [
     | Komisi Marketing
     |--------------------------------------------------------------------------
     | 1 = 4K ALPHA PRO
-    | 2 = NOTCH UV 400
+    | 2 = NOTCH UV 400 (tarif baru)
+    | 3 = BLACK MASTER (tarif lama kategori 2)
+    | ID mengikuti tabel category_products — cek ID di production sebelum deploy.
     */
 
     'marketing' => [
@@ -114,6 +116,15 @@ return [
         ],
 
         2 => [
+            'fullset'          => 80000,
+            'full_panoramic'   => 80000,  // same as fullset
+            'ekstra_panoramic' => 80000,  // same as fullset
+            'dsp'              => 40000,
+            'dsp_panoramic'    => 80000,  // dsp × 2
+            'skkb'             => 60000,
+        ],
+
+        3 => [
             'fullset'          => 70000,
             'full_panoramic'   => 70000,  // same as fullset
             'ekstra_panoramic' => 70000,  // same as fullset
@@ -137,9 +148,11 @@ return [
     |--------------------------------------------------------------------------
     | Prioritas Kategori Marketing
     |--------------------------------------------------------------------------
+    | Bila satu customer punya beberapa kategori produk, dipakai kategori yang
+    | muncul lebih dulu di daftar ini (tarif terendah lebih dulu: BM, Notch, 4K).
     */
 
-    'marketing_category_priority' => [2, 1],
+    'marketing_category_priority' => [3, 2, 1],
 
 
     /*

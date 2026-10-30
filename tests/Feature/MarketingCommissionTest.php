@@ -13,7 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
-/** Komisi marketing: tarif per kategori produk (1 = 4K Alpha Pro, 2 = Notch UV 400) dan tipe pemasangan. */
+/** Komisi marketing: tarif per kategori produk (1 = 4K Alpha Pro, 2 = Notch UV, 3 = Black Master) dan tipe pemasangan. */
 class MarketingCommissionTest extends TestCase
 {
     use RefreshDatabase;
@@ -29,7 +29,7 @@ class MarketingCommissionTest extends TestCase
         $this->marketing = Employee::factory()->create(['branch_id' => $this->branch->id, 'job_position' => 'Marketing']);
         $this->tukang    = Employee::factory()->create(['branch_id' => $this->branch->id, 'job_position' => 'Teknisi']);
 
-        foreach ([1, 2] as $id) {
+        foreach ([1, 2, 3] as $id) {
             DB::table('category_products')->insert(['id' => $id, 'name' => "C$id", 'duration' => 5, 'created_at' => now(), 'updated_at' => now()]);
             DB::table('products')->insert(['id' => $id, 'category_id' => $id, 'name' => "P$id", 'created_at' => now(), 'updated_at' => now()]);
         }
@@ -70,7 +70,12 @@ class MarketingCommissionTest extends TestCase
             // [category, install_type, panoramic, expected]
             [1, 'fullset', false, 120000], [1, 'fullset', true, 120000], [1, 'dsp', false, 70000],
             [1, 'dsp', true, 140000], [1, 'skkb', false, 100000],
-            [2, 'fullset', false, 70000], [2, 'dsp', false, 30000], [2, 'dsp', true, 60000], [2, 'skkb', false, 50000],
+            // Notch UV (tarif baru)
+            [2, 'fullset', false, 80000], [2, 'fullset', true, 80000], [2, 'dsp', false, 40000],
+            [2, 'dsp', true, 80000], [2, 'skkb', false, 60000],
+            // Black Master
+            [3, 'fullset', false, 70000], [3, 'fullset', true, 70000], [3, 'dsp', false, 30000],
+            [3, 'dsp', true, 60000], [3, 'skkb', false, 50000],
         ];
 
         foreach ($cases as [$cat, $type, $pano, $expected]) {
@@ -95,12 +100,15 @@ class MarketingCommissionTest extends TestCase
         $this->assertSame(120000, (int) $this->marketingRows($third)[0]->amount);
     }
 
-    public function test_priority_category_two_wins_when_both_categories_are_present(): void
+    public function test_lowest_priority_category_wins_when_categories_are_mixed(): void
     {
-        $i = $this->invoice([], [1, 2]);
+        $i = $this->invoice([], [1, 2, 3]);
         $this->release($i);
+        $this->assertSame(70000, (int) $this->marketingRows($i)[0]->amount, 'Black Master menang');
 
-        $this->assertSame(70000, (int) $this->marketingRows($i)[0]->amount);
+        $j = $this->invoice([], [1, 2]);
+        $this->release($j);
+        $this->assertSame(80000, (int) $this->marketingRows($j)[0]->amount, 'Notch mengalahkan 4K');
     }
 
     public function test_release_twice_does_not_duplicate_marketing_row(): void
