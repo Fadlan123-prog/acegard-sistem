@@ -96,7 +96,7 @@ thead .col-total-sep { border-left: 2px solid #475569 !important; }
     </div>
     <div class="d-flex gap-2">
         <x-ui.button variant="outline" size="sm" href="{{ route('attendances.daily') }}">Input Harian</x-ui.button>
-        <x-ui.button variant="outline" size="sm" href="{{ route('attendances.monthlyReport', request()->query()) }}">Lap. Gaji</x-ui.button>
+        <x-ui.button variant="outline" size="sm" :href="route('attendances.monthlyReport', request()->query())">Lap. Gaji</x-ui.button>
     </div>
 </div>
 
