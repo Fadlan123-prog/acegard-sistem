@@ -17,8 +17,11 @@
 <x-ui.card>
     @slot('header')
         <div class="d-flex justify-content-between align-items-center">
-            <div class="ui-card-title">Tambah / Ubah Target KPI</div>
-            <x-ui.button :href="route('kpi.targets.index', ['month' => $month ?? now()->month, 'year' => $year ?? now()->year])" variant="secondary" size="sm">Kembali</x-ui.button>
+            <div>
+                <div class="ui-card-title">Tambah / Ubah Target KPI</div>
+                <small class="text-muted">Kombinasi divisi + metric key + periode yang sama akan memperbarui target yang ada.</small>
+            </div>
+            <x-ui.button :href="route('kpi.targets.index', ['month' => $month ?? now()->month, 'year' => $year ?? now()->year])" variant="outline" size="sm">Kembali</x-ui.button>
         </div>
     @endslot
 
@@ -82,7 +85,7 @@
         </div>
 
         <div class="d-flex justify-content-end gap-2 mt-2">
-            <x-ui.button :href="route('kpi.targets.index', ['month' => $month ?? now()->month, 'year' => $year ?? now()->year])" variant="secondary">Batal</x-ui.button>
+            <x-ui.button :href="route('kpi.targets.index', ['month' => $month ?? now()->month, 'year' => $year ?? now()->year])" variant="outline">Batal</x-ui.button>
             <x-ui.button type="submit" variant="primary">Simpan</x-ui.button>
         </div>
     </form>

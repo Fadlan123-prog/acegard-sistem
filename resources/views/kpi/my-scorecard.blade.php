@@ -8,7 +8,7 @@
 
 <x-ui.card title="Skor KPI Saya" :subtitle="now()->month($month)->translatedFormat('F') . ' ' . $year">
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0" style="font-size:12px">
+        <table class="table bordered-table align-middle mb-0">
             <thead>
                 <tr>
                     <th class="ps-0 py-2 text-muted fw-medium border-bottom">KPI</th>
@@ -26,7 +26,7 @@
                     <td class="py-2 text-end">{{ rtrim(rtrim($s->target->target_value, '0'), '.') }}</td>
                     <td class="py-2 text-end">{{ rtrim(rtrim($s->actual_value, '0'), '.') }}</td>
                     <td class="py-2 text-end">{{ $s->target->weight }}%</td>
-                    <td class="py-2 text-end">{{ $s->achievementPercent() }}%</td>
+                    <td class="py-2 text-end">@include('kpi._achievement-badge', ['value' => $s->achievementPercent()])</td>
                     <td class="py-2 text-end">{{ $s->weightedScore() }}</td>
                 </tr>
                 @empty
@@ -37,7 +37,7 @@
             <tfoot>
                 <tr>
                     <td colspan="5" class="py-2 text-end fw-semibold">Skor Total</td>
-                    <td class="py-2 text-end fw-semibold">{{ round($totalScore, 1) }}%</td>
+                    <td class="py-2 text-end fw-semibold">@include('kpi._achievement-badge', ['value' => round($totalScore, 1)])</td>
                 </tr>
             </tfoot>
             @endif
