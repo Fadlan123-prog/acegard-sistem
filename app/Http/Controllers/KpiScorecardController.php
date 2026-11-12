@@ -47,8 +47,8 @@ class KpiScorecardController extends Controller
         $validated = $request->validate([
             'division'      => 'required|in:' . implode(',', array_keys(KpiTarget::DIVISIONS)),
             'metric_key'    => 'required|string|max:100|alpha_dash',
-            'source'        => ['required', function ($attr, $value, $fail) {
-                if ($value !== 'manual' && ! \App\Services\KpiMetrics::has($value)) {
+            'source'        => ['nullable', function ($attr, $value, $fail) {
+                if ($value && $value !== 'manual' && ! \App\Services\KpiMetrics::has($value)) {
                     $fail('Sumber data tidak dikenal.');
                 }
             }],
@@ -59,6 +59,8 @@ class KpiScorecardController extends Controller
             'period_month'  => 'required|integer|min:1|max:12',
             'period_year'   => 'required|integer|min:2026|max:2100',
         ]);
+
+        $validated['source'] = $validated['source'] ?? 'manual';
 
         KpiTarget::updateOrCreate(
             [
