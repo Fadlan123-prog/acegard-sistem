@@ -66,6 +66,11 @@ class PpfProductController extends Controller
 
     public function destroy(PpfProduct $ppf_product)
     {
+        $usage = app(\App\Services\CatalogUsage::class)->usage('ppf_products', $ppf_product->id);
+        if ($usage) {
+            return back()->with('error', "Produk \"{$ppf_product->name}\" tidak bisa dihapus karena masih dipakai: " . \App\Services\CatalogUsage::describe($usage) . '.');
+        }
+
         $ppf_product->delete();
 
         return redirect()

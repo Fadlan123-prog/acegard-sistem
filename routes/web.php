@@ -547,6 +547,7 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin'])->group(fun
     // PPF Products
     Route::resource('ppf-products', PpfProductController::class);
 
+
     // Warranty Claims
     Route::prefix('warranty-claims')->name('admin.claims.')->controller(AdminWarrantyClaimController::class)->group(function () {
         Route::get('/', 'index')->name('index');
@@ -1085,4 +1086,22 @@ Route::middleware(['auth', 'role:superadmin|admin'])
         Route::get('/{salesProduct}/edit', 'edit')->name('edit');
         Route::put('/{salesProduct}', 'update')->name('update');
         Route::post('/{salesProduct}/toggle', 'toggle')->name('toggle');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| MANAJEMEN PRODUK (katalog film mobil/gedung + PPF) — superadmin, admin, owner
+|--------------------------------------------------------------------------
+| Katalog berlaku untuk semua cabang. Penghapusan ditolak bila masih dipakai data lain.
+*/
+Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|owner'])
+    ->prefix('product-management')->name('product-management.')
+    ->controller(\App\Http\Controllers\ProductManagementController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/{type}/categories', 'storeCategory')->name('categories.store')->where('type', 'car|building');
+        Route::put('/{type}/categories/{id}', 'updateCategory')->name('categories.update')->where(['type' => 'car|building', 'id' => '[0-9]+']);
+        Route::delete('/{type}/categories/{id}', 'destroyCategory')->name('categories.destroy')->where(['type' => 'car|building', 'id' => '[0-9]+']);
+        Route::post('/{type}/categories/{id}/products', 'storeProduct')->name('products.store')->where(['type' => 'car|building', 'id' => '[0-9]+']);
+        Route::put('/{type}/products/{id}', 'updateProduct')->name('products.update')->where(['type' => 'car|building', 'id' => '[0-9]+']);
+        Route::delete('/{type}/products/{id}', 'destroyProduct')->name('products.destroy')->where(['type' => 'car|building', 'id' => '[0-9]+']);
     });

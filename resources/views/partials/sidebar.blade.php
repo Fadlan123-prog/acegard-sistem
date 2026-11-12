@@ -256,6 +256,18 @@
             @endif
 
             {{-- ═══════════════════════════════════════════
+                 MANAJEMEN PRODUK (katalog film mobil/gedung + PPF)
+            ═══════════════════════════════════════════ --}}
+            @if(($isSuperadmin || $isAdmin || $isOwner) && Route::has('product-management.index'))
+            <li>
+                <a href="{{ route('product-management.index') }}">
+                    <iconify-icon icon="mdi:shape-outline" class="menu-icon"></iconify-icon>
+                    <span>Manajemen Produk</span>
+                </a>
+            </li>
+            @endif
+
+            {{-- ═══════════════════════════════════════════
                  OWNER
             ═══════════════════════════════════════════ --}}
             @if($isOwner)
