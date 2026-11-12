@@ -111,11 +111,7 @@ final class CommissionCalculator
         $categoryId  = $this->resolveMarketingCategoryId($customer);
         $installType = $this->resolveBaseType($customer); // handles panoramic product detection
 
-        $amount = $this->config['marketing'][$categoryId][$installType]
-            ?? $this->config['marketing']['default'][$installType]
-            ?? 0;
-
-        return (int) $amount;
+        return app(\App\Services\CommissionRates::class)->marketingCar($categoryId, $installType);
     }
 
     // ── Private resolution ────────────────────────────────────────

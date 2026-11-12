@@ -36,11 +36,11 @@ class BuildingCommissionService
             return [];
         }
 
-        $rates = (array) config('commission.building_per_meter', []);
+        $rates = app(\App\Services\CommissionRates::class);
 
         $perEmployee = [];
         foreach ($customer->technicianMeters as $row) {
-            $amount = (int) round((float) $row->meters * (int) ($rates[$row->category_product_building_id] ?? 0));
+            $amount = (int) round((float) $row->meters * $rates->buildingTechnicianPerMeter((int) $row->category_product_building_id));
             $perEmployee[$row->employee_id] = ($perEmployee[$row->employee_id] ?? 0) + $amount;
         }
 
@@ -89,11 +89,11 @@ class BuildingCommissionService
             return;
         }
 
-        $rates = (array) config('commission.building_marketing_per_meter', []);
+        $rates = app(\App\Services\CommissionRates::class);
 
         $default = 0;
         foreach ($customer->products as $row) {
-            $default += (int) round((float) $row->meters * (int) ($rates[$row->category_product_building_id] ?? 0));
+            $default += (int) round((float) $row->meters * $rates->buildingMarketingPerMeter((int) $row->category_product_building_id));
         }
 
         $resolved = $this->employeeResolver->resolve($customer->marketing, $default, (int) $invoice->total_price);

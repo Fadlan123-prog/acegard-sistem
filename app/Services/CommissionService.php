@@ -128,10 +128,7 @@ class CommissionService
 
         $baseType = $this->baseFromFinal($finalType);
 
-        $marketingMap = config('commission.marketing', []);
-        $categoryMap = $marketingMap[$categoryProductId] ?? ($marketingMap['default'] ?? []);
-
-        $defaultAmount = (int) ($categoryMap[$baseType] ?? 0);
+        $defaultAmount = app(\App\Services\CommissionRates::class)->marketingCar($categoryProductId, $baseType);
 
         $employee = Employee::find($marketingEmployeeId);
         $amount   = $this->employeeResolver->resolve($employee, $defaultAmount, $invoicePrice)['amount'];

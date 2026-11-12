@@ -23,6 +23,14 @@
     .pm-table th { font-size:12px; text-transform:uppercase; letter-spacing:.03em; color:var(--ui-text-2, #6b7280); }
     .pm-edit { background:var(--neutral-50, #f8fafc); border-radius:10px; padding:.75rem; margin-bottom:.75rem; }
     .pm-used { font-size:11.5px; color:#92400e; }
+    .pm-comm { background:var(--neutral-50, #f8fafc); border:1px solid var(--ui-border, #e5e7eb); border-radius:10px; padding:.75rem .9rem; margin-bottom:.9rem; }
+    .pm-comm.is-missing { border-color:#fcd34d; background:#fffbeb; }
+    .pm-rate-chips { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.6rem; }
+    .pm-rate-chip { display:inline-flex; gap:.4rem; align-items:center; background:#eff6ff; color:#1d4ed8; border-radius:999px; padding:3px 11px; font-size:12.5px; }
+    .pm-rate-chip strong { font-variant-numeric:tabular-nums; color:#1e3a8a; }
+    .pm-rate-chip.is-zero { background:#f3f4f6; color:#6b7280; }
+    .pm-rate-chip.is-zero strong { color:#6b7280; }
+    .pm-warn { margin-top:.6rem; font-size:12.5px; color:#92400e; display:flex; gap:.4rem; align-items:center; }
 </style>
 
 <nav class="pm-tabs" aria-label="Jenis produk">
@@ -121,6 +129,70 @@
             </div>
 
             <div class="pm-body">
+                @php
+                    $rates = $cat->commissionRates;
+                    $missing = collect($rates)->every(fn ($r) => $r['amount'] <= 0);
+                    $fmt = fn ($n) => 'Rp ' . number_format($n, 0, ',', '.');
+                @endphp
+                <div class="pm-comm {{ $missing ? 'is-missing' : '' }}">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                        <div>
+                            <div class="fw-semibold" style="font-size:13.5px">
+                                <iconify-icon icon="mdi:cash-multiple" aria-hidden="true"></iconify-icon>
+                                {{ $tab === 'car' ? 'Komisi marketing per mobil' : 'Komisi per meter' }}
+                            </div>
+                            <div class="pm-meta">
+                                @if($tab === 'car')
+                                    Dibayar ke marketing saat invoice lunas. Mobil dengan panoramic: Fullset tetap sama, D/S/P menjadi 2× D/S/P.
+                                @else
+                                    Dibayar saat invoice gedung lunas. Teknisi: dikali meter yang dikerjakan masing-masing. Marketing: dikali total meter pekerjaan.
+                                @endif
+                            </div>
+                        </div>
+                        <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#edit-comm-{{ $cat->id }}" aria-expanded="{{ $missing ? 'true' : 'false' }}" aria-controls="edit-comm-{{ $cat->id }}">
+                            <iconify-icon icon="mdi:cash-edit" aria-hidden="true"></iconify-icon> Atur Tarif
+                        </button>
+                    </div>
+
+                    <div class="pm-rate-chips">
+                        @foreach($rates as $key => $r)
+                            <span class="pm-rate-chip {{ $r['amount'] <= 0 ? 'is-zero' : '' }}">
+                                {{ $r['label'] }}
+                                <strong>{{ $fmt($r['amount']) }}{{ $tab === 'building' ? ' / meter' : '' }}</strong>
+                            </span>
+                        @endforeach
+                    </div>
+                    @if($missing)
+                        <div class="pm-warn" role="alert">
+                            <iconify-icon icon="mdi:alert-outline" aria-hidden="true"></iconify-icon>
+                            Tarif komisi belum diatur — pekerjaan kategori ini belum menghasilkan komisi. Klik <strong>Atur Tarif</strong>.
+                        </div>
+                    @endif
+
+                    <div class="collapse {{ $missing ? 'show' : '' }}" id="edit-comm-{{ $cat->id }}">
+                        <form method="POST" action="{{ route('product-management.categories.commission', [$tab, $cat->id]) }}" class="row g-2 align-items-end mt-1">
+                            @csrf @method('PUT')
+                            @foreach($rates as $key => $r)
+                                <div class="col-md-4 col-sm-6">
+                                    <label class="ui-label" for="rate-{{ $cat->id }}-{{ $key }}">
+                                        {{ $r['label'] }}{{ $tab === 'building' ? ' (Rp per meter)' : ' (Rp per mobil)' }}
+                                    </label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">Rp</span>
+                                        <input id="rate-{{ $cat->id }}-{{ $key }}" type="text" inputmode="numeric" name="{{ $key }}" class="form-control"
+                                               value="{{ old($key, $r['amount']) }}" required aria-describedby="rate-help-{{ $cat->id }}">
+                                    </div>
+                                </div>
+                            @endforeach
+                            <div class="col-md-4 col-sm-6"><x-ui.button type="submit" variant="primary" size="sm" class="w-100">Simpan Tarif</x-ui.button></div>
+                            <div class="col-12 pm-meta" id="rate-help-{{ $cat->id }}">
+                                Ketik angka saja, contoh <strong>120000</strong> (titik ribuan boleh). Isi <strong>0</strong> bila tidak ada komisi untuk jenis itu.
+                                Perubahan berlaku untuk komisi yang dirilis setelah ini; komisi yang sudah dirilis tidak berubah.
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
                 <div class="collapse" id="edit-cat-{{ $cat->id }}">
                     <form method="POST" action="{{ route('product-management.categories.update', [$tab, $cat->id]) }}" class="pm-edit row g-2 align-items-end">
                         @csrf @method('PUT')
@@ -179,8 +251,7 @@
 
     <p class="text-muted small">
         Kategori/produk yang sudah dipakai data lain (customer, stok roll, quotation/SO, dll.) tidak bisa dihapus; ubah namanya saja.
-        <strong>Perhatian:</strong> tarif komisi marketing dan teknisi gedung dikaitkan ke <em>ID kategori</em> (lihat <code>config/commission.php</code>);
-        kategori baru belum punya tarif komisi sampai ID-nya ditambahkan di sana.
+        Tarif komisi diatur per kategori di kartu masing-masing. Kategori baru perlu diatur tarifnya agar menghasilkan komisi.
     </p>
 @endif
 @endsection

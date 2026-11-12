@@ -8,6 +8,7 @@ use App\Models\PpfProduct;
 use App\Models\Product;
 use App\Models\ProductBuilding;
 use App\Services\CatalogUsage;
+use App\Services\CommissionRates;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -28,7 +29,7 @@ class ProductManagementController extends Controller
         ],
     ];
 
-    public function __construct(private CatalogUsage $usage) {}
+    public function __construct(private CatalogUsage $usage, private CommissionRates $rates) {}
 
     private function cfg(string $type): array
     {
@@ -57,6 +58,7 @@ class ProductManagementController extends Controller
 
                     return $p;
                 }));
+                $c->commissionRates = $this->rates->forCategory($tab, $c->id);
                 $c->usageSummary = $this->usage->usage(
                     $tab === 'car' ? 'category_products' : 'category_product_building', $c->id,
                     [$tab === 'car' ? 'products' : 'product_building']
@@ -112,8 +114,39 @@ class ProductManagementController extends Controller
 
         $name = $category->name;
         $category->delete();
+        $this->rates->forget($type, $id);
 
         return redirect()->route('product-management.index', ['tab' => $type])->with('success', "Kategori \"{$name}\" dihapus.");
+    }
+
+    // ── Tarif komisi per kategori ──────────────────────────────────────────
+
+    public function updateCommission(Request $request, string $type, int $id)
+    {
+        $cfg = $this->cfg($type);
+        $category = $cfg['category']::findOrFail($id);
+
+        $keys = array_keys($type === 'car' ? CommissionRates::CAR_KEYS : CommissionRates::BUILDING_KEYS);
+        $labels = $type === 'car' ? CommissionRates::CAR_KEYS : CommissionRates::BUILDING_KEYS;
+
+        $rules = [];
+        $messages = [];
+        foreach ($keys as $key) {
+            $rules[$key] = ['required', 'integer', 'min:0', 'max:50000000'];
+            $messages["$key.required"] = "Tarif {$labels[$key]} wajib diisi (isi 0 bila tidak ada komisi).";
+            $messages["$key.integer"]  = "Tarif {$labels[$key]} harus berupa angka rupiah tanpa titik atau koma.";
+            $messages["$key.min"]      = "Tarif {$labels[$key]} tidak boleh negatif.";
+            $messages["$key.max"]      = "Tarif {$labels[$key]} terlalu besar (maksimal Rp50.000.000).";
+        }
+
+        // Angka boleh diketik dengan titik ribuan (mis. 120.000): bersihkan dulu.
+        $request->merge(collect($keys)->mapWithKeys(fn ($k) => [$k => preg_replace('/[^\d]/', '', (string) $request->input($k, ''))])->all());
+        $data = $request->validate($rules, $messages);
+
+        $this->rates->save($type, $id, $data, $request->user()->id);
+
+        return redirect()->route('product-management.index', ['tab' => $type])
+            ->with('success', "Tarif komisi kategori \"{$category->name}\" disimpan. Berlaku untuk komisi yang dirilis mulai sekarang.");
     }
 
     // ── Produk dalam kategori ──────────────────────────────────────────────
