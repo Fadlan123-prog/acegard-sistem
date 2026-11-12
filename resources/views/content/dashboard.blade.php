@@ -108,4 +108,16 @@
     </div>
 </div>
 
+
+<div class="row g-3 mt-1">
+    <div class="col-lg-6">
+        <x-dashboard.donut id="donutContentViews" title="Porsi Views per Creator"
+            :labels="$byCreator->pluck('name')->all()" :values="$byCreator->pluck('total_views')->all()" />
+    </div>
+    <div class="col-lg-6">
+        <x-dashboard.donut id="donutContentPlatform" title="Porsi Video per Platform"
+            :labels="array_map('ucfirst', array_keys($byPlatform))" :values="array_values($byPlatform)" />
+    </div>
+</div>
+
 @endsection

@@ -229,4 +229,12 @@
 
 </div>
 
+
+<div class="row g-3 mt-1">
+    <div class="col-lg-6">
+        <x-dashboard.donut id="donutCsStatus" title="Status Leads" subtitle="bulan berjalan"
+            :labels="array_map(fn ($k) => \App\Models\Lead::STATUSES[$k] ?? $k, array_keys($leadStatus))" :values="array_values($leadStatus)" />
+    </div>
+</div>
+
 @endsection

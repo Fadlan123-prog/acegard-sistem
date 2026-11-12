@@ -119,4 +119,16 @@
     <div class="mt-3">{{ $sessions->links() }}</div>
 </x-ui.card>
 
+
+<div class="row g-3 mt-1">
+    <div class="col-lg-6">
+        <x-dashboard.donut id="donutLiveHours" title="Porsi Jam Live per Host" format="number"
+            :labels="$byHost->pluck('name')->all()" :values="$byHost->map(fn ($h) => round($h->total_minutes / 60, 1))->all()" />
+    </div>
+    <div class="col-lg-6">
+        <x-dashboard.donut id="donutLiveClosing" title="Porsi Closing per Host"
+            :labels="$byHost->pluck('name')->all()" :values="$byHost->pluck('total_closing')->all()" />
+    </div>
+</div>
+
 @endsection

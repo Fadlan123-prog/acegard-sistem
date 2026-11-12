@@ -111,4 +111,16 @@
     </div>
 </div>
 
+
+<div class="row g-3 mt-1">
+    <div class="col-lg-6">
+        <x-dashboard.donut id="donutAdSpend" title="Porsi Spend per Channel" format="rp"
+            :labels="array_column($channels, 'label')" :values="array_column($channels, 'spend')" />
+    </div>
+    <div class="col-lg-6">
+        <x-dashboard.donut id="donutAdLeads" title="Porsi Leads per Channel"
+            :labels="array_column($channels, 'label')" :values="array_column($channels, 'leads')" />
+    </div>
+</div>
+
 @endsection

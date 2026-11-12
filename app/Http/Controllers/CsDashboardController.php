@@ -120,7 +120,17 @@ class CsDashboardController extends Controller
             ? round($closingByAgent->sum('won_leads') / $closingByAgent->sum('total_leads') * 100, 1)
             : 0;
 
+        $leadStatus = Lead::query()
+            ->when(! $isGlobal, fn ($q) => $q->where('branch_id', $branchId))
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->select('status', DB::raw('COUNT(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status')
+            ->all();
+
         return view('cs.dashboard', compact(
+            'leadStatus',
             'followUpLeads', 'totalFollowUp',
             'warrantyExpiringCar', 'warrantyExpiringPpf',
             'pendingPayments', 'recentClaims',
