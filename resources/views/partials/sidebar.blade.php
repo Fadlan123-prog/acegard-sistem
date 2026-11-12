@@ -256,6 +256,24 @@
             @endif
 
             {{-- ═══════════════════════════════════════════
+                 CONTENT & TIKTOK LIVE (creative team + strategi pengembangan)
+            ═══════════════════════════════════════════ --}}
+            @if(($isCreativeTeam || $isStrategiPengembangan) && Route::has('content.dashboard'))
+            <li>
+                <a href="{{ route('content.dashboard') }}">
+                    <iconify-icon icon="mdi:video-outline" class="menu-icon"></iconify-icon>
+                    <span>Dashboard Content</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('live-sessions.index') }}">
+                    <iconify-icon icon="mdi:tiktok" class="menu-icon"></iconify-icon>
+                    <span>TikTok Live</span>
+                </a>
+            </li>
+            @endif
+
+            {{-- ═══════════════════════════════════════════
                  MANAJEMEN PRODUK (katalog film mobil/gedung + PPF)
             ═══════════════════════════════════════════ --}}
             @if(($isSuperadmin || $isAdmin || $isOwner) && Route::has('product-management.index'))
@@ -466,6 +484,48 @@
                 <ul class="sidebar-submenu">
                     <li><a href="{{ route('ranking.teknisi') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Ranking Teknisi</a></li>
                     <li><a href="{{ route('ranking.marketing') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Ranking Marketing</a></li>
+                </ul>
+            </li>
+            @if(Route::has('kpi.targets.index'))
+            <li>
+                <a href="{{ route('kpi.targets.index') }}">
+                    <iconify-icon icon="mdi:target" class="menu-icon"></iconify-icon>
+                    <span>Target KPI</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('kpi.scores.index') }}">
+                    <iconify-icon icon="mdi:clipboard-check-outline" class="menu-icon"></iconify-icon>
+                    <span>Skor KPI Karyawan</span>
+                </a>
+            </li>
+            @endif
+            @endif
+
+            {{-- ═══════════════════════════════════════════
+                 ADVERTISING (marketing & manager marketing)
+            ═══════════════════════════════════════════ --}}
+            @if(($isMarketing || $isManagerMarketing) && Route::has('advertising.dashboard'))
+            <li>
+                <a href="{{ route('advertising.dashboard') }}">
+                    <iconify-icon icon="mdi:bullhorn-outline" class="menu-icon"></iconify-icon>
+                    <span>Dashboard Advertising</span>
+                </a>
+            </li>
+            @endif
+
+            {{-- ═══════════════════════════════════════════
+                 KPI GENERIK (superadmin, admin, owner, manager marketing)
+            ═══════════════════════════════════════════ --}}
+            @if(($isSuperadmin || $isAdmin || $isOwner || $isManagerMarketing) && Route::has('kpi.targets.index'))
+            <li class="dropdown">
+                <a href="javascript:void(0)">
+                    <iconify-icon icon="mdi:target" class="menu-icon"></iconify-icon>
+                    <span>KPI Karyawan</span>
+                </a>
+                <ul class="sidebar-submenu">
+                    <li><a href="{{ route('kpi.targets.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Target KPI</a></li>
+                    <li><a href="{{ route('kpi.scores.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Skor KPI Karyawan</a></li>
                 </ul>
             </li>
             @endif
@@ -921,6 +981,18 @@
             @endif {{-- end superadmin-only --}}
 
             @endif {{-- end isAdmin || isSuperadmin --}}
+
+            {{-- ═══════════════════════════════════════════
+                 SKOR KPI SAYA (siapa pun yang terhubung ke data karyawan)
+            ═══════════════════════════════════════════ --}}
+            @if($user?->employee_id && Route::has('kpi.my-scorecard'))
+            <li>
+                <a href="{{ route('kpi.my-scorecard') }}">
+                    <iconify-icon icon="mdi:clipboard-check-outline" class="menu-icon"></iconify-icon>
+                    <span>Skor KPI Saya</span>
+                </a>
+            </li>
+            @endif
 
         </ul>
     </div>

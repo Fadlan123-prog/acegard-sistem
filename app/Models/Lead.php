@@ -12,7 +12,7 @@ class Lead extends Model
 
     protected $fillable = [
         'branch_id', 'name', 'phone', 'email', 'address', 'city',
-        'source', 'category', 'vehicle_brand', 'vehicle_model', 'vehicle_year',
+        'source', 'ad_channel', 'category', 'vehicle_brand', 'vehicle_model', 'vehicle_year',
         'notes', 'status', 'lost_reason', 'assigned_to', 'estimated_value',
         'follow_up_date', 'quoted_at', 'converted_at',
         'converted_to_type', 'converted_to_id', 'created_by',
@@ -23,6 +23,13 @@ class Lead extends Model
         'follow_up_date'  => 'date',
         'quoted_at'       => 'datetime',
         'converted_at'    => 'datetime',
+    ];
+
+    const AD_CHANNELS = [
+        'meta'    => 'Meta Ads',
+        'tiktok'  => 'TikTok Ads',
+        'google'  => 'Google Ads',
+        'lainnya' => 'Lainnya',
     ];
 
     const SOURCES = [

@@ -81,6 +81,10 @@ use App\Http\Controllers\ManagerOpsDashboardController;
 use App\Http\Controllers\FinanceDashboardController;
 use App\Http\Controllers\PurchasingDashboardController;
 use App\Http\Controllers\EmployeeRankingController;
+use App\Http\Controllers\AdvertisingController;
+use App\Http\Controllers\ContentPostController;
+use App\Http\Controllers\LiveSessionController;
+use App\Http\Controllers\KpiScorecardController;
 
 // CRM
 use App\Http\Controllers\LeadController;
@@ -1025,6 +1029,69 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|owner|manager
         Route::get('/teknisi', [EmployeeRankingController::class, 'teknisi'])->name('teknisi');
         Route::get('/marketing', [EmployeeRankingController::class, 'marketing'])->name('marketing');
     });
+
+/*
+|--------------------------------------------------------------------------
+| ADVERTISING — ad-spend/CPL tracking per channel (2026-11)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'branch.access', 'role:marketing|manager_marketing|superadmin|owner'])
+    ->prefix('advertising')->name('advertising.')
+    ->group(function () {
+        Route::get('/dashboard', [AdvertisingController::class, 'dashboard'])->name('dashboard');
+        Route::get('/spend', [AdvertisingController::class, 'index'])->name('spend.index');
+        Route::get('/spend/create', [AdvertisingController::class, 'create'])->name('spend.create');
+        Route::post('/spend', [AdvertisingController::class, 'store'])->name('spend.store');
+        Route::delete('/spend/{spend}', [AdvertisingController::class, 'destroy'])->name('spend.destroy');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| CONTENT & TIKTOK LIVE — performa konten/live per creator & host (2026-11)
+|--------------------------------------------------------------------------
+*/
+// Catatan: tidak pakai middleware 'branch.access' — designer/videographer/
+// strategi_pengembangan bukan "staff role" di EnsureBranchAccess (sama seperti
+// creative-tasks), jadi akan 403 kalau dipaksa lewat situ. Branch diambil dari
+// employee masing-masing di controller, bukan dari active_branch_id session.
+Route::middleware(['auth', 'role:strategi_pengembangan|designer|videographer|superadmin|owner|manager_marketing'])
+    ->prefix('content')->name('content.')
+    ->group(function () {
+        Route::get('/dashboard', [ContentPostController::class, 'dashboard'])->name('dashboard');
+        Route::get('/posts', [ContentPostController::class, 'index'])->name('posts.index');
+        Route::get('/posts/create', [ContentPostController::class, 'create'])->name('posts.create');
+        Route::post('/posts', [ContentPostController::class, 'store'])->name('posts.store');
+        Route::delete('/posts/{post}', [ContentPostController::class, 'destroy'])->name('posts.destroy');
+    });
+
+Route::middleware(['auth', 'role:strategi_pengembangan|designer|videographer|superadmin|owner|manager_marketing'])
+    ->prefix('live-sessions')->name('live-sessions.')
+    ->group(function () {
+        Route::get('/', [LiveSessionController::class, 'index'])->name('index');
+        Route::get('/create', [LiveSessionController::class, 'create'])->name('create');
+        Route::post('/', [LiveSessionController::class, 'store'])->name('store');
+        Route::delete('/{session}', [LiveSessionController::class, 'destroy'])->name('destroy');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| KPI GENERIK LINTAS DIVISI — target & skor (2026-11)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|owner|manager_operasional|manager_marketing'])
+    ->prefix('kpi')->name('kpi.')
+    ->group(function () {
+        Route::get('/targets', [KpiScorecardController::class, 'targets'])->name('targets.index');
+        Route::get('/targets/create', [KpiScorecardController::class, 'createTarget'])->name('targets.create');
+        Route::post('/targets', [KpiScorecardController::class, 'storeTarget'])->name('targets.store');
+        Route::delete('/targets/{target}', [KpiScorecardController::class, 'destroyTarget'])->name('targets.destroy');
+        Route::get('/scores', [KpiScorecardController::class, 'scores'])->name('scores.index');
+        Route::post('/scores', [KpiScorecardController::class, 'storeScore'])->name('scores.store');
+    });
+
+Route::middleware(['auth', 'branch.access'])->group(function () {
+    Route::get('/kpi/my-scorecard', [KpiScorecardController::class, 'myScorecard'])->name('kpi.my-scorecard');
+});
 
 
 /*
