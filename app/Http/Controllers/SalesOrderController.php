@@ -156,7 +156,15 @@ class SalesOrderController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('sales-orders.show', compact('salesOrder', 'employees'));
+        $filmCategories = collect();
+        $filmProducts = collect();
+        if ($salesOrder->usesFilmSelection()) {
+            $filmCategories = $salesOrder->filmCategoryModel()::orderBy('name')->get(['id', 'name']);
+            $catKey = $salesOrder->category === 'building_film' ? 'category_product_building_id' : 'category_id';
+            $filmProducts = $salesOrder->filmProductModel()::orderBy('name')->get(['id', $catKey . ' as category_id', 'name', 'description']);
+        }
+
+        return view('sales-orders.show', compact('salesOrder', 'employees', 'filmCategories', 'filmProducts'));
     }
 
     public function edit(SalesOrder $salesOrder)
@@ -273,6 +281,12 @@ class SalesOrderController extends Controller
             'SO harus dikonfirmasi terlebih dahulu sebelum menugaskan teknisi/kenek.'
         );
 
+        // Setelah SO dikonversi ke Customer/Invoice, penugasan hanya diubah lewat
+        // Monitoring Pekerjaan (WorkOrderController::assign) agar komisi ikut tertangani.
+        abort_if($salesOrder->isConverted(), 422, 'SO sudah dikonversi ke Customer. Ganti teknisi lewat menu Monitoring Pekerjaan.');
+
+        $film = $this->validatedFilm($request, $salesOrder);
+
         if ($salesOrder->assignsMultipleTechnicians()) {
             $data = $request->validate([
                 'technicians'   => 'nullable|array',
@@ -282,6 +296,9 @@ class SalesOrderController extends Controller
                 ],
             ]);
             $salesOrder->technicians()->sync($data['technicians'] ?? []);
+            if ($film !== null) {
+                $salesOrder->update($film);
+            }
 
             return back()->with('success', 'Penugasan teknisi diperbarui.');
         }
@@ -306,14 +323,23 @@ class SalesOrderController extends Controller
         $tukangChanged = $oldTukangId !== $newTukangId;
         $kenekChanged  = $oldKenekId !== $newKenekId;
 
-        if (!$tukangChanged && !$kenekChanged) {
+        $filmChanged = $film !== null && (
+            (int) ($film['film_category_id'] ?? 0) !== (int) $salesOrder->film_category_id
+            || (int) ($film['film_product_id'] ?? 0) !== (int) $salesOrder->film_product_id
+        );
+
+        if (!$tukangChanged && !$kenekChanged && !$filmChanged) {
             return back()->with('info', 'Penugasan tidak berubah.');
         }
 
-        $salesOrder->update([
+        $salesOrder->update(array_merge([
             'tukang_id' => $newTukangId,
             'kenek_id'  => $newKenekId,
-        ]);
+        ], $film ?? []));
+
+        if (!$tukangChanged && !$kenekChanged) {
+            return back()->with('success', 'Tipe film dan persentase kegelapan diperbarui.');
+        }
 
         if ($newTukangId && $tukangChanged) {
             $assignedUser = \App\Models\User::where('employee_id', $newTukangId)->first();
@@ -328,6 +354,38 @@ class SalesOrderController extends Controller
             : 'Teknisi dilepas dari SO ini.';
 
         return back()->with('success', $message);
+    }
+
+    /**
+     * Tipe film & persentase kegelapan (opsional). null = SO tidak memakai pilihan film;
+     * produk harus milik tipe yang dipilih.
+     */
+    private function validatedFilm(Request $request, SalesOrder $salesOrder): ?array
+    {
+        // Rincian per bagian kaca dari rincian harga SO adalah sumber kebenaran; pilihan tunggal tidak dipakai.
+        if (! $salesOrder->usesFilmSelection() || $salesOrder->filmBreakdown()) {
+            return null;
+        }
+
+        $catTable = (new ($salesOrder->filmCategoryModel()))->getTable();
+        $prodModel = $salesOrder->filmProductModel();
+        $prodTable = (new $prodModel)->getTable();
+        $prodCatColumn = $salesOrder->category === 'building_film' ? 'category_product_building_id' : 'category_id';
+
+        $data = $request->validate([
+            'film_category_id' => ['nullable', 'integer', Rule::exists($catTable, 'id')],
+            'film_product_id'  => [
+                'nullable', 'integer',
+                Rule::exists($prodTable, 'id')->where(fn ($q) => $q->where($prodCatColumn, $request->input('film_category_id'))),
+            ],
+        ], [
+            'film_product_id.exists' => 'Persentase kegelapan tidak sesuai dengan tipe film yang dipilih.',
+        ]);
+
+        return [
+            'film_category_id' => $data['film_category_id'] ?? null,
+            'film_product_id'  => ! empty($data['film_category_id']) ? ($data['film_product_id'] ?? null) : null,
+        ];
     }
 
     // ── SPK ──────────────────────────────────────────────────────────────
@@ -386,6 +444,9 @@ class SalesOrderController extends Controller
                 'sort_order'       => $idx,
                 'description'      => $item['description'],
                 'specifications'   => $item['specifications'] ?? null,
+                'film_lines'       => $item['film_lines'] ?? null,
+                'vehicle_label'    => $item['vehicle_label'] ?? null,
+                'vehicle_plate'    => $item['vehicle_plate'] ?? null,
                 'unit'             => $item['unit'] ?? 'unit',
                 'quantity'         => $qty,
                 'unit_price'       => $price,
@@ -421,16 +482,16 @@ class SalesOrderController extends Controller
 
     private function validateItems(Request $request): array
     {
-        $request->validate([
+        $request->validate(array_merge([
             'items'                    => 'required|array|min:1',
-            'items.*.description'      => 'required|string|max:255',
+            'items.*.description'      => 'required_without:items.*.film_lines|nullable|string|max:255',
             'items.*.specifications'   => 'nullable|string|max:255',
             'items.*.unit'             => 'nullable|string|max:20',
             'items.*.quantity'         => 'required|numeric|min:0.01',
             'items.*.unit_price'       => 'required|integer|min:0',
             'items.*.discount_percent' => 'nullable|numeric|min:0|max:100',
-        ]);
+        ], \App\Services\QuotationCatalog::packageRules()));
 
-        return $request->input('items', []);
+        return app(\App\Services\QuotationCatalog::class)->normalizeItems($request->input('items', []), $request->input('category'));
     }
 }

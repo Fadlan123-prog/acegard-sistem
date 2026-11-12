@@ -183,6 +183,14 @@ public function moveUpdate(Request $request, Commission $commission)
         'correction_note'=> ['nullable', 'string', 'max:1000'],
     ]);
 
+    // Komisi yang sudah dibayar / masuk pencairan tidak boleh dipindah (riwayat uang).
+    if ($commission->status === 'paid' || $commission->commission_payment_batch_id !== null) {
+        return back()->with('error', 'Komisi ini sudah dibayarkan / masuk pencairan, tidak bisa dipindahkan.');
+    }
+
+    $targetBranchId = Employee::where('id', $data['employees_id'])->value('branch_id');
+    abort_unless($user->canAccessBranch($targetBranchId !== null ? (int) $targetBranchId : null), 403, 'Karyawan tujuan bukan dari cabang Anda.');
+
     DB::beginTransaction();
 
     try {
@@ -277,6 +285,10 @@ public function toggleActive(Commission $commission)
         return back()->with('error', 'Toggle aktif hanya tersedia untuk komisi marketing.');
     }
 
+    if ($commission->status === 'paid' || $commission->commission_payment_batch_id !== null) {
+        return back()->with('error', 'Komisi yang sudah dibayarkan / masuk pencairan tidak bisa dinonaktifkan.');
+    }
+
     $was = (bool) $commission->is_active;
     $commission->update(['is_active' => !$was]);
 
@@ -314,6 +326,12 @@ public function print(Request $request)
     ]);
 
     $employee  = Employee::findOrFail($data['employee_id']);
+    abort_unless(
+        auth()->user()->canAccessBranch($employee->branch_id !== null ? (int) $employee->branch_id : null)
+        || (int) $employee->id === (int) $forcedEmployeeId,
+        403,
+        'Karyawan ini bukan dari cabang Anda.'
+    );
     $from      = Carbon::parse($data['from'])->startOfDay();
     $to        = Carbon::parse($data['to'])->endOfDay();
     $kasbon    = (int) ($data['kasbon']     ?? 0);

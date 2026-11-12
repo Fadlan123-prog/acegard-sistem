@@ -116,7 +116,7 @@
                     @if($lead->follow_up_date)
                         @php
                             $isToday = $lead->follow_up_date->isToday();
-                            $isPast  = $lead->follow_up_date->isPast() && !$isToday;
+                            $isPast  = $lead->follow_up_date->isBeforeToday() && !$isToday;
                         @endphp
                         <span class="{{ $isToday ? 'text-warning fw-bold' : ($isPast && !in_array($lead->status, ['won','lost']) ? 'text-danger' : '') }}">
                             {{ $lead->follow_up_date->format('d M Y') }}
@@ -262,12 +262,12 @@
         @endif
 
         {{-- Convert to Customer --}}
-        @if(in_array($lead->status, ['quoted','won']) && !$lead->isConverted())
+        @if(!in_array($lead->status, ['lost']) && !$lead->isConverted())
         <x-ui.card class="mb-3" style="border-color:var(--success-main)">
             @slot('header')
                 <div class="ui-card-title text-success">Konversi ke Customer</div>
             @endslot
-            <p class="small text-muted mb-3">Lead ini siap dikonversi menjadi data customer.</p>
+            <p class="small text-muted mb-3">Data lead akan terisi otomatis di form customer — quotation tidak wajib.</p>
             @if($lead->category === 'car_film')
                 <x-ui.button :href="route('customer.create') . '?from_lead=' . $lead->id" variant="success" size="sm" class="w-100">
                     <iconify-icon icon="mdi:account-plus-outline" class="me-1"></iconify-icon> Buat Customer Kaca Film

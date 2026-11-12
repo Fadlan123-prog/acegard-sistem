@@ -25,9 +25,11 @@ class PublicWarrantyController extends Controller
     {
         $data = $request->validate([
             'card_number' => ['required','string','max:255'],
+            'phone_last4' => ['required','digits:4'],
         ]);
 
         $card = trim($data['card_number']);
+        $last4 = $data['phone_last4'];
         $matches = [];
 
         // 1) Mobil film (customers.card_number)
@@ -35,7 +37,7 @@ class PublicWarrantyController extends Controller
             ->where('card_number', $card)
             ->first();
 
-        if ($car) {
+        if ($car && $this->phoneMatches($car->phone_number, $last4)) {
             $matches[] = [
                 'type' => 'car_film',
                 'id'   => $car->id,
@@ -49,7 +51,7 @@ class PublicWarrantyController extends Controller
             ->where('card_number', $card)
             ->first();
 
-        if ($bld) {
+        if ($bld && $this->phoneMatches($bld->phone_number, $last4)) {
             $matches[] = [
                 'type' => 'building_film',
                 'id'   => $bld->id,
@@ -67,7 +69,7 @@ class PublicWarrantyController extends Controller
             ->where('card_number', $card)
             ->first();
 
-        if ($ppfCustomer) {
+        if ($ppfCustomer && $this->phoneMatches($ppfCustomer->phone, $last4)) {
             $matches[] = [
                 'type' => 'ppf',
                 'id'   => $ppfCustomer->id, // catatan: ini customer_ppf id
@@ -77,7 +79,12 @@ class PublicWarrantyController extends Controller
         }
 
         if (count($matches) === 0) {
-            return back()->with('error', 'Card Number tidak ditemukan.')->withInput();
+            // Pesan sama untuk kartu salah / HP salah: tidak membocorkan keberadaan kartu.
+            return back()->with('error', 'Data garansi tidak ditemukan. Periksa Card Number dan 4 digit terakhir nomor HP.')->withInput($request->only('card_number'));
+        }
+
+        foreach ($matches as $m) {
+            $this->markVerified($m['type'], (int) $m['id']);
         }
 
         // kalau ketemu lebih dari 1 (card number dipakai lintas kategori), tampilkan pick
@@ -105,6 +112,8 @@ class PublicWarrantyController extends Controller
         $type = $request->type;
         $id   = (int) $request->id;
         $card = trim($request->card_number);
+
+        $this->requireVerified($type, $id);
 
         if ($type === 'car_film') {
             $data = Customer::with([
@@ -189,14 +198,13 @@ class PublicWarrantyController extends Controller
         $card = trim($data['card_number']);
         $type = $data['type'];
 
-        // generate nomor claim
-        $claimNumber = $this->generateClaimNumber();
+        $this->requireVerified($type, (int) $data['id']);
+
 
         if ($type === 'building_film') {
             $b = CustomerBuilding::where('id',$data['id'])->where('card_number',$card)->firstOrFail();
 
-            $claim = WarrantyClaim::create([
-                'claim_number' => $claimNumber,
+            $claim = $this->createClaim([
                 'claim_date'   => now()->toDateString(),
                 'warranty_type'=> 'building_film',
                 'warrantable_type' => get_class($b),
@@ -225,8 +233,7 @@ class PublicWarrantyController extends Controller
             $c = Customer::with(['customerProducts.part','customerProducts.product','customerProducts.categoryProduct'])
                 ->where('id',$data['id'])->where('card_number',$card)->firstOrFail();
 
-            $claim = WarrantyClaim::create([
-                'claim_number' => $claimNumber,
+            $claim = $this->createClaim([
                 'claim_date'   => now()->toDateString(),
                 'warranty_type'=> 'car_film',
                 'warrantable_type' => get_class($c),
@@ -297,8 +304,7 @@ class PublicWarrantyController extends Controller
                 }
             }
 
-            $claim = WarrantyClaim::create([
-                'claim_number' => $claimNumber,
+            $claim = $this->createClaim([
                 'claim_date'   => now()->toDateString(),
                 'warranty_type'=> 'ppf',
                 'warrantable_type' => get_class($ins),
@@ -331,16 +337,39 @@ class PublicWarrantyController extends Controller
             ->with('success', "Claim berhasil dikirim. Nomor Claim: {$claim->claim_number}");
     }
 
-    protected function generateClaimNumber(): string
+    private function phoneMatches(?string $phone, string $last4): bool
     {
-        $prefix = 'CLM-'.now()->format('Ym').'-';
-        $last = WarrantyClaim::where('claim_number','like',$prefix.'%')
-            ->orderByDesc('id')->value('claim_number');
+        $digits = preg_replace('/\D+/', '', (string) $phone);
 
-        $next = 1;
-        if ($last) $next = ((int)substr($last,-4)) + 1;
+        return strlen($digits) >= 4 && hash_equals(substr($digits, -4), $last4);
+    }
 
-        return $prefix . str_pad((string)$next, 4, '0', STR_PAD_LEFT);
+    private function markVerified(string $type, int $id): void
+    {
+        session()->put('warranty_verified', array_values(array_unique(
+            array_merge((array) session('warranty_verified', []), ["{$type}:{$id}"])
+        )));
+    }
+
+    private function requireVerified(string $type, int $id): void
+    {
+        abort_unless(
+            in_array("{$type}:{$id}", (array) session('warranty_verified', []), true),
+            403,
+            'Silakan cek garansi lewat halaman pencarian terlebih dahulu.'
+        );
+    }
+
+    /** Nomor klaim = MAX+1 per bulan; diulang bila dua pelanggan mengirim klaim bersamaan. */
+    protected function createClaim(array $attributes): WarrantyClaim
+    {
+        $docs = app(\App\Services\DocumentNumberService::class);
+        $prefix = 'CLM-' . now()->format('Ym') . '-';
+
+        return $docs->retryOnDuplicate(fn () => WarrantyClaim::create(array_merge(
+            ['claim_number' => $docs->nextSequential('warranty_claims', 'claim_number', $prefix)],
+            $attributes
+        )));
     }
 
     protected function ppfPanelLabels(): array
@@ -401,6 +430,8 @@ class PublicWarrantyController extends Controller
     if (!in_array($type, ['car_film','building_film','ppf'], true)) {
         abort(404);
     }
+
+    $this->requireVerified($type, $id);
 
     // Load data sesuai type (harus match id + card_number)
     if ($type === 'car_film') {

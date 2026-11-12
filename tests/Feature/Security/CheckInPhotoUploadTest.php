@@ -5,6 +5,7 @@ namespace Tests\Feature\Security;
 use App\Models\Employee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -22,12 +23,12 @@ class CheckInPhotoUploadTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        File::deleteDirectory(public_path('storage/checkin-photos'));
+        File::deleteDirectory(Storage::disk('local')->path('checkin-photos'));
     }
 
     protected function tearDown(): void
     {
-        File::deleteDirectory(public_path('storage/checkin-photos'));
+        File::deleteDirectory(Storage::disk('local')->path('checkin-photos'));
         parent::tearDown();
     }
 
@@ -46,7 +47,7 @@ class CheckInPhotoUploadTest extends TestCase
 
         $response->assertSuccessful();
 
-        $dir = public_path('storage/checkin-photos');
+        $dir = Storage::disk('local')->path('checkin-photos');
         $this->assertDirectoryDoesNotContainPhpFiles($dir);
 
         $this->assertDatabaseHas('attendances', [
@@ -76,7 +77,7 @@ class CheckInPhotoUploadTest extends TestCase
             'check_in_photo' => null,
         ]);
 
-        $this->assertDirectoryDoesNotContainPhpFiles(public_path('storage/checkin-photos'));
+        $this->assertDirectoryDoesNotContainPhpFiles(Storage::disk('local')->path('checkin-photos'));
     }
 
     public function test_a_genuine_png_upload_still_works(): void
@@ -96,7 +97,9 @@ class CheckInPhotoUploadTest extends TestCase
         $attendance = \App\Models\Attendance::where('employee_id', $employee->id)->first();
         $this->assertNotNull($attendance->check_in_photo);
         $this->assertStringEndsWith('.png', $attendance->check_in_photo);
-        $this->assertFileExists(public_path($attendance->check_in_photo));
+        $this->assertTrue(Storage::disk('local')->exists($attendance->check_in_photo));
+        $this->assertStringStartsNotWith('storage/', $attendance->check_in_photo);
+        $this->assertFileDoesNotExist(public_path($attendance->check_in_photo));
     }
 
     private function assertDirectoryDoesNotContainPhpFiles(string $dir): void

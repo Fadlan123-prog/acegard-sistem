@@ -56,7 +56,13 @@ class CustomerBuildingController extends Controller
             ? SalesOrder::find($request->integer('from_so'))
             : null;
 
-        return view('customer.building.create', compact('branches', 'categories', 'products', 'fromSo'));
+        $branchId = auth()->user()->branches->first()->id ?? 1;
+        $employees = \App\Models\Employee::where('branch_id', $branchId)->where('is_active', true)->orderBy('name')->get(['id', 'name', 'job_position']);
+        $fromSo?->loadMissing('technicians');
+
+        $fromLead = $fromSo ? null : app(\App\Services\LeadConversion::class)->find($request->integer('from_lead') ?: null);
+
+        return view('customer.building.create', compact('branches', 'categories', 'products', 'fromSo', 'employees', 'fromLead'));
     }
 
     public function store(Request $request, FilmStockPoolService $filmStock)
@@ -72,6 +78,13 @@ class CustomerBuildingController extends Controller
             'applicator'   => 'nullable|string',
             'city'         => 'nullable|string',
             'country'      => 'nullable|string',
+            'marketing_id'                                     => ['nullable', 'integer', \Illuminate\Validation\Rule::exists('employees', 'id')
+                ->where('branch_id', auth()->user()->branches->first()->id ?? 1)->where('is_active', true)],
+            'technician_meters'                                => 'nullable|array',
+            'technician_meters.*.employee_id'                  => ['required', 'integer', \Illuminate\Validation\Rule::exists('employees', 'id')
+                ->where('branch_id', auth()->user()->branches->first()->id ?? 1)->where('is_active', true)],
+            'technician_meters.*.category_product_building_id' => 'required|integer|exists:category_product_building,id',
+            'technician_meters.*.meters'                       => 'required|numeric|min:0.01',
 
             'products'                                  => 'required|array|min:1',
             'products.*.category_product_building_id'   => 'required|integer|exists:category_product_building,id',
@@ -99,13 +112,14 @@ class CustomerBuildingController extends Controller
                 'wsn'          => $request->wsn,
                 'card_number'  => $cardNumber, // ✅ pakai hasil generate
                 'name'         => $request->name,
-                'email'        => $request->email,
+                'email'        => $request->email ?? '',
                 'phone_number' => $request->phone_number,
-                'address'      => $request->address,
-                'dealer_name'  => $request->dealer_name,
-                'applicator'   => $request->applicator,
-                'city'         => $request->city,
-                'country'      => $request->country,
+                'address'      => $request->address ?? '',
+                'dealer_name'  => $request->dealer_name ?? '',
+                'applicator'   => $request->applicator ?? '',
+                'city'         => $request->city ?? '',
+                'country'      => $request->country ?? '',
+                'marketing_id' => $request->filled('marketing_id') ? (int) $request->marketing_id : null,
             ]);
 
             $createdBuildingProducts = [];
@@ -129,9 +143,15 @@ class CustomerBuildingController extends Controller
                 ];
             }
 
+            $this->syncTechnicianMeters($customer, $request);
+
             // Stock deduction dipindah ke saat pelunasan invoice (InvoiceBuildingController::recordPelunasan)
 
             DB::commit();
+
+            if (! $request->filled('from_so')) {
+                app(\App\Services\LeadConversion::class)->markConverted($request->integer('from_lead') ?: null, $customer);
+            }
 
             if ($request->filled('from_so')) {
                 $so = SalesOrder::find($request->integer('from_so'));
@@ -167,9 +187,10 @@ class CustomerBuildingController extends Controller
         $branches = Branch::all();
         $categories = CategoryProductBuilding::all();
         $products = ProductBuilding::all();
-        $customer->load('products.category', 'products.product');
+        $customer->load('products.category', 'products.product', 'technicianMeters');
+        $employees = \App\Models\Employee::where('branch_id', $customer->branch_id)->where('is_active', true)->orderBy('name')->get(['id', 'name', 'job_position']);
 
-        return view('customer.building.edit', compact('customer', 'branches', 'categories', 'products'));
+        return view('customer.building.edit', compact('customer', 'branches', 'categories', 'products', 'employees'));
     }
 
 
@@ -195,6 +216,13 @@ class CustomerBuildingController extends Controller
             'applicator' => 'nullable|string',
             'city' => 'nullable|string',
             'country' => 'nullable|string',
+            'marketing_id'                                     => ['nullable', 'integer', \Illuminate\Validation\Rule::exists('employees', 'id')
+                ->where('branch_id', $customer->branch_id)->where('is_active', true)],
+            'technician_meters'                                => 'nullable|array',
+            'technician_meters.*.employee_id'                  => ['required', 'integer', \Illuminate\Validation\Rule::exists('employees', 'id')
+                ->where('branch_id', $customer->branch_id)->where('is_active', true)],
+            'technician_meters.*.category_product_building_id' => 'required|integer|exists:category_product_building,id',
+            'technician_meters.*.meters'                       => 'required|numeric|min:0.01',
             'products' => 'required|array|min:1',
             'products.*.id' => 'nullable|exists:customer_building_product,id',
             'products.*.category_product_building_id' => 'required|exists:category_product_building,id',
@@ -215,13 +243,14 @@ class CustomerBuildingController extends Controller
                 'wsn' => $request->wsn,
                 'card_number' => $request->card_number,
                 'name' => $request->name,
-                'email' => $request->email,
+                'email' => $request->email ?? '',
                 'phone_number' => $request->phone_number,
-                'address' => $request->address,
-                'dealer_name' => $request->dealer_name,
-                'applicator' => $request->applicator,
-                'city' => $request->city,
-                'country' => $request->country,
+                'address' => $request->address ?? '',
+                'dealer_name' => $request->dealer_name ?? '',
+                'applicator' => $request->applicator ?? '',
+                'city' => $request->city ?? '',
+                'country' => $request->country ?? '',
+                'marketing_id' => $request->filled('marketing_id') ? (int) $request->marketing_id : null,
             ]);
 
             // Update data produk
@@ -250,6 +279,8 @@ class CustomerBuildingController extends Controller
 
             // Hapus produk yang dihapus dari form
             $customer->products()->whereNotIn('id', $existingIds)->delete();
+
+            $this->syncTechnicianMeters($customer, $request);
 
             DB::commit();
             return redirect()->route('customer.building.index')->with('success', 'Customer berhasil diperbarui.');
@@ -310,5 +341,42 @@ class CustomerBuildingController extends Controller
         $query->delete();
 
         return redirect()->route('customer.index')->with('success', 'Data berhasil dihapus.');
+    }
+
+    /**
+     * Simpan meter per teknisi per kategori. Jumlah meter per kategori tidak boleh melebihi
+     * meter produk kategori itu di customer; meter yang belum dialokasikan tidak dikomisi.
+     * Dipanggil di dalam transaksi; melempar ValidationException agar transaksi dibatalkan.
+     */
+    private function syncTechnicianMeters(CustomerBuilding $customer, Request $request): void
+    {
+        $rows = collect($request->input('technician_meters', []))
+            ->map(fn ($r) => [
+                'employee_id' => (int) $r['employee_id'],
+                'category_product_building_id' => (int) $r['category_product_building_id'],
+                'meters' => round((float) $r['meters'], 2),
+            ]);
+
+        $available = collect($request->input('products', []))
+            ->groupBy(fn ($p) => (int) $p['category_product_building_id'])
+            ->map(fn ($g) => round($g->sum(fn ($p) => (float) $p['meters']), 2));
+
+        foreach ($rows->groupBy('category_product_building_id') as $cat => $group) {
+            if ($group->sum('meters') > ($available[$cat] ?? 0) + 0.001) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'technician_meters' => 'Total meter teknisi untuk satu kategori film melebihi meter pada produk customer.',
+                ]);
+            }
+        }
+
+        // satu baris per (teknisi, kategori): gabungkan duplikat
+        $merged = $rows->groupBy(fn ($r) => $r['employee_id'] . ':' . $r['category_product_building_id'])
+            ->map(fn ($g) => array_merge($g->first(), ['meters' => round($g->sum('meters'), 2)]));
+
+        $customer->technicianMeters()->delete();
+
+        foreach ($merged as $row) {
+            $customer->technicianMeters()->create($row);
+        }
     }
 }

@@ -177,8 +177,16 @@
     </x-ui.alert>
     @endif
 
-    <form action="{{ route('customer.building.store') }}" method="POST">
+        @if(isset($fromLead) && $fromLead)
+    <x-ui.alert type="info" class="mb-3" :dismissible="false">
+        <x-slot name="title">Diisi dari Lead <strong>{{ $fromLead->name }}</strong></x-slot>
+        Data lead sudah diisi otomatis (tanpa perlu quotation). Lengkapi data yang masih kosong lalu simpan; lead akan ditandai terkonversi.
+    </x-ui.alert>
+    @endif
+
+<form action="{{ route('customer.building.store') }}" method="POST">
       @csrf
+      @if(isset($fromLead) && $fromLead)<input type="hidden" name="from_lead" value="{{ $fromLead->id }}">@endif
       @if(isset($fromSo) && $fromSo)
       <input type="hidden" name="from_so" value="{{ $fromSo->id }}">
       @endif
@@ -209,7 +217,7 @@
             <div class="col-md-6">
               <label class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
               <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
-                     value="{{ old('name', $fromSo?->prospect_name) }}" placeholder="Nama pemilik / PIC gedung" required>
+                     value="{{ old('name', $fromSo?->prospect_name ?? $fromLead?->name) }}" placeholder="Nama pemilik / PIC gedung" required>
               @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-6">
@@ -218,26 +226,26 @@
                 <span class="fi-badge"><span class="wa-dot"></span>+62</span>
                 <input type="tel" id="phone_display" placeholder="812 3456 7890" autocomplete="off">
                 <input type="hidden" name="phone_number" id="phone_hidden"
-                       value="{{ old('phone_number', $fromSo?->prospect_phone) }}">
+                       value="{{ old('phone_number', $fromSo?->prospect_phone ?? $fromLead?->phone) }}">
               </div>
               @error('phone_number')<div class="text-danger" style="font-size:.85em;margin-top:4px">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-6">
               <label class="form-label">Email</label>
               <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                     value="{{ old('email', $fromSo?->prospect_email) }}" placeholder="email@contoh.com">
+                     value="{{ old('email', $fromSo?->prospect_email ?? $fromLead?->email) }}" placeholder="email@contoh.com">
               @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-6">
               <label class="form-label">Alamat Gedung</label>
               <input type="text" name="address" class="form-control @error('address') is-invalid @enderror"
-                     value="{{ old('address', $fromSo?->prospect_address) }}" placeholder="Alamat lengkap gedung">
+                     value="{{ old('address', $fromSo?->prospect_address ?? $fromLead?->address) }}" placeholder="Alamat lengkap gedung">
               @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-6">
               <label class="form-label">Kota</label>
               <input type="text" name="city" class="form-control @error('city') is-invalid @enderror"
-                     value="{{ old('city') }}" placeholder="Jakarta">
+                     value="{{ old('city', $fromLead?->city) }}" placeholder="Jakarta">
               @error('city')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-6">
@@ -272,6 +280,61 @@
               <input type="text" name="applicator" class="form-control @error('applicator') is-invalid @enderror"
                      value="{{ old('applicator') }}" placeholder="Nama perusahaan / individu aplikator">
               @error('applicator')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Marketing <span class="text-muted small">(komisi per meter, dibayar saat lunas)</span></label>
+              <select name="marketing_id" class="form-select">
+                <option value="">— Tidak ada —</option>
+                @foreach($employees as $e)
+                  @if($e->job_position === 'Marketing')
+                    <option value="{{ $e->id }}" {{ (string) old('marketing_id', $fromSo?->marketing_id) === (string) $e->id ? 'selected' : '' }}>{{ $e->name }}</option>
+                  @endif
+                @endforeach
+              </select>
+              @error('marketing_id')<div class="text-danger small">{{ $message }}</div>@enderror
+            </div>
+            <div class="col-md-12" id="techMetersBox">
+              <label class="form-label">Meter per Teknisi <span class="text-muted small">(dasar komisi gedung, tanpa kenek)</span></label>
+              <div class="table-responsive">
+                <table class="table table-sm align-middle mb-2">
+                  <thead><tr><th>Teknisi</th><th style="width:220px">Kategori Film</th><th style="width:130px">Meter</th><th style="width:50px"></th></tr></thead>
+                  <tbody id="techMetersBody"></tbody>
+                </table>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="addTechMeter">+ Tambah teknisi</button>
+              <div class="form-text">Catat berapa meter yang dikerjakan tiap teknisi. Komisi = meter × tarif kategori, dibayar saat invoice lunas. Total meter per kategori tidak boleh melebihi meter produk; sisa yang belum dialokasikan tidak dikomisi.</div>
+              @error('technician_meters')<div class="text-danger small">{{ $message }}</div>@enderror
+              @error('technician_meters.*')<div class="text-danger small">{{ $message }}</div>@enderror
+              @php
+                $__techRows = old('technician_meters', isset($fromSo) && $fromSo ? $fromSo->technicians->map(fn ($t) => ['employee_id' => $t->id, 'category_product_building_id' => '', 'meters' => ''])->all() : []);
+              @endphp
+              <script>
+              (function () {
+                const employees = @json($employees->map(fn ($e) => ['id' => $e->id, 'label' => $e->name . ($e->job_position ? ' — ' . $e->job_position : '')])->values());
+                const categories = @json($categories->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])->values());
+                const rows = @json(array_values($__techRows));
+                const body = document.getElementById('techMetersBody');
+                let idx = 0;
+                function opt(list, key, sel, ph) {
+                  return '<option value="">' + ph + '</option>' + list.map(x => '<option value="' + x.id + '"' + (String(x.id) === String(sel) ? ' selected' : '') + '>' + (x.label || x.name) + '</option>').join('');
+                }
+                function addRow(r) {
+                  r = r || {};
+                  const i = idx++;
+                  const tr = document.createElement('tr');
+                  tr.innerHTML =
+                    '<td><select name="technician_meters[' + i + '][employee_id]" class="form-select form-select-sm" required>' + opt(employees, 'id', r.employee_id, '— Pilih teknisi —') + '</select></td>' +
+                    '<td><select name="technician_meters[' + i + '][category_product_building_id]" class="form-select form-select-sm" required>' + opt(categories, 'id', r.category_product_building_id, '— Pilih kategori —') + '</select></td>' +
+                    '<td><input type="number" step="0.01" min="0.01" name="technician_meters[' + i + '][meters]" class="form-control form-control-sm" value="' + (r.meters ?? '') + '" required></td>' +
+                    '<td><button type="button" class="btn btn-sm btn-outline-danger">&times;</button></td>';
+                  tr.querySelector('button').addEventListener('click', () => tr.remove());
+                  body.appendChild(tr);
+                }
+                rows.forEach(addRow);
+                document.getElementById('addTechMeter').addEventListener('click', () => addRow());
+              })();
+              </script>
             </div>
           </div>
         </div>

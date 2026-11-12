@@ -21,11 +21,25 @@ class AppServiceProvider extends ServiceProvider
             \App\Domain\Commission\CommissionCalculator::class,
             fn () => new \App\Domain\Commission\CommissionCalculator(config('commission'))
         );
+
+        $this->app->bind(
+            \App\Domain\Sales\SalesCommissionCalculator::class,
+            fn () => new \App\Domain\Sales\SalesCommissionCalculator(config('sales_commission'))
+        );
     }
 
     public function boot(): void
     {
         Paginator::useBootstrapFive();
+
+        // Tanggal jatuh tempo/jadwal berjenis date (00:00): "terlambat" hanya bila harinya sudah lewat
+        // menurut waktu aplikasi (WIB), bukan sejak pukul 00:00 pada hari itu sendiri.
+        \Illuminate\Support\Carbon::macro('isBeforeToday', fn () => $this->copy()->startOfDay()->lt(now()->startOfDay()));
+
+        // Throttle publik butuh IP pengunjung asli bila ada reverse proxy (config app.trusted_proxies).
+        if ($proxies = array_values(array_filter(array_map('trim', explode(',', (string) config('app.trusted_proxies')))))) {
+            \Illuminate\Http\Middleware\TrustProxies::at($proxies === ['*'] ? '*' : $proxies);
+        }
 
         Blade::componentNamespace('App\\View\\Components\\Ui', 'ui');
 
@@ -37,6 +51,17 @@ class AppServiceProvider extends ServiceProvider
             $key = Str::lower((string) $request->input('email')) . '|' . $request->ip();
 
             return Limit::perMinute(5)->by($key);
+        });
+
+        // Lupa-password & penukaran token: dikunci per email+IP (bukan IP saja,
+        // karena trustProxies sengaja tidak diaktifkan — lihat bootstrap/app.php).
+        // Pengiriman tautan juga dibatasi 1x/60 detik per akun oleh broker.
+        RateLimiter::for('password-link', function (Request $request) {
+            return Limit::perMinute(3)->by('pwlink|' . Str::lower((string) $request->input('email')) . '|' . $request->ip());
+        });
+
+        RateLimiter::for('password-reset', function (Request $request) {
+            return Limit::perMinute(5)->by('pwreset|' . Str::lower((string) $request->input('email')) . '|' . $request->ip());
         });
     }
 }

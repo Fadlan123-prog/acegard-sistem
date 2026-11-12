@@ -146,6 +146,19 @@
               >
             </div>
 
+            <label class="form-label fw-semibold mt-3">4 digit terakhir nomor HP</label>
+            <input
+              type="text"
+              name="phone_last4"
+              class="form-control form-control-lg"
+              placeholder="Contoh: 1234"
+              maxlength="4"
+              pattern="[0-9]{4}"
+              inputmode="numeric"
+              required
+              autocomplete="off"
+            >
+
             <div class="d-flex flex-column flex-md-row justify-content-between gap-2 mt-3">
               <div class="text-muted small">
                 Tip: you can usually find it on your <b>warranty card</b> or <b>invoice</b>.

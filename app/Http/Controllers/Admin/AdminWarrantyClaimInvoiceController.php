@@ -42,11 +42,9 @@ class AdminWarrantyClaimInvoiceController extends Controller
         $total = max(0, $subtotal - $discount);
         $remaining = max(0, $total - $downpayment);
 
-        $invoiceNumber = $this->generateInvoiceNumber();
-
-        $invoice = WarrantyClaimInvoice::create([
+        $invoice = app(\App\Services\DocumentNumberService::class)->retryOnDuplicate(fn () => WarrantyClaimInvoice::create([
             'warranty_claim_id' => $claim->id,
-            'invoice_number' => $invoiceNumber,
+            'invoice_number' => $this->generateInvoiceNumber(),
             'invoice_date' => now(),
             'payment_method' => $data['payment_method'],
             'subtotal' => $subtotal,
@@ -55,7 +53,7 @@ class AdminWarrantyClaimInvoiceController extends Controller
             'total_price' => $total,
             'remaining_payment' => $remaining,
             'status' => $data['status'],
-        ]);
+        ]));
 
         foreach ($claim->items as $it) {
             $price = (int)$it->charge_amount;
@@ -146,13 +144,7 @@ class AdminWarrantyClaimInvoiceController extends Controller
 
     protected function generateInvoiceNumber(): string
     {
-        $prefix = 'INV-CLM-'.now()->format('Ym').'-';
-        $last = WarrantyClaimInvoice::where('invoice_number','like',$prefix.'%')
-            ->orderByDesc('id')->value('invoice_number');
-
-        $next = 1;
-        if ($last) $next = ((int)substr($last,-4)) + 1;
-
-        return $prefix . str_pad((string)$next, 4, '0', STR_PAD_LEFT);
+        return app(\App\Services\DocumentNumberService::class)
+            ->nextSequential('warranty_claim_invoices', 'invoice_number', 'INV-CLM-' . now()->format('Ym') . '-');
     }
 }

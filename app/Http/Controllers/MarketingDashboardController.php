@@ -150,6 +150,7 @@ class MarketingDashboardController extends Controller
         $eligibleUnbatched = Commission::where('employees_id', $employee->id)
             ->where('role', 'marketing')
             ->where('status', 'eligible')
+            ->where('is_active', true)
             ->whereNull('commission_payment_batch_id')
             ->get();
 
@@ -214,8 +215,26 @@ class MarketingDashboardController extends Controller
 
         $total = $eligibleCommissions->sum('amount');
 
-        DB::transaction(function () use ($employee, $eligibleCommissions, $total, $nowWib, $request) {
+        DB::transaction(function () use ($employee, &$eligibleCommissions, &$total, $nowWib, $request) {
+            $eligibleCommissions = Commission::where('employees_id', $employee->id)
+                ->where('role', 'marketing')
+                ->where('status', 'eligible')
+                ->where('is_active', true)
+                ->whereNull('commission_payment_batch_id')
+                ->lockForUpdate()
+                ->get();
+            $total = $eligibleCommissions->sum('amount');
+
+            if ($eligibleCommissions->isEmpty()) {
+                return;
+            }
+
             $batchNumber = 'WD-' . $nowWib->format('Ym') . '-' . strtoupper(substr($employee->name, 0, 3)) . '-' . $employee->id;
+            // Pengajuan yang pernah ditolak/disetujui pada bulan yang sama tidak boleh bentrok nomor.
+            $baseNumber = $batchNumber;
+            for ($n = 2; CommissionPaymentBatch::where('batch_number', $batchNumber)->exists(); $n++) {
+                $batchNumber = $baseNumber . '-' . $n;
+            }
 
             $batch = CommissionPaymentBatch::create([
                 'employee_id'     => $employee->id,

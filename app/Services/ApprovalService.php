@@ -39,14 +39,12 @@ class ApprovalService
             return false;
         }
 
-        if ($step->same_branch_as_subject) {
-            $subjectBranchId = $request->approvable?->branch_id;
-            if ($subjectBranchId !== null) {
-                $allowed = $actor->branches()->pluck('branches.id')->map(fn ($id) => (int) $id)->all();
-                if (!in_array((int) $subjectBranchId, $allowed, true)) {
-                    return false;
-                }
-            }
+        // Admin/manager terikat cabang: subjek yang punya branch_id harus di
+        // cabang aktor (owner lintas cabang). same_branch_as_subject kini
+        // berlaku untuk semua tahap, bukan hanya yang ditandai.
+        $subjectBranchId = $request->approvable?->branch_id;
+        if ($subjectBranchId !== null && !$actor->canAccessBranch((int) $subjectBranchId)) {
+            return false;
         }
 
         return true;

@@ -79,7 +79,7 @@
                     </thead>
                     <tbody>
                         @forelse ($followUpLeads as $lead)
-                        @php $isOverdue = $lead->follow_up_date && $lead->follow_up_date->isPast(); @endphp
+                        @php $isOverdue = $lead->follow_up_date && $lead->follow_up_date->isBeforeToday(); @endphp
                         <tr>
                             <td class="ps-0 py-2">
                                 <a href="{{ route('leads.show', $lead) }}" class="fw-medium text-decoration-none" style="font-size:12px">{{ $lead->name }}</a>

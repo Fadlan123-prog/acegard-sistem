@@ -149,43 +149,7 @@ class CommissionPeriodController extends Controller
         $start = Carbon::parse($period)->setDay(16)->startOfDay();
         $end   = $start->copy()->addMonth()->subDay()->endOfDay();
 
-        DB::transaction(function () use ($data, $start, $end, $period) {
-            $employeeId = (int) $data['employee_id'];
-
-            $commissions = Commission::where('employees_id', $employeeId)
-                ->where('status', 'eligible')
-                ->whereDate('created_at', '>=', $start->toDateString())
-                ->whereDate('created_at', '<=', $end->toDateString())
-                ->get();
-
-            if ($commissions->isEmpty()) {
-                return;
-            }
-
-            $total = $commissions->sum('amount');
-            $now   = now();
-
-            $batch = CommissionPaymentBatch::create([
-                'employee_id'   => $employeeId,
-                'batch_number'  => 'KOM-' . Carbon::parse($period)->format('Ym') . '-' . $employeeId,
-                'period_from'   => $start->toDateString(),
-                'period_to'     => $end->copy()->startOfDay()->toDateString(),
-                'payment_date'  => $now->toDateString(),
-                'status'        => 'paid',
-                'total_amount'  => $total,
-                'created_by'    => auth()->id(),
-                'paid_by'       => auth()->id(),
-                'paid_at'       => $now,
-                'notes'         => $data['notes'] ?? null,
-            ]);
-
-            Commission::whereIn('id', $commissions->pluck('id'))->update([
-                'commission_payment_batch_id' => $batch->id,
-                'status'                      => 'paid',
-                'paid_at'                     => $now,
-                'paid_by'                     => auth()->id(),
-            ]);
-        });
+        $this->payEmployeeInPeriod((int) $data['employee_id'], $start, $end, $period, $data['notes'] ?? null);
 
         return back()->with('success', 'Komisi berhasil ditandai lunas.');
     }
@@ -204,6 +168,8 @@ class CommissionPeriodController extends Controller
         $unpaid = Commission::query()
             ->join('employees as e', 'e.id', '=', 'commissions.employees_id')
             ->where('commissions.status', 'eligible')
+            ->where('commissions.is_active', true)
+            ->whereNull('commissions.commission_payment_batch_id')
             ->whereDate('commissions.created_at', '>=', $start->toDateString())
             ->whereDate('commissions.created_at', '<=', $end->toDateString())
             ->when($branchId, fn($q) => $q->where('e.branch_id', $branchId))
@@ -214,36 +180,66 @@ class CommissionPeriodController extends Controller
             return back()->with('error', 'Tidak ada komisi yang belum dibayar di periode ini.');
         }
 
-        DB::transaction(function () use ($unpaid, $start, $end, $period, $request) {
-            $now     = now();
-            $grouped = $unpaid->groupBy('employees_id');
-
-            foreach ($grouped as $employeeId => $items) {
-                $total = $items->sum('amount');
-
-                $batch = CommissionPaymentBatch::create([
-                    'employee_id'   => $employeeId,
-                    'batch_number'  => 'KOM-' . Carbon::parse($period)->format('Ym') . '-' . $employeeId,
-                    'period_from'   => $start->toDateString(),
-                    'period_to'     => $end->copy()->startOfDay()->toDateString(),
-                    'payment_date'  => $now->toDateString(),
-                    'status'        => 'paid',
-                    'total_amount'  => $total,
-                    'created_by'    => auth()->id(),
-                    'paid_by'       => auth()->id(),
-                    'paid_at'       => $now,
-                    'notes'         => $request->input('notes'),
-                ]);
-
-                Commission::whereIn('id', $items->pluck('id'))->update([
-                    'commission_payment_batch_id' => $batch->id,
-                    'status'                      => 'paid',
-                    'paid_at'                     => $now,
-                    'paid_by'                     => auth()->id(),
-                ]);
-            }
-        });
+        foreach ($unpaid->pluck('employees_id')->unique() as $employeeId) {
+            $this->payEmployeeInPeriod((int) $employeeId, $start, $end, $period, $request->input('notes'));
+        }
 
         return back()->with('success', 'Semua komisi periode ini berhasil ditandai lunas.');
+    }
+
+    /**
+     * Bayar semua komisi eligible, AKTIF, dan belum masuk batch milik satu karyawan di periode ini.
+     * Dikunci agar klik ganda tidak membayar dua kali; nomor batch dibuat unik per pembayaran;
+     * kasbon potong-komisi diterapkan seperti jalur persetujuan pencairan.
+     */
+    private function payEmployeeInPeriod(int $employeeId, Carbon $start, Carbon $end, string $period, ?string $notes): void
+    {
+        DB::transaction(function () use ($employeeId, $start, $end, $period, $notes) {
+            $commissions = Commission::where('employees_id', $employeeId)
+                ->where('status', 'eligible')
+                ->where('is_active', true)
+                ->whereNull('commission_payment_batch_id')
+                ->whereDate('created_at', '>=', $start->toDateString())
+                ->whereDate('created_at', '<=', $end->toDateString())
+                ->lockForUpdate()
+                ->get();
+
+            if ($commissions->isEmpty()) {
+                return;
+            }
+
+            $now  = now();
+            $base = 'KOM-' . Carbon::parse($period)->format('Ym') . '-' . $employeeId;
+            $number = $base;
+            for ($n = 2; CommissionPaymentBatch::where('batch_number', $number)->exists(); $n++) {
+                $number = $base . '-' . $n;
+            }
+
+            $batch = CommissionPaymentBatch::create([
+                'employee_id'   => $employeeId,
+                'batch_number'  => $number,
+                'period_from'   => $start->toDateString(),
+                'period_to'     => $end->copy()->startOfDay()->toDateString(),
+                'payment_date'  => $now->toDateString(),
+                'status'        => 'paid',
+                'total_amount'  => (int) $commissions->sum('amount'),
+                'created_by'    => auth()->id(),
+                'paid_by'       => auth()->id(),
+                'paid_at'       => $now,
+                'notes'         => $notes,
+            ]);
+
+            Commission::whereIn('id', $commissions->pluck('id'))->update([
+                'commission_payment_batch_id' => $batch->id,
+                'status'                      => 'paid',
+                'paid_at'                     => $now,
+                'paid_by'                     => auth()->id(),
+            ]);
+
+            $employee = \App\Models\Employee::find($employeeId);
+            if ($employee) {
+                app(\App\Services\KasbonDeductionService::class)->applyForCommission($employee, $batch);
+            }
+        });
     }
 }

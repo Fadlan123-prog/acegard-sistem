@@ -145,6 +145,15 @@ body { font-family:'Helvetica Neue',Arial,sans-serif; font-size:10pt; color:#1a1
                 <span class="val" style="font-size:11pt;letter-spacing:1pt">{{ strtoupper($salesOrder->vehicle_plate) }}</span>
             </p>
             @endif
+            @php $filmBreakdown = $salesOrder->filmBreakdown(); @endphp
+            @if($filmBreakdown)
+            <p style="margin-top:3pt"><span class="lbl">Tipe Film / Kegelapan per Bagian Kaca</span></p>
+            @include('sales-orders._film-breakdown', ['breakdown' => $filmBreakdown, 'variant' => 'print'])
+            @elseif($salesOrder->usesFilmSelection() && $salesOrder->film_label)
+            <p style="margin-top:3pt"><span class="lbl">Tipe Film / Kegelapan</span><br>
+                <span class="val">{{ $salesOrder->film_label }}</span>
+            </p>
+            @endif
         </div>
 
         <div class="info-box">
@@ -189,6 +198,9 @@ body { font-family:'Helvetica Neue',Arial,sans-serif; font-size:10pt; color:#1a1
             @foreach($salesOrder->items as $item)
             <tr>
                 <td>
+                    @if($item->vehicle_label || $item->vehicle_plate)
+                        <div class="desc" style="color:#1d4ed8">Kendaraan: {{ trim($item->vehicle_label . ($item->vehicle_plate ? ' · ' . $item->vehicle_plate : ''), ' ·') }}</div>
+                    @endif
                     <div class="desc">{{ $item->description }}</div>
                     @if($item->specifications)
                         <div class="spec">{{ $item->specifications }}</div>

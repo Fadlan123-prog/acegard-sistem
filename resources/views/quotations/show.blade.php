@@ -59,7 +59,7 @@
                 </div>
                 <div class="col-sm-3">
                     <div class="text-muted small mb-1">Berlaku s/d</div>
-                    @php $expired = $quotation->valid_until->isPast() && !in_array($quotation->status, ['accepted','rejected']); @endphp
+                    @php $expired = $quotation->valid_until->isBeforeToday() && !in_array($quotation->status, ['accepted','rejected']); @endphp
                     <div class="fw-semibold {{ $expired ? 'text-danger' : '' }}">
                         {{ $quotation->valid_until->format('d M Y') }}
                         @if($expired)
@@ -141,7 +141,14 @@
                     <tbody>
                         @forelse($quotation->items as $item)
                         <tr>
-                            <td class="fw-semibold">{{ $item->description }}</td>
+                            <td class="fw-semibold">
+                                @if($item->vehicle_label || $item->vehicle_plate)
+                                    <div class="small text-primary fw-semibold mb-1">
+                                        <iconify-icon icon="mdi:car-outline" class="me-1"></iconify-icon>{{ trim($item->vehicle_label . ($item->vehicle_plate ? ' · ' . $item->vehicle_plate : ''), ' ·') }}
+                                    </div>
+                                @endif
+                                {{ $item->description }}
+                            </td>
                             <td class="small text-muted">{{ $item->specifications ?? '—' }}</td>
                             <td class="text-center small">{{ $item->unit }}</td>
                             <td class="text-center">{{ rtrim(rtrim(number_format($item->quantity, 2), '0'), '.') }}</td>
@@ -256,15 +263,15 @@
                         <iconify-icon icon="mdi:checkbox-marked-circle-outline" class="me-1"></iconify-icon> Quotation diterima! Buat customer:
                     </x-ui.alert>
                     @if($quotation->category === 'car_film')
-                        <x-ui.button :href="route('customer.create') }}?from_quotation={{ $quotation->id" variant="success" size="sm">
+                        <x-ui.button :href="route('customer.create', ['from_quotation' => $quotation->id])" variant="success" size="sm">
                             <iconify-icon icon="mdi:account-plus-outline" class="me-1"></iconify-icon> Buat Customer Kaca Film
                         </x-ui.button>
                     @elseif($quotation->category === 'building_film')
-                        <x-ui.button :href="route('customer.building.create') }}?from_quotation={{ $quotation->id" variant="success" size="sm">
+                        <x-ui.button :href="route('customer.building.create', ['from_quotation' => $quotation->id])" variant="success" size="sm">
                             <iconify-icon icon="mdi:office-building-outline" class="me-1"></iconify-icon> Buat Customer Gedung
                         </x-ui.button>
                     @elseif($quotation->category === 'ppf')
-                        <x-ui.button :href="route('ppf-customers.create') }}?from_quotation={{ $quotation->id" variant="success" size="sm">
+                        <x-ui.button :href="route('ppf-customers.create', ['from_quotation' => $quotation->id])" variant="success" size="sm">
                             <iconify-icon icon="mdi:car-outline" class="me-1"></iconify-icon> Buat Customer PPF
                         </x-ui.button>
                     @endif

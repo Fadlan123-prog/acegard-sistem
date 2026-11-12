@@ -97,7 +97,9 @@ class CustomerController extends Controller
             ? SalesOrder::find($request->integer('from_so'))
             : null;
 
-        return view('customer.create', compact('categories', 'products', 'parts', 'employees', 'fromSo'));
+        $fromLead = $fromSo ? null : app(\App\Services\LeadConversion::class)->find($request->integer('from_lead') ?: null);
+
+        return view('customer.create', compact('categories', 'products', 'parts', 'employees', 'fromSo', 'fromLead'));
     }
 public function store(Request $request, InstallTypeResolver $resolver, CommissionService $commission, CustomerCommissionSyncService $commissionSync, FilmStockPoolService $filmStock)
 {
@@ -225,6 +227,7 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
             $request->boolean('has_panoramic'),
             $customer->id,
             $request->install_date,
+            collect($request->input('products', []))->pluck('part_id')->map(fn ($v) => (int) $v)->all(),
         );
 
         // Stock deduction dipindah ke saat pelunasan invoice (InvoiceController::recordPelunasan)
@@ -238,6 +241,10 @@ public function store(Request $request, InstallTypeResolver $resolver, Commissio
                 'converted_to_id'   => $customer->id,
                 'converted_at'      => now(),
             ]);
+        }
+
+        if (! $fromSo) {
+            app(\App\Services\LeadConversion::class)->markConverted($request->integer('from_lead') ?: null, $customer);
         }
 
         return redirect()
@@ -399,41 +406,27 @@ public function edit(Customer $customer)
             $request->boolean('has_panoramic'),
             $customer->id,
             $request->install_date,
+            collect($request->input('products', []))->pluck('part_id')->map(fn ($v) => (int) $v)->all(),
         );
 
         // === Sync marketing + Adit override jika sudah dirilis dan marketing berubah ===
         if ($oldMarketingId !== $newMarketingId) {
             $invoice = $customer->invoice;
             if ($invoice && $invoice->commission_released_at) {
-                // Ambil install_type dari komisi marketing lama (sudah dalam format base: fullset/dsp/skkb)
-                $oldRow   = DB::table('commissions')
-                    ->where('invoice_id', $invoice->id)
-                    ->where('role', 'marketing')
-                    ->first();
-                $baseType = $oldRow?->install_type ?? 'fullset';
+                // Ganti penerima komisi marketing; ditolak bila sudah dibayar / masuk batch pencairan.
+                try {
+                    $commission->reassignMarketingAfterRelease($invoice, $customer->fresh(), $newMarketingId);
+                } catch (\DomainException $e) {
+                    DB::rollBack();
 
-                // Hapus komisi marketing lama
-                DB::table('commissions')
-                    ->where('invoice_id', $invoice->id)
-                    ->where('role', 'marketing')
-                    ->delete();
-
-                // Buat komisi marketing baru untuk marketing yang baru
-                if ($newMarketingId) {
-                    $commission->createMarketingForCustomerAutoCategory(
-                        $newMarketingId,
-                        $customer->id,
-                        $invoice->id,
-                        $baseType,
-                        (int) $invoice->price,
-                    );
+                    return back()->withInput()->with('error', $e->getMessage());
                 }
 
                 // Sync Adit override — triggernya dari marketing,
                 // jadi harus dijalankan ulang setelah marketing berubah.
                 // Reload relasi supaya AditCommissionService membaca marketing yang baru.
                 $invoice->load('customer.marketing');
-                $aditCommission->sync($invoice, $invoice->price);
+                $aditCommission->sync($invoice, (int) $invoice->total_price);
             }
         }
 
@@ -702,7 +695,10 @@ public function edit(Customer $customer)
         $kenekId      = $request->integer('kenek_id')  ?: null;
         $forDate      = $request->filled('date') ? Carbon::parse($request->input('date')) : Carbon::today();
 
-        $finalType = $resolver->decideFromBase($tukangId ?: 0, $installType, $hasPanoramic, $forDate);
+        $finalType = $resolver->decideFromBase(
+            $tukangId ?: 0, $installType, $hasPanoramic, $forDate,
+            $request->has('part_ids') ? array_map('intval', (array) $request->input('part_ids')) : null,
+        );
 
         try {
             $preview = $commissionSync->previewSplit(

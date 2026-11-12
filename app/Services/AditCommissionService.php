@@ -92,7 +92,7 @@ class AditCommissionService
 
         $rows = [];
         foreach ($triggers as $trigger) {
-            $amount = (int) round($invoice->price * (float) $trigger->rate);
+            $amount = (int) round($invoice->total_price * (float) $trigger->rate);
             if ($amount <= 0) continue;
 
             $rows[] = [

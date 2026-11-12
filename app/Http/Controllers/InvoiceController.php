@@ -51,8 +51,8 @@ class InvoiceController extends Controller
         $data = $request->validate([
             'customer_id'    => ['required', 'exists:customers,id'],
             'price'          => ['required', 'integer', 'min:' . config('pricing.minimum_transaction_amount')],
-            'discount'       => ['nullable', 'integer', 'min:0'],
-            'downpayment'    => ['nullable', 'integer', 'min:0'],
+            'discount'       => ['nullable', 'integer', 'min:0', 'lte:price'],
+            'downpayment'    => ['nullable', 'integer', 'min:0', 'lte:price'],
             'payment_method' => ['nullable', 'in:cash,credit,transfer,tokopedia'],
             'status'         => ['required', 'in:paid,unpaid,partial'],
             'invoice_number' => ['nullable', 'string', 'max:255', 'unique:invoices,invoice_number'],
@@ -71,6 +71,12 @@ class InvoiceController extends Controller
         $downpayment      = $priceCalc['downpayment'];
         $totalPrice       = $priceCalc['total_price'];
         $remainingPayment = $priceCalc['remaining_payment'];
+
+        if ($data['status'] === 'paid' && $priceCalc['remaining_payment'] > 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'status' => 'Status Lunas hanya boleh bila DP sudah menutup total harga.',
+            ]);
+        }
 
         // Guard against accidental double-submit (double-click / form resubmit) creating
         // two near-identical invoices for the same job. Customers can legitimately have
@@ -186,8 +192,8 @@ class InvoiceController extends Controller
         $data = $request->validate([
             'customer_id'    => ['required', 'exists:customers,id'],
             'price'          => ['required', 'integer', 'min:0'],
-            'discount'       => ['nullable', 'integer', 'min:0'],
-            'downpayment'    => ['nullable', 'integer', 'min:0'],
+            'discount'       => ['nullable', 'integer', 'min:0', 'lte:price'],
+            'downpayment'    => ['nullable', 'integer', 'min:0', 'lte:price'],
             'payment_method' => ['nullable', 'in:cash,credit,transfer,tokopedia'],
             'status'         => ['required', 'in:paid,unpaid,partial'],
             'invoice_number' => [
@@ -207,6 +213,12 @@ class InvoiceController extends Controller
         $downpayment      = $priceCalc['downpayment'];
         $totalPrice       = $priceCalc['total_price'];
         $remainingPayment = $priceCalc['remaining_payment'];
+
+        if ($data['status'] === 'paid' && $priceCalc['remaining_payment'] > 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'status' => 'Status Lunas hanya boleh bila DP sudah menutup total harga.',
+            ]);
+        }
 
         $invoiceNumber = !empty($data['invoice_number'])
             ? $data['invoice_number']
@@ -266,8 +278,6 @@ class InvoiceController extends Controller
             return back()->with('error', 'Pelunasan sudah dicatat dan stok sudah dipotong sebelumnya.');
         }
 
-        // Pelunasan done but stock deduction failed previously — allow stock-only retry.
-        $paymentAlreadyRecorded = $invoice->isStep2Done();
 
         $data = $request->validate([
             'payment_method' => ['nullable', 'in:cash,credit,transfer,tokopedia'],
@@ -278,17 +288,21 @@ class InvoiceController extends Controller
         // Tahap 1: Catat pembayaran — commit terpisah agar tidak ikut rollback jika stok gagal
         try {
             DB::beginTransaction();
-            if (!$paymentAlreadyRecorded) {
-                $invoice->update([
+            // Baca ulang dengan lock: dua request bersamaan (double-click) tidak boleh
+            // sama-sama mencatat pelunasan.
+            $locked = Invoice::lockForUpdate()->findOrFail($invoice->id);
+            if (!$locked->isStep2Done()) {
+                $locked->update([
                     'remaining_payment' => 0,
                     'status'            => 'paid',
                     'paid_at'           => $now,
                     'pelunasan_at'      => $now,
                     'pelunasan_by'      => auth()->id(),
-                    'payment_method'    => $data['payment_method'] ?? $invoice->payment_method,
+                    'payment_method'    => $data['payment_method'] ?? $locked->payment_method,
                 ]);
             }
             DB::commit();
+            $invoice->refresh();
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->with('error', 'Gagal mencatat pelunasan: ' . $e->getMessage());
@@ -311,11 +325,15 @@ class InvoiceController extends Controller
                     ])->toArray();
 
                     DB::beginTransaction();
-                    $this->filmStock->consumeForCar($customer, $carProducts, $customer->install_type ?? 'fullset');
-                    $invoice->update([
-                        'stock_deducted_at' => $now,
-                        'stock_deducted_by' => auth()->id(),
-                    ]);
+                    // Cek ulang di bawah lock agar stok tidak terpotong dua kali.
+                    $lockedForStock = Invoice::lockForUpdate()->findOrFail($invoice->id);
+                    if (!$lockedForStock->isStockDeducted()) {
+                        $this->filmStock->consumeForCar($customer, $carProducts, $customer->install_type ?? 'fullset');
+                        $lockedForStock->update([
+                            'stock_deducted_at' => $now,
+                            'stock_deducted_by' => auth()->id(),
+                        ]);
+                    }
                     DB::commit();
                 }
             } catch (\Throwable $e) {
@@ -368,6 +386,11 @@ class InvoiceController extends Controller
         }
 
         $lebaran = $request->boolean('lebaran');
+        // Tarif Lebaran (2x) hanya boleh diaktifkan superadmin/owner dan dicatat di log.
+        abort_if($lebaran && ! auth()->user()->hasAnyRole(['superadmin', 'owner']), 403, 'Hanya superadmin/owner yang boleh memakai tarif Lebaran.');
+        if ($lebaran) {
+            Log::warning('[Komisi] Tarif Lebaran dipakai', ['invoice_id' => $invoice->id, 'user_id' => auth()->id()]);
+        }
 
         try {
             DB::beginTransaction();
@@ -408,11 +431,26 @@ class InvoiceController extends Controller
         }
 
         $lebaran = $request->boolean('lebaran');
+        // Tarif Lebaran (2x) hanya boleh diaktifkan superadmin/owner dan dicatat di log.
+        abort_if($lebaran && ! auth()->user()->hasAnyRole(['superadmin', 'owner']), 403, 'Hanya superadmin/owner yang boleh memakai tarif Lebaran.');
+        if ($lebaran) {
+            Log::warning('[Komisi] Tarif Lebaran dipakai', ['invoice_id' => $invoice->id, 'user_id' => auth()->id()]);
+        }
 
         try {
             DB::beginTransaction();
 
             $locked = Invoice::lockForUpdate()->findOrFail($invoice->id);
+
+            // Komisi yang sudah dibayar / masuk batch pencairan tidak boleh dihapus.
+            $alreadyPaidOut = DB::table('commissions')
+                ->where('invoice_id', $locked->id)
+                ->where(fn ($q) => $q->where('status', 'paid')->orWhereNotNull('commission_payment_batch_id'))
+                ->exists();
+            if ($alreadyPaidOut) {
+                DB::rollBack();
+                return back()->with('error', 'Komisi invoice ini sudah dibayarkan/masuk batch pencairan, tidak bisa dirilis ulang.');
+            }
 
             // Hapus semua komisi lama untuk invoice ini
             DB::table('commissions')
@@ -500,7 +538,6 @@ class InvoiceController extends Controller
         $view = $this->resolveInvoiceViewForBranch($keys);
 
         // Debug sementara kalau mau cek
-        // dd($branch?->name, $branch?->city, $keys, $view);
 
         $publicPath = public_path();
 

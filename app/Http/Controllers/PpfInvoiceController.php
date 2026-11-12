@@ -53,6 +53,10 @@ class PpfInvoiceController extends Controller
         $discount = (int)($data['discount'] ?? 0);
         $downpayment = (int)($data['downpayment'] ?? 0);
 
+        if ($discount > $price) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['discount' => 'Diskon tidak boleh melebihi harga.']);
+        }
+
         $total = max(0, $price - $discount);
         $remaining = max(0, $total - $downpayment);
 
@@ -73,26 +77,27 @@ class PpfInvoiceController extends Controller
                 ->with('success', 'Invoice ini baru saja tersimpan.');
         }
 
-        // generate invoice number (simple)
+        $docs = app(\App\Services\DocumentNumberService::class);
         $dateStr = now()->format('Ymd');
-        $seq = str_pad((string) (PpfInvoice::where('invoice_number', 'like', "PPF-$dateStr-%")->count() + 1), 4, '0', STR_PAD_LEFT);
-        $invoiceNumber = "PPF-$dateStr-$seq";
 
-        $invoice = PpfInvoice::create([
-            'branch_id' => $installation->branch_id,
-            'customer_ppf_id' => $installation->customer_ppf_id,
-            'customer_ppf_installation_id' => $installation->id,
-            'invoice_number' => $invoiceNumber,
-            'invoice_date' => $data['invoice_date'] ?? now()->toDateString(),
-            'payment_method' => $data['payment_method'],
-            'price' => $price,
-            'discount' => $discount,
-            'downpayment' => $downpayment,
-            'total_price' => $total,
-            'remaining_payment' => $remaining,
-            'status' => $status,
-            'notes' => $data['notes'] ?? null,
-        ]);
+        // Nomor = MAX+1 (aman setelah invoice dihapus) dan diulang bila dua admin menyimpan bersamaan.
+        $invoice = $docs->retryOnDuplicate(function () use ($docs, $dateStr, $installation, $price, $discount, $downpayment, $total, $remaining, $status, $data) {
+            return PpfInvoice::create([
+                'branch_id' => $installation->branch_id,
+                'customer_ppf_id' => $installation->customer_ppf_id,
+                'customer_ppf_installation_id' => $installation->id,
+                'invoice_number' => $docs->nextSequential('ppf_invoices', 'invoice_number', "PPF-$dateStr-"),
+                'invoice_date' => $data['invoice_date'] ?? now()->toDateString(),
+                'payment_method' => $data['payment_method'],
+                'price' => $price,
+                'discount' => $discount,
+                'downpayment' => $downpayment,
+                'total_price' => $total,
+                'remaining_payment' => $remaining,
+                'status' => $status,
+                'notes' => $data['notes'] ?? null,
+            ]);
+        });
 
         return redirect()->route('ppf-invoices.show', $invoice->id)
             ->with('success', 'Invoice PPF berhasil dibuat.');
@@ -145,8 +150,16 @@ class PpfInvoiceController extends Controller
         $discount   = (int)($data['discount'] ?? 0);
         $downpay    = (int)($data['downpayment'] ?? 0);
 
+        if ($discount > $price) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['discount' => 'Diskon tidak boleh melebihi harga.']);
+        }
+
         $total      = max(0, $price - $discount);
         $remaining  = max(0, $total - $downpay);
+
+        if ($data['status'] === 'paid' && $remaining > 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['status' => 'Status Lunas hanya boleh bila DP sudah menutup total harga.']);
+        }
 
         // kalau status void, biasanya angka bisa tetap (audit), tapi payment dianggap 0.
         if ($data['status'] === 'void') {
@@ -176,7 +189,20 @@ class PpfInvoiceController extends Controller
         $invoice = \App\Models\PpfInvoice::findOrFail($id);
         $this->authorizeBranch($invoice->branch_id);
 
-        $invoice->delete();
+        // Komisi yang sudah dibayar / masuk pencairan membuat invoice tidak boleh dihapus.
+        $locked = DB::table('commissions')->where('ppf_invoice_id', $invoice->id)
+            ->where(fn ($q) => $q->where('status', 'paid')->orWhereNotNull('commission_payment_batch_id'))
+            ->exists();
+
+        if ($locked) {
+            return back()->with('error', 'Invoice PPF tidak bisa dihapus: komisinya sudah dibayarkan / masuk pencairan.');
+        }
+
+        DB::transaction(function () use ($invoice) {
+            // Komisi yang belum dibayar ikut dibatalkan agar tidak jadi yatim yang bisa dicairkan.
+            DB::table('commissions')->where('ppf_invoice_id', $invoice->id)->delete();
+            $invoice->delete();
+        });
 
         // balik ke halaman customer/installation sesuai preferensi
         return redirect()
@@ -256,8 +282,19 @@ class PpfInvoiceController extends Controller
             return back()->with('error', 'Invoice void tidak bisa dirilis komisinya.');
         }
 
+        if ($invoice->status !== 'paid') {
+            return back()->with('error', 'Komisi PPF baru bisa dirilis setelah invoice lunas.');
+        }
+
         DB::beginTransaction();
         try {
+            // Baca ulang di bawah lock agar klik ganda / dua admin tidak merilis dua kali.
+            $locked = \App\Models\PpfInvoice::whereKey($invoice->id)->lockForUpdate()->firstOrFail();
+            if ($locked->commission_released_at || $locked->status !== 'paid') {
+                DB::rollBack();
+                return back()->with('error', 'Komisi PPF sudah dirilis atau invoice belum lunas.');
+            }
+
             $this->commissionService->createPpfCommissions($invoice);
 
             $invoice->update([
