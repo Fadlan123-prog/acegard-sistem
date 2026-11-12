@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class OwnerDashboardController extends Controller
 {
-    public function dashboard()
+    public function dashboard(\Illuminate\Http\Request $request, \App\Services\ExecutiveSummaryService $exec)
     {
         $today = today();
         $month = now()->month;
@@ -112,6 +112,10 @@ class OwnerDashboardController extends Controller
             ->limit(10)
             ->get();
 
+        $execMonth = min(12, max(1, (int) $request->query('month', $month)));
+        $execYear  = min(2100, max(2020, (int) $request->query('year', $year)));
+        $executive = $exec->summary($execMonth, $execYear);
+
         $upcomingBirthdays = \App\Models\Employee::upcomingBirthdays();
 
         return view('owner.dashboard', compact(
@@ -121,7 +125,7 @@ class OwnerDashboardController extends Controller
             'revenueByBranch',
             'totalCustomers', 'totalBranches',
             'recentInvoices',
-            'upcomingBirthdays',
+            'upcomingBirthdays', 'executive', 'execMonth', 'execYear',
         ));
     }
 }

@@ -88,7 +88,24 @@ class AdvertisingController extends Controller
             ->groupBy('status')
             ->pluck('total', 'status');
 
+        // Repeat order = lead berstatus won periode ini yang nomor teleponnya sudah
+        // pernah won sebelumnya (pelanggan yang order lagi).
+        $repeatOrders = Lead::query()
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+            ->whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
+            ->where('status', 'won')
+            ->whereNotNull('phone')->where('phone', '!=', '')
+            ->whereExists(function ($q) {
+                $q->select(DB::raw(1))->from('leads as prior')
+                    ->whereColumn('prior.phone', 'leads.phone')
+                    ->where('prior.status', 'won')
+                    ->whereColumn('prior.id', '<', 'leads.id');
+            })
+            ->count();
+
         return view('advertising.dashboard', [
+            'repeatOrders'      => $repeatOrders,
             'channels'          => $channels,
             'totalSpend'        => $totalSpend,
             'totalLeads'        => $totalLeads,
