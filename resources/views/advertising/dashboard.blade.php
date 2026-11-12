@@ -32,15 +32,15 @@
         </x-ui.stats-card>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <x-ui.stats-card label="Average CPL" :value="$avgCpl !== null ? $idr($avgCpl) : '—'" color="amber" accent
+        <x-ui.stats-card label="Follow Up" :value="number_format($totalFollowed)" color="amber" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'>
-            <span class="text-muted" style="font-size:11px">Spend ÷ leads</span>
+            <span class="text-muted" style="font-size:11px">Leads follow up, penawaran, atau berhasil</span>
         </x-ui.stats-card>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <x-ui.stats-card label="Attributed Revenue" :value="$idr($attributedRevenue)" color="green" accent
+        <x-ui.stats-card label="Repeat Order" :value="number_format($totalRepeat)" color="green" accent
             icon='<svg viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'>
-            <span class="text-muted" style="font-size:11px">Estimasi dari leads closing (ad_channel)</span>
+            <span class="text-muted" style="font-size:11px">Pelanggan lama yang order lagi</span>
         </x-ui.stats-card>
     </div>
 </div>
@@ -55,7 +55,8 @@
                             <th class="ps-0 py-2 text-muted fw-medium border-bottom">Channel</th>
                             <th class="py-2 text-end text-muted fw-medium border-bottom">Spend</th>
                             <th class="py-2 text-end text-muted fw-medium border-bottom">Leads</th>
-                            <th class="py-2 text-end text-muted fw-medium border-bottom">CPL</th>
+                            <th class="py-2 text-end text-muted fw-medium border-bottom">Follow Up</th>
+                            <th class="py-2 text-end text-muted fw-medium border-bottom">Repeat Order</th>
                             <th class="py-2 text-end text-muted fw-medium border-bottom">Closing Rate</th>
                         </tr>
                     </thead>
@@ -65,7 +66,8 @@
                             <td class="ps-0 py-2 fw-medium">{{ $c['label'] }}</td>
                             <td class="py-2 text-end">{{ $idr($c['spend']) }}</td>
                             <td class="py-2 text-end">{{ $c['leads'] }}</td>
-                            <td class="py-2 text-end">{{ $c['cpl'] !== null ? $idr($c['cpl']) : '—' }}</td>
+                            <td class="py-2 text-end">{{ $c['followed'] }}</td>
+                            <td class="py-2 text-end">{{ $c['repeat'] }}</td>
                             <td class="py-2 text-end">
                                 <x-ui.badge :variant="$c['closing_rate'] >= 5.3 ? 'success' : 'warning'" size="sm">
                                     {{ $c['closing_rate'] }}%
