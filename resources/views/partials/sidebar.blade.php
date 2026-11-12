@@ -486,20 +486,6 @@
                     <li><a href="{{ route('ranking.marketing') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Ranking Marketing</a></li>
                 </ul>
             </li>
-            @if(Route::has('kpi.targets.index'))
-            <li>
-                <a href="{{ route('kpi.targets.index') }}">
-                    <iconify-icon icon="mdi:target" class="menu-icon"></iconify-icon>
-                    <span>Target KPI</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('kpi.scores.index') }}">
-                    <iconify-icon icon="mdi:clipboard-check-outline" class="menu-icon"></iconify-icon>
-                    <span>Skor KPI Karyawan</span>
-                </a>
-            </li>
-            @endif
             @endif
 
             {{-- ═══════════════════════════════════════════
@@ -518,12 +504,23 @@
                  KPI GENERIK (superadmin, admin, owner, manager marketing)
             ═══════════════════════════════════════════ --}}
             @if(($isSuperadmin || $isAdmin || $isOwner || $isManagerMarketing) && Route::has('kpi.targets.index'))
-            <li class="dropdown">
+            @php $execView = $isSuperadmin || $isOwner || $isManagerMarketing; @endphp
+            <li class="dropdown {{ request()->routeIs('kpi.*', 'advertising.*', 'content.*', 'live-sessions.*') || ($isOwner && request()->routeIs('owner.dashboard')) ? 'open' : '' }}">
                 <a href="javascript:void(0)">
-                    <iconify-icon icon="mdi:target" class="menu-icon"></iconify-icon>
-                    <span>KPI Karyawan</span>
+                    <iconify-icon icon="mdi:chart-box-outline" class="menu-icon"></iconify-icon>
+                    <span>Dashboard &amp; KPI</span>
                 </a>
                 <ul class="sidebar-submenu">
+                    @if($isOwner)
+                    <li><a href="{{ route('owner.dashboard') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Ringkasan Eksekutif</a></li>
+                    @endif
+                    @if($execView && Route::has('advertising.dashboard'))
+                    <li><a href="{{ route('advertising.dashboard') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Dashboard Advertising</a></li>
+                    @endif
+                    @if($execView && Route::has('content.dashboard'))
+                    <li><a href="{{ route('content.dashboard') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Dashboard Konten</a></li>
+                    <li><a href="{{ route('live-sessions.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>TikTok Live</a></li>
+                    @endif
                     <li><a href="{{ route('kpi.targets.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Target KPI</a></li>
                     <li><a href="{{ route('kpi.scores.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Skor KPI Karyawan</a></li>
                 </ul>
