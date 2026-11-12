@@ -47,6 +47,11 @@ class KpiScorecardController extends Controller
         $validated = $request->validate([
             'division'      => 'required|in:' . implode(',', array_keys(KpiTarget::DIVISIONS)),
             'metric_key'    => 'required|string|max:100|alpha_dash',
+            'source'        => ['required', function ($attr, $value, $fail) {
+                if ($value !== 'manual' && ! \App\Services\KpiMetrics::has($value)) {
+                    $fail('Sumber data tidak dikenal.');
+                }
+            }],
             'metric_label'  => 'required|string|max:255',
             'target_value'  => 'required|numeric|min:0',
             'weight'        => 'required|numeric|min:0|max:100',
@@ -110,6 +115,12 @@ class KpiScorecardController extends Controller
             'actual_value'  => 'required|numeric|min:0',
         ]);
 
+        abort_if(
+            KpiTarget::findOrFail($validated['kpi_target_id'])->isAuto(),
+            422,
+            'Skor KPI otomatis tidak bisa diisi manual.'
+        );
+
         KpiScore::updateOrCreate(
             [
                 'employee_id'   => $validated['employee_id'],
@@ -117,6 +128,7 @@ class KpiScorecardController extends Controller
             ],
             [
                 'actual_value' => $validated['actual_value'],
+                'is_auto'      => false,
                 'created_by'   => auth()->id(),
             ]
         );

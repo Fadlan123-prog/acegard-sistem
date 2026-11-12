@@ -39,7 +39,7 @@
             <x-ui.form-field label="KPI" name="kpi_target_id" :required="true">
                 <select name="kpi_target_id" class="form-select" required>
                     <option value="">Pilih KPI</option>
-                    @foreach ($targets as $t)
+                    @foreach ($targets->reject->isAuto() as $t)
                         <option value="{{ $t->id }}">{{ $t->division_label }} — {{ $t->metric_label }} (target {{ rtrim(rtrim($t->target_value, '0'), '.') }})</option>
                     @endforeach
                 </select>
@@ -74,7 +74,7 @@
                     @foreach ($rows as $i => $s)
                     <tr>
                         <td class="ps-0 py-2 fw-medium">@if($i === 0){{ $s->employee->name }}@endif</td>
-                        <td class="py-2">{{ $s->target->metric_label }}</td>
+                        <td class="py-2">{{ $s->target->metric_label }} @if($s->is_auto)<x-ui.badge variant="info" size="sm">Otomatis</x-ui.badge>@endif</td>
                         <td class="py-2 text-end">{{ rtrim(rtrim($s->actual_value, '0'), '.') }}</td>
                         <td class="py-2 text-end">@include('kpi._achievement-badge', ['value' => $s->achievementPercent()])</td>
                         <td class="py-2 text-end">{{ $s->weightedScore() }}</td>

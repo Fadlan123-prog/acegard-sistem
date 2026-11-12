@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class KpiScore extends Model
 {
     protected $fillable = [
-        'employee_id', 'kpi_target_id', 'actual_value', 'created_by',
+        'employee_id', 'kpi_target_id', 'actual_value', 'is_auto', 'created_by',
     ];
 
     protected $casts = [
