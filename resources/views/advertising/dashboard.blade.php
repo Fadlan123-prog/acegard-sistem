@@ -1,0 +1,104 @@
+@extends('layout.index')
+
+@section('title', 'Dashboard Advertising')
+@section('route-breadcrumb', route('advertising.dashboard'))
+@section('breadcrumb', 'Dashboard Advertising')
+
+@section('content')
+
+@php
+    $idr = fn($v) => 'Rp ' . number_format($v, 0, ',', '.');
+    $statusLabels = \App\Models\Lead::STATUSES;
+@endphp
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div></div>
+    <x-ui.button :href="route('advertising.spend.index', ['month' => $month, 'year' => $year])" variant="outline" size="sm">
+        <iconify-icon icon="mdi:cash-plus" class="me-1"></iconify-icon> Kelola Spend
+    </x-ui.button>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <x-ui.stats-card label="Ad Spend" :value="$idr($totalSpend)" color="blue" accent
+            icon='<svg viewBox="0 0 24 24" fill="none"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V6m0 2v8m0 0v2m0-2c-1.11 0-2.08-.402-2.599-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'>
+            <span class="text-muted" style="font-size:11px">Seluruh channel, bulan ini</span>
+        </x-ui.stats-card>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <x-ui.stats-card label="Total Leads" :value="number_format($totalLeads)" color="blue" accent
+            icon='<svg viewBox="0 0 24 24" fill="none"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'>
+            <span class="text-muted" style="font-size:11px">Dari channel berbayar</span>
+        </x-ui.stats-card>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <x-ui.stats-card label="Average CPL" :value="$avgCpl !== null ? $idr($avgCpl) : '—'" color="amber" accent
+            icon='<svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'>
+            <span class="text-muted" style="font-size:11px">Spend ÷ leads</span>
+        </x-ui.stats-card>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <x-ui.stats-card label="Attributed Revenue" :value="$idr($attributedRevenue)" color="green" accent
+            icon='<svg viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'>
+            <span class="text-muted" style="font-size:11px">Estimasi dari leads closing (ad_channel)</span>
+        </x-ui.stats-card>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-xl-8">
+        <x-ui.card title="Performa per Channel">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size:12px">
+                    <thead>
+                        <tr>
+                            <th class="ps-0 py-2 text-muted fw-medium border-bottom">Channel</th>
+                            <th class="py-2 text-end text-muted fw-medium border-bottom">Spend</th>
+                            <th class="py-2 text-end text-muted fw-medium border-bottom">Leads</th>
+                            <th class="py-2 text-end text-muted fw-medium border-bottom">CPL</th>
+                            <th class="py-2 text-end text-muted fw-medium border-bottom">Closing Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($channels as $c)
+                        <tr>
+                            <td class="ps-0 py-2 fw-medium">{{ $c['label'] }}</td>
+                            <td class="py-2 text-end">{{ $idr($c['spend']) }}</td>
+                            <td class="py-2 text-end">{{ $c['leads'] }}</td>
+                            <td class="py-2 text-end">{{ $c['cpl'] !== null ? $idr($c['cpl']) : '—' }}</td>
+                            <td class="py-2 text-end">
+                                <x-ui.badge :variant="$c['closing_rate'] >= 5.3 ? 'success' : 'warning'" size="sm">
+                                    {{ $c['closing_rate'] }}%
+                                </x-ui.badge>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </x-ui.card>
+    </div>
+
+    <div class="col-xl-4">
+        <x-ui.card title="Funnel Advertising" subtitle="Leads bulan ini">
+            @php
+                $funnelOrder = ['new', 'contacted', 'follow_up', 'quoted', 'won'];
+                $max = max(1, $funnel->max() ?? 1);
+            @endphp
+            @foreach ($funnelOrder as $status)
+            @php $value = $funnel[$status] ?? 0; @endphp
+            <div class="mb-3">
+                <div class="d-flex justify-content-between" style="font-size:12px">
+                    <span>{{ $statusLabels[$status] ?? $status }}</span>
+                    <span class="fw-semibold">{{ $value }}</span>
+                </div>
+                <div class="progress" style="height:6px">
+                    <div class="progress-bar" style="width: {{ $max > 0 ? round($value / $max * 100) : 0 }}%"></div>
+                </div>
+            </div>
+            @endforeach
+        </x-ui.card>
+    </div>
+</div>
+
+@endsection

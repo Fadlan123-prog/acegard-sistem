@@ -42,6 +42,55 @@
             <span class="text-muted" style="font-size:11px">Submitted &amp; under review</span>
         </x-ui.stats-card>
     </div>
+    <div class="col-sm-6 col-xl-4">
+        <x-ui.stats-card
+            label="Closing Rate Tim (bulan ini)"
+            :value="$teamClosingRate . '%'"
+            color="green" accent
+            icon='<svg viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        >
+            <span class="text-muted" style="font-size:11px">Won ÷ total leads assigned</span>
+        </x-ui.stats-card>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <x-ui.card title="Closing Rate per CS" subtitle="Leads yang ditugaskan ke tiap CS, bulan berjalan">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size:12px">
+                    <thead>
+                        <tr>
+                            <th class="ps-0 py-2 text-muted fw-medium border-bottom">CS</th>
+                            <th class="py-2 text-end text-muted fw-medium border-bottom">Leads</th>
+                            <th class="py-2 text-end text-muted fw-medium border-bottom">Closing</th>
+                            <th class="py-2 text-end text-muted fw-medium border-bottom">Closing Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($closingByAgent as $row)
+                        <tr>
+                            <td class="ps-0 py-2 fw-medium">{{ $row->name }}</td>
+                            <td class="py-2 text-end">{{ $row->total_leads }}</td>
+                            <td class="py-2 text-end">{{ $row->won_leads }}</td>
+                            <td class="py-2 text-end">
+                                <x-ui.badge :variant="$row->closing_rate >= 5.3 ? 'success' : 'warning'" size="sm">
+                                    {{ $row->closing_rate }}%
+                                </x-ui.badge>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="py-4 text-center">
+                                <x-ui.empty-state title="Belum ada lead yang ditugaskan bulan ini" />
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </x-ui.card>
+    </div>
 </div>
 
 <div class="row g-3">
