@@ -92,10 +92,8 @@ class CommissionReleaseService
         if ($customer->marketing_id) {
             $categoryId = $this->commissionService->resolveMarketingCategoryId($customer->id);
             if ($categoryId) {
-                $mMap = config('commission.marketing', []);
-                $mCat = $mMap[$categoryId] ?? ($mMap['default'] ?? []);
                 $base = $this->calculator->resolveMarketingBase($customer);
-                $defaultMAmt = (int) ($mCat[$base] ?? 0);
+                $defaultMAmt = app(\App\Services\CommissionRates::class)->marketingCar($categoryId, $base);
                 $marketing = $this->employeeResolver->resolve($customer->marketing, $defaultMAmt, $invoicePrice);
 
                 if ($marketing['amount'] > 0 || $marketing['forced']) {

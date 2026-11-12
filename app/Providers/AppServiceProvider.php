@@ -32,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrapFive();
 
+        $this->app->singleton(\App\Services\CommissionRates::class);
+
         // Tanggal jatuh tempo/jadwal berjenis date (00:00): "terlambat" hanya bila harinya sudah lewat
         // menurut waktu aplikasi (WIB), bukan sejak pukul 00:00 pada hari itu sendiri.
         \Illuminate\Support\Carbon::macro('isBeforeToday', fn () => $this->copy()->startOfDay()->lt(now()->startOfDay()));

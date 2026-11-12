@@ -1101,6 +1101,7 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|owner'])
         Route::post('/{type}/categories', 'storeCategory')->name('categories.store')->where('type', 'car|building');
         Route::put('/{type}/categories/{id}', 'updateCategory')->name('categories.update')->where(['type' => 'car|building', 'id' => '[0-9]+']);
         Route::delete('/{type}/categories/{id}', 'destroyCategory')->name('categories.destroy')->where(['type' => 'car|building', 'id' => '[0-9]+']);
+        Route::put('/{type}/categories/{id}/commission', 'updateCommission')->name('categories.commission')->where(['type' => 'car|building', 'id' => '[0-9]+']);
         Route::post('/{type}/categories/{id}/products', 'storeProduct')->name('products.store')->where(['type' => 'car|building', 'id' => '[0-9]+']);
         Route::put('/{type}/products/{id}', 'updateProduct')->name('products.update')->where(['type' => 'car|building', 'id' => '[0-9]+']);
         Route::delete('/{type}/products/{id}', 'destroyProduct')->name('products.destroy')->where(['type' => 'car|building', 'id' => '[0-9]+']);

@@ -38,14 +38,14 @@ class BuildingMeterReportController extends Controller
                 DB::raw('SUM(m.meters) as meters'),
             ]);
 
-        $rates = (array) config('commission.building_per_meter', []);
+        $rates = app(\App\Services\CommissionRates::class);
 
         $report = $rows->groupBy('employee_id')->map(function ($group) use ($rates) {
             $lines = $group->map(fn ($r) => [
                 'category' => $r->category,
                 'meters'   => (float) $r->meters,
-                'rate'     => (int) ($rates[$r->category_id] ?? 0),
-                'amount'   => (int) round((float) $r->meters * (int) ($rates[$r->category_id] ?? 0)),
+                'rate'     => $rates->buildingTechnicianPerMeter((int) $r->category_id),
+                'amount'   => (int) round((float) $r->meters * $rates->buildingTechnicianPerMeter((int) $r->category_id)),
             ]);
 
             return [
