@@ -1,7 +1,7 @@
 @extends('layout.index')
 
 @section('title', 'Tambah Target KPI')
-@section('route-breadcrumb', route('kpi.targets.index'))
+@section('route-breadcrumb', route('kpi.targets.index', ['month' => $month ?? now()->month, 'year' => $year ?? now()->year]))
 @section('breadcrumb', 'Tambah Target KPI')
 
 @section('content')
@@ -18,7 +18,7 @@
     @slot('header')
         <div class="d-flex justify-content-between align-items-center">
             <div class="ui-card-title">Tambah / Ubah Target KPI</div>
-            <x-ui.button :href="route('kpi.targets.index')" variant="secondary" size="sm">Kembali</x-ui.button>
+            <x-ui.button :href="route('kpi.targets.index', ['month' => $month ?? now()->month, 'year' => $year ?? now()->year])" variant="secondary" size="sm">Kembali</x-ui.button>
         </div>
     @endslot
 
@@ -72,17 +72,17 @@
                     <div class="d-flex gap-2">
                         <select name="period_month" class="form-select @error('period_month') is-invalid @enderror" required>
                             @for ($m = 1; $m <= 12; $m++)
-                                <option value="{{ $m }}" @selected((int) old('period_month', now()->month) === $m)>{{ $m }}</option>
+                                <option value="{{ $m }}" @selected((int) old('period_month', $month ?? now()->month) === $m)>{{ $m }}</option>
                             @endfor
                         </select>
-                        <input type="number" name="period_year" class="form-control @error('period_year') is-invalid @enderror" value="{{ old('period_year', now()->year) }}" required>
+                        <input type="number" name="period_year" class="form-control @error('period_year') is-invalid @enderror" value="{{ old('period_year', $year ?? now()->year) }}" required>
                     </div>
                 </x-ui.form-field>
             </div>
         </div>
 
         <div class="d-flex justify-content-end gap-2 mt-2">
-            <x-ui.button :href="route('kpi.targets.index')" variant="secondary">Batal</x-ui.button>
+            <x-ui.button :href="route('kpi.targets.index', ['month' => $month ?? now()->month, 'year' => $year ?? now()->year])" variant="secondary">Batal</x-ui.button>
             <x-ui.button type="submit" variant="primary">Simpan</x-ui.button>
         </div>
     </form>

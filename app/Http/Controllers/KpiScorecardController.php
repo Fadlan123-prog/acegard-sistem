@@ -21,8 +21,8 @@ class KpiScorecardController extends Controller
 {
     public function targets(Request $request)
     {
-        $month = (int) $request->query('month', now()->month);
-        $year  = (int) $request->query('year', now()->year);
+        $month = min(12, max(1, (int) $request->query('month', now()->month)));
+        $year  = min(2100, max(2026, (int) $request->query('year', now()->year)));
 
         $targets = KpiTarget::where('period_month', $month)
             ->where('period_year', $year)
@@ -34,9 +34,12 @@ class KpiScorecardController extends Controller
         return view('kpi.targets.index', compact('targets', 'month', 'year'));
     }
 
-    public function createTarget()
+    public function createTarget(Request $request)
     {
-        return view('kpi.targets.create');
+        $month = min(12, max(1, (int) $request->query('month', now()->month)));
+        $year  = min(2100, max(2026, (int) $request->query('year', now()->year)));
+
+        return view('kpi.targets.create', compact('month', 'year'));
     }
 
     public function storeTarget(Request $request)
