@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\CreativeTask;
 use App\Models\User;
 use App\Notifications\CreativeTaskAssigned;
+use App\Notifications\CreativeTaskCancelled;
 use App\Notifications\CreativeTaskDeliverableSubmitted;
+use App\Notifications\CreativeTaskReassigned;
+use App\Notifications\CreativeTaskUpdated;
 use App\Notifications\CreativeTaskRevisionRequested;
 use Illuminate\Http\Request;
 
@@ -29,6 +32,37 @@ class CreativeTaskController extends Controller
         );
     }
 
+    /** Hanya Strategi Pengembangan dan superadmin yang boleh membuat/mengubah/membatalkan tugas. */
+    private function authorizeManager(): void
+    {
+        abort_unless(
+            auth()->user()->hasAnyRole(['strategi_pengembangan', 'superadmin']),
+            403,
+            'Hanya Strategi Pengembangan yang dapat membuat atau mengelola tugas.'
+        );
+    }
+
+    /** @return array<string,mixed> */
+    private function validatedTask(Request $request): array
+    {
+        $data = $request->validate([
+            'assigned_to'         => ['required', 'exists:users,id'],
+            'title'               => ['required', 'string', 'max:255'],
+            'brief'               => ['required', 'string'],
+            'department_context'  => ['nullable', 'string', 'max:255'],
+            'priority'            => ['required', 'in:low,normal,high'],
+            'due_date'            => ['nullable', 'date'],
+        ]);
+
+        abort_unless(
+            User::whereKey($data['assigned_to'])->role(['designer', 'videographer'])->exists(),
+            422,
+            'Tugas hanya bisa ditujukan ke Designer atau Videographer.'
+        );
+
+        return $data;
+    }
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -49,6 +83,7 @@ class CreativeTaskController extends Controller
 
     public function create()
     {
+        $this->authorizeManager();
         $assignees = User::role(['designer', 'videographer'])->orderBy('name')->get();
 
         return view('creative-tasks.create', compact('assignees'));
@@ -56,20 +91,8 @@ class CreativeTaskController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'assigned_to'         => ['required', 'exists:users,id'],
-            'title'               => ['required', 'string', 'max:255'],
-            'brief'               => ['required', 'string'],
-            'department_context'  => ['nullable', 'string', 'max:255'],
-            'priority'            => ['required', 'in:low,normal,high'],
-            'due_date'            => ['nullable', 'date'],
-        ]);
-
-        abort_unless(
-            User::whereKey($data['assigned_to'])->role(['designer', 'videographer'])->exists(),
-            422,
-            'Tugas hanya bisa ditujukan ke Designer atau Videographer.'
-        );
+        $this->authorizeManager();
+        $data = $this->validatedTask($request);
 
         $task = CreativeTask::create($data + [
             'assigned_by' => $request->user()->id,
@@ -96,9 +119,67 @@ class CreativeTaskController extends Controller
         return view('creative-tasks.show', ['task' => $creativeTask]);
     }
 
+    public function edit(CreativeTask $creativeTask)
+    {
+        $this->authorizeManager();
+        $this->authorizeAssigner($creativeTask);
+        abort_unless($creativeTask->isOpen(), 422, 'Tugas yang sudah selesai atau dibatalkan tidak dapat diubah.');
+
+        $assignees = User::role(['designer', 'videographer'])->orderBy('name')->get();
+
+        return view('creative-tasks.edit', ['task' => $creativeTask, 'assignees' => $assignees]);
+    }
+
+    public function update(Request $request, CreativeTask $creativeTask)
+    {
+        $this->authorizeManager();
+        $this->authorizeAssigner($creativeTask);
+        abort_unless($creativeTask->isOpen(), 422, 'Tugas yang sudah selesai atau dibatalkan tidak dapat diubah.');
+
+        $data = $this->validatedTask($request);
+        $oldAssignee = $creativeTask->assignee;
+        $reassigned  = (int) $data['assigned_to'] !== (int) $creativeTask->assigned_to;
+
+        $creativeTask->fill($data);
+        $contentChanged = $creativeTask->isDirty(['title', 'brief', 'department_context', 'priority', 'due_date']);
+        $creativeTask->save();
+        $creativeTask->load('assignee', 'assigner');
+
+        if ($reassigned) {
+            $creativeTask->assignee->notify(new CreativeTaskAssigned($creativeTask));
+            $oldAssignee?->notify(new CreativeTaskReassigned($creativeTask));
+        } elseif ($contentChanged) {
+            $creativeTask->assignee->notify(new CreativeTaskUpdated($creativeTask));
+        }
+
+        return redirect()->route('creative-tasks.show', $creativeTask)->with('success', 'Tugas berhasil diperbarui.');
+    }
+
+    public function cancel(Request $request, CreativeTask $creativeTask)
+    {
+        $this->authorizeManager();
+        $this->authorizeAssigner($creativeTask);
+        abort_unless($creativeTask->isOpen(), 422, 'Tugas ini sudah selesai atau sudah dibatalkan.');
+
+        $data = $request->validate(
+            ['cancel_reason' => ['required', 'string', 'max:1000']],
+            ['cancel_reason.required' => 'Alasan pembatalan wajib diisi.']
+        );
+
+        $creativeTask->update([
+            'status'        => 'cancelled',
+            'cancel_reason' => $data['cancel_reason'],
+            'cancelled_at'  => now(),
+        ]);
+        $creativeTask->assignee->notify(new CreativeTaskCancelled($creativeTask));
+
+        return back()->with('success', 'Tugas dibatalkan.');
+    }
+
     public function storeDeliverable(Request $request, CreativeTask $creativeTask)
     {
         $this->authorizeAssignee($creativeTask);
+        abort_unless(in_array($creativeTask->status, ['in_progress', 'revision'], true), 422, 'Hasil kerja hanya bisa diunggah saat tugas In Progress atau Revisi.');
 
         $data = $request->validate([
             'file' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,mp4,mov', 'max:51200'],

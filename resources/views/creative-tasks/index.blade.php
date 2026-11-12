@@ -23,6 +23,9 @@
         'revision'    => 'Revisi',
         'done'        => 'Selesai',
     ];
+    if (($tasksByStatus['cancelled'] ?? collect())->isNotEmpty()) {
+        $columns['cancelled'] = 'Dibatalkan';
+    }
 @endphp
 
 <div class="row g-3">

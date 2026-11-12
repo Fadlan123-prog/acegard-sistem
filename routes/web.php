@@ -256,8 +256,14 @@ Route::middleware('auth')->group(function () {
         ->middleware('role:superadmin|strategi_pengembangan|designer|videographer')
         ->controller(\App\Http\Controllers\CreativeTaskController::class)->group(function () {
             Route::get('/',                       'index')->name('index');
-            Route::get('/create',                 'create')->name('create');
-            Route::post('/',                      'store')->name('store');
+            // Membuat/mengubah/membatalkan tugas: hanya Strategi Pengembangan & superadmin
+            Route::middleware('role:superadmin|strategi_pengembangan')->group(function () {
+                Route::get('/create',                     'create')->name('create');
+                Route::post('/',                          'store')->name('store');
+                Route::get('/{creativeTask}/edit',        'edit')->name('edit');
+                Route::put('/{creativeTask}',             'update')->name('update');
+                Route::post('/{creativeTask}/cancel',     'cancel')->name('cancel');
+            });
             Route::get('/{creativeTask}',          'show')->name('show');
             Route::post('/{creativeTask}/deliverables', 'storeDeliverable')->name('deliverables.store');
             Route::post('/{creativeTask}/approve', 'approve')->name('approve');

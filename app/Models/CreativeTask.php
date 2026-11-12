@@ -15,11 +15,12 @@ class CreativeTask extends Model
 
     protected $fillable = [
         'assigned_by', 'assigned_to', 'title', 'brief',
-        'department_context', 'priority', 'due_date', 'status',
+        'department_context', 'priority', 'due_date', 'status', 'cancel_reason', 'cancelled_at',
     ];
 
     protected $casts = [
         'due_date' => 'date',
+        'cancelled_at' => 'datetime',
     ];
 
     public function assigner(): BelongsTo
@@ -45,6 +46,12 @@ class CreativeTask extends Model
     public function nextVersion(): int
     {
         return ($this->deliverables()->max('version') ?? 0) + 1;
+    }
+
+    /** Masih bisa diedit/dibatalkan pemberi tugas (belum selesai dan belum dibatalkan). */
+    public function isOpen(): bool
+    {
+        return ! in_array($this->status, ['done', 'cancelled'], true);
     }
 
     public function isOverdue(): bool

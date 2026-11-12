@@ -17,10 +17,12 @@
         'review'      => 'warning',
         'revision'    => 'danger',
         'done'        => 'success',
+        'cancelled'   => 'neutral',
         default       => 'secondary',
     };
     $isAssigner = auth()->id() === $task->assigned_by || auth()->user()->hasRole('superadmin');
     $isAssignee = auth()->id() === $task->assigned_to || auth()->user()->hasRole('superadmin');
+    $canManage  = $isAssigner && auth()->user()->hasAnyRole(['strategi_pengembangan', 'superadmin']) && $task->isOpen();
 @endphp
 
 <div class="row g-3">
@@ -36,6 +38,13 @@
 
             @if($task->department_context)
                 <p class="small text-muted mb-0">Kebutuhan dari: {{ $task->department_context }}</p>
+            @endif
+
+            @if($task->status === 'cancelled')
+                <x-ui.alert type="warning" class="mt-3 mb-0" :dismissible="false">
+                    <strong>Tugas dibatalkan</strong> {{ $task->cancelled_at?->translatedFormat('d M Y, H:i') }}.
+                    @if($task->cancel_reason) Alasan: {{ $task->cancel_reason }} @endif
+                </x-ui.alert>
             @endif
         </x-ui.card>
 
@@ -59,7 +68,7 @@
                 <p class="text-muted small mb-0">Belum ada deliverable diunggah.</p>
             @endforelse
 
-            @if($isAssignee && in_array($task->status, ['in_progress', 'revision']))
+            @if($isAssignee && in_array($task->status, ['in_progress', 'revision'], true))
                 <hr>
                 <form method="POST" action="{{ route('creative-tasks.deliverables.store', $task) }}" enctype="multipart/form-data">
                     @csrf
@@ -88,6 +97,23 @@
                 <dd class="col-7">{{ $task->due_date?->translatedFormat('d M Y') ?? '-' }}</dd>
             </dl>
         </x-ui.card>
+
+        @if($canManage)
+        <x-ui.card class="mt-3">
+            <h6 class="mb-2">Kelola Tugas</h6>
+            <x-ui.button :href="route('creative-tasks.edit', $task)" variant="outline" class="w-100 mb-2">
+                <iconify-icon icon="mdi:pencil-outline" class="me-1"></iconify-icon>Ubah Tugas / Ganti Penerima
+            </x-ui.button>
+            <form method="POST" action="{{ route('creative-tasks.cancel', $task) }}">
+                @csrf
+                <textarea name="cancel_reason" rows="2" class="form-control form-control-sm mb-2" placeholder="Alasan pembatalan (wajib)..." required aria-label="Alasan pembatalan"></textarea>
+                <x-ui.button type="submit" variant="danger-outline" class="w-100"
+                             onclick="return confirm('Batalkan tugas ini? Penerima akan diberi tahu.')">
+                    <iconify-icon icon="mdi:close-circle-outline" class="me-1"></iconify-icon>Batalkan Tugas
+                </x-ui.button>
+            </form>
+        </x-ui.card>
+        @endif
 
         @if($isAssigner && $task->status === 'review')
         <x-ui.card class="mt-3">
