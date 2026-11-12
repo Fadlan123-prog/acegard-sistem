@@ -71,7 +71,7 @@
             <tbody>
                 @foreach ($rows as $t)
                 <tr>
-                    <td class="ps-0 py-2 fw-medium">{{ $t->metric_label }}<div class="text-muted" style="font-size:11px">{{ $t->metric_key }}</div></td>
+                    <td class="ps-0 py-2 fw-medium">{{ $t->metric_label }} @if($t->isAuto())<x-ui.badge variant="info" size="sm">Otomatis</x-ui.badge>@endif<div class="text-muted" style="font-size:11px">{{ $t->metric_key }}</div></td>
                     <td class="py-2 text-end">{{ rtrim(rtrim($t->target_value, '0'), '.') }}</td>
                     <td class="py-2 text-end">{{ rtrim(rtrim(number_format($t->weight, 2, '.', ''), '0'), '.') }}%</td>
                     <td class="py-2">

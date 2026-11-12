@@ -40,6 +40,16 @@
                 </x-ui.form-field>
             </div>
             <div class="col-md-4 mb-3">
+                <x-ui.form-field label="Sumber Data" name="source" help="Otomatis = dihitung sistem tiap jam dan tidak bisa diisi manual" :required="true">
+                    <select name="source" class="form-select @error('source') is-invalid @enderror" required>
+                        <option value="manual" @selected(old('source', 'manual') === 'manual')>Manual (diisi admin)</option>
+                        @foreach (\App\Services\KpiMetrics::options() as $code => $label)
+                            <option value="{{ $code }}" @selected(old('source') === $code)>Otomatis — {{ $label }}</option>
+                        @endforeach
+                    </select>
+                </x-ui.form-field>
+            </div>
+            <div class="col-md-4 mb-3">
                 <x-ui.form-field label="Metric Key" name="metric_key" help="Kode unik, mis. balas_chat_5menit" :required="true">
                     <input type="text" name="metric_key" class="form-control @error('metric_key') is-invalid @enderror" value="{{ old('metric_key') }}" required>
                 </x-ui.form-field>

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class KpiTarget extends Model
 {
     protected $fillable = [
-        'division', 'metric_key', 'metric_label', 'target_value',
+        'division', 'metric_key', 'source', 'metric_label', 'target_value',
         'weight', 'direction', 'period_month', 'period_year', 'created_by',
     ];
 
@@ -15,6 +15,11 @@ class KpiTarget extends Model
         'target_value' => 'decimal:2',
         'weight'       => 'decimal:2',
     ];
+
+    public function isAuto(): bool
+    {
+        return $this->source !== 'manual';
+    }
 
     // Divisi yang sudah didefinisikan di "Kartu KPI per Divisi — Acegard".
     const DIVISIONS = [

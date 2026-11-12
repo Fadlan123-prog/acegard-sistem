@@ -22,7 +22,7 @@
             <tbody>
                 @forelse ($scores as $s)
                 <tr>
-                    <td class="ps-0 py-2 fw-medium">{{ $s->target->metric_label }}</td>
+                    <td class="ps-0 py-2 fw-medium">{{ $s->target->metric_label }} @if($s->is_auto)<x-ui.badge variant="info" size="sm">Otomatis</x-ui.badge>@endif</td>
                     <td class="py-2 text-end">{{ rtrim(rtrim($s->target->target_value, '0'), '.') }}</td>
                     <td class="py-2 text-end">{{ rtrim(rtrim($s->actual_value, '0'), '.') }}</td>
                     <td class="py-2 text-end">{{ $s->target->weight }}%</td>
