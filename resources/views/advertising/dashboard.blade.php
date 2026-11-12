@@ -82,19 +82,27 @@
     <div class="col-xl-4">
         <x-ui.card title="Funnel Advertising" subtitle="Leads bulan ini">
             @php
-                $funnelOrder = ['new', 'contacted', 'follow_up', 'quoted', 'won'];
-                $max = max(1, $funnel->max() ?? 1);
+                $allLeads  = (int) $funnel->sum();
+                $followed  = (int) (($funnel['follow_up'] ?? 0) + ($funnel['quoted'] ?? 0) + ($funnel['won'] ?? 0));
+                $stages = [
+                    ['label' => 'Leads Masuk', 'value' => $allLeads, 'text' => number_format($allLeads, 0, ',', '.'), 'bar' => $allLeads],
+                    ['label' => 'CPL (biaya per lead)', 'value' => $avgCpl, 'text' => $avgCpl ? 'Rp ' . number_format($avgCpl, 0, ',', '.') : '-', 'bar' => null],
+                    ['label' => 'Follow Up', 'value' => $followed, 'text' => number_format($followed, 0, ',', '.'), 'bar' => $followed],
+                    ['label' => 'Repeat Order', 'value' => $repeatOrders, 'text' => number_format($repeatOrders, 0, ',', '.'), 'bar' => $repeatOrders],
+                ];
+                $max = max(1, $allLeads);
             @endphp
-            @foreach ($funnelOrder as $status)
-            @php $value = $funnel[$status] ?? 0; @endphp
+            @foreach ($stages as $st)
             <div class="mb-3">
                 <div class="d-flex justify-content-between" style="font-size:12px">
-                    <span>{{ $statusLabels[$status] ?? $status }}</span>
-                    <span class="fw-semibold">{{ $value }}</span>
+                    <span>{{ $st['label'] }}</span>
+                    <span class="fw-semibold">{{ $st['text'] }}</span>
                 </div>
+                @if ($st['bar'] !== null)
                 <div class="progress" style="height:6px">
-                    <div class="progress-bar" style="width: {{ $max > 0 ? round($value / $max * 100) : 0 }}%"></div>
+                    <div class="progress-bar" style="width: {{ round($st['bar'] / $max * 100) }}%"></div>
                 </div>
+                @endif
             </div>
             @endforeach
         </x-ui.card>

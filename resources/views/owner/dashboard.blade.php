@@ -10,6 +10,65 @@
 
 <x-dashboard.birthday-widget :birthdays="$upcomingBirthdays" />
 
+{{-- Ringkasan Eksekutif --}}
+@php
+    $ex = $executive;
+    $monthNames = [1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    $short = fn($v) => $v >= 1e9 ? 'Rp ' . number_format($v/1e9, 2, ',', '.') . ' M' : ($v >= 1e6 ? 'Rp ' . number_format($v/1e6, 1, ',', '.') . ' jt' : 'Rp ' . number_format($v, 0, ',', '.'));
+@endphp
+<x-ui.card title="Ringkasan Eksekutif" subtitle="Omzet = invoice lunas (mobil, PPF, gedung) per tanggal invoice" class="mb-4">
+    <form method="GET" class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+        <label for="ex-month" class="visually-hidden">Bulan</label>
+        <select id="ex-month" name="month" class="form-select" style="width:auto" onchange="this.form.submit()">
+            @foreach ($monthNames as $n => $l)<option value="{{ $n }}" @selected($n === $execMonth)>{{ $l }}</option>@endforeach
+        </select>
+        <label for="ex-year" class="visually-hidden">Tahun</label>
+        <input id="ex-year" type="number" name="year" value="{{ $execYear }}" min="2020" max="2100" class="form-control" style="width:96px" onchange="this.form.submit()">
+        <span class="text-muted" style="font-size:12px">{{ $ex['start']->translatedFormat('d M') }} – {{ $ex['end']->translatedFormat('d M Y') }}</span>
+    </form>
+
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-xl-3">
+            <div class="text-muted" style="font-size:12px">Total Omzet</div>
+            <div class="fw-bold" style="font-size:22px">{{ $short($ex['revenue']['total']) }}</div>
+            @if ($ex['growth_pct'] !== null)
+                <div style="font-size:12px" class="{{ $ex['growth_pct'] >= 0 ? 'text-success' : 'text-danger' }}">
+                    <iconify-icon icon="mdi:{{ $ex['growth_pct'] >= 0 ? 'arrow-up' : 'arrow-down' }}"></iconify-icon>
+                    {{ abs($ex['growth_pct']) }}% vs bulan lalu
+                </div>
+            @else
+                <div class="text-muted" style="font-size:12px">Belum ada pembanding bulan lalu</div>
+            @endif
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="text-muted" style="font-size:12px">Total Advertising Spend</div>
+            <div class="fw-bold" style="font-size:22px">{{ $short($ex['ad_spend']) }}</div>
+            <div class="text-muted" style="font-size:12px">ROAS {{ $ex['roas'] !== null ? $ex['roas'].'x' : '-' }}</div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="text-muted" style="font-size:12px">Total Leads</div>
+            <div class="fw-bold" style="font-size:22px">{{ number_format($ex['leads'], 0, ',', '.') }}</div>
+            <div class="text-muted" style="font-size:12px">Closing {{ $ex['closing_rate'] }}% · CPL {{ $ex['cpl'] ? $short($ex['cpl']) : '-' }}</div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="text-muted" style="font-size:12px">Total Transaksi</div>
+            <div class="fw-bold" style="font-size:22px">{{ number_format($ex['revenue']['count'], 0, ',', '.') }}</div>
+            <div class="text-muted" style="font-size:12px">Invoice lunas</div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="fw-semibold mb-1" style="font-size:13px">Omzet per Kategori</div>
+            <div id="execCategoryChart" style="height:240px"></div>
+        </div>
+        <div class="col-lg-6">
+            <div class="fw-semibold mb-1" style="font-size:13px">Tren Omzet {{ count($ex['trend']) }} Bulan</div>
+            <div id="execTrendChart" style="height:240px"></div>
+        </div>
+    </div>
+</x-ui.card>
+
 {{-- KPI Cards --}}
 <div class="row g-3 mb-4">
     <div class="col-sm-6 col-xl-3">
@@ -153,5 +212,33 @@
     </div>
 
 </div>
+
+@push('page-scripts')
+<script>
+(function () {
+    const fmt = v => 'Rp ' + Number(v).toLocaleString('id-ID');
+    const axis = v => v >= 1e9 ? (v/1e9).toFixed(1) + ' M' : (v/1e6).toFixed(0) + ' jt';
+    const cat = {!! json_encode($executive['revenue']['by_category']) !!};
+    const trend = {!! json_encode($executive['trend']) !!};
+    new ApexCharts(document.getElementById('execCategoryChart'), {
+        chart: { type: 'bar', height: 240, toolbar: { show: false }, fontFamily: 'inherit' },
+        series: [{ name: 'Omzet', data: Object.values(cat) }],
+        xaxis: { categories: Object.keys(cat) },
+        yaxis: { labels: { formatter: axis } },
+        colors: ['#2563eb'], dataLabels: { enabled: false },
+        plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
+        tooltip: { y: { formatter: fmt } },
+    }).render();
+    new ApexCharts(document.getElementById('execTrendChart'), {
+        chart: { type: 'line', height: 240, toolbar: { show: false }, fontFamily: 'inherit' },
+        series: [{ name: 'Omzet', data: trend.map(t => t.total) }],
+        xaxis: { categories: trend.map(t => t.label) },
+        yaxis: { labels: { formatter: axis } },
+        colors: ['#2563eb'], stroke: { width: 3, curve: 'smooth' }, markers: { size: 4 },
+        tooltip: { y: { formatter: fmt } },
+    }).render();
+})();
+</script>
+@endpush
 
 @endsection
