@@ -46,4 +46,20 @@ class OwnerExecutiveOverviewTest extends TestCase
             ->assertSee('Repeat Order')
             ->assertDontSee('Qualified');
     }
+
+    public function test_advertising_cards_and_table_use_followup_and_repeat(): void
+    {
+        $branch = Branch::factory()->create();
+        $m = $this->userWithRole('marketing', $branch);
+        foreach (['won', 'won', 'follow_up'] as $i => $st) {
+            \App\Models\Lead::create(['branch_id' => $branch->id, 'name' => "L$i", 'phone' => $st === 'won' ? '0812' : '0899', 'source' => 'walk_in', 'ad_channel' => 'meta', 'category' => 'car_film', 'status' => $st]);
+        }
+
+        $html = $this->actingAs($m)->get(route('advertising.dashboard'))->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('Average CPL', $html);
+        $this->assertStringNotContainsString('Attributed Revenue', $html);
+        $this->assertMatchesRegularExpression('/Follow Up<\/div>\s*<div[^>]*>\s*3\b/s', $html);
+        $this->assertMatchesRegularExpression('/Repeat Order<\/div>\s*<div[^>]*>\s*1\b/s', $html);
+    }
 }

@@ -47,10 +47,29 @@ class AdvertisingController extends Controller
                 DB::raw('COUNT(*) as total_leads'),
                 DB::raw('SUM(CASE WHEN status = "won" THEN 1 ELSE 0 END) as won_leads'),
                 DB::raw('SUM(CASE WHEN status = "won" THEN estimated_value ELSE 0 END) as won_value'),
+                DB::raw('SUM(CASE WHEN status IN ("follow_up","quoted","won") THEN 1 ELSE 0 END) as followed_leads'),
             )
             ->groupBy('ad_channel')
             ->get()
             ->keyBy('ad_channel');
+
+        // Repeat order per channel: lead won yang nomornya sudah pernah won sebelumnya.
+        $repeatByChannel = Lead::query()
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+            ->whereNotNull('ad_channel')
+            ->whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
+            ->where('status', 'won')
+            ->whereNotNull('phone')->where('phone', '!=', '')
+            ->whereExists(function ($q) {
+                $q->select(DB::raw(1))->from('leads as prior')
+                    ->whereColumn('prior.phone', 'leads.phone')
+                    ->where('prior.status', 'won')
+                    ->whereColumn('prior.id', '<', 'leads.id');
+            })
+            ->select('ad_channel', DB::raw('COUNT(*) as total'))
+            ->groupBy('ad_channel')
+            ->pluck('total', 'ad_channel');
 
         $channels = [];
         foreach (Lead::AD_CHANNELS as $key => $label) {
@@ -66,6 +85,8 @@ class AdvertisingController extends Controller
                 'spend'        => $spend,
                 'leads'        => $totalLeads,
                 'cpl'          => $totalLeads > 0 ? $spend / $totalLeads : null,
+                'followed'     => (int) ($leads->followed_leads ?? 0),
+                'repeat'       => (int) ($repeatByChannel[$key] ?? 0),
                 'won_leads'    => $wonLeads,
                 'closing_rate' => $totalLeads > 0 ? round($wonLeads / $totalLeads * 100, 1) : 0,
                 'attributed_revenue' => $wonValue,
@@ -76,6 +97,8 @@ class AdvertisingController extends Controller
         $totalLeads = array_sum(array_column($channels, 'leads'));
         $avgCpl     = $totalLeads > 0 ? $totalSpend / $totalLeads : null;
         $attributedRevenue = array_sum(array_column($channels, 'attributed_revenue'));
+        $totalFollowed     = array_sum(array_column($channels, 'followed'));
+        $totalRepeat       = array_sum(array_column($channels, 'repeat'));
 
         // Funnel across the whole lead base for the period (not only paid channels),
         // mapped from Lead::STATUSES — mirrors the mockup's "Leads masuk → Qualified →
@@ -106,6 +129,8 @@ class AdvertisingController extends Controller
 
         return view('advertising.dashboard', [
             'repeatOrders'      => $repeatOrders,
+            'totalFollowed'     => $totalFollowed,
+            'totalRepeat'       => $totalRepeat,
             'channels'          => $channels,
             'totalSpend'        => $totalSpend,
             'totalLeads'        => $totalLeads,
