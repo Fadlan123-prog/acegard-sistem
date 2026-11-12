@@ -27,7 +27,7 @@
 /* Items table */
 .items-tbl th { font-size:12px; font-weight:600; color:var(--neutral-500); background:var(--neutral-50); }
 .items-tbl td { vertical-align:middle; }
-.item-subtotal-cell { font-weight:600; color:var(--primary-600); }
+
 
 [data-theme="dark"] .cust-section,[data-theme="dark"] .cust-action-bar { background:var(--dark-2); }
 [data-theme="dark"] .cust-section-head { background:var(--dark-3); }
@@ -37,6 +37,7 @@
 [data-theme="dark"] .cust-section-head .sec-title { color:var(--neutral-100); }
 [data-theme="dark"] .items-tbl th { background:var(--dark-3); }
 </style>
+@include('partials.doc-items.styles')
 @endpush
 
 @include('partials.form-errors')
@@ -237,27 +238,7 @@
             </div>
             <div class="cust-section-body">
 
-                <div class="table-responsive mb-3">
-                    <table class="table table-bordered items-tbl mb-0" id="itemsTable">
-                        <thead>
-                            <tr>
-                                <th style="min-width:200px">Deskripsi / Produk</th>
-                                <th style="min-width:150px">Spesifikasi</th>
-                                <th style="width:80px">Satuan</th>
-                                <th style="width:70px">Qty</th>
-                                <th style="width:130px">Harga Satuan (Rp)</th>
-                                <th style="width:70px">Disc%</th>
-                                <th style="width:130px" class="text-end">Subtotal (Rp)</th>
-                                <th style="width:40px"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="itemsBody"></tbody>
-                    </table>
-                </div>
-
-                <x-ui.button type="button" variant="outline" size="sm" class="mb-4" id="addRowBtn">
-                    <iconify-icon icon="mdi:plus" class="me-1"></iconify-icon> Tambah Baris
-                </x-ui.button>
+                @include('partials.doc-items.table')
 
                 {{-- Totals --}}
                 <div class="row justify-content-end">
@@ -272,8 +253,8 @@
                                 <td class="text-end border-0" style="width:150px">
                                     <input type="number" name="discount_amount" id="discountInput"
                                            class="form-control form-control-sm text-end"
-                                           value="{{ old('discount_amount', $isEdit ? $quotation->discount_amount : 0) }}"
-                                           min="0" step="1000">
+                                           value="{{ old('discount_amount', (int) round((float) ($isEdit ? $quotation->discount_amount : 0))) }}"
+                                           min="0" step="1">
                                 </td>
                             </tr>
                             <tr class="table-light">
@@ -324,99 +305,16 @@
     </div>
 </div>
 
-{{-- Row template --}}
-<template id="itemRowTemplate">
-    <tr class="item-row">
-        <td><input type="text" name="items[__IDX__][description]" class="form-control form-control-sm" placeholder="Nama produk / layanan" required></td>
-        <td><input type="text" name="items[__IDX__][specifications]" class="form-control form-control-sm" placeholder="Opsional"></td>
-        <td>
-            <select name="items[__IDX__][unit]" class="form-select form-select-sm">
-                <option value="unit">unit</option>
-                <option value="m2">m²</option>
-                <option value="pcs">pcs</option>
-                <option value="paket">paket</option>
-                <option value="meter">meter</option>
-            </select>
-        </td>
-        <td><input type="number" name="items[__IDX__][quantity]" class="form-control form-control-sm item-qty" value="1" min="0.01" step="0.01" required></td>
-        <td><input type="number" name="items[__IDX__][unit_price]" class="form-control form-control-sm item-price" value="0" min="0" step="1000" required></td>
-        <td><input type="number" name="items[__IDX__][discount_percent]" class="form-control form-control-sm item-disc" value="0" min="0" max="100" step="0.5"></td>
-        <td class="text-end item-subtotal-cell align-middle"><span class="item-subtotal">Rp 0</span></td>
-        <td class="text-center align-middle">
-            <button type="button" class="w-32-px h-32-px bg-danger-focus text-danger-main rounded-circle d-inline-flex align-items-center justify-content-center border-0 remove-row-btn" title="Hapus">
-                <iconify-icon icon="mingcute:delete-2-line"></iconify-icon>
-            </button>
-        </td>
-    </tr>
-</template>
+@include('partials.doc-items.template')
 
 @push('page-scripts')
+@include('partials.doc-items.script', ['seedItems' => $isEdit ? $existingItems->map(fn($i) => [
+    'description' => $i->description, 'specifications' => $i->specifications, 'film_lines' => $i->film_lines,
+    'vehicle_label' => $i->vehicle_label, 'vehicle_plate' => $i->vehicle_plate, 'unit' => $i->unit,
+    'quantity' => (float) $i->quantity, 'unit_price' => (int) round((float) $i->unit_price), 'discount_percent' => (float) $i->discount_percent,
+])->all() : []])
 <script>
 (function(){
-    let rowIdx = 0;
-    const body   = document.getElementById('itemsBody');
-    const tmpl   = document.getElementById('itemRowTemplate');
-    const discIn = document.getElementById('discountInput');
-
-    function fmt(n){ return 'Rp ' + Math.round(n).toLocaleString('id-ID'); }
-
-    function rowSub(row){
-        const qty   = parseFloat(row.querySelector('.item-qty').value)   || 0;
-        const price = parseFloat(row.querySelector('.item-price').value)  || 0;
-        const disc  = parseFloat(row.querySelector('.item-disc').value)   || 0;
-        return qty * price * (1 - disc / 100);
-    }
-
-    function recalc(){
-        let sub = 0;
-        body.querySelectorAll('.item-row').forEach(row => {
-            const s = rowSub(row);
-            sub += s;
-            row.querySelector('.item-subtotal').textContent = fmt(s);
-        });
-        const disc = parseFloat(discIn.value) || 0;
-        document.getElementById('displaySubtotal').textContent = fmt(sub);
-        document.getElementById('displayTotal').textContent    = fmt(sub - disc);
-    }
-
-    function addRow(data){
-        const html = tmpl.innerHTML.replace(/__IDX__/g, rowIdx++);
-        body.insertAdjacentHTML('beforeend', html);
-        const row = body.lastElementChild;
-
-        if(data){
-            row.querySelector('[name$="[description]"]').value    = data.description     || '';
-            row.querySelector('[name$="[specifications]"]').value = data.specifications  || '';
-            row.querySelector('[name$="[unit]"]').value           = data.unit            || 'unit';
-            row.querySelector('.item-qty').value                  = data.quantity        || 1;
-            row.querySelector('.item-price').value                = data.unit_price      || 0;
-            row.querySelector('.item-disc').value                 = data.discount_percent|| 0;
-        }
-
-        row.querySelectorAll('input,select').forEach(el => el.addEventListener('input', recalc));
-        row.querySelector('.remove-row-btn').addEventListener('click', () => { row.remove(); recalc(); });
-        recalc();
-    }
-
-    // Seed existing items (edit mode)
-    // Js::from() (not ->toJson() wrapped in a raw Blade echo) HEX-escapes <, >, &, ' so a
-    // description/specifications value containing a closing script tag can't break
-    // out of this inline script block (stored XSS — see audit finding H-10).
-    var seedItems = {!! \Illuminate\Support\Js::from($isEdit && $existingItems->isNotEmpty()
-        ? $existingItems->map(fn($i) => [
-            'description'      => $i->description,
-            'specifications'   => $i->specifications,
-            'unit'             => $i->unit,
-            'quantity'         => $i->quantity,
-            'unit_price'       => $i->unit_price,
-            'discount_percent' => $i->discount_percent,
-          ])
-        : []) !!};
-    if (seedItems.length) { seedItems.forEach(addRow); } else { addRow(); }
-
-    document.getElementById('addRowBtn').addEventListener('click', () => addRow());
-    discIn.addEventListener('input', recalc);
-
     // Show/hide vehicle fields
     function toggleVehicle(){
         const cat = document.getElementById('categorySelect')?.value;

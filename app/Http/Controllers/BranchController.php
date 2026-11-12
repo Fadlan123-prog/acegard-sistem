@@ -53,6 +53,7 @@ class BranchController extends Controller
                 'customerBuildings',
                 'employees',
             ])
+            ->when(! $request->user()->hasRole('superadmin'), fn ($q) => $q->whereIn('id', $request->user()->accessibleBranchIds()))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
@@ -73,6 +74,8 @@ class BranchController extends Controller
 
     public function bulkDelete(Request $request)
     {
+        $this->requireSuperadmin();
+
         $ids = collect(explode(',', (string) $request->input('selected_ids')))
             ->map(fn ($id) => (int) trim($id))
             ->filter()
@@ -122,6 +125,8 @@ class BranchController extends Controller
 
     public function create()
     {
+        $this->requireSuperadmin();
+
         return view('branches.create', [
             'title'     => 'Tambah Cabang',
             'employees' => Employee::orderBy('name')->get(['id', 'name', 'job_position']),
@@ -130,6 +135,8 @@ class BranchController extends Controller
 
     public function store(Request $request)
     {
+        $this->requireSuperadmin();
+
         $validated = $this->validateBranch($request);
 
         $branch = Branch::create($validated);
@@ -141,6 +148,8 @@ class BranchController extends Controller
 
     public function edit(Branch $branch)
     {
+        $this->authorizeBranch($branch);
+
         return view('branches.edit', [
             'title'     => 'Edit Cabang',
             'branch'    => $branch,
@@ -150,6 +159,8 @@ class BranchController extends Controller
 
     public function update(Request $request, Branch $branch)
     {
+        $this->authorizeBranch($branch);
+
         $validated = $this->validateBranch($request, $branch->id);
 
         $branch->update($validated);
@@ -166,6 +177,8 @@ class BranchController extends Controller
 
     public function destroy(Branch $branch)
     {
+        $this->requireSuperadmin();
+
         $branch->loadCount([
             'customers',
             'customerBuildings',
@@ -189,6 +202,16 @@ class BranchController extends Controller
         return redirect()
             ->route('branches.index')
             ->with('success', 'Cabang berhasil dihapus.');
+    }
+
+    private function requireSuperadmin(): void
+    {
+        abort_unless(auth()->user()->hasRole('superadmin'), 403, 'Hanya superadmin yang dapat menambah/menghapus cabang.');
+    }
+
+    private function authorizeBranch(Branch $branch): void
+    {
+        abort_unless(auth()->user()->canAccessBranch((int) $branch->id), 403, 'Bukan cabang Anda.');
     }
 
     private function validateBranch(Request $request, ?int $branchId = null): array

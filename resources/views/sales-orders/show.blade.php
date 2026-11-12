@@ -103,7 +103,7 @@
                 <div class="col-sm-3">
                     <div class="text-muted small mb-1">Jadwal Pasang</div>
                     @if($salesOrder->scheduled_date)
-                        @php $overdue = $salesOrder->scheduled_date->isPast() && !in_array($salesOrder->status, ['completed','cancelled']); @endphp
+                        @php $overdue = $salesOrder->scheduled_date->isBeforeToday() && !in_array($salesOrder->status, ['completed','cancelled']); @endphp
                         <div class="fw-semibold {{ $overdue ? 'text-danger' : '' }}">
                             {{ $salesOrder->scheduled_date->format('d M Y') }}
                             @if($overdue)
@@ -194,6 +194,19 @@
                 </div>
                 @endif
 
+                @php $filmBreakdown = $salesOrder->filmBreakdown(); @endphp
+                @if($filmBreakdown)
+                <div class="col-12">
+                    <div class="text-muted small mb-1">Tipe Film &amp; Kegelapan per Bagian Kaca</div>
+                    @include('sales-orders._film-breakdown', ['breakdown' => $filmBreakdown, 'variant' => 'web'])
+                </div>
+                @elseif($salesOrder->usesFilmSelection() && $salesOrder->film_label)
+                <div class="col-sm-6">
+                    <div class="text-muted small mb-1">Tipe Film &amp; Kegelapan</div>
+                    <div class="fw-semibold">{{ $salesOrder->film_label }}</div>
+                </div>
+                @endif
+
                 @if(in_array($salesOrder->status, ['confirmed', 'in_progress']))
                 <div class="col-12">
                     <x-ui.button variant="outline" size="sm" type="button"
@@ -225,7 +238,14 @@
                     <tbody>
                         @forelse($salesOrder->items as $item)
                         <tr>
-                            <td class="fw-semibold">{{ $item->description }}</td>
+                            <td class="fw-semibold">
+                                @if($item->vehicle_label || $item->vehicle_plate)
+                                    <div class="small text-primary fw-semibold mb-1">
+                                        <iconify-icon icon="mdi:car-outline" class="me-1"></iconify-icon>{{ trim($item->vehicle_label . ($item->vehicle_plate ? ' · ' . $item->vehicle_plate : ''), ' ·') }}
+                                    </div>
+                                @endif
+                                {{ $item->description }}
+                            </td>
                             <td class="small text-muted">{{ $item->specifications ?? '—' }}</td>
                             <td class="text-center small">{{ $item->unit }}</td>
                             <td class="text-center">{{ rtrim(rtrim(number_format($item->quantity, 2), '0'), '.') }}</td>
@@ -534,6 +554,55 @@
                         <p class="text-muted mt-2" style="font-size:11px">
                             Mengganti teknisi yang sudah ditugaskan akan mengirim notifikasi ke teknisi baru.
                         </p>
+                    @endif
+
+                    @php $filmBreakdown = $salesOrder->filmBreakdown(); @endphp
+                    @if($filmBreakdown)
+                        <hr>
+                        <div class="fw-semibold mb-1">Tipe Film &amp; Kegelapan per Bagian Kaca</div>
+                        <p class="text-muted small mb-2">Diambil dari rincian harga SO. Untuk mengubahnya, edit rincian harga di Sales Order.</p>
+                        @include('sales-orders._film-breakdown', ['breakdown' => $filmBreakdown, 'variant' => 'web'])
+                    @elseif($salesOrder->usesFilmSelection())
+                        <hr>
+                        <x-ui.form-field label="Tipe Kaca Film" name="film_category_id">
+                            <select name="film_category_id" id="filmCategory" class="form-select">
+                                <option value="">— Belum dipilih —</option>
+                                @foreach($filmCategories as $cat)
+                                    <option value="{{ $cat->id }}" {{ (int) $salesOrder->film_category_id === (int) $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                                @endforeach
+                            </select>
+                        </x-ui.form-field>
+                        <x-ui.form-field label="Persentase Kegelapan" name="film_product_id" class="mt-3">
+                            <select name="film_product_id" id="filmProduct" class="form-select">
+                                <option value="">— Pilih tipe film dulu —</option>
+                                @foreach($filmProducts as $fp)
+                                    <option value="{{ $fp->id }}" data-category="{{ $fp->category_id }}"
+                                            {{ (int) $salesOrder->film_product_id === (int) $fp->id ? 'selected' : '' }}>
+                                        {{ $fp->name }}{{ $fp->description ? ' (' . $fp->description . ')' : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </x-ui.form-field>
+                        <script>
+                        (function () {
+                            const cat = document.getElementById('filmCategory');
+                            const prod = document.getElementById('filmProduct');
+                            if (!cat || !prod) return;
+                            function sync() {
+                                let hasSelected = false;
+                                Array.from(prod.options).forEach(o => {
+                                    if (!o.value) return;
+                                    const ok = o.dataset.category === cat.value;
+                                    o.hidden = !ok; o.disabled = !ok;
+                                    if (ok && o.selected) hasSelected = true;
+                                });
+                                if (!hasSelected) prod.value = '';
+                                prod.options[0].textContent = cat.value ? '— Pilih persentase —' : '— Pilih tipe film dulu —';
+                            }
+                            cat.addEventListener('change', sync);
+                            sync();
+                        })();
+                        </script>
                     @endif
                 </div>
                 <div class="modal-footer flex-column flex-sm-row gap-2">

@@ -13,6 +13,7 @@
             $isManagerOps       = $user?->hasRole('manager_operasional') ?? false;
             $isManagerMarketing = $user?->hasRole('manager_marketing') ?? false;
             $isMarketing        = $user?->hasRole('marketing') ?? false;
+            $isSales            = $user?->hasRole('sales') ?? false;
             $isFinance          = $user?->hasRole('finance') ?? false;
             $isPurchasing       = $user?->hasRole('purchasing') ?? false;
             $isTeknisi          = $user?->hasRole('teknisi') ?? false;
@@ -34,6 +35,8 @@
                 $dashboardUrl = route('owner.dashboard');
             } elseif ($isMarketing || $isManagerMarketing) {
                 $dashboardUrl = route('marketing.dashboard');
+            } elseif ($isSales) {
+                $dashboardUrl = route('sales.dashboard');
             } elseif ($isCs) {
                 $dashboardUrl = route('cs.dashboard');
             } elseif ($isManagerOps) {
@@ -338,6 +341,32 @@
             @endif
 
             {{-- ═══════════════════════════════════════════
+                 REFERRAL & HIERARKI SALES (2026-10)
+            ═══════════════════════════════════════════ --}}
+            @if($isSales)
+            <li>
+                <a href="{{ route('sales.dashboard') }}">
+                    <iconify-icon icon="mdi:account-tie-outline" class="menu-icon"></iconify-icon>
+                    <span>Dashboard Sales</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('sales-transactions.index') }}">
+                    <iconify-icon icon="mdi:cart-outline" class="menu-icon"></iconify-icon>
+                    <span>Transaksi Sales</span>
+                </a>
+            </li>
+            @endif
+            @if($isSales || $isMarketing)
+            <li>
+                <a href="{{ route('sales-network.my-network') }}">
+                    <iconify-icon icon="mdi:account-group-outline" class="menu-icon"></iconify-icon>
+                    <span>Jaringan Sales Saya</span>
+                </a>
+            </li>
+            @endif
+
+            {{-- ═══════════════════════════════════════════
                  MANAGER MARKETING
             ═══════════════════════════════════════════ --}}
             @if($isManagerMarketing)
@@ -386,7 +415,7 @@
             <li>
                 <a href="{{ route('work-orders.index') }}">
                     <iconify-icon icon="solar:clipboard-list-outline" class="menu-icon"></iconify-icon>
-                    <span>Penugasan Kerja</span>
+                    <span>Monitoring Pekerjaan</span>
                 </a>
             </li>
             <li class="dropdown">
@@ -475,6 +504,7 @@
                 <ul class="sidebar-submenu">
                     <li><a href="{{ route('hutang.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Hutang ke Vendor</a></li>
                     <li><a href="{{ route('piutang.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Piutang dari Pelanggan</a></li>
+                    <li><a href="{{ route('finance.payment-status') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Status Pembayaran Customer</a></li>
                 </ul>
             </li>
             <li>
@@ -577,7 +607,7 @@
             <li>
                 <a href="{{ route('work-orders.index') }}">
                     <iconify-icon icon="solar:clipboard-list-outline" class="menu-icon"></iconify-icon>
-                    <span>Penugasan Kerja</span>
+                    <span>Monitoring Pekerjaan</span>
                 </a>
             </li>
 
@@ -715,6 +745,19 @@
                 </a>
             </li>
 
+            <li class="dropdown">
+                <a href="javascript:void(0)">
+                    <iconify-icon icon="mdi:sitemap-outline" class="menu-icon"></iconify-icon>
+                    <span>Referral & Sales</span>
+                </a>
+                <ul class="sidebar-submenu">
+                    <li><a href="{{ route('sales-network.admin-index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Jaringan Sales</a></li>
+                    <li><a href="{{ route('sales-network.pending') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Approval Rekrutan</a></li>
+                    <li><a href="{{ route('sales-products.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Produk Sales</a></li>
+                    <li><a href="{{ route('sales-transactions.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Transaksi Sales</a></li>
+                </ul>
+            </li>
+
             @if(Route::has('claims-disbursement.index'))
             <li>
                 <a href="{{ route('claims-disbursement.index') }}">
@@ -757,6 +800,7 @@
                 <ul class="sidebar-submenu">
                     <li><a href="{{ route('hutang.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Hutang ke Vendor</a></li>
                     <li><a href="{{ route('piutang.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Piutang dari Pelanggan</a></li>
+                    <li><a href="{{ route('finance.payment-status') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Status Pembayaran Customer</a></li>
                 </ul>
             </li>
 

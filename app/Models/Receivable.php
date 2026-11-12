@@ -35,7 +35,7 @@ class Receivable extends Model
 
     public function isOverdue(): bool
     {
-        return $this->status !== 'paid' && $this->due_date && $this->due_date->isPast();
+        return $this->status !== 'paid' && $this->due_date && $this->due_date->isBeforeToday();
     }
 
     public static array $statusLabels = [

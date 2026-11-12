@@ -172,6 +172,29 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
+// Lupa password & atur password dari undangan (publik). Hanya akun role
+// config('password_setup.self_service_roles') yang benar-benar dikirimi tautan.
+Route::middleware('guest')->controller(\App\Http\Controllers\PasswordResetController::class)->group(function () {
+    Route::get('/lupa-password', 'showForgotForm')->name('password.request');
+    Route::post('/lupa-password', 'sendLink')->middleware('throttle:password-link')->name('password.email');
+    Route::get('/atur-password/{token}', 'showResetForm')->name('password.reset');
+    Route::post('/atur-password', 'reset')->middleware('throttle:password-reset')->name('password.update');
+});
+
+// Ganti password (wajib untuk akun dengan password sementara dari admin).
+Route::middleware('auth')->controller(\App\Http\Controllers\PasswordChangeController::class)->group(function () {
+    Route::get('/ganti-password', 'show')->name('password.change');
+    Route::post('/ganti-password', 'update')->middleware('throttle:5,1')->name('password.change.update');
+});
+
+// Pendaftaran sales mandiri lewat kode referral — publik, tidak perlu login
+// (kandidat belum punya akun). Akun yang terbentuk tetap nonaktif sampai
+// admin approve, sama seperti jalur sponsor-merekrut yang sudah ada.
+Route::prefix('daftar-sales')->name('sales-network.')->controller(\App\Http\Controllers\SalesNetworkController::class)->group(function () {
+    Route::get('/', 'publicRegisterForm')->name('public-register')->middleware('throttle:20,1');
+    Route::post('/', 'publicRegister')->name('public-register.store')->middleware('throttle:5,1');
+});
+
 
 /*
 |--------------------------------------------------------------------------
@@ -636,6 +659,14 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|owner|manager
             Route::put('/{commission}/move', 'moveUpdate')->name('move.update');
             Route::patch('/{commission}/toggle-active', 'toggleActive')->name('toggle-active');
         });
+
+        Route::middleware('role:superadmin|admin|owner|manager_operasional|finance')
+            ->get('/payment-status', [\App\Http\Controllers\PaymentStatusController::class, 'index'])
+            ->name('finance.payment-status');
+
+        Route::middleware('role:superadmin|admin|owner|manager_operasional|finance')
+            ->get('/building-meters', [\App\Http\Controllers\BuildingMeterReportController::class, 'index'])
+            ->name('commission.building-meters');
     });
 
 
@@ -994,3 +1025,64 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|owner|manager
         Route::get('/marketing', [EmployeeRankingController::class, 'marketing'])->name('marketing');
     });
 
+
+/*
+|--------------------------------------------------------------------------
+| REFERRAL & HIERARKI SALES (2026-10) — superadmin, admin, sales, marketing
+|--------------------------------------------------------------------------
+*/
+
+// Sales/marketing: dashboard sendiri, kelola jaringan sendiri.
+Route::middleware(['auth', 'branch.access', 'role:sales|marketing'])
+    ->group(function () {
+        Route::get('/sales/dashboard', [\App\Http\Controllers\SalesDashboardController::class, 'dashboard'])
+            ->name('sales.dashboard');
+
+        Route::prefix('my-sales-network')->name('sales-network.')
+            ->controller(\App\Http\Controllers\SalesNetworkController::class)
+            ->group(function () {
+                Route::get('/', 'myNetwork')->name('my-network');
+                Route::get('/recruit', 'create')->name('create');
+                Route::post('/recruit', 'store')->name('store');
+            });
+    });
+
+// Transaksi sales: sales bikin & catat pembayaran sendiri; superadmin/admin bisa
+// lihat semua (oversight/laporan) — dibatasi lagi di controller lewat authorizeAccess().
+Route::middleware(['auth', 'branch.access', 'role:sales|superadmin|admin'])
+    ->prefix('sales-transactions')->name('sales-transactions.')
+    ->controller(\App\Http\Controllers\SalesTransactionController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{salesTransaction}', 'show')->name('show');
+        Route::post('/{salesTransaction}/payment', 'recordPayment')->name('payment');
+        Route::post('/{salesTransaction}/release-commission', 'releaseCommission')->name('release-commission');
+    });
+
+// Admin: approve rekrutan, kelola anggota & produk jaringan sales.
+Route::middleware(['auth', 'branch.access', 'role:superadmin|admin'])
+    ->prefix('sales-network')->name('sales-network.')
+    ->controller(\App\Http\Controllers\SalesNetworkController::class)
+    ->group(function () {
+        Route::get('/', 'adminIndex')->name('admin-index');
+        Route::get('/create', 'adminCreate')->name('admin-create');
+        Route::post('/', 'adminStore')->name('admin-store');
+        Route::get('/pending', 'pendingApprovals')->name('pending');
+        Route::post('/{profile}/approve', 'approve')->name('approve');
+        Route::post('/{profile}/reject', 'reject')->name('reject');
+        Route::post('/{profile}/resend-invite', 'resendInvite')->name('resend-invite')->middleware('throttle:6,1');
+    });
+
+Route::middleware(['auth', 'role:superadmin|admin'])
+    ->prefix('sales-products')->name('sales-products.')
+    ->controller(\App\Http\Controllers\SalesProductController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{salesProduct}/edit', 'edit')->name('edit');
+        Route::put('/{salesProduct}', 'update')->name('update');
+        Route::post('/{salesProduct}/toggle', 'toggle')->name('toggle');
+    });

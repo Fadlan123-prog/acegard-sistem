@@ -35,10 +35,12 @@ return [
         'dsp_50'    => ['teknisi' => 25000, 'kenek' => 25000],
         'dsp_solo'  => ['teknisi' => 50000, 'kenek' => 50000],
 
-        // ── D / S / P + Panoramic (base + 30k/15k) ──────────────────────────
-        'dsp_panoramic'      => ['teknisi' => 65000,  'kenek' => 30000],   // dsp + 30k/15k
-        'dsp_panoramic_50'   => ['teknisi' => 47500,  'kenek' => 47500],   // (dsp_50 pool + 45k) ÷ 2
-        'dsp_panoramic_solo' => ['teknisi' => 95000,  'kenek' => 95000],   // dsp_solo pool + 45k
+        // ── D / S / P + Panoramic = 2× D/S/P ────────────────────────────────
+        // Hanya bila bagian yang dipasang persis kaca depan + panoramic
+        // (CommissionCalculator::isWindshieldPlusPanoramicOnly). Salah satunya saja = 1× D/S/P.
+        'dsp_panoramic'      => ['teknisi' => 70000,  'kenek' => 30000],   // 2 × dsp
+        'dsp_panoramic_50'   => ['teknisi' => 50000,  'kenek' => 50000],   // 2 × dsp_50
+        'dsp_panoramic_solo' => ['teknisi' => 100000, 'kenek' => 100000],  // 2 × dsp_solo
 
         // ── SKKB ─────────────────────────────────────────────────────────────
         'skkb'      => ['teknisi' => 49000, 'kenek' => 21000],
@@ -82,7 +84,7 @@ return [
 
         // ── Lebaran (2× rate standard) ───────────────────────────────────────
         'dsp_lebaran'                        => ['teknisi' => 70000,  'kenek' => 30000],
-        'dsp_panoramic_lebaran'              => ['teknisi' => 130000, 'kenek' => 60000],   // 2× dsp_panoramic
+        'dsp_panoramic_lebaran'              => ['teknisi' => 140000, 'kenek' => 60000],   // 2× dsp_lebaran × 2
         'skkb_lebaran'                       => ['teknisi' => 98000,  'kenek' => 42000],
         'skkb_panoramic_lebaran'             => ['teknisi' => 158000, 'kenek' => 72000],   // 2× skkb_panoramic
         'fullset_lebaran'                    => ['teknisi' => 140000, 'kenek' => 60000],
@@ -100,7 +102,9 @@ return [
     | Komisi Marketing
     |--------------------------------------------------------------------------
     | 1 = 4K ALPHA PRO
-    | 2 = NOTCH UV 400
+    | 2 = NOTCH UV 400 (tarif baru)
+    | 3 = BLACK MASTER (tarif lama kategori 2)
+    | ID mengikuti tabel category_products — cek ID di production sebelum deploy.
     */
 
     'marketing' => [
@@ -114,6 +118,15 @@ return [
         ],
 
         2 => [
+            'fullset'          => 80000,
+            'full_panoramic'   => 80000,  // same as fullset
+            'ekstra_panoramic' => 80000,  // same as fullset
+            'dsp'              => 40000,
+            'dsp_panoramic'    => 80000,  // dsp × 2
+            'skkb'             => 60000,
+        ],
+
+        3 => [
             'fullset'          => 70000,
             'full_panoramic'   => 70000,  // same as fullset
             'ekstra_panoramic' => 70000,  // same as fullset
@@ -135,11 +148,49 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Prioritas Kategori Marketing
+    | Komisi Teknisi Gedung (per meter)
     |--------------------------------------------------------------------------
+    | Key = category_product_building.id. Tanpa kenek: pool = Σ(meter × tarif),
+    | dibagi rata ke teknisi yang ditugaskan di customer gedung.
+    | 1 = 4K ALPHA PRO, 2 = NOTCH UV 400, 3 = BLACK MASTER, 4 = FLEX ONE WAY.
+    | Sunblast (Rp10.000/m) belum ada sebagai kategori — tambahkan kategorinya
+    | di category_product_building lalu isi ID-nya di sini.
     */
 
-    'marketing_category_priority' => [2, 1],
+    'building_per_meter' => [
+        1 => 40000,
+        2 => 30000,
+        3 => 25000,
+        4 => 15000,
+    ],
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Komisi Marketing Gedung (per meter)
+    |--------------------------------------------------------------------------
+    | Key = category_product_building.id. Dasar = SELURUH meter produk customer
+    | gedung (bukan meter alokasi teknisi). Dibayar ke marketing_id customer gedung
+    | saat invoice lunas. Sunblast (Rp10.000/m) belum ada sebagai kategori.
+    */
+
+    'building_marketing_per_meter' => [
+        1 => 25000,   // 4K Alpha Pro
+        2 => 20000,   // Notch UV400
+        3 => 15000,   // Black Master
+        4 => 10000,   // Flex One Way
+    ],
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Prioritas Kategori Marketing
+    |--------------------------------------------------------------------------
+    | Bila satu customer punya beberapa kategori produk, dipakai kategori yang
+    | muncul lebih dulu di daftar ini (tarif terendah lebih dulu: BM, Notch, 4K).
+    */
+
+    'marketing_category_priority' => [3, 2, 1],
 
 
     /*
@@ -157,16 +208,21 @@ return [
     | Komisi PPF (Paint Protection Film)
     |--------------------------------------------------------------------------
     |
-    | teknisi_rate  : % dari total_price invoice → untuk tukang_id instalasi
-    | detailer_rate : % dari total_price invoice → untuk kenek_id instalasi
+    | pool_rate     : 11% dari total_price invoice (setelah diskon), dibagi ke tim instalasi
+    | detailer_rate : bagian detailer pada tim lengkap; detailer_rate_short bila teknisi < full_team_size
     | marketing_fixed : nominal tetap → untuk marketing_id customer PPF
     |
     */
 
     'ppf' => [
-        'teknisi_rate'    => 0.03,    // 3%
-        'detailer_rate'   => 0.02,    // 2%
-        'admin_rate'      => 0.02,    // 2% — employees with ppf_admin_commission = true
+        // Pool teknisi PPF = 11% dari total_price (setelah diskon), semua teknisi sama rata:
+        //   tim lengkap (3 teknisi + detailer): 3% per teknisi, detailer 2%.
+        //   teknisi < 3 dan ada detailer: detailer 3% (+1%), sisa pool dibagi rata ke teknisi.
+        'pool_rate'           => 0.11,
+        'detailer_rate'       => 0.02,
+        'detailer_rate_short' => 0.03,
+        'full_team_size'      => 3,
+        'admin_rate'      => 0.02,    // 2% — employees with ppf_admin_commission = true (per cabang)
         'marketing_fixed' => 500000,  // Rp500.000
     ],
 

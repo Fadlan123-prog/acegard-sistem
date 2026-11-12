@@ -272,6 +272,7 @@ class TeknisiDashboardController extends Controller
         $eligibleCommissions = Commission::query()
             ->where('employees_id', $employee->id)
             ->where('status', 'eligible')
+            ->where('is_active', true)
             ->whereNull('commission_payment_batch_id')
             ->get();
 
@@ -285,8 +286,26 @@ class TeknisiDashboardController extends Controller
 
         $total = $eligibleCommissions->sum('amount');
 
-        DB::transaction(function () use ($employee, $eligibleCommissions, $total, $nowWib, $request) {
+        DB::transaction(function () use ($employee, &$eligibleCommissions, &$total, $nowWib, $request) {
+            // Baca ulang di bawah lock: komisi yang berubah sejak halaman dibuka tidak ikut.
+            $eligibleCommissions = Commission::where('employees_id', $employee->id)
+                ->where('status', 'eligible')
+                ->where('is_active', true)
+                ->whereNull('commission_payment_batch_id')
+                ->lockForUpdate()
+                ->get();
+            $total = $eligibleCommissions->sum('amount');
+
+            if ($eligibleCommissions->isEmpty()) {
+                return;
+            }
+
             $batchNumber = 'WD-' . $nowWib->format('Ym') . '-' . strtoupper(substr($employee->name, 0, 3)) . '-' . $employee->id;
+            // Pengajuan yang pernah ditolak/disetujui pada bulan yang sama tidak boleh bentrok nomor.
+            $baseNumber = $batchNumber;
+            for ($n = 2; CommissionPaymentBatch::where('batch_number', $batchNumber)->exists(); $n++) {
+                $batchNumber = $baseNumber . '-' . $n;
+            }
 
             $batch = CommissionPaymentBatch::create([
                 'employee_id'     => $employee->id,
@@ -330,9 +349,9 @@ class TeknisiDashboardController extends Controller
             ->paginate(20);
 
         $summary = [
-            'pending_total'  => Commission::where('employees_id', $employee->id)->where('status', 'pending')->sum('amount'),
-            'eligible_total' => Commission::where('employees_id', $employee->id)->where('status', 'eligible')->sum('amount'),
-            'paid_total'     => Commission::where('employees_id', $employee->id)->where('status', 'paid')->sum('amount'),
+            'pending_total'  => Commission::where('employees_id', $employee->id)->where('is_active', true)->where('status', 'pending')->sum('amount'),
+            'eligible_total' => Commission::where('employees_id', $employee->id)->where('is_active', true)->where('status', 'eligible')->sum('amount'),
+            'paid_total'     => Commission::where('employees_id', $employee->id)->where('is_active', true)->where('status', 'paid')->sum('amount'),
         ];
 
         return view('teknisi.komisi', [

@@ -30,6 +30,7 @@ class RoleSeeder extends Seeder
             'manage_hutang',         // hutang / piutang CRUD
             'manage_purchases',      // pembelian CRUD
             'manage_payroll',        // payroll & absensi
+            'manage_sales_network',  // approve rekrutan sales baru, kelola produk sales
         ];
 
         foreach ($permissionList as $perm) {
@@ -43,6 +44,7 @@ class RoleSeeder extends Seeder
         $mgrOps           = Role::firstOrCreate(['name' => 'manager_operasional']);
         $mgrMarketing     = Role::firstOrCreate(['name' => 'manager_marketing']);
         $marketing        = Role::firstOrCreate(['name' => 'marketing']);
+        $sales            = Role::firstOrCreate(['name' => 'sales']);
         $finance          = Role::firstOrCreate(['name' => 'finance']);
         $purchasing       = Role::firstOrCreate(['name' => 'purchasing']);
         $customerService  = Role::firstOrCreate(['name' => 'customer_service']);
@@ -71,6 +73,7 @@ class RoleSeeder extends Seeder
             'view_all_customers', 'manage_employees', 'manage_branches',
             'manage_users', 'view_reports', 'manage_film_stock',
             'manage_finance', 'manage_hutang', 'manage_purchases', 'manage_payroll',
+            'manage_sales_network',
         ]);
 
         $mgrOps->syncPermissions([
@@ -83,6 +86,7 @@ class RoleSeeder extends Seeder
         ]);
 
         $marketing->syncPermissions([]);   // data scoping via controller, no extra perms
+        $sales->syncPermissions([]);       // data scoping via controller, no extra perms
 
         $finance->syncPermissions([
             'view_all_commissions', 'manage_finance', 'manage_hutang',

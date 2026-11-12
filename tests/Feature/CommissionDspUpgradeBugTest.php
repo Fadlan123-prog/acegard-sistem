@@ -29,6 +29,61 @@ class CommissionDspUpgradeBugTest extends TestCase
         return [$tukang, $kenek];
     }
 
+    private function attachParts(Customer $customer, array $partNames): void
+    {
+        foreach ($partNames as $name) {
+            $partId = \Illuminate\Support\Facades\DB::table('parts')->where('name', $name)->value('id')
+                ?? \Illuminate\Support\Facades\DB::table('parts')->insertGetId(['name' => $name, 'created_at' => now(), 'updated_at' => now()]);
+            $catId = \Illuminate\Support\Facades\DB::table('category_products')->value('id')
+                ?? \Illuminate\Support\Facades\DB::table('category_products')->insertGetId(['name' => 'C', 'duration' => 5, 'created_at' => now(), 'updated_at' => now()]);
+            $prodId = \Illuminate\Support\Facades\DB::table('products')->value('id')
+                ?? \Illuminate\Support\Facades\DB::table('products')->insertGetId(['category_id' => $catId, 'name' => 'P', 'created_at' => now(), 'updated_at' => now()]);
+
+            \Illuminate\Support\Facades\DB::table('customer_product')->insert([
+                'customer_id' => $customer->id, 'product_id' => $prodId, 'part_id' => $partId,
+                'category_product_id' => $catId, 'created_at' => now(), 'updated_at' => now(),
+            ]);
+        }
+    }
+
+    /** @return array{0:string,1:int,2:int} configKey, teknisi, kenek */
+    private function dspSplit(array $parts, bool $panoramic): array
+    {
+        [$tukang, $kenek] = $this->makeInstallerPair();
+        $customer = Customer::factory()->create([
+            'tukang_id' => $tukang->id, 'kenek_id' => $kenek->id, 'install_type' => 'dsp',
+            'has_panoramic' => $panoramic, 'install_date' => now()->toDateString(),
+        ]);
+        $this->attachParts($customer, $parts);
+        $invoice = Invoice::factory()->create(['customer_id' => $customer->id]);
+        $this->loadForCalculator($customer, $invoice);
+        $split = app(CommissionCalculator::class)->resolveInstallerSplit($customer, $invoice);
+
+        return [$split->configKey, $split->teknisiAmount, $split->kenekAmount];
+    }
+
+    public function test_dsp_counts_double_only_for_windshield_plus_panoramic(): void
+    {
+        $this->assertSame(['dsp_panoramic', 70000, 30000], $this->dspSplit(['WINDSHIELD', 'SUNROOF/PANORAMIC'], true));
+    }
+
+    public function test_dsp_with_only_windshield_or_only_panoramic_is_a_single_dsp(): void
+    {
+        $this->assertSame(['dsp', 35000, 15000], $this->dspSplit(['WINDSHIELD'], false));
+        $this->assertSame(['dsp', 35000, 15000], $this->dspSplit(['SUNROOF/PANORAMIC'], true), 'panoramic saja = 1 DSP');
+        $this->assertSame(['dsp', 35000, 15000], $this->dspSplit(['WINDSHIELD'], true), 'flag panoramic tanpa bagian panoramic = 1 DSP');
+    }
+
+    public function test_dsp_with_extra_parts_beyond_windshield_and_panoramic_is_a_single_dsp(): void
+    {
+        $this->assertSame(['dsp', 35000, 15000], $this->dspSplit(['WINDSHIELD', 'SUNROOF/PANORAMIC', 'REAR WINDOW'], true));
+    }
+
+    public function test_windshield_plus_panoramic_without_the_panoramic_flag_stays_single(): void
+    {
+        $this->assertSame(['dsp', 35000, 15000], $this->dspSplit(['WINDSHIELD', 'SUNROOF/PANORAMIC'], false));
+    }
+
     private function loadForCalculator(Customer $customer, Invoice $invoice): void
     {
         $customer->load(['tukang', 'kenek', 'marketing', 'customerProducts.part']);
@@ -86,13 +141,14 @@ class CommissionDspUpgradeBugTest extends TestCase
             'has_panoramic' => true,
             'install_date'  => now()->toDateString(),
         ]);
+        $this->attachParts($dspPanoCustomer, ['WINDSHIELD', 'SUNROOF/PANORAMIC']);
         $invoice = Invoice::factory()->create(['customer_id' => $dspPanoCustomer->id]);
         $this->loadForCalculator($dspPanoCustomer, $invoice);
 
         $split = app(CommissionCalculator::class)->resolveInstallerSplit($dspPanoCustomer, $invoice);
 
         $this->assertSame('dsp_panoramic', $split->configKey);
-        $this->assertSame(65000, $split->teknisiAmount);
+        $this->assertSame(70000, $split->teknisiAmount);
         $this->assertSame(30000, $split->kenekAmount);
         $this->assertFalse($split->isSecondCar);
     }

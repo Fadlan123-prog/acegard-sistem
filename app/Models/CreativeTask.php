@@ -56,6 +56,6 @@ class CreativeTask extends Model
 
     public function isOverdue(): bool
     {
-        return $this->due_date && $this->due_date->isPast() && ! in_array($this->status, ['done', 'cancelled'], true);
+        return $this->due_date && $this->due_date->isBeforeToday() && $this->status !== 'done';
     }
 }

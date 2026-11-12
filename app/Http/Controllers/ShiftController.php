@@ -25,7 +25,7 @@ class ShiftController extends Controller
 
     public function create()
     {
-        $branches = Branch::where('is_active', true)->orderBy('name')->get();
+        $branches = Branch::where('status', 'active')->when(! auth()->user()->hasRole('superadmin'), fn ($q) => $q->whereIn('id', auth()->user()->accessibleBranchIds()))->orderBy('name')->get();
         return view('shifts.create', compact('branches'));
     }
 
@@ -40,6 +40,8 @@ class ShiftController extends Controller
             'is_active'              => 'boolean',
         ]);
 
+        $this->authorizeBranchInput($validated['branch_id'] ?? null);
+
         $validated['is_active'] = $request->boolean('is_active', true);
 
         Shift::create($validated);
@@ -49,12 +51,14 @@ class ShiftController extends Controller
 
     public function edit(Shift $shift)
     {
-        $branches = Branch::where('is_active', true)->orderBy('name')->get();
+        $this->authorizeShift($shift);
+        $branches = Branch::where('status', 'active')->when(! auth()->user()->hasRole('superadmin'), fn ($q) => $q->whereIn('id', auth()->user()->accessibleBranchIds()))->orderBy('name')->get();
         return view('shifts.edit', compact('shift', 'branches'));
     }
 
     public function update(Request $request, Shift $shift)
     {
+        $this->authorizeShift($shift);
         $validated = $request->validate([
             'branch_id'              => 'nullable|exists:branches,id',
             'name'                   => 'required|string|max:100',
@@ -63,6 +67,8 @@ class ShiftController extends Controller
             'overtime_after_minutes' => 'required|integer|min:0|max:300',
             'is_active'              => 'boolean',
         ]);
+
+        $this->authorizeBranchInput($validated['branch_id'] ?? null);
 
         $validated['is_active'] = $request->boolean('is_active', false);
 
@@ -73,6 +79,7 @@ class ShiftController extends Controller
 
     public function destroy(Shift $shift)
     {
+        $this->authorizeShift($shift);
         if ($shift->attendances()->exists()) {
             return back()->with('error', 'Shift tidak dapat dihapus karena sudah digunakan di absensi.');
         }
@@ -80,5 +87,22 @@ class ShiftController extends Controller
         $shift->delete();
 
         return redirect()->route('shifts.index')->with('success', 'Shift berhasil dihapus.');
+    }
+
+    /** Shift global (branch_id null) hanya boleh diubah superadmin. */
+    private function authorizeShift(Shift $shift): void
+    {
+        $this->authorizeBranchInput($shift->branch_id);
+    }
+
+    private function authorizeBranchInput($branchId): void
+    {
+        $user = auth()->user();
+
+        if ($user->hasRole('superadmin')) {
+            return;
+        }
+
+        abort_unless($branchId !== null && $user->canAccessBranch((int) $branchId), 403, 'Bukan cabang Anda.');
     }
 }

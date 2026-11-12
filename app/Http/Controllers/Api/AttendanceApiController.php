@@ -10,6 +10,8 @@ use App\Services\OvertimeService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AttendanceApiController extends Controller
 {
@@ -143,12 +145,11 @@ class AttendanceApiController extends Controller
             return null;
         }
 
-        $dir  = public_path('storage/checkin-photos');
-        if (!is_dir($dir)) mkdir($dir, 0755, true);
+        // Disk privat (storage/app/private), bukan public/: selfie karyawan tidak boleh
+        // bisa diakses anonim. Nama acak agar tidak bisa ditebak dari id + waktu.
+        $path = 'checkin-photos/' . Str::random(40) . '.' . $ext;
+        Storage::disk('local')->put($path, $decoded);
 
-        $filename = 'checkin_' . $employeeId . '_' . now()->format('Ymd_His') . '.' . $ext;
-        file_put_contents($dir . '/' . $filename, $decoded);
-
-        return 'storage/checkin-photos/' . $filename;
+        return $path;
     }
 }
