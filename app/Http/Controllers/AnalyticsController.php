@@ -43,6 +43,10 @@ class AnalyticsController extends Controller
 
         $pettyCash = $this->getPettyCashSummary($startDate, $endDate, $branchId, $isSuperadmin);
 
+        // ── Total pengeluaran (petty cash + gaji + komisi dibayar + hutang) ───
+
+        $expenses = app(\App\Services\ExpenseSummaryService::class)->summarize($startDate, $endDate, $branchId);
+
         // ── Branch comparison (superadmin) ────────────────────────────────────
 
         $branchRevenue = $isSuperadmin
@@ -55,7 +59,7 @@ class AnalyticsController extends Controller
             'revenue', 'revenueByDay', 'revenueByType',
             'commissionStats', 'topMarketing', 'topTeknisi',
             'hutangAging', 'piutangAging',
-            'pettyCash', 'branchRevenue'
+            'pettyCash', 'branchRevenue', 'expenses'
         ) + ['filters' => $request->only(['branch_id', 'start', 'end', 'period'])]);
     }
 

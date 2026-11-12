@@ -71,7 +71,7 @@
             ['label'=>'Total Pendapatan',      'val'=>$fmtRp($revenue['grand_total']), 'sub'=>$revenue['grand_count'].' transaksi',         'color'=>'purple','icon'=>$mdIcon('mdi:currency-usd-circle-outline')],
             ['label'=>'Rata-rata Transaksi',   'val'=>$fmtRp($revenue['avg']),         'sub'=>'per invoice',                                 'color'=>'green', 'icon'=>$mdIcon('mdi:chart-bar-stacked')],
             ['label'=>'Komisi Dibayar',        'val'=>$fmtRp($commissionStats['total_paid']),    'sub'=>$fmtRp($commissionStats['total_eligible']).' eligible', 'color'=>'amber','icon'=>$mdIcon('mdi:account-star-outline')],
-            ['label'=>'Pengeluaran Kas',       'val'=>$fmtRp($pettyCash['out'] + $pettyCash['purchase']), 'sub'=>'petty cash + pembelian',  'color'=>'red',   'icon'=>$mdIcon('mdi:wallet-outline')],
+            ['label'=>'Total Pengeluaran',     'val'=>$fmtRp($expenses['total']), 'sub'=>'petty cash + gaji + komisi + hutang',  'color'=>'red',   'icon'=>$mdIcon('mdi:wallet-outline')],
         ];
     @endphp
     @foreach ($kpis as $k)
@@ -205,6 +205,66 @@
     </div>
     @endforeach
 </div>
+
+{{-- Total Pengeluaran per kategori --}}
+<x-ui.card class="mb-4">
+    @slot('header')
+        <div class="ui-card-title">Rincian Total Pengeluaran</div>
+        <div class="ui-card-subtitle">Basis kas, {{ $periodLabel }}. Pembelian PO ditampilkan terpisah karena belum tentu sudah dibayar.</div>
+    @endslot
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr><th>Kategori</th><th class="text-end">Jumlah</th><th style="width:32%">Porsi</th></tr>
+            </thead>
+            <tbody>
+                @foreach ($expenses['rows'] as $row)
+                    @php $pct = $expenses['total'] > 0 ? round($row['amount'] / $expenses['total'] * 100, 1) : 0; @endphp
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">{{ $row['label'] }}</div>
+                            <div class="text-muted" style="font-size:11.5px">{{ $row['hint'] }}</div>
+                        </td>
+                        <td class="text-end fw-semibold" style="white-space:nowrap;font-variant-numeric:tabular-nums">{{ $fmtRp($row['amount']) }}</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="flex-grow-1" style="height:6px;border-radius:999px;background:var(--neutral-100,#f1f5f9);overflow:hidden"
+                                     role="progressbar" aria-valuenow="{{ $pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ $row['label'] }} {{ $pct }}%">
+                                    <div style="width:{{ $pct }}%;height:100%;background:#DC2626"></div>
+                                </div>
+                                <span class="small text-muted" style="min-width:42px;text-align:right">{{ $pct }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr class="fw-bold">
+                    <td>Total Pengeluaran (kas)</td>
+                    <td class="text-end" style="font-variant-numeric:tabular-nums">{{ $fmtRp($expenses['total']) }}</td>
+                    <td></td>
+                </tr>
+                <tr class="text-muted">
+                    <td>
+                        Memo: pembelian PO (komitmen)
+                        <div style="font-size:11.5px">PO Purchasing berstatus dikonfirmasi s.d. diterima. Tidak termasuk total di atas.</div>
+                    </td>
+                    <td class="text-end" style="font-variant-numeric:tabular-nums">{{ $fmtRp($expenses['po_commitment']) }}</td>
+                    <td></td>
+                </tr>
+                <tr class="text-muted">
+                    <td>Total termasuk komitmen PO</td>
+                    <td class="text-end" style="font-variant-numeric:tabular-nums">{{ $fmtRp($expenses['total_with_po']) }}</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <p class="text-muted small mt-3 mb-0">
+        Tidak termasuk: kasbon (pinjaman karyawan, bukan biaya), potongan, dan pembayaran yang tidak dicatat di sistem.
+        Klaim karyawan yang dicairkan sudah ada di petty cash. Komisi dihitung saat dibayar, bukan saat dibuat.
+    </p>
+</x-ui.card>
 
 {{-- Petty Cash Summary --}}
 <x-ui.card class="mb-4">
