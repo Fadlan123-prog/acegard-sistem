@@ -46,7 +46,10 @@ Yang perlu diperhatikan di Hostinger shared:
   melambat; login biasanya bergantian sehingga aman. Jangan turunkan di bawah 10.
 - **Pembatas login** 5x/menit per kombinasi email+IP: aman untuk kantor satu IP karena kuncinya per email. Salah password 5x memblokir akun itu 1 menit.
 - **Cache opcode & konfigurasi**: aktifkan OPcache (hPanel → PHP Configuration) dan jalankan `config:cache route:cache view:cache` setiap deploy.
-- **Session/cache di database** (tanpa Redis): tabel `sessions`, `cache`, `cache_locks` dibersihkan otomatis; pantau ukurannya bulanan.
+- **Session & cache di file** (`SESSION_DRIVER=file`, `CACHE_STORE=file`): tiap request tidak lagi membaca/menulis tabel `sessions`/`cache`, sehingga
+  koneksi MySQL (batas `max_user_connections` di shared hosting) hanya dipakai untuk data aplikasi. Jika muncul error
+  *"Too many connections"* / *SQLSTATE[HY000] [1040]* pada session, ganti ke file lalu `php artisan config:clear`.
+  Pastikan `storage/framework/sessions` dan `storage/framework/cache` bisa ditulis (chmod 775).
 - **Batas proses**: paket shared membatasi proses PHP bersamaan (Entry Processes). Bila halaman lambat/503 saat jam sibuk, cek
   hPanel → Resource Usage; pertimbangkan naik paket / Cloud.
 - Nomor dokumen (invoice PPF, klaim garansi, pengajuan pencairan) kini aman bila dua orang menyimpan bersamaan.
