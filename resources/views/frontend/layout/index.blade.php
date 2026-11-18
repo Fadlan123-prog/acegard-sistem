@@ -30,7 +30,7 @@
   <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js" async></script>
 
   {{-- Inter --}}
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Inter+Tight:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('assets/frontend/home/css/style.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/frontend/css/tokens.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/frontend/css/ag-design.css') }}">

@@ -7,26 +7,26 @@
 <footer class="ag-footer">
   <div class="ag-container">
     <div class="ag-footer-grid">
-      <div>
+      <div class="ag-footer-cell">
         <a href="{{ route('frontend.home') }}" aria-label="Acegard — beranda">
           <img src="{{ asset('assets/frontend/ag/logo-white.webp') }}" alt="Acegard" width="236" height="28">
         </a>
         <p>Solusi kaca film mobil, kaca film gedung, dan Paint Protection Film untuk kendaraan dan properti Anda.</p>
       </div>
 
-      <div>
+      <div class="ag-footer-cell">
         <h4>Layanan</h4>
-        <ul>
+        <ul class="big">
           <li><a href="{{ route('frontend.service.car') }}">Automotive Film</a></li>
           <li><a href="{{ route('frontend.service.building') }}">Building Film</a></li>
-          <li><a href="{{ route('frontend.ppf.catalog') }}">Paint Protection Film</a></li>
+          <li><a href="{{ route('frontend.ppf.catalog') }}">Paint Protection</a></li>
           <li><a href="{{ route('warranty.form') }}">Cek Garansi</a></li>
         </ul>
       </div>
 
-      <div>
+      <div class="ag-footer-cell">
         <h4>Perusahaan</h4>
-        <ul>
+        <ul class="big">
           <li><a href="{{ route('frontend.about') }}">About Us</a></li>
           <li><a href="{{ route('frontend.contact') }}">Contact</a></li>
           @if ($faqHref)<li><a href="{{ $faqHref }}">FAQ</a></li>@endif
@@ -35,7 +35,7 @@
         </ul>
       </div>
 
-      <div>
+      <div class="ag-footer-cell">
         <h4>Kontak</h4>
         <p>{{ config('acegard.address') }}</p>
         <p><a href="mailto:{{ config('acegard.email') }}">{{ config('acegard.email') }}</a></p>
@@ -43,6 +43,9 @@
       </div>
     </div>
 
-    <div class="ag-footer-bottom">Copyright {{ date('Y') }} - ACEGARD, All Rights Reserved</div>
+    <div class="ag-footer-bottom">
+      <span>Copyright {{ date('Y') }} - ACEGARD, All Rights Reserved</span>
+      <span>Tangerang, Indonesia</span>
+    </div>
   </div>
 </footer>
