@@ -19,7 +19,7 @@ class FrontendRedesignHomeTest extends TestCase
         config(['acegard.whatsapp' => '6281234567890']);
 
         $res = $this->get('/')->assertOk();
-        $res->assertSee('Protection,', false)->assertSee('Clarity.', false)
+        $res->assertSee('Kaca film premium', false)->assertSee('Cooler Cabins, Clearer Views', false)
             ->assertSee('Our Services')->assertSee('Why ACEGARD')->assertSee('Our Products')
             ->assertSee('ag-design.css', false)->assertSee('Segera hadir');
 

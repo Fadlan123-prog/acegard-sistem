@@ -16,8 +16,9 @@
 {{-- ───────── Hero ───────── --}}
 <section class="ag-hero" aria-labelledby="ag-hero-title">
   <div class="ag-container">
-    <h1 class="ag-display" id="ag-hero-title">Protection, Comfort <b>&amp; Clarity.</b></h1>
-    <p class="ag-hero-sub">Premium Automotive Window Film, Architectural Film, dan Paint Protection untuk kendaraan dan bangunan Anda. Dipasang oleh teknisi ACEGARD di Tangerang.</p>
+    <span class="ag-eyebrow ag-hero-tag">Cooler Cabins, Clearer Views</span>
+    <h1 class="ag-display" id="ag-hero-title">Kaca film premium <b>untuk mobil dan bangunan.</b></h1>
+    <p class="ag-hero-sub">Menolak panas dan sinar UV, menjaga privasi, dan melindungi cat kendaraan. Dipasang oleh teknisi ACEGARD di Tangerang.</p>
     <div class="ag-hero-actions">
       <a class="ag-btn ag-btn-primary" href="#produk">Explore Our Products</a>
       <a class="ag-btn ag-btn-secondary whatsapp-btn" data-gtm-label="hero-whatsapp" target="_blank" rel="noopener"

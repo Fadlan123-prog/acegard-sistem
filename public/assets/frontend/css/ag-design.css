@@ -81,7 +81,8 @@ html { scroll-behavior: smooth; }
 /* ---------- Hero ---------- */
 .ag-hero { position: relative; overflow: hidden; background: #fff; text-align: center; }
 .ag-hero .ag-container { padding-block: clamp(40px, 6vw, 80px) 0; }
-.ag-display { font-size: clamp(2.5rem, 7.2vw, 5.75rem) !important; line-height: 1.02 !important; letter-spacing: -.045em !important; font-weight: 300 !important; }
+.ag-hero-tag { margin-bottom: 20px; }
+.ag-display { font-size: clamp(2.25rem, 6.2vw, 4.75rem) !important; line-height: 1.02 !important; letter-spacing: -.045em !important; font-weight: 300 !important; }
 .ag-display b { display: block; font-weight: 700 !important; color: var(--ag-primary); }
 .ag-hero-sub { max-width: 58ch; margin: 24px auto 0; font-size: clamp(1rem, 1.6vw, 1.1875rem); color: var(--ag-muted-strong); }
 .ag-hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 32px; }
@@ -93,6 +94,7 @@ html { scroll-behavior: smooth; }
 .js .ag-hero .ag-container > *:nth-child(2) { animation-delay: .1s; }
 .js .ag-hero .ag-container > *:nth-child(3) { animation-delay: .2s; }
 .js .ag-hero .ag-container > *:nth-child(4) { animation-delay: .3s; }
+.js .ag-hero .ag-container > *:nth-child(5) { animation-delay: .4s; }
 @keyframes agUp { to { opacity: 1; transform: none; } }
 
 /* marquee klien */
