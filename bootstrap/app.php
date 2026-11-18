@@ -13,6 +13,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
+            'frontend.maintenance' => \App\Http\Middleware\FrontendMaintenance::class,
             'branch.access' => \App\Http\Middleware\EnsureBranchAccess::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,

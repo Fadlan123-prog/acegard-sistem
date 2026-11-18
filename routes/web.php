@@ -99,7 +99,7 @@ use App\Http\Controllers\SpkPublicController;
 |--------------------------------------------------------------------------
 */
 
-Route::controller(FrontendController::class)->group(function () {
+Route::controller(FrontendController::class)->middleware('frontend.maintenance')->group(function () {
     Route::get('/', 'home')->name('frontend.home');
     Route::get('/service/car', 'serviceCar')->name('frontend.service.car');
     Route::get('/service/building', 'serviceBuilding')->name('frontend.service.building');
@@ -119,6 +119,7 @@ Route::controller(FrontendController::class)->group(function () {
 });
 
 Route::get('/promo/kaca-film-mobil', [PromotionController::class, 'car'])
+    ->middleware('frontend.maintenance')
     ->name('frontend.promotion.car');
 
 
