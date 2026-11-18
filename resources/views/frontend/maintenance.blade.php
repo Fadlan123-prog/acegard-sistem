@@ -27,7 +27,7 @@
             border: 1px solid var(--border); border-radius: 16px; padding: 40px 24px 32px;
             box-shadow: 0 1px 2px rgba(15, 42, 95, .06), 0 16px 40px rgba(15, 42, 95, .12);
         }
-        .logo { display: block; height: 36px; width: auto; max-width: 100%; margin: 0 auto 28px; }
+        .logo { display: block; height: 26px; width: auto; max-width: 100%; margin: 0 auto 28px; }
         .badge {
             display: flex; align-items: center; justify-content: center; width: 72px; height: 72px;
             border-radius: 50%; background: var(--blue-soft); color: var(--blue); margin: 0 auto 20px;
