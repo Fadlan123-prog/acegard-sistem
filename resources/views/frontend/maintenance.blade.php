@@ -4,18 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
+    <meta name="color-scheme" content="light">
     <title>Sedang Maintenance — Acegard</title>
     <style>
-        :root { --bg:#F3F5FB; --surface:#fff; --text:#111827; --muted:#4B5563; --primary:#2563EB; --border:#DDE2F0; }
-        @media (prefers-color-scheme: dark) {
-            :root { --bg:#0F172A; --surface:#1C2537; --text:#F1F5F9; --muted:#94A3B8; --primary:#60A5FA; --border:#1E3050; }
-        }
+        :root { --bg:#DCE7FB; --surface:#FFFFFF; --text:#111827; --muted:#4B5563; --primary:#2563EB; --border:#DDE2F0; }
         * { box-sizing: border-box; }
         body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:16px;
-               background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; line-height:1.5; }
+               background:linear-gradient(160deg,#EAF1FF 0%,#C9DBFA 100%); color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; line-height:1.5; }
         main { width:100%; max-width:480px; text-align:center; background:var(--surface); border:1px solid var(--border);
-               border-radius:12px; padding:40px 24px; }
-        img { height:36px; margin-bottom:24px; }
+               border-radius:12px; padding:40px 24px; box-shadow:0 10px 30px rgba(15,23,42,.12); }
+        img { height:40px; width:auto; margin-bottom:24px; }
         h1 { font-size:1.5rem; margin:0 0 8px; }
         p { margin:0 0 20px; color:var(--muted); }
         .actions { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
