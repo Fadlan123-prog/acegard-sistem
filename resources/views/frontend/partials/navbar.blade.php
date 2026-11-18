@@ -1,54 +1,47 @@
 @php
-  $ppfHref     = Route::has('frontend.ppf.catalog') ? route('frontend.ppf.catalog') : '#';
-  $dealersHref = Route::has('frontend.dealers') ? route('frontend.dealers') : '#';
-  $faqHref     = Route::has('frontend.faq') ? route('frontend.faq') : '#';
-  $artikelHref = Route::has('frontend.artikel') ? route('frontend.artikel') : '#';
+  use App\Support\Whatsapp;
+  $links = [
+    ['label' => 'Home',            'href' => route('frontend.home'),             'active' => request()->routeIs('frontend.home')],
+    ['label' => 'Automotive Film', 'href' => route('frontend.service.car'),      'active' => request()->routeIs('frontend.service.car')],
+    ['label' => 'Building Film',   'href' => route('frontend.service.building'), 'active' => request()->routeIs('frontend.service.building')],
+    ['label' => 'PPF',             'href' => route('frontend.ppf.catalog'),      'active' => request()->routeIs('frontend.ppf.catalog')],
+    ['label' => 'About Us',        'href' => route('frontend.about'),            'active' => request()->routeIs('frontend.about')],
+    ['label' => 'Contact',         'href' => route('frontend.contact'),          'active' => request()->routeIs('frontend.contact')],
+  ];
 @endphp
-<nav class="navbar navbar-expand-lg ace-navbar bg-white border-bottom sticky-top py-3">
-  <div class="container">
-    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('frontend.home') }}">
-      <img src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}" alt="Acegard" style="height:32px;">
+<header class="ag-nav">
+  <div class="ag-container">
+    <a class="ag-nav-brand" href="{{ route('frontend.home') }}" aria-label="Acegard — beranda">
+      <img src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}" alt="Acegard" width="236" height="28">
     </a>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topnav">
-      <span class="navbar-toggler-icon"></span>
+    <button class="ag-nav-toggle" type="button" id="agNavToggle" aria-expanded="false" aria-controls="agNavMenu" aria-label="Buka menu">
+      <iconify-icon icon="mdi:menu" width="24"></iconify-icon>
     </button>
 
-    <div class="collapse navbar-collapse" id="topnav">
-      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
-        <li class="nav-item">
-          <a class="nav-link {{ request()->routeIs('frontend.service.car') ? 'active' : '' }}" href="{{ route('frontend.service.car') }}">Kaca Film Otomotif</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {{ request()->routeIs('frontend.service.building') ? 'active' : '' }}" href="{{ route('frontend.service.building') }}">Kaca Film Bangunan</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {{ request()->routeIs('frontend.ppf.catalog') ? 'active' : '' }}" href="{{ $ppfHref }}">PPF</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {{ request()->routeIs('frontend.about') ? 'active' : '' }}" href="{{ route('frontend.about') }}">Tentang Kami</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {{ request()->routeIs('frontend.dealers') ? 'active' : '' }}" href="{{ $dealersHref }}">Dealers</a>
-        </li>
-
-        <li class="nav-item ms-lg-2">
-          <a class="btn-ace-outline w-100 w-lg-auto" href="{{ route('warranty.form') }}">
-            Warranty Claim
-          </a>
-        </li>
-
-        <li class="nav-item dropdown ms-lg-2">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Selengkapnya
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="{{ $faqHref }}">FAQ</a></li>
-            <li><a class="dropdown-item" href="{{ $artikelHref }}">Artikel</a></li>
-            <li><a class="dropdown-item" href="{{ route('frontend.contact') }}">Contact Us</a></li>
-          </ul>
-        </li>
-      </ul>
-    </div>
+    <nav class="ag-nav-menu" id="agNavMenu" aria-label="Menu utama">
+      @foreach ($links as $l)
+        <a class="ag-nav-link {{ $l['active'] ? 'is-active' : '' }}" href="{{ $l['href'] }}" @if($l['active']) aria-current="page" @endif>{{ $l['label'] }}</a>
+      @endforeach
+      <div class="ag-nav-cta">
+        <a class="ag-btn ag-btn-secondary ag-btn-sm" href="{{ route('warranty.form') }}">Cek Garansi</a>
+        <a class="ag-btn ag-btn-primary ag-btn-sm whatsapp-btn" data-gtm-label="navbar-konsultasi" target="_blank" rel="noopener"
+           href="{{ Whatsapp::url('Halo ACEGARD, saya ingin berkonsultasi.') }}">Konsultasi</a>
+      </div>
+    </nav>
   </div>
-</nav>
+</header>
+<script>
+  (function () {
+    var t = document.getElementById('agNavToggle'), m = document.getElementById('agNavMenu');
+    if (!t || !m) return;
+    t.addEventListener('click', function () {
+      var open = m.classList.toggle('is-open');
+      t.setAttribute('aria-expanded', open ? 'true' : 'false');
+      t.setAttribute('aria-label', open ? 'Tutup menu' : 'Buka menu');
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && m.classList.contains('is-open')) { t.click(); t.focus(); }
+    });
+  })();
+</script>

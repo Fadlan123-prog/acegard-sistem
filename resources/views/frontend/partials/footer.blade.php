@@ -1,48 +1,48 @@
 @php
-  $faqHref = Route::has('frontend.faq') ? route('frontend.faq') : '#';
+  use App\Support\Whatsapp;
+  $faqHref     = Route::has('frontend.faq') ? route('frontend.faq') : null;
+  $artikelHref = Route::has('frontend.artikel') ? route('frontend.artikel') : null;
+  $dealersHref = Route::has('frontend.dealers') ? route('frontend.dealers') : null;
 @endphp
-<footer class="ace-footer pt-5 pb-4 mt-5">
-  <div class="container">
-    <div class="row g-4">
-      <div class="col-lg-4">
-        <a href="{{ route('frontend.home') }}" class="d-inline-flex align-items-center gap-2 mb-3 text-decoration-none">
-          <img src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}" alt="Acegard" style="height:32px;">
+<footer class="ag-footer">
+  <div class="ag-container">
+    <div class="ag-footer-grid">
+      <div>
+        <a href="{{ route('frontend.home') }}" aria-label="Acegard — beranda">
+          <img src="{{ asset('assets/frontend/ag/logo-white.webp') }}" alt="Acegard" width="236" height="28">
         </a>
-        <p class="mb-3 small ace-muted">
-          Bergabunglah bersama kami dalam menghadirkan solusi kaca film terbaik untuk kendaraan dan properti Anda. Hubungi Acegard sekarang juga.
-        </p>
-        <div class="d-flex gap-3 fs-5">
-          <a href="#" aria-label="Facebook"><iconify-icon icon="mdi:facebook"></iconify-icon></a>
-          <a href="#" aria-label="Instagram"><iconify-icon icon="mdi:instagram"></iconify-icon></a>
-          <a href="#" aria-label="TikTok"><iconify-icon icon="mdi:music-note"></iconify-icon></a>
-          <a href="#" aria-label="YouTube"><iconify-icon icon="mdi:youtube"></iconify-icon></a>
-        </div>
+        <p>Solusi kaca film mobil, kaca film gedung, dan Paint Protection Film untuk kendaraan dan properti Anda.</p>
       </div>
 
-      <div class="col-lg-4">
-        <h6 class="mb-3">Useful Links</h6>
-        <ul class="list-unstyled small mb-0 d-flex flex-column gap-2">
-          <li><a href="{{ route('frontend.about') }}">About Us</a></li>
-          <li><a href="{{ route('frontend.service.car') }}">Our Service</a></li>
-          <li><a href="{{ route('frontend.contact') }}">Contact Us</a></li>
-          <li><a href="{{ $faqHref }}">FAQs</a></li>
+      <div>
+        <h4>Layanan</h4>
+        <ul>
+          <li><a href="{{ route('frontend.service.car') }}">Automotive Film</a></li>
+          <li><a href="{{ route('frontend.service.building') }}">Building Film</a></li>
+          <li><a href="{{ route('frontend.ppf.catalog') }}">Paint Protection Film</a></li>
+          <li><a href="{{ route('warranty.form') }}">Cek Garansi</a></li>
         </ul>
       </div>
 
-      <div class="col-lg-4">
-        <h6 class="mb-3">Contact Us</h6>
-        <div class="small d-flex flex-column gap-2">
-          <div class="ace-muted">Jl. KH. Hasyim Ashari, RT.007/RW.002, Nerogtog, Kec. Cipondoh, Kota Tangerang, Banten 15146</div>
-          <div><a href="mailto:acegardindonesia@gmail.com">acegardindonesia@gmail.com</a></div>
-          <div class="ace-muted">+6282121212093</div>
-        </div>
+      <div>
+        <h4>Perusahaan</h4>
+        <ul>
+          <li><a href="{{ route('frontend.about') }}">About Us</a></li>
+          <li><a href="{{ route('frontend.contact') }}">Contact</a></li>
+          @if ($faqHref)<li><a href="{{ $faqHref }}">FAQ</a></li>@endif
+          @if ($artikelHref)<li><a href="{{ $artikelHref }}">Artikel</a></li>@endif
+          @if ($dealersHref)<li><a href="{{ $dealersHref }}">Lokasi Dealer</a></li>@endif
+        </ul>
+      </div>
+
+      <div>
+        <h4>Kontak</h4>
+        <p>{{ config('acegard.address') }}</p>
+        <p><a href="mailto:{{ config('acegard.email') }}">{{ config('acegard.email') }}</a></p>
+        <p><a class="whatsapp-btn" data-gtm-label="footer-whatsapp" target="_blank" rel="noopener" href="{{ Whatsapp::url() }}">WhatsApp {{ Whatsapp::display() }}</a></p>
       </div>
     </div>
 
-    <hr class="my-4" style="border-color: var(--ace-border);">
-
-    <div class="text-center small ace-muted">
-      Copyright {{ date('Y') }} - ACEGARD, All Rights Reserved
-    </div>
+    <div class="ag-footer-bottom">Copyright {{ date('Y') }} - ACEGARD, All Rights Reserved</div>
   </div>
 </footer>

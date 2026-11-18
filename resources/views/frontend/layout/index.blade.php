@@ -3,7 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ $title ?? 'Acegard Indonesia' }}</title>
+  <title>@yield('title', $title ?? 'Acegard Indonesia')</title>
+  @hasSection('meta_description')
+  <meta name="description" content="@yield('meta_description')">
+  <meta property="og:title" content="@yield('title', $title ?? 'Acegard Indonesia')">
+  <meta property="og:description" content="@yield('meta_description')">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ url()->current() }}">
+  <meta property="og:image" content="@yield('og_image', asset('assets/frontend/ag/hero-car.webp'))">
+  @endif
+  <script>document.documentElement.classList.add('js');</script>
 
   <link rel="icon" type="image/png" href="{{ asset('assets/images/favicon.png') }}">
 
@@ -24,9 +33,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('assets/frontend/home/css/style.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/frontend/css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/frontend/css/ag-design.css') }}">
   @stack('styles')
 </head>
-<body>
+<body class="@yield('body-class')">
   {{-- Google Tag Manager (noscript) --}}
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5DH3T7FD"
   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -46,6 +56,10 @@
   {{-- Landing page ads dapat memakai footer khusus via @section('hide-footer', '1') + markup sendiri di @section('content') --}}
   @if (! View::hasSection('hide-footer'))
     @include('frontend.partials.footer')
+  @endif
+
+  @if (! View::hasSection('hide-navbar'))
+    @include('frontend.partials.wa-float')
   @endif
 
   {{-- Bootstrap JS --}}
