@@ -157,6 +157,15 @@ class ContentPostController extends Controller
             abort(403);
         }
 
+
+        // manager_marketing terikat cabang: tidak boleh menghapus data cabang lain.
+        if (! $user->hasAnyRole(['superadmin', 'owner'])) {
+            abort_unless(
+                in_array($post->branch_id, $user->branches()->pluck('branches.id')->all()) || (int) $post->employee_id === (int) $user->employee_id,
+                403
+            );
+        }
+
         $post->delete();
 
         return back()->with('success', 'Konten dihapus.');
