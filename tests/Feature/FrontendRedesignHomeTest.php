@@ -61,4 +61,17 @@ class FrontendRedesignHomeTest extends TestCase
         $this->assertStringNotContainsString('ag-nav', $html);
         $this->assertStringNotContainsString('class="ag-wa', $html);
     }
+
+    public function test_home_menampilkan_konten_lengkap_acegard(): void
+    {
+        $this->get('/')->assertOk()
+            ->assertSee('About ACEGARD')
+            ->assertSee('Nano Ceramic Matrix Composite')
+            ->assertSee('Teknologi di balik kaca film ACEGARD')
+            ->assertSee('Dari konsultasi sampai garansi')
+            ->assertSee('Mercure Hotels')
+            ->assertSee('Pertanyaan yang sering diajukan')
+            ->assertSee('Kunjungi workshop kami')
+            ->assertSee(config('acegard.address'));
+    }
 }
