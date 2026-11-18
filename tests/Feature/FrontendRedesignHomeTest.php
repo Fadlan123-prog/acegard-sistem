@@ -67,11 +67,11 @@ class FrontendRedesignHomeTest extends TestCase
         $this->get('/')->assertOk()
             ->assertSee('About ACEGARD')
             ->assertSee('Nano Ceramic Matrix Composite')
-            ->assertSee('Teknologi di balik kaca film ACEGARD')
-            ->assertSee('Dari konsultasi sampai garansi')
+            ->assertSeeText('Teknologi di balik kaca film ACEGARD')
+            ->assertSeeText('Dari konsultasi sampai garansi')
             ->assertSee('Mercure Hotels')
-            ->assertSee('Pertanyaan yang sering diajukan')
-            ->assertSee('Kunjungi workshop kami')
+            ->assertSeeText('Pertanyaan yang sering diajukan')
+            ->assertSeeText('Kunjungi workshop kami')
             ->assertSee(config('acegard.address'));
     }
 }

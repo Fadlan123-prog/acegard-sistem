@@ -8,112 +8,163 @@
 
 @section('content')
 
+@php
+  $clients = ['BTN', 'Jasamarga', 'Kemenko Marves', 'Mercure Hotels', 'Cengkareng Heliport'];
+  $img = fn ($f) => asset('assets/frontend/ag/' . $f);
+@endphp
+
 {{-- ───────── Hero ───────── --}}
-<section class="ag-hero ag-lines" aria-labelledby="ag-hero-title">
+<section class="ag-hero" aria-labelledby="ag-hero-title">
   <div class="ag-container">
-    <div class="ag-hero-meta">
-      <span>Window Film &middot; Paint Protection</span>
-      <span>Tangerang, Indonesia</span>
+    <h1 class="ag-display" id="ag-hero-title">Protection, Comfort <b>&amp; Clarity.</b></h1>
+    <p class="ag-hero-sub">Premium Automotive Window Film, Architectural Film, dan Paint Protection untuk kendaraan dan bangunan Anda. Dipasang oleh teknisi ACEGARD di Tangerang.</p>
+    <div class="ag-hero-actions">
+      <a class="ag-btn ag-btn-primary" href="#produk">Explore Our Products</a>
+      <a class="ag-btn ag-btn-secondary whatsapp-btn" data-gtm-label="hero-whatsapp" target="_blank" rel="noopener"
+         href="{{ Whatsapp::url('Halo ACEGARD, saya ingin berkonsultasi.') }}">
+        <iconify-icon icon="mdi:whatsapp" width="20" aria-hidden="true"></iconify-icon> Contact Us
+      </a>
     </div>
-
-    <h1 class="ag-display" id="ag-hero-title">
-      <span class="ln" style="--i:0"><span>Protection,</span></span>
-      <span class="ln" style="--i:1"><span>Comfort</span></span>
-      <span class="ln" style="--i:2"><span class="accent">&amp; Clarity.</span></span>
-    </h1>
-
-    <div class="ag-hero-stage">
-      <div class="ag-hero-copy">
-        <p>Premium Automotive Window Film, Architectural Film, and Paint Protection Solutions untuk kendaraan dan bangunan Anda.</p>
-        <div class="ag-hero-actions">
-          <a class="ag-btn ag-btn-primary" href="#produk">Explore Our Products</a>
-          <a class="ag-btn ag-btn-secondary whatsapp-btn" data-gtm-label="hero-whatsapp" target="_blank" rel="noopener"
-             href="{{ Whatsapp::url('Halo ACEGARD, saya ingin berkonsultasi.') }}">
-            <iconify-icon icon="mdi:whatsapp" width="20" aria-hidden="true"></iconify-icon> Contact Us
-          </a>
-        </div>
-      </div>
-      <div class="ag-hero-car">
-        <img src="{{ asset('assets/frontend/ag/hero-car.webp') }}" width="1200" height="799" alt="Mobil sedan perak dengan kaca film ACEGARD" fetchpriority="high">
-      </div>
+    <div class="ag-hero-car">
+      <img src="{{ $img('hero-car-clear.webp') }}" width="1334" height="889" alt="Mobil sedan perak dengan kaca film ACEGARD" fetchpriority="high">
     </div>
-
-    <nav class="ag-hero-index" aria-label="Layanan">
-      <a href="{{ route('frontend.service.car') }}"><span><small>01</small>Automotive Film</span><iconify-icon icon="mdi:arrow-top-right" aria-hidden="true"></iconify-icon></a>
-      <a href="{{ route('frontend.service.building') }}"><span><small>02</small>Building Film</span><iconify-icon icon="mdi:arrow-top-right" aria-hidden="true"></iconify-icon></a>
-      <a href="{{ route('frontend.ppf.catalog') }}"><span><small>03</small>Paint Protection Film</span><iconify-icon icon="mdi:arrow-top-right" aria-hidden="true"></iconify-icon></a>
-    </nav>
+  </div>
+  <div class="ag-marquee" aria-label="Dipercaya oleh">
+    <div class="ag-marquee-track">
+      <ul>@foreach ($clients as $c)<li>{{ $c }}</li>@endforeach</ul>
+      <ul aria-hidden="true">@foreach ($clients as $c)<li>{{ $c }}</li>@endforeach</ul>
+      <ul aria-hidden="true">@foreach ($clients as $c)<li>{{ $c }}</li>@endforeach</ul>
+      <ul aria-hidden="true">@foreach ($clients as $c)<li>{{ $c }}</li>@endforeach</ul>
+    </div>
   </div>
 </section>
 
-{{-- ───────── About ACEGARD ───────── --}}
-<section class="ag-section" id="tentang" aria-labelledby="ag-about-title">
+{{-- ───────── Layanan ───────── --}}
+<section class="ag-section" id="layanan" aria-labelledby="ag-services-title">
   <div class="ag-container">
-    <div class="ag-about">
-      <div class="ag-reveal">
-        <span class="ag-eyebrow">About ACEGARD</span>
-        <h2 class="ag-h2" id="ag-about-title">Kaca film Nano Ceramic untuk kendaraan dan bangunan</h2>
-      </div>
-      <div class="ag-prose ag-reveal">
-        <p>ACEGARD Indonesia menyediakan kaca film mobil, kaca film gedung dan rumah, serta Paint Protection Film (PPF). Produk kami diproduksi di pabrik bersertifikat internasional di Korea, melewati kontrol kualitas berlapis, lalu didistribusikan secara resmi di Indonesia.</p>
-        <p>Kaca film ACEGARD memakai teknologi Nano Ceramic Matrix Composite. Lapisan dasarnya berupa dual-layer Nano Ceramic yang diproses dengan teknologi sputtering dan diperkuat unsur logam Tin, Titanium, dan Tungsten. Hasilnya tujuh lapisan yang stabil secara optik, tahan lama, dan tidak mengganggu sinyal seluler, WiFi, maupun GPS.</p>
-        <p>Pemasangan dikerjakan oleh teknisi di workshop kami di Cipondoh, Kota Tangerang. Setiap pelanggan mendapat konsultasi sebelum pemasangan, garansi, dan layanan after sales.</p>
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">Our Services</span>
+      <h2 class="ag-h2" id="ag-services-title">Tiga layanan <b>utama ACEGARD</b></h2>
+      <p class="ag-lead">Setiap layanan punya pilihan produk berbeda. Pilih sesuai kebutuhan, lalu konsultasikan tipe film yang paling cocok dengan tim kami.</p>
+    </div>
+    <div class="ag-grid c3">
+      <a class="ag-card ag-reveal" href="{{ route('frontend.service.car') }}">
+        <span class="ag-card-media"><img src="{{ $img('service-otomotif.webp') }}" width="1100" height="488" loading="lazy" alt="Kaca film mobil"></span>
+        <span class="ag-card-body">
+          <h3>Automotive Window Film</h3>
+          <p>Kaca depan, samping, belakang, dan sunroof. Menolak panas dan sinar UV, mengurangi silau, dan menjaga privasi kabin dengan pilihan VLT.</p>
+          <ul class="ag-pills"><li class="ag-pill">Tolak panas &amp; UV</li><li class="ag-pill">Anti silau</li><li class="ag-pill">Privasi</li></ul>
+          <span class="ag-card-foot"><span class="ag-link">Lihat kaca film mobil</span><span class="ag-arrow" aria-hidden="true"><iconify-icon icon="mdi:arrow-right"></iconify-icon></span></span>
+        </span>
+      </a>
+      <a class="ag-card ag-reveal" href="{{ route('frontend.service.building') }}">
+        <span class="ag-card-media"><img src="{{ $img('service-bangunan.webp') }}" width="1100" height="488" loading="lazy" alt="Kaca film gedung dan bangunan"></span>
+        <span class="ag-card-body">
+          <h3>Building Window Film</h3>
+          <p>Rumah, kantor, hotel, dan gedung komersial. Menurunkan panas dari jendela, meringankan kerja AC, dan melindungi interior dari pudar.</p>
+          <ul class="ag-pills"><li class="ag-pill">Hemat energi AC</li><li class="ag-pill">Interior awet</li><li class="ag-pill">Privasi</li></ul>
+          <span class="ag-card-foot"><span class="ag-link">Lihat kaca film gedung</span><span class="ag-arrow" aria-hidden="true"><iconify-icon icon="mdi:arrow-right"></iconify-icon></span></span>
+        </span>
+      </a>
+      <a class="ag-card ag-reveal" href="{{ route('frontend.ppf.catalog') }}">
+        <span class="ag-card-media"><img src="{{ $img('service-ppf.webp') }}" width="1100" height="488" loading="lazy" alt="Paint Protection Film pada mobil"></span>
+        <span class="ag-card-body">
+          <h3>Paint Protection Film</h3>
+          <p>Lapisan transparan yang melindungi cat dari goresan halus, kotoran, dan paparan lingkungan. Pilihan tampilan Gloss dan Matte.</p>
+          <ul class="ag-pills"><li class="ag-pill">Perlindungan cat</li><li class="ag-pill">Gloss &amp; Matte</li><li class="ag-pill">Beberapa seri</li></ul>
+          <span class="ag-card-foot"><span class="ag-link">Lihat seri PPF</span><span class="ag-arrow" aria-hidden="true"><iconify-icon icon="mdi:arrow-right"></iconify-icon></span></span>
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+{{-- ───────── Produk kaca film mobil ───────── --}}
+<section class="ag-section alt" id="produk" aria-labelledby="ag-prod-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">Our Products</span>
+      <h2 class="ag-h2" id="ag-prod-title">Pilihan <b>kaca film mobil</b></h2>
+      <p class="ag-lead">Empat tipe film untuk kebutuhan berbeda. Spesifikasi lengkap dan harga dapat dikonsultasikan langsung dengan tim ACEGARD.</p>
+    </div>
+    <div class="ag-grid c4 ag-film">
+      @foreach ([
+        ['film-notch-uv400.webp',   'NOTCH UV400',  'Jernih & tetap sejuk',            'Kejernihan maksimal dengan perlindungan panas yang efektif. Tampilan tetap natural.'],
+        ['film-4k-alpha-pro.webp',  '4K ALPHA PRO', 'Nyaman dengan privasi yang pas',  'Perpaduan visibilitas, kenyamanan, dan privasi. Jernih dari dalam, stylish dari luar.'],
+        ['film-flex-one-way.webp',  'FLEX ONE WAY', 'Privasi untuk kaca samping',      'Pilihan untuk kaca samping dan belakang dengan tampilan satu arah.'],
+        ['film-black-master.webp',  'BLACK MASTER', 'Tampilan gelap yang tegas',       'Pilihan untuk Anda yang mengutamakan privasi dan tampilan kabin yang lebih gelap.'],
+      ] as [$file, $name, $tag, $desc])
+        <article class="ag-card is-hover ag-reveal">
+          <span class="ag-card-media"><img src="{{ $img($file) }}" width="900" height="600" loading="lazy" alt="Kaca film {{ $name }}"></span>
+          <div class="ag-card-body">
+            <h3>{{ $name }}</h3>
+            <p><strong>{{ $tag }}</strong></p>
+            <p>{{ $desc }}</p>
+            <div class="ag-card-foot">
+              <span class="ag-price">Hubungi untuk harga</span>
+              <a class="ag-btn ag-btn-secondary ag-btn-sm whatsapp-btn" data-gtm-label="film-{{ \Illuminate\Support\Str::slug($name) }}" target="_blank" rel="noopener"
+                 href="{{ Whatsapp::url('Halo ACEGARD, saya tertarik dengan kaca film ' . $name) }}">Tanya</a>
+            </div>
+          </div>
+        </article>
+      @endforeach
+    </div>
+    <p class="ag-center ag-reveal" style="margin-top:36px"><a class="ag-btn ag-btn-primary" href="{{ route('frontend.service.car') }}">Lihat Semua Kaca Film Mobil</a></p>
+  </div>
+</section>
+
+{{-- ───────── Why ACEGARD ───────── --}}
+<section class="ag-section" aria-labelledby="ag-why-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">Why ACEGARD</span>
+      <h2 class="ag-h2" id="ag-why-title">Mengapa <b>memilih ACEGARD</b></h2>
+    </div>
+    <div class="ag-grid c3">
+      @foreach ([
+        ['mdi:diamond-stone',         'Premium Material',          'Diproduksi di pabrik bersertifikat internasional di Korea dengan kontrol kualitas berlapis, dan didistribusikan resmi di Indonesia.'],
+        ['mdi:account-wrench',        'Professional Installation', 'Pemasangan dikerjakan teknisi ACEGARD di workshop kami, dengan prosedur yang sama untuk setiap pelanggan.'],
+        ['mdi:shield-check-outline',  'Protection Technology',     'Nano Ceramic dengan lapisan Titanium dan Tungsten menolak panas inframerah dan sinar UV tanpa mengganggu sinyal.'],
+        ['mdi:check-decagram-outline','Quality-Focused',           'Warna stabil, tahan pudar, dan kejernihan optik yang konsisten di setiap varian produk.'],
+        ['mdi:handshake-outline',     'Customer-Oriented',         'Konsultasi sebelum pemasangan, garansi, dan layanan after sales yang jelas setelahnya.'],
+      ] as [$icon, $title, $desc])
+        <div class="ag-card ag-feature is-hover ag-reveal">
+          <span class="ic"><iconify-icon icon="{{ $icon }}" aria-hidden="true"></iconify-icon></span>
+          <h3>{{ $title }}</h3>
+          <p>{{ $desc }}</p>
+        </div>
+      @endforeach
+      <div class="ag-card ag-feature is-cta ag-reveal">
+        <div>
+          <h3>Punya pertanyaan?</h3>
+          <p>Tim ACEGARD siap membantu memilih film yang sesuai.</p>
+        </div>
+        <a class="ag-btn ag-btn-light ag-btn-sm whatsapp-btn" data-gtm-label="why-whatsapp" target="_blank" rel="noopener"
+           href="{{ Whatsapp::url('Halo ACEGARD, saya ingin bertanya.') }}">Tanya via WhatsApp</a>
       </div>
     </div>
+  </div>
+</section>
 
+{{-- ───────── About ───────── --}}
+<section class="ag-section alt" id="tentang" aria-labelledby="ag-about-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal" style="margin-bottom:28px">
+      <span class="ag-eyebrow">About ACEGARD</span>
+      <h2 class="ag-h2" id="ag-about-title">Kaca film Nano Ceramic <b>untuk kendaraan dan bangunan</b></h2>
+    </div>
+    <div class="ag-prose ag-reveal">
+      <p>ACEGARD Indonesia menyediakan kaca film mobil, kaca film gedung dan rumah, serta Paint Protection Film (PPF). Produk kami diproduksi di pabrik bersertifikat internasional di Korea, melewati kontrol kualitas berlapis, lalu didistribusikan secara resmi di Indonesia.</p>
+      <p>Kaca film ACEGARD memakai teknologi Nano Ceramic Matrix Composite. Lapisan dasarnya berupa dual-layer Nano Ceramic yang diproses dengan teknologi sputtering dan diperkuat unsur logam Tin, Titanium, dan Tungsten. Hasilnya tujuh lapisan yang stabil secara optik, tahan lama, dan tidak mengganggu sinyal seluler, WiFi, maupun GPS.</p>
+      <p>Pemasangan dikerjakan oleh teknisi di workshop kami di Cipondoh, Kota Tangerang. Setiap pelanggan mendapat konsultasi sebelum pemasangan, garansi, dan layanan after sales.</p>
+    </div>
     <dl class="ag-stats ag-reveal">
       <div><dt>Tolak inframerah hingga</dt><dd>99,9<small>%</small></dd></div>
       <div><dt>TSER hingga</dt><dd>88<small>%</small></dd></div>
       <div><dt>Perlindungan UV</dt><dd>UV400</dd></div>
       <div><dt>Penurunan suhu interior</dt><dd>&plusmn;5<small>&deg;C</small></dd></div>
     </dl>
-    <p class="ag-note ag-reveal">Angka bersumber dari spesifikasi produk ACEGARD. Hasil di lapangan dapat berbeda menurut tipe film, kendaraan atau bangunan, dan kondisi cuaca.</p>
-  </div>
-</section>
-
-{{-- ───────── Our Services ───────── --}}
-<section class="ag-section alt" id="layanan" aria-labelledby="ag-services-title">
-  <div class="ag-container">
-    <div class="ag-head ag-reveal">
-      <div>
-        <span class="ag-eyebrow">Our Services</span>
-        <h2 class="ag-h2" id="ag-services-title">Tiga layanan utama ACEGARD</h2>
-      </div>
-      <p class="ag-lead">Setiap layanan punya pilihan produk berbeda. Pilih sesuai kebutuhan Anda, lalu konsultasikan tipe film yang paling cocok dengan tim kami sebelum pemasangan.</p>
-    </div>
-
-    <ul class="ag-rows is-media">
-      <li class="ag-reveal">
-        <a class="ag-row" href="{{ route('frontend.service.car') }}">
-          <span class="ag-row-num">01</span>
-          <span class="ag-row-title">Automotive<br>Window Film</span>
-          <span class="ag-row-desc">Kaca film untuk kaca depan, samping, belakang, dan sunroof. Menolak panas dan sinar UV, mengurangi silau, dan menjaga privasi kabin, dengan pilihan tingkat kegelapan (VLT) sesuai selera dan aturan berkendara.
-            <ul><li>Tolak panas &amp; UV</li><li>Anti silau</li><li>Privasi kabin</li><li>Pilihan VLT</li></ul></span>
-          <span class="ag-row-media"><img src="{{ asset('assets/frontend/ag/service-otomotif.webp') }}" width="1100" height="488" loading="lazy" alt="Kaca film mobil"></span>
-          <span class="ag-row-arrow" aria-hidden="true"><iconify-icon icon="mdi:arrow-right"></iconify-icon></span>
-        </a>
-      </li>
-      <li class="ag-reveal">
-        <a class="ag-row" href="{{ route('frontend.service.building') }}">
-          <span class="ag-row-num">02</span>
-          <span class="ag-row-title">Building<br>Window Film</span>
-          <span class="ag-row-desc">Kaca film untuk rumah, kantor, hotel, dan gedung komersial. Membantu menurunkan panas yang masuk lewat jendela, meringankan kerja AC, melindungi interior dari pudar, dan memberi privasi tanpa menutup pemandangan.
-            <ul><li>Hemat energi AC</li><li>Interior awet</li><li>Privasi</li><li>Tampilan modern</li></ul></span>
-          <span class="ag-row-media"><img src="{{ asset('assets/frontend/ag/service-bangunan.webp') }}" width="1100" height="488" loading="lazy" alt="Kaca film gedung dan bangunan"></span>
-          <span class="ag-row-arrow" aria-hidden="true"><iconify-icon icon="mdi:arrow-right"></iconify-icon></span>
-        </a>
-      </li>
-      <li class="ag-reveal">
-        <a class="ag-row" href="{{ route('frontend.ppf.catalog') }}">
-          <span class="ag-row-num">03</span>
-          <span class="ag-row-title">Paint Protection<br>Film</span>
-          <span class="ag-row-desc">Lapisan transparan yang melindungi cat bodi dari goresan halus, kotoran, dan paparan lingkungan sehari-hari. Tersedia pilihan tampilan Gloss dan Matte dalam beberapa seri, dipasang oleh teknisi ACEGARD.
-            <ul><li>Perlindungan cat</li><li>Gloss &amp; Matte</li><li>Beberapa seri</li><li>Teknisi ACEGARD</li></ul></span>
-          <span class="ag-row-media"><img src="{{ asset('assets/frontend/ag/service-ppf.webp') }}" width="1100" height="488" loading="lazy" alt="Paint Protection Film pada mobil"></span>
-          <span class="ag-row-arrow" aria-hidden="true"><iconify-icon icon="mdi:arrow-right"></iconify-icon></span>
-        </a>
-      </li>
-    </ul>
+    <p class="ag-note ag-center ag-reveal">Angka bersumber dari spesifikasi produk ACEGARD. Hasil di lapangan dapat berbeda menurut tipe film, kendaraan atau bangunan, dan kondisi cuaca.</p>
   </div>
 </section>
 
@@ -121,101 +172,99 @@
 <section class="ag-section" id="teknologi" aria-labelledby="ag-tech-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
-      <div>
-        <span class="ag-eyebrow">Technology</span>
-        <h2 class="ag-h2" id="ag-tech-title">Teknologi di balik kaca film ACEGARD</h2>
-      </div>
+      <span class="ag-eyebrow">Technology</span>
+      <h2 class="ag-h2" id="ag-tech-title">Teknologi di balik <b>kaca film ACEGARD</b></h2>
       <p class="ag-lead">Tujuh karakter utama yang membedakan kaca film ACEGARD, dari penolakan panas sampai kestabilan warna.</p>
     </div>
-    <ol class="ag-tech">
+    <div class="ag-grid c4">
       @foreach ([
-        ['High TSER Performance',            'Menolak energi surya total hingga 88%, sehingga kabin dan ruangan terasa lebih sejuk.'],
-        ['Tungsten Thermal Layer',           'Lapisan Tungsten memperkuat penolakan panas inframerah hingga 99,9%.'],
-        ['Night Vision Optical Clarity',     'VLT dijaga optimal agar detail jalan tetap terlihat di cahaya rendah, dengan glare lampu yang berkurang.'],
-        ['UV400 Full Spectrum Protection',   'Melindungi kulit dan interior dari paparan sinar UV pada seluruh spektrum.'],
-        ['Non-Metal Signal Friendly',        'Sinyal seluler, WiFi, dan GPS tetap lancar setelah kaca film terpasang.'],
-        ['Color Fade Resistant',             'Warna tetap konsisten untuk pemakaian bertahun-tahun.'],
-        ['Energy Efficient Color System',    'Membantu AC bekerja lebih ringan sehingga konsumsi energi harian dapat berkurang.'],
+        ['High TSER Performance',          'Menolak energi surya total hingga 88%, sehingga kabin dan ruangan terasa lebih sejuk.'],
+        ['Tungsten Thermal Layer',         'Lapisan Tungsten memperkuat penolakan panas inframerah hingga 99,9%.'],
+        ['Night Vision Optical Clarity',   'VLT dijaga optimal agar detail jalan tetap terlihat di cahaya rendah, dengan glare lampu yang berkurang.'],
+        ['UV400 Full Spectrum Protection', 'Melindungi kulit dan interior dari paparan sinar UV pada seluruh spektrum.'],
+        ['Non-Metal Signal Friendly',      'Sinyal seluler, WiFi, dan GPS tetap lancar setelah kaca film terpasang.'],
+        ['Color Fade Resistant',           'Warna tetap konsisten untuk pemakaian bertahun-tahun.'],
+        ['Energy Efficient Color System',  'Membantu AC bekerja lebih ringan sehingga konsumsi energi harian dapat berkurang.'],
       ] as $i => [$t, $d])
-        <li class="ag-tech-item ag-reveal">
+        <div class="ag-card ag-feature is-hover ag-reveal">
           <span class="n">0{{ $i + 1 }}</span>
           <h3>{{ $t }}</h3>
           <p>{{ $d }}</p>
-        </li>
-      @endforeach
-    </ol>
-  </div>
-</section>
-
-{{-- ───────── Why ACEGARD ───────── --}}
-<section class="ag-section alt" aria-labelledby="ag-why-title">
-  <div class="ag-container">
-    <div class="ag-head ag-reveal">
-      <div>
-        <span class="ag-eyebrow">Why ACEGARD</span>
-        <h2 class="ag-h2" id="ag-why-title">Mengapa memilih ACEGARD</h2>
-      </div>
-    </div>
-    <div class="ag-why">
-      @foreach ([
-        ['mdi:diamond-stone',         'Premium Material',         'Diproduksi di pabrik bersertifikat internasional di Korea dengan kontrol kualitas berlapis, dan didistribusikan resmi di Indonesia.'],
-        ['mdi:account-wrench',        'Professional Installation','Pemasangan dikerjakan teknisi ACEGARD di workshop kami, dengan prosedur yang sama untuk setiap pelanggan.'],
-        ['mdi:shield-check-outline',  'Protection Technology',    'Nano Ceramic dengan lapisan Titanium dan Tungsten menolak panas inframerah dan sinar UV tanpa mengganggu sinyal.'],
-        ['mdi:check-decagram-outline','Quality-Focused',          'Warna stabil, tahan pudar, dan kejernihan optik yang konsisten di setiap varian produk.'],
-        ['mdi:handshake-outline',     'Customer-Oriented',        'Konsultasi sebelum pemasangan, garansi, dan layanan after sales yang jelas setelahnya.'],
-      ] as $i => [$icon, $title, $desc])
-        <div class="ag-why-item ag-reveal">
-          <span class="n">0{{ $i + 1 }}</span>
-          <iconify-icon icon="{{ $icon }}" aria-hidden="true"></iconify-icon>
-          <h3>{{ $title }}</h3>
-          <p>{{ $desc }}</p>
         </div>
       @endforeach
+      <a class="ag-card ag-feature is-cta ag-reveal" href="{{ route('frontend.about') }}" style="text-decoration:none">
+        <div>
+          <h3>Pelajari lebih lanjut</h3>
+          <p>Cerita lengkap teknologi Nano Ceramic ACEGARD.</p>
+        </div>
+        <span class="ag-btn ag-btn-light ag-btn-sm">Tentang kami</span>
+      </a>
     </div>
   </div>
 </section>
 
-{{-- ───────── Process ───────── --}}
+{{-- ───────── Galeri ───────── --}}
+<section class="ag-section alt" aria-labelledby="ag-gal-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">Gallery</span>
+      <h2 class="ag-h2" id="ag-gal-title">Hasil pemasangan <b>di workshop ACEGARD</b></h2>
+      <p class="ag-lead">Proses pemasangan dan kendaraan pelanggan yang sudah ditangani teknisi kami.</p>
+    </div>
+    <div class="ag-gallery ag-reveal">
+      <figure class="w2"><img src="{{ $img('gallery-install.webp') }}" width="1000" height="726" loading="lazy" alt="Teknisi memasang kaca film pada jendela mobil"></figure>
+      <figure><img src="{{ $img('proj-aion-hyptec.webp') }}" width="412" height="513" loading="lazy" alt="Aion Hyptec dengan PPF ACEGARD"></figure>
+      <figure><img src="{{ $img('proj-bmw-ix-drive.webp') }}" width="412" height="513" loading="lazy" alt="BMW iX xDrive dengan PPF ACEGARD"></figure>
+      <figure><img src="{{ $img('proj-mazda-3.webp') }}" width="412" height="513" loading="lazy" alt="Mazda 3 dengan PPF ACEGARD"></figure>
+      <figure><img src="{{ $img('proj-mini-cooper.webp') }}" width="412" height="513" loading="lazy" alt="Mini Cooper dengan PPF ACEGARD"></figure>
+      <figure class="w2"><img src="{{ $img('gallery-view.webp') }}" width="998" height="664" loading="lazy" alt="Pemandangan dari balik kaca film mobil"></figure>
+      <figure><img src="{{ $img('proj-vinfast.webp') }}" width="412" height="513" loading="lazy" alt="VinFast dengan PPF ACEGARD"></figure>
+      <figure><img src="{{ $img('proj-denza-d-9.webp') }}" width="412" height="513" loading="lazy" alt="Denza D9 dengan PPF ACEGARD"></figure>
+      <figure><img src="{{ $img('proj-jaecoo-j5.webp') }}" width="412" height="513" loading="lazy" alt="Jaecoo J5 dengan PPF ACEGARD"></figure>
+      <figure><img src="{{ $img('gallery-sticker.webp') }}" width="1000" height="666" loading="lazy" alt="Stiker ACEGARD pada kaca mobil"></figure>
+    </div>
+  </div>
+</section>
+
+{{-- ───────── Proses ───────── --}}
 <section class="ag-section" id="proses" aria-labelledby="ag-process-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
-      <div>
-        <span class="ag-eyebrow">How It Works</span>
-        <h2 class="ag-h2" id="ag-process-title">Dari konsultasi sampai garansi</h2>
-      </div>
+      <span class="ag-eyebrow">How It Works</span>
+      <h2 class="ag-h2" id="ag-process-title">Dari konsultasi <b>sampai garansi</b></h2>
       <p class="ag-lead">Empat langkah yang sama untuk kendaraan maupun bangunan.</p>
     </div>
-    <ol class="ag-steps">
+    <div class="ag-grid c4">
       @foreach ([
-        ['Konsultasi',  'Ceritakan kendaraan atau bangunan Anda lewat WhatsApp. Tim kami membantu memilih tipe film sesuai kebutuhan dan anggaran.'],
-        ['Pilih produk','Bandingkan pilihan film, tingkat kegelapan (VLT), dan tampilan, lalu tentukan jadwal pemasangan.'],
-        ['Pemasangan',  'Teknisi ACEGARD memasang film di workshop kami di Cipondoh, Tangerang, dengan perhatian pada kerapian dan hasil akhir.'],
-        ['Garansi & after sales','Setelah pemasangan, Anda mendapat garansi dan dukungan after sales. Cek status garansi kapan saja di halaman Cek Garansi.'],
+        ['Konsultasi',           'Ceritakan kendaraan atau bangunan Anda lewat WhatsApp. Tim kami membantu memilih tipe film sesuai kebutuhan dan anggaran.'],
+        ['Pilih produk',         'Bandingkan pilihan film, tingkat kegelapan (VLT), dan tampilan, lalu tentukan jadwal pemasangan.'],
+        ['Pemasangan',           'Teknisi ACEGARD memasang film di workshop kami di Cipondoh, Tangerang, dengan perhatian pada kerapian dan hasil akhir.'],
+        ['Garansi & after sales','Setelah pemasangan, Anda mendapat garansi dan dukungan after sales. Cek status garansi kapan saja.'],
       ] as $i => [$t, $d])
-        <li class="ag-step ag-reveal">
+        <div class="ag-card ag-feature is-hover ag-reveal">
           <span class="n">0{{ $i + 1 }}</span>
           <h3>{{ $t }}</h3>
           <p>{{ $d }}</p>
-        </li>
+        </div>
       @endforeach
-    </ol>
-    <p class="ag-reveal" style="margin-top:32px"><a class="ag-link" href="{{ route('warranty.form') }}">Cek garansi Anda <iconify-icon icon="mdi:arrow-right" aria-hidden="true"></iconify-icon></a></p>
+    </div>
+    <p class="ag-center ag-reveal" style="margin-top:28px"><a class="ag-link" href="{{ route('warranty.form') }}">Cek garansi Anda <iconify-icon icon="mdi:arrow-right" aria-hidden="true"></iconify-icon></a></p>
   </div>
 </section>
 
-{{-- ───────── Interactive experience (pratinjau) ───────── --}}
+{{-- ───────── Simulator (pratinjau) ───────── --}}
 <section class="ag-section tint" aria-labelledby="ag-sim-title">
   <div class="ag-container ag-split">
     <div class="ag-reveal">
       <span class="ag-eyebrow">Interactive Experience</span>
-      <h2 class="ag-h2" id="ag-sim-title" style="margin-top:16px">Coba tingkat kegelapan kaca film</h2>
+      <h2 class="ag-h2" id="ag-sim-title" style="margin-top:16px">Coba tingkat <b>kegelapan kaca film</b></h2>
       <p class="ag-lead">Simulator kaca film mobil akan membantu Anda membayangkan tampilan berbagai persentase VLT sebelum memilih. Semakin rendah angka VLT, semakin gelap kaca film.</p>
       <a class="ag-btn ag-btn-primary" href="{{ route('frontend.service.car') }}">Lihat Kaca Film Mobil</a>
     </div>
     <div class="ag-reveal">
       <div class="ag-sim-stage">
         <span class="ag-soon">Segera hadir</span>
-        <img src="{{ asset('assets/frontend/ag/hero-car.webp') }}" width="1200" height="799" loading="lazy" alt="Pratinjau simulator kaca film mobil">
+        <img src="{{ $img('hero-car-clear.webp') }}" width="1334" height="889" loading="lazy" alt="Pratinjau simulator kaca film mobil">
         <div class="ag-chips" aria-hidden="true">
           @foreach ([5, 20, 35, 50, 70] as $v)
             <span class="ag-chip {{ $v === 35 ? 'is-on' : '' }}">{{ $v }}%</span>
@@ -227,74 +276,38 @@
   </div>
 </section>
 
-{{-- ───────── Our Products ───────── --}}
-<section class="ag-section" id="produk" aria-labelledby="ag-prod-title">
+{{-- ───────── Testimoni ───────── --}}
+<section class="ag-section" aria-labelledby="ag-testi-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
-      <div>
-        <span class="ag-eyebrow">Our Products</span>
-        <h2 class="ag-h2" id="ag-prod-title">Pilih kategori produk</h2>
-      </div>
-      <p class="ag-lead">Detail spesifikasi dan harga dapat dikonsultasikan langsung dengan tim ACEGARD.</p>
+      <span class="ag-eyebrow">Testimonials</span>
+      <h2 class="ag-h2" id="ag-testi-title">Kata mereka <b>tentang ACEGARD</b></h2>
     </div>
-
-    <ul class="ag-rows is-simple">
-      <li class="ag-reveal">
-        <a class="ag-row" href="{{ route('frontend.service.car') }}">
-          <span class="ag-row-num">01</span>
-          <span class="ag-row-title">Kaca Film Mobil</span>
-          <span class="ag-row-desc">Kaca film untuk kaca depan, samping, belakang, dan sunroof.</span>
-          <span class="ag-row-arrow" aria-hidden="true"><iconify-icon icon="mdi:arrow-right"></iconify-icon></span>
-        </a>
-      </li>
-      <li class="ag-reveal">
-        <a class="ag-row" href="{{ route('frontend.service.building') }}">
-          <span class="ag-row-num">02</span>
-          <span class="ag-row-title">Kaca Film Gedung</span>
-          <span class="ag-row-desc">Kaca film untuk rumah, kantor, dan gedung komersial.</span>
-          <span class="ag-row-arrow" aria-hidden="true"><iconify-icon icon="mdi:arrow-right"></iconify-icon></span>
-        </a>
-      </li>
-      <li class="ag-reveal">
-        <a class="ag-row" href="{{ route('frontend.ppf.catalog') }}">
-          <span class="ag-row-num">03</span>
-          <span class="ag-row-title">Paint Protection Film</span>
-          <span class="ag-row-desc">
-            <span class="visually-hidden">Seri PPF:</span>
-            <ul class="ag-tags">@foreach (['ARMOR', 'ARMOR PLUS', 'AEGIS', 'AEGIS MAX+', 'MATTE'] as $s)<li>{{ $s }}</li>@endforeach</ul>
-          </span>
-          <span class="ag-row-arrow" aria-hidden="true"><iconify-icon icon="mdi:arrow-right"></iconify-icon></span>
-        </a>
-      </li>
-    </ul>
-  </div>
-</section>
-
-{{-- ───────── Clients ───────── --}}
-<section class="ag-section alt" aria-labelledby="ag-clients-title">
-  <div class="ag-container">
-    <div class="ag-head ag-reveal">
-      <div>
-        <span class="ag-eyebrow">Trusted By</span>
-        <h2 class="ag-h2" id="ag-clients-title">Dipercaya instansi dan pelaku usaha</h2>
-      </div>
-      <p class="ag-lead">ACEGARD telah dipasang di kantor, hotel, dan fasilitas milik berbagai pelanggan korporasi dan instansi, selain kendaraan pribadi dari banyak merek.</p>
-    </div>
-    <ul class="ag-clients ag-reveal">
-      @foreach (['BTN', 'Jasamarga', 'Kemenko Bidang Kemaritiman dan Investasi', 'Mercure Hotels', 'Cengkareng Heliport'] as $c)
-        <li>{{ $c }}</li>
+    <div class="ag-grid c3">
+      @foreach ([
+        ['Jessica Iskandar', 'Pelanggan', asset('assets/frontend/building/img/faces/1.jpg'), 'Suka banget sama kaca film nya bikin tampilan kaca rumah lebih elegan dan ruangan jadi lebih adem'],
+        ['Presdir Bank INA', 'Pelanggan korporasi', null, 'Ac jadi lebih cepat dingin dan kinerja listrik berkurang drastis, kualitas Acegard memang bukan kaleng-kaleng'],
+        ['Bos Daikin', 'Pelanggan', null, 'Awalnya hanya coba-coba, ternyata adem banget ac central saya jadi lebih dingin, siang pun tidak silau'],
+      ] as [$name, $role, $photo, $quote])
+        <figure class="ag-card ag-quote ag-reveal" style="margin:0">
+          <blockquote style="margin:0"><q>{{ $quote }}</q></blockquote>
+          <footer>
+            <span class="av">@if($photo)<img src="{{ $photo }}" alt="" width="44" height="44" loading="lazy">@else{{ mb_substr($name, 0, 1) }}@endif</span>
+            <span><strong>{{ $name }}</strong><small>{{ $role }}</small></span>
+          </footer>
+        </figure>
       @endforeach
-    </ul>
+    </div>
   </div>
 </section>
 
 {{-- ───────── FAQ ───────── --}}
-<section class="ag-section" id="faq" aria-labelledby="ag-faq-title">
-  <div class="ag-container ag-faq-wrap">
-    <div class="ag-reveal">
+<section class="ag-section alt" id="faq" aria-labelledby="ag-faq-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">FAQ</span>
-      <h2 class="ag-h2" id="ag-faq-title" style="margin-top:16px">Pertanyaan yang sering diajukan</h2>
-      <p class="ag-lead" style="margin-top:20px">Belum menemukan jawabannya? <a class="ag-link" href="{{ route('frontend.faq') }}">Lihat FAQ lengkap</a> atau tanyakan langsung lewat WhatsApp.</p>
+      <h2 class="ag-h2" id="ag-faq-title">Pertanyaan yang <b>sering diajukan</b></h2>
+      <p class="ag-lead">Belum menemukan jawabannya? <a class="ag-link" href="{{ route('frontend.faq') }}">Lihat FAQ lengkap</a> atau tanyakan langsung lewat WhatsApp.</p>
     </div>
     <div class="ag-faq ag-reveal">
       @foreach ([
@@ -314,12 +327,12 @@
   </div>
 </section>
 
-{{-- ───────── Location ───────── --}}
-<section class="ag-section alt" id="lokasi" aria-labelledby="ag-loc-title">
+{{-- ───────── Lokasi ───────── --}}
+<section class="ag-section" id="lokasi" aria-labelledby="ag-loc-title">
   <div class="ag-container ag-split">
     <div class="ag-reveal">
       <span class="ag-eyebrow">Visit Us</span>
-      <h2 class="ag-h2" id="ag-loc-title" style="margin-top:16px">Kunjungi workshop kami</h2>
+      <h2 class="ag-h2" id="ag-loc-title" style="margin-top:16px">Kunjungi <b>workshop kami</b></h2>
       <p class="ag-lead">Lihat langsung contoh film, konsultasi tatap muka, dan jadwalkan pemasangan di workshop ACEGARD.</p>
       <dl class="ag-contact">
         <div><dt>Alamat</dt><dd>{{ config('acegard.address') }}</dd></div>
@@ -338,7 +351,7 @@
 <section class="ag-section" style="padding-top:0" aria-labelledby="ag-cta-title">
   <div class="ag-container">
     <div class="ag-cta-panel ag-reveal">
-      <h2 id="ag-cta-title">Siap berkonsultasi?</h2>
+      <h2 id="ag-cta-title">Siap <b>berkonsultasi?</b></h2>
       <p>Ceritakan kebutuhan Anda melalui WhatsApp. Tim ACEGARD akan membantu memilih produk yang sesuai.</p>
       <div class="ag-cta-actions">
         <a class="ag-btn ag-btn-light whatsapp-btn" data-gtm-label="cta-whatsapp" target="_blank" rel="noopener"
@@ -360,7 +373,7 @@
     if (!('IntersectionObserver' in window)) { els.forEach(function (e) { e.classList.add('is-visible'); }); return; }
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('is-visible'); io.unobserve(en.target); } });
-    }, { threshold: .1, rootMargin: '0px 0px -5% 0px' });
+    }, { threshold: .08, rootMargin: '0px 0px -4% 0px' });
     els.forEach(function (e) { io.observe(e); });
   })();
 </script>

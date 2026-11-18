@@ -19,16 +19,18 @@
       <iconify-icon icon="mdi:menu" width="24"></iconify-icon>
     </button>
 
-    <nav class="ag-nav-menu" id="agNavMenu" aria-label="Menu utama">
-      @foreach ($links as $l)
-        <a class="ag-nav-link {{ $l['active'] ? 'is-active' : '' }}" href="{{ $l['href'] }}" @if($l['active']) aria-current="page" @endif>{{ $l['label'] }}</a>
-      @endforeach
+    <div class="ag-nav-menu" id="agNavMenu">
+      <nav class="ag-nav-pill" aria-label="Menu utama">
+        @foreach ($links as $l)
+          <a class="ag-nav-link {{ $l['active'] ? 'is-active' : '' }}" href="{{ $l['href'] }}" @if($l['active']) aria-current="page" @endif>{{ $l['label'] }}</a>
+        @endforeach
+      </nav>
       <div class="ag-nav-cta">
         <a class="ag-btn ag-btn-secondary ag-btn-sm" href="{{ route('warranty.form') }}">Cek Garansi</a>
         <a class="ag-btn ag-btn-primary ag-btn-sm whatsapp-btn" data-gtm-label="navbar-konsultasi" target="_blank" rel="noopener"
            href="{{ Whatsapp::url('Halo ACEGARD, saya ingin berkonsultasi.') }}">Konsultasi</a>
       </div>
-    </nav>
+    </div>
   </div>
 </header>
 <script>
