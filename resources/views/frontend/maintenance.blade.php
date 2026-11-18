@@ -27,10 +27,10 @@
             border: 1px solid var(--border); border-radius: 16px; padding: 40px 24px 32px;
             box-shadow: 0 1px 2px rgba(15, 42, 95, .06), 0 16px 40px rgba(15, 42, 95, .12);
         }
-        .logo { height: 40px; width: auto; margin-bottom: 28px; }
+        .logo { display: block; height: 36px; width: auto; max-width: 100%; margin: 0 auto 28px; }
         .badge {
-            display: inline-flex; align-items: center; justify-content: center; width: 72px; height: 72px;
-            border-radius: 50%; background: var(--blue-soft); color: var(--blue); margin-bottom: 20px;
+            display: flex; align-items: center; justify-content: center; width: 72px; height: 72px;
+            border-radius: 50%; background: var(--blue-soft); color: var(--blue); margin: 0 auto 20px;
         }
         .badge svg { width: 36px; height: 36px; animation: spin 12s linear infinite; }
         h1 { font-size: clamp(1.375rem, 4.5vw, 1.75rem); line-height: 1.25; margin: 0 0 12px; color: var(--navy); }
@@ -63,7 +63,7 @@
 </head>
 <body>
     <main role="main">
-        <img class="logo" src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}" alt="Acegard" width="160" height="40">
+        <img class="logo" src="{{ asset('assets/frontend/images/new-acegard-logo.webp') }}" alt="Acegard">
 
         <div class="badge" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
