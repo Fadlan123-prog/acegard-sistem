@@ -39,6 +39,9 @@ return [
     |
     */
 
+    // Tutup beranda & menu navbar publik dengan halaman maintenance (lihat FrontendMaintenance).
+    'frontend_maintenance' => (bool) env('FRONTEND_MAINTENANCE', true),
+
     'debug' => (bool) env('APP_DEBUG', false),
 
     /*
