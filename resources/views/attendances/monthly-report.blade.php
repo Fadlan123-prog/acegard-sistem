@@ -25,10 +25,10 @@
         <p class="text-muted mb-0" style="font-size:13px;">Rekap gaji berdasarkan kehadiran bulanan karyawan</p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
-        <x-ui.button variant="outline" size="sm" href="{{ route('attendances.monthlyReport.export', array_merge(request()->query(), ['format'=>'excel'])) }}">
+        <x-ui.button variant="outline" size="sm" :href="route('attendances.monthlyReport.export', array_merge(request()->query(), ['format'=>'excel']))">
             <iconify-icon icon="mdi:microsoft-excel" class="me-1"></iconify-icon> Excel
         </x-ui.button>
-        <x-ui.button variant="danger-outline" size="sm" href="{{ route('attendances.monthlyReport.export', array_merge(request()->query(), ['format'=>'pdf'])) }}">
+        <x-ui.button variant="danger-outline" size="sm" :href="route('attendances.monthlyReport.export', array_merge(request()->query(), ['format'=>'pdf']))">
             <iconify-icon icon="mdi:file-pdf-box" class="me-1"></iconify-icon> PDF
         </x-ui.button>
         <x-ui.button variant="outline" size="sm" href="{{ route('attendances.report') }}">Lap. Absensi</x-ui.button>

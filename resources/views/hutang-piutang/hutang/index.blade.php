@@ -53,7 +53,7 @@
         @endif
         <x-ui.button variant="primary" size="sm" type="submit"><iconify-icon icon="mdi:magnify" class="me-1"></iconify-icon>Cari</x-ui.button>
         <x-ui.button variant="outline" size="sm" href="{{ route('hutang.index') }}">Reset</x-ui.button>
-        <x-ui.button variant="outline" size="sm" href="{{ route('hutang.export', request()->only(['branch_id','status'])) }}">
+        <x-ui.button variant="outline" size="sm" :href="route('hutang.export', request()->only(['branch_id','status']))">
             <iconify-icon icon="mdi:file-excel-outline" class="me-1"></iconify-icon>Export
         </x-ui.button>
         <x-ui.button variant="danger" size="sm" class="ms-auto" href="{{ route('hutang.create') }}">
