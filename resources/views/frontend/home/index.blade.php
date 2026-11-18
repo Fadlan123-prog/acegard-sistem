@@ -110,7 +110,7 @@
         </article>
       @endforeach
     </div>
-    <p class="ag-center ag-reveal" style="margin-top:36px"><a class="ag-btn ag-btn-primary" href="{{ route('frontend.service.car') }}">Lihat Semua Kaca Film Mobil</a></p>
+    <p class="ag-center ag-reveal" style="margin-top:36px"><a class="ag-btn ag-btn-primary" href="{{ route('frontend.service.car') }}">Lihat Spesifikasi Lengkap</a></p>
   </div>
 </section>
 
@@ -160,12 +160,12 @@
       <p>Pemasangan dikerjakan oleh teknisi di workshop kami di Cipondoh, Kota Tangerang. Setiap pelanggan mendapat konsultasi sebelum pemasangan, garansi, dan layanan after sales.</p>
     </div>
     <dl class="ag-stats ag-reveal">
-      <div><dt>Tolak inframerah hingga</dt><dd>99,9<small>%</small></dd></div>
-      <div><dt>TSER hingga</dt><dd>88<small>%</small></dd></div>
-      <div><dt>Perlindungan UV</dt><dd>UV400</dd></div>
+      <div><dt>Tolak inframerah</dt><dd>99<small>%</small></dd></div>
+      <div><dt>TSER hingga</dt><dd>95<small>%</small></dd></div>
+      <div><dt>Tolak sinar UV</dt><dd>99,9<small>%</small></dd></div>
       <div><dt>Penurunan suhu interior</dt><dd>&plusmn;5<small>&deg;C</small></dd></div>
     </dl>
-    <p class="ag-note ag-center ag-reveal">Angka bersumber dari spesifikasi produk ACEGARD. Hasil di lapangan dapat berbeda menurut tipe film, kendaraan atau bangunan, dan kondisi cuaca.</p>
+    <p class="ag-note ag-center ag-reveal">Angka bersumber dari lembar spesifikasi produk ACEGARD. Hasil di lapangan dapat berbeda menurut tipe film, kendaraan atau bangunan, dan kondisi cuaca.</p>
   </div>
 </section>
 
@@ -179,10 +179,10 @@
     </div>
     <div class="ag-grid c4">
       @foreach ([
-        ['High TSER Performance',          'Menolak energi surya total hingga 88%, sehingga kabin dan ruangan terasa lebih sejuk.'],
-        ['Tungsten Thermal Layer',         'Lapisan Tungsten memperkuat penolakan panas inframerah hingga 99,9%.'],
+        ['High TSER Performance',          'Menolak energi surya total (TSER) hingga 95% pada varian tergelap, sehingga kabin dan ruangan terasa lebih sejuk.'],
+        ['Tungsten Thermal Layer',         'Lapisan Tungsten memperkuat penolakan panas inframerah hingga 99% pada 900 nm dan 1400 nm.'],
         ['Night Vision Optical Clarity',   'VLT dijaga optimal agar detail jalan tetap terlihat di cahaya rendah, dengan glare lampu yang berkurang.'],
-        ['UV400 Full Spectrum Protection', 'Melindungi kulit dan interior dari paparan sinar UV pada seluruh spektrum.'],
+        ['UV400 Full Spectrum Protection', 'Menangkal UVA, UVB, dan UVC hingga 99,9% sampai 400 nm, melindungi kulit dan interior.'],
         ['Non-Metal Signal Friendly',      'Sinyal seluler, WiFi, dan GPS tetap lancar setelah kaca film terpasang.'],
         ['Color Fade Resistant',           'Warna tetap konsisten untuk pemakaian bertahun-tahun.'],
         ['Energy Efficient Color System',  'Membantu AC bekerja lebih ringan sehingga konsumsi energi harian dapat berkurang.'],

@@ -1,159 +1,272 @@
 @extends('frontend.layout.index')
 
-@section('title', 'Kaca Film Otomotif - Acegard Indonesia')
+@php use App\Support\Whatsapp; @endphp
+
+@section('title', 'Kaca Film Mobil - Acegard Indonesia')
+@section('meta_description', 'Kaca film mobil ACEGARD: BLACK MASTER, NOTCH UV400, dan 4K ALPHA PRO. Lihat spesifikasi VLT, TSER, dan penolakan UV tiap varian, lalu konsultasikan lewat WhatsApp.')
+@section('body-class', 'ag-page')
 
 @section('content')
 
 @php
-    $waLink = fn ($text) => 'https://wa.me/6282121212093?text=' . urlencode($text);
+  $img = fn ($f) => asset('assets/frontend/ag/' . $f);
 
-    $depan = [
-        ['image' => asset('assets/frontend/figma/otomotif/depan-1-notch-uv400.png'), 'caption' => 'Lorem Ipsum', 'name' => 'NOTCH UV400', 'tagline' => 'Jernih & Tetap Sejuk', 'desc' => 'Kejernihan maksimal dengan perlindungan panas yang efektif. Tampilan tetap natural, kenyamanan tetap terjaga.', 'irr' => '00%', 'uvr' => '00%', 'tser' => '00%'],
-        ['image' => asset('assets/frontend/figma/otomotif/depan-2-4k-alpha-pro.png'), 'caption' => 'Lorem Ipsum', 'name' => '4K ALPHA PRO', 'tagline' => 'Nyaman dengan Privasi yang Pas', 'desc' => 'Perpaduan ideal antara visibilitas, kenyamanan, dan privasi. Tetap jernih dari dalam, stylish dari luar.', 'irr' => '00%', 'uvr' => '00%', 'tser' => '00%'],
-    ];
+  // Sumber: lembar spesifikasi produk ACEGARD. Angka ditampilkan apa adanya.
+  $rows = [
+    ['color', 'Warna film'],
+    ['vlt',   'Visible Light Transmission (VLT)'],
+    ['ir9',   'IR Rejection 900 nm'],
+    ['ir14',  'IR Rejection 1400 nm'],
+    ['uv',    'UV Rejection'],
+    ['tser',  'TSER'],
+    ['dark',  'Darkness'],
+    ['shgc',  'Solar Heat Gain Coefficient'],
+  ];
+  $v = fn ($code, $color, $vlt, $tser, $dark, $shgc) => compact('code', 'color', 'vlt', 'tser', 'dark', 'shgc') + ['ir9' => '99%', 'ir14' => '99%', 'uv' => '99,9%'];
 
-    $samping = [
-        ['image' => asset('assets/frontend/figma/otomotif/samping-flex-one-way.png'), 'caption' => 'FLEX ONE WAY', 'name' => 'FLEX ONE WAY', 'irr' => '73%', 'uvr' => '99%', 'tser' => '73%'],
-        ['image' => asset('assets/frontend/figma/otomotif/samping-black-master.png'), 'caption' => 'BLACK MASTER', 'name' => 'BLACK MASTER', 'irr' => '90%', 'uvr' => '99%', 'tser' => '75%'],
-        ['image' => asset('assets/frontend/figma/otomotif/samping-notch-uv400.png'), 'caption' => 'NOTCH UV400', 'name' => 'NOTCH UV400', 'irr' => '98%', 'uvr' => '99%', 'tser' => '83%'],
-        ['image' => asset('assets/frontend/figma/otomotif/samping-flex-one-way.png'), 'caption' => '4K ALPHA PRO', 'name' => '4K ALPHA PRO', 'irr' => '90%', 'uvr' => '99%', 'tser' => '75%'],
-    ];
+  $series = [
+    [
+      'name' => 'BLACK MASTER', 'image' => 'film-black-master.webp', 'tag' => 'Penyaringan panas dengan tampilan gelap',
+      'desc' => 'BLACK MASTER memakai teknologi penyaringan panas yang membantu mengurangi paparan panas matahari dan menjaga kabin tetap nyaman dalam berbagai kondisi cuaca.',
+      'variants' => [
+        $v('BM20', 'Charcoal Black', '25%', '67%', '40%', '0,16%'),
+        $v('BM15', 'Charcoal Black', '16%', '70%', '60%', '0,1%'),
+        $v('BM05', 'Charcoal Black', '6%',  '87%', '80%', '0,04%'),
+      ],
+    ],
+    [
+      'name' => 'NOTCH UV400', 'image' => 'film-notch-uv400.webp', 'tag' => 'Night Vision dan proteksi UV hingga 400 nm',
+      'desc' => 'NOTCH UV400 memakai Titanium dan Nano Ceramic dengan teknologi sputter pada PET Film berkualitas tinggi. Dilengkapi Night Vision, film ini menangkal UVA, UVB, dan UVC hingga 99,9% sampai 400 nm.',
+      'variants' => [
+        $v('NV70', 'Sky Blue',       '68%', '53%', '20%', '0,43%'),
+        $v('NV72', 'Soft Green',     '71%', '61%', '30%', '0,4%'),
+        $v('NV30', 'Graphic Black',  '30%', '65%', '40%', '0,19%'),
+        $v('NV20', 'Graphic Black',  '10%', '68%', '60%', '0,13%'),
+        $v('NV05', 'Graphic Black',  '6%',  '89%', '80%', '0,03%'),
+      ],
+    ],
+    [
+      'name' => '4K ALPHA PRO', 'image' => 'film-4k-alpha-pro.webp', 'tag' => 'Nano Ceramic Tungsten & Tin hingga 2500 nm',
+      'desc' => '4K ALPHA PRO memakai teknologi Nano Ceramic berbahan Tungsten dan Tin dengan proses sputter. Film ini menolak panas dan spektrum sinar matahari hingga 2500 nm.',
+      'variants' => [
+        $v('AP50', 'Black Tungsten', '51%', '60%', '30%', '0,29%'),
+        $v('AP35', 'Black Tungsten', '34%', '64%', '40%', '0,21%'),
+        $v('AP10', 'Black Tungsten', '18%', '82%', '60%', '0,1%'),
+        $v('AP05', 'Black Tungsten', '4%',  '90%', '80%', '0,03%'),
+        $v('AP02', 'Black Tungsten', '4%',  '95%', '90%', '0,01%'),
+      ],
+    ],
+  ];
 
-    $sunroof = [
-        ['image' => asset('assets/frontend/figma/otomotif/sunroof-1.png'), 'caption' => 'NOTCH UV400', 'name' => 'NOTCH UV400', 'irr' => '73%', 'uvr' => '99%', 'tser' => '73%'],
-        ['image' => asset('assets/frontend/figma/otomotif/sunroof-2.png'), 'caption' => 'NOTCH UV400', 'name' => 'NOTCH UV400', 'irr' => '90%', 'uvr' => '99%', 'tser' => '75%'],
-        ['image' => asset('assets/frontend/figma/otomotif/sunroof-3.png'), 'caption' => 'NOTCH UV400', 'name' => 'NOTCH UV400', 'irr' => '98%', 'uvr' => '99%', 'tser' => '83%'],
-    ];
+  $swatch = ['Charcoal Black' => '#2B2D31', 'Sky Blue' => '#8EC5F2', 'Soft Green' => '#A9D8BC', 'Graphic Black' => '#1E2024', 'Black Tungsten' => '#15171A'];
 
-    $seri = [
-        ['image' => asset('assets/frontend/figma/otomotif/seri-1.png'), 'caption' => '4K ALPHA PRO', 'name' => '4K ALPHA PRO', 'irr' => '00%', 'uvr' => '00%', 'tser' => '00%'],
-        ['image' => asset('assets/frontend/figma/otomotif/seri-2.png'), 'caption' => 'NOTCH UV400', 'name' => 'NOTCH UV400', 'irr' => '00%', 'uvr' => '00%', 'tser' => '00%'],
-        ['image' => asset('assets/frontend/figma/otomotif/seri-3.png'), 'caption' => 'NOTCH UV400', 'name' => 'NOTCH UV400', 'irr' => '00%', 'uvr' => '00%', 'tser' => '00%'],
-    ];
-
-    $genericDesc = 'Kejernihan maksimal dengan perlindungan panas yang efektif. Tampilan tetap natural, kenyamanan tetap terjaga.';
+  // semua varian, dari paling terang (VLT tertinggi) ke paling gelap
+  $all = collect($series)->flatMap(fn ($s) => collect($s['variants'])->map(fn ($x) => $x + ['series' => $s['name']]))
+          ->sortByDesc(fn ($x) => (int) $x['vlt'])->values();
 @endphp
 
-{{-- Hero --}}
-<section class="ace-section-sm text-center">
-    <div class="container">
-        <h1 class="fw-normal mb-3">Rasakan Kenyamanan Berkendara<br>dalam Kemewahan</h1>
-
-        <div class="d-flex justify-content-center gap-2 flex-wrap mb-4 ace-muted">
-            <a href="#depan" class="text-decoration-none ace-muted">Depan</a> |
-            <a href="#samping-belakang" class="text-decoration-none ace-muted">Samping</a> |
-            <a href="#samping-belakang" class="text-decoration-none ace-muted">Belakang</a> |
-            <a href="#sunroof" class="text-decoration-none ace-muted">Sunroof</a>
-        </div>
-
-        <x-frontend.button variant="gradient" :href="$waLink('Halo Acegard, saya ingin konsultasi kaca film otomotif')" class="whatsapp-btn" target="_blank">
-            Konsultasi Dengan Kami Gratis di Whatsapp
-        </x-frontend.button>
+{{-- ───────── Hero ───────── --}}
+<section class="ag-hero ag-hero-sub-page" aria-labelledby="ag-car-title">
+  <div class="ag-container">
+    <nav class="ag-crumbs" aria-label="Breadcrumb">
+      <a href="{{ route('frontend.home') }}">Home</a><span aria-hidden="true">/</span><span aria-current="page">Automotive Film</span>
+    </nav>
+    <span class="ag-eyebrow ag-hero-tag">Automotive Window Film</span>
+    <h1 class="ag-display" id="ag-car-title">Kaca film mobil <b>sejuk, jernih, privasi terjaga.</b></h1>
+    <p class="ag-hero-sub">Tiga seri film dengan 13 varian VLT. Lihat spesifikasi lengkapnya, lalu konsultasikan pilihan yang cocok untuk tiap kaca mobil Anda.</p>
+    <div class="ag-hero-actions">
+      <a class="ag-btn ag-btn-primary" href="#seri">Lihat Spesifikasi</a>
+      <a class="ag-btn ag-btn-secondary whatsapp-btn" data-gtm-label="car-hero-whatsapp" target="_blank" rel="noopener"
+         href="{{ Whatsapp::url('Halo ACEGARD, saya ingin berkonsultasi soal kaca film mobil.') }}">
+        <iconify-icon icon="mdi:whatsapp" width="20" aria-hidden="true"></iconify-icon> Konsultasi Gratis
+      </a>
     </div>
+    <div class="ag-hero-car is-compact">
+      <img src="{{ $img('hero-car-clear.webp') }}" width="1334" height="889" alt="Mobil sedan perak dengan kaca film ACEGARD" fetchpriority="high">
+    </div>
+  </div>
 </section>
 
-{{-- Depan --}}
-<section id="depan" class="ace-section-sm">
-    <div class="container">
-        <x-frontend.section-heading title="Rekomendasi Kaca Film" highlight="Depan" />
-
-        <div class="row g-4">
-            @foreach($depan as $item)
-                <div class="col-md-6">
-                    <x-frontend.product-card
-                        :image="$item['image']"
-                        :badge="$item['caption']"
-                        :title="$item['name'] . ' — ' . $item['tagline']"
-                        :desc="$item['desc']"
-                        class="mb-3"
-                    />
-                    <x-frontend.spec-table
-                        title="Spesifikasi | Lorem Ipsum"
-                        :rows="[['IRR', $item['irr']], ['UVR', $item['uvr']], ['TSER', $item['tser']]]"
-                        :cta="['label' => 'Hubungi Kami', 'href' => $waLink('Halo Acegard, saya tertarik dengan kaca film ' . $item['name']), 'whatsapp' => true]"
-                    />
-                </div>
-            @endforeach
-        </div>
+{{-- ───────── Manfaat ───────── --}}
+<section class="ag-section" aria-labelledby="ag-benefit-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">Benefits</span>
+      <h2 class="ag-h2" id="ag-benefit-title">Manfaat kaca film <b>untuk mobil Anda</b></h2>
     </div>
+    <div class="ag-grid c3">
+      @foreach ([
+        ['mdi:white-balance-sunny',  'Tolak panas', 'Penolakan inframerah 99% pada 900 nm dan 1400 nm. TSER mencapai 95% pada varian tergelap.'],
+        ['mdi:shield-sun-outline',   'Tolak sinar UV', 'UV Rejection 99,9% pada semua varian, melindungi kulit dan interior dari pudar.'],
+        ['mdi:weather-night',        'Night Vision', 'Seri NOTCH UV400 dilengkapi Night Vision untuk menjaga detail jalan di cahaya rendah.'],
+        ['mdi:eye-off-outline',      'Privasi kabin', 'Pilihan VLT dari 71% sampai 4% untuk mengatur seberapa terlihat kabin dari luar.'],
+        ['mdi:signal',               'Sinyal tetap lancar', 'Lapisan Nano Ceramic non-metal tidak mengganggu sinyal seluler, WiFi, dan GPS.'],
+        ['mdi:car-cog',              'Pemasangan profesional', 'Dipasang teknisi ACEGARD di workshop Cipondoh, Tangerang, lengkap dengan garansi.'],
+      ] as [$icon, $title, $desc])
+        <div class="ag-card ag-feature is-hover ag-reveal">
+          <span class="ic"><iconify-icon icon="{{ $icon }}" aria-hidden="true"></iconify-icon></span>
+          <h3>{{ $title }}</h3>
+          <p>{{ $desc }}</p>
+        </div>
+      @endforeach
+    </div>
+  </div>
 </section>
 
-{{-- Samping & Belakang --}}
-<section id="samping-belakang" class="ace-section-sm">
-    <div class="container">
-        <x-frontend.section-heading title="Rekomendasi Kaca Film" highlight="Samping & Belakang" />
-
-        <div class="row g-4">
-            @foreach($samping as $item)
-                <div class="col-md-6 col-lg-3">
-                    <x-frontend.product-card
-                        :image="$item['image']"
-                        :badge="$item['caption']"
-                        :title="$item['name'] . ' — Jernih & Tetap Sejuk'"
-                        :desc="$genericDesc"
-                        class="mb-3"
-                    />
-                    <x-frontend.spec-table
-                        :title="'Spesifikasi | ' . ucwords(strtolower($item['name']))"
-                        :rows="[['IRR', $item['irr']], ['UVR', $item['uvr']], ['TSER', $item['tser']]]"
-                        :cta="['label' => 'Hubungi Kami', 'href' => $waLink('Halo Acegard, saya tertarik dengan kaca film ' . $item['name']), 'whatsapp' => true]"
-                    />
-                </div>
-            @endforeach
-        </div>
+{{-- ───────── Seri & spesifikasi ───────── --}}
+<section class="ag-section alt" id="seri" aria-labelledby="ag-series-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">Series &amp; Specification</span>
+      <h2 class="ag-h2" id="ag-series-title">Pilih seri <b>dan varian VLT</b></h2>
+      <p class="ag-lead">VLT adalah persentase cahaya tampak yang menembus film. Semakin rendah angkanya, semakin gelap filmnya. Harga dapat dikonsultasikan dengan tim kami.<span class="ag-hint"> Geser tabel ke samping untuk melihat semua varian.</span></p>
     </div>
+
+    <div class="ag-series">
+      @foreach ($series as $s)
+        <article class="ag-prod ag-reveal" id="{{ \Illuminate\Support\Str::slug($s['name']) }}">
+          <div class="ag-prod-info">
+            <span class="ag-card-media"><img src="{{ $img($s['image']) }}" width="900" height="600" loading="lazy" alt="Kaca film {{ $s['name'] }}"></span>
+            <h3>{{ $s['name'] }}</h3>
+            <p class="ag-prod-tag">{{ $s['tag'] }}</p>
+            <p>{{ $s['desc'] }}</p>
+            <a class="ag-btn ag-btn-primary ag-btn-sm whatsapp-btn" data-gtm-label="car-{{ \Illuminate\Support\Str::slug($s['name']) }}" target="_blank" rel="noopener"
+               href="{{ Whatsapp::url('Halo ACEGARD, saya tertarik dengan kaca film ' . $s['name']) }}">Tanya {{ $s['name'] }}</a>
+          </div>
+          <div class="ag-spec-wrap" tabindex="0" role="region" aria-label="Spesifikasi {{ $s['name'] }}">
+            <table class="ag-spec">
+              <caption class="visually-hidden">Spesifikasi {{ $s['name'] }} per varian</caption>
+              <thead>
+                <tr><th scope="col">Spesifikasi</th>@foreach ($s['variants'] as $x)<th scope="col">{{ $x['code'] }}</th>@endforeach</tr>
+              </thead>
+              <tbody>
+                @foreach ($rows as [$key, $label])
+                  <tr>
+                    <th scope="row">{{ $label }}</th>
+                    @foreach ($s['variants'] as $x)
+                      <td>
+                        @if ($key === 'color')<span class="ag-swatch" style="background:{{ $swatch[$x['color']] ?? '#222' }}" aria-hidden="true"></span>@endif{{ $x[$key] }}
+                      </td>
+                    @endforeach
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
+        </article>
+      @endforeach
+
+      <article class="ag-prod ag-prod-note ag-reveal">
+        <div class="ag-prod-info">
+          <h3>FLEX ONE WAY</h3>
+          <p>Pilihan untuk kaca samping dan belakang dengan tampilan satu arah. Hubungi tim kami untuk spesifikasi dan varian yang tersedia.</p>
+          <a class="ag-btn ag-btn-secondary ag-btn-sm whatsapp-btn" data-gtm-label="car-flex-one-way" target="_blank" rel="noopener"
+             href="{{ Whatsapp::url('Halo ACEGARD, saya tertarik dengan kaca film FLEX ONE WAY') }}">Tanya FLEX ONE WAY</a>
+        </div>
+      </article>
+    </div>
+    <p class="ag-note ag-center ag-reveal">Angka bersumber dari lembar spesifikasi produk ACEGARD. Hasil di lapangan dapat berbeda menurut kendaraan dan kondisi cuaca.</p>
+  </div>
 </section>
 
-{{-- Sunroof --}}
-<section id="sunroof" class="ace-section-sm">
-    <div class="container">
-        <x-frontend.section-heading title="Rekomendasi Kaca Film" highlight="Sunroof" />
-
-        <div class="row g-4">
-            @foreach($sunroof as $item)
-                <div class="col-md-4">
-                    <x-frontend.product-card
-                        :image="$item['image']"
-                        :badge="$item['caption']"
-                        :title="$item['name'] . ' — Jernih & Tetap Sejuk'"
-                        :desc="$genericDesc"
-                        class="mb-3"
-                    />
-                    <x-frontend.spec-table
-                        title="Spesifikasi | Lorem Ipsum"
-                        :rows="[['IRR', $item['irr']], ['UVR', $item['uvr']], ['TSER', $item['tser']]]"
-                        :cta="['label' => 'Hubungi Kami', 'href' => $waLink('Halo Acegard, saya tertarik dengan kaca film ' . $item['name']), 'whatsapp' => true]"
-                    />
-                </div>
-            @endforeach
-        </div>
+{{-- ───────── Perbandingan VLT ───────── --}}
+<section class="ag-section" id="bandingkan" aria-labelledby="ag-compare-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">Compare</span>
+      <h2 class="ag-h2" id="ag-compare-title">Bandingkan semua varian <b>dari terang ke gelap</b></h2>
+      <p class="ag-lead">Diurutkan menurut VLT. Pilih VLT sesuai kebutuhan privasi, kenyamanan, dan aturan berkendara setempat.</p>
     </div>
+    <div class="ag-spec-wrap ag-reveal" tabindex="0" role="region" aria-label="Perbandingan semua varian">
+      <table class="ag-spec ag-compare">
+        <caption class="visually-hidden">Perbandingan 13 varian kaca film mobil ACEGARD menurut VLT</caption>
+        <thead>
+          <tr><th scope="col">Varian</th><th scope="col">Seri</th><th scope="col">Warna</th><th scope="col">VLT</th><th scope="col">TSER</th><th scope="col">Darkness</th></tr>
+        </thead>
+        <tbody>
+          @foreach ($all as $x)
+            <tr>
+              <th scope="row">{{ $x['code'] }}</th>
+              <td>{{ $x['series'] }}</td>
+              <td><span class="ag-swatch" style="background:{{ $swatch[$x['color']] ?? '#222' }}" aria-hidden="true"></span>{{ $x['color'] }}</td>
+              <td><span class="ag-bar" style="--w:{{ (int) $x['vlt'] }}%"><i></i></span>{{ $x['vlt'] }}</td>
+              <td>{{ $x['tser'] }}</td>
+              <td>{{ $x['dark'] }}</td>
+            </tr>
+          @endforeach
+        </tbody>
+      </table>
+    </div>
+  </div>
 </section>
 
-{{-- Rekomendasi Seri Kaca Film ACEGARD --}}
-<section class="ace-section-sm">
-    <div class="container">
-        <x-frontend.section-heading title="Rekomendasi Seri Kaca Film" highlight="ACEGARD" />
-
-        <div class="row g-4">
-            @foreach($seri as $item)
-                <div class="col-md-4">
-                    <x-frontend.product-card
-                        :image="$item['image']"
-                        :badge="$item['caption']"
-                        :title="$item['name'] . ' — Jernih & Tetap Sejuk'"
-                        :desc="$genericDesc"
-                        class="mb-3"
-                    />
-                    <x-frontend.spec-table
-                        title="Spesifikasi | Lorem Ipsum"
-                        :rows="[['IRR', $item['irr']], ['UVR', $item['uvr']], ['TSER', $item['tser']]]"
-                        :cta="['label' => 'Hubungi Kami', 'href' => $waLink('Halo Acegard, saya tertarik dengan kaca film ' . $item['name']), 'whatsapp' => true]"
-                    />
-                </div>
-            @endforeach
-        </div>
+{{-- ───────── Galeri ───────── --}}
+<section class="ag-section alt" aria-labelledby="ag-cargal-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">Gallery</span>
+      <h2 class="ag-h2" id="ag-cargal-title">Pemasangan <b>di workshop ACEGARD</b></h2>
     </div>
+    <div class="ag-grid c3 ag-reveal">
+      @foreach ([['gallery-install.webp', 'Teknisi memasang kaca film pada jendela mobil'], ['gallery-view.webp', 'Pemandangan dari balik kaca film mobil'], ['gallery-sticker.webp', 'Stiker ACEGARD pada kaca mobil']] as [$f, $alt])
+        <figure class="ag-shot"><img src="{{ $img($f) }}" width="1000" height="700" loading="lazy" alt="{{ $alt }}"></figure>
+      @endforeach
+    </div>
+  </div>
+</section>
+
+{{-- ───────── FAQ ───────── --}}
+<section class="ag-section" aria-labelledby="ag-carfaq-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">FAQ</span>
+      <h2 class="ag-h2" id="ag-carfaq-title">Pertanyaan seputar <b>kaca film mobil</b></h2>
+    </div>
+    <div class="ag-faq ag-reveal">
+      @foreach ([
+        ['Apa itu VLT dan TSER?', 'VLT (Visible Light Transmission) adalah persentase cahaya tampak yang menembus film, makin rendah makin gelap. TSER (Total Solar Energy Rejected) adalah persentase total energi matahari yang ditolak film, makin tinggi makin sejuk.'],
+        ['Seri mana yang cocok untuk saya?', 'NOTCH UV400 cocok bila Anda mengutamakan Night Vision dan proteksi UV. 4K ALPHA PRO menawarkan penolakan panas tinggi dengan Nano Ceramic Tungsten dan Tin. BLACK MASTER cocok untuk tampilan Charcoal Black. Tim kami membantu mencocokkan seri dengan kebutuhan Anda.'],
+        ['Apakah kaca film mengganggu sinyal?', 'Tidak. Lapisan Nano Ceramic ACEGARD bersifat non-metal sehingga sinyal seluler, WiFi, dan GPS tetap berfungsi.'],
+        ['Apakah aman dipakai berkendara malam hari?', 'Seri NOTCH UV400 dilengkapi Night Vision. Untuk kaca depan, pilih VLT yang lebih tinggi agar visibilitas tetap baik dan sesuai aturan setempat. Konsultasikan dengan tim kami.'],
+        ['Berapa harga dan di mana pemasangannya?', 'Harga bergantung pada tipe kendaraan dan varian film. Hubungi kami lewat WhatsApp untuk penawaran. Pemasangan dilakukan oleh teknisi ACEGARD di workshop kami di Cipondoh, Kota Tangerang, dan setiap pemasangan mendapat garansi.'],
+      ] as $i => [$q, $a])
+        <details class="ag-faq-item" @if($i === 0) open @endif>
+          <summary>{{ $q }}</summary>
+          <p>{{ $a }}</p>
+        </details>
+      @endforeach
+    </div>
+  </div>
+</section>
+
+{{-- ───────── CTA ───────── --}}
+<section class="ag-section" style="padding-top:0" aria-labelledby="ag-carcta-title">
+  <div class="ag-container">
+    <div class="ag-cta-panel ag-reveal">
+      <h2 id="ag-carcta-title">Bingung <b>memilih VLT?</b></h2>
+      <p>Sebutkan tipe mobil dan kebutuhan Anda. Tim ACEGARD akan merekomendasikan seri dan varian untuk tiap kaca.</p>
+      <div class="ag-cta-actions">
+        <a class="ag-btn ag-btn-light whatsapp-btn" data-gtm-label="car-cta-whatsapp" target="_blank" rel="noopener"
+           href="{{ Whatsapp::url('Halo ACEGARD, saya ingin konsultasi memilih VLT kaca film mobil.') }}">
+          <iconify-icon icon="mdi:whatsapp" width="20" aria-hidden="true"></iconify-icon> Konsultasi via WhatsApp
+        </a>
+        <a class="ag-btn ag-btn-ghost" href="{{ route('warranty.form') }}">Cek Garansi</a>
+      </div>
+    </div>
+  </div>
 </section>
 
 @endsection
+
+@push('scripts')
+<script>
+  (function () {
+    var els = document.querySelectorAll('.ag-reveal');
+    if (!('IntersectionObserver' in window)) { els.forEach(function (e) { e.classList.add('is-visible'); }); return; }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('is-visible'); io.unobserve(en.target); } });
+    }, { threshold: .06, rootMargin: '0px 0px -4% 0px' });
+    els.forEach(function (e) { io.observe(e); });
+  })();
+</script>
+@endpush

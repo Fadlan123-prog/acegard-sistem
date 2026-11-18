@@ -74,4 +74,16 @@ class FrontendRedesignHomeTest extends TestCase
             ->assertSeeText('Kunjungi workshop kami')
             ->assertSee(config('acegard.address'));
     }
+
+    public function test_halaman_kaca_film_mobil_menampilkan_spesifikasi_dan_iklan_tidak_berubah(): void
+    {
+        $this->get(route('frontend.service.car'))->assertOk()
+            ->assertSee('ag-nav', false)
+            ->assertSee('BM20')->assertSee('NV72')->assertSee('AP02')
+            ->assertSee('Charcoal Black')->assertSee('Black Tungsten')
+            ->assertSee('99,9%');
+
+        $this->get('/kaca-film-mobil')->assertOk()->assertDontSee('ag-nav', false);
+        $this->get('/promo/kaca-film-mobil')->assertOk()->assertDontSee('ag-nav', false);
+    }
 }
