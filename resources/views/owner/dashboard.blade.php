@@ -241,4 +241,16 @@
 </script>
 @endpush
 
+
+<div class="row g-3 mt-1">
+    <div class="col-lg-6">
+        <x-dashboard.donut id="donutOwnerCategory" title="Porsi Omzet per Kategori" subtitle="Mobil, PPF, Gedung" format="rp"
+            :labels="array_keys($executive['revenue']['by_category'])" :values="array_values($executive['revenue']['by_category'])" />
+    </div>
+    <div class="col-lg-6">
+        <x-dashboard.donut id="donutOwnerBranch" title="Porsi Omset per Cabang" subtitle="bulan ini" format="rp"
+            :labels="$revenueByBranch->pluck('name')->all()" :values="$revenueByBranch->pluck('total')->all()" />
+    </div>
+</div>
+
 @endsection

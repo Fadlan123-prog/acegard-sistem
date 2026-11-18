@@ -188,4 +188,12 @@
 
 </div>
 
+
+<div class="row g-3 mt-1">
+    <div class="col-lg-6">
+        <x-dashboard.donut id="donutMarketingFunnel" title="Komposisi Status Lead Saya"
+            :labels="array_map(fn ($k) => \App\Models\Lead::STATUSES[$k] ?? ucfirst($k), $leadFunnel->keys()->all())" :values="$leadFunnel->values()->all()" />
+    </div>
+</div>
+
 @endsection

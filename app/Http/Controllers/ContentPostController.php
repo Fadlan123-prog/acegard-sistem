@@ -75,7 +75,14 @@ class ContentPostController extends Controller
             ->orderByDesc('total_views')
             ->get();
 
+        $byPlatform = (clone $base)
+            ->select('platform', DB::raw('COUNT(*) as total'))
+            ->groupBy('platform')
+            ->pluck('total', 'platform')
+            ->all();
+
         return view('content.dashboard', [
+            'byPlatform'   => $byPlatform,
             'totalPosts'   => $totalPosts,
             'totalViews'   => $totalViews,
             'fypCount'     => $fypCount,
