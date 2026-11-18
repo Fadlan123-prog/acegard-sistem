@@ -25,3 +25,4 @@ Thumbs.db
 acegard-system.zip
 .ftp-deploy-sync-state.json
 .claude/
+/build

@@ -1,0 +1,31 @@
+# Daftar yang TIDAK ikut paket rilis (dipakai rsync --exclude-from)
+/.git/
+/.github/
+/.claude/
+/.idea/
+/.vscode/
++ /.env.production.example
+- /.env
+- /.env.*
+/node_modules/
+/vendor/
+/tests/
+/build/
+/docs/
+/scripts/
+/public/storage
+/public/hot
+# Aset situs publik (besar, jarang berubah): dibuat terpisah dengan ./scripts/build-release.sh --assets
+/public/assets/promotion/
+/public/assets/frontend/
+/storage/logs/*.log
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*.php
+/storage/app/private/*
++ /storage/app/public/.gitignore
+- /storage/app/public/*
+/storage/pail/
+*.sqlite
+.DS_Store
+.phpunit.result.cache
