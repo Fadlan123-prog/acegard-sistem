@@ -385,4 +385,14 @@ class FrontendRedesignHomeTest extends TestCase
             $this->assertStringNotContainsString('gsap', $ad, $url);
         }
     }
+
+    public function test_animasi_scrub_hero_memakai_nilai_awal_eksplisit(): void
+    {
+        // Regresi: scrub hero dengan gsap.to() membaca opacity 0 dari animasi pembuka, sehingga hero kosong
+        // setelah pengunjung menggulir kembali ke atas. Harus fromTo dengan immediateRender:false.
+        $js = file_get_contents(public_path('assets/frontend/js/ag-motion.js'));
+        $this->assertStringContainsString('gsap.fromTo(texts', $js);
+        $this->assertStringContainsString('immediateRender: false', $js);
+        $this->assertStringNotContainsString('gsap.to(container.children', $js);
+    }
 }

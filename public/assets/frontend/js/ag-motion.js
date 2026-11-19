@@ -156,15 +156,18 @@
       var marquee = hero.querySelector('.ag-marquee');
       if (marquee) tl.from(marquee, { opacity: 0, duration: 0.8 }, '>-0.6');
 
-      // Transisi saat mulai scroll: teks naik dan memudar, mobil bergerak lebih lambat
+      // Transisi saat mulai scroll: teks naik dan memudar, mobil bergerak lebih lambat.
+      // Wajib fromTo + immediateRender:false: nilai awal eksplisit, supaya scroll kembali ke atas
+      // memulihkan keadaan penuh dan tidak bentrok dengan animasi pembuka di atas.
       mm.add('(min-width: 768px)', function () {
-        if (container) {
-          gsap.to(container.children, { yPercent: -6, opacity: 0.35, ease: 'none', stagger: 0, scrollTrigger: { trigger: hero, start: 'top top', end: '60% top', scrub: true } });
+        var texts = container ? Array.prototype.slice.call(container.children).filter(function (c) { return c !== car; }) : [];
+        if (texts.length) {
+          gsap.fromTo(texts, { yPercent: 0, opacity: 1 }, { yPercent: -6, opacity: 0.35, ease: 'none', immediateRender: false, scrollTrigger: { trigger: hero, start: 'top top', end: '60% top', scrub: true } });
         }
         if (car) {
           var im = car.querySelector('img');
-          gsap.to(car, { yPercent: 9, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
-          if (im) gsap.to(im, { scale: 1.07, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
+          gsap.fromTo(car, { yPercent: 0 }, { yPercent: 9, ease: 'none', immediateRender: false, scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
+          if (im) gsap.fromTo(im, { scale: 1 }, { scale: 1.07, ease: 'none', immediateRender: false, scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
         }
       });
       // reveal marquee tidak boleh ikut memudar di mobile
