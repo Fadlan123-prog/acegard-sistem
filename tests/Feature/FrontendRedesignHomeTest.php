@@ -140,7 +140,7 @@ class FrontendRedesignHomeTest extends TestCase
             ->assertSee('ag-nav', false)
             ->assertSee('agPpf', false)
             ->assertSee('ARMOR PLUS')->assertSee('AEGIS MAX +')->assertSee('MATTE')
-            ->assertSee('Lubrizol Estane Grade')->assertSee('8,5 mils')
+            ->assertSee('Lubrizol Estane USA')->assertSee('8,5 mils')->assertSee('5500 psi')->assertSee('830 n/m')->assertSee('5 sampai 7 hari kerja')
             ->assertSee('Instan Self Healing');
 
         // harga tidak ditampilkan; klaim garansi 6-8 tahun dari poster lama tidak dipakai

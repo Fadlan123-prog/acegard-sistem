@@ -100,8 +100,10 @@
             <div><dt>Garansi</dt><dd data-i="warranty"></dd></div>
             <div><dt>Urethane</dt><dd data-i="urethane"></dd></div>
             <div><dt>Ketebalan</dt><dd data-i="mils"></dd></div>
-            <div><dt>Cocok untuk</dt><dd data-i="best"></dd></div>
+            <div><dt>Daya tahan</dt><dd data-i="durability"></dd></div>
           </dl>
+          <p class="ag-sim-info-title" style="margin:14px 0 8px" data-i="best"></p>
+          <div class="ag-ppf-rate" data-rates></div>
         </div>
 
         <a class="ag-btn ag-btn-primary whatsapp-btn" data-gtm-label="ppf-simulator-whatsapp" target="_blank" rel="noopener"
@@ -127,7 +129,7 @@
         ['mdi:shield-car', 'Lindungi dari kerikil dan goresan', 'Film urethane menjadi lapisan pertama yang menerima gesekan, debu, dan percikan kerikil di jalan.'],
         ['mdi:auto-fix', 'Self healing', 'Goresan ringan memulihkan diri. Tingkat AEGIS dan AEGIS MAX + memakai Instan Self Healing, tingkat lainnya Heat Self Healing.'],
         ['mdi:water-outline', 'Hydrophobic', 'Permukaan menolak air, debu, dan kotoran sehingga mobil lebih mudah dibersihkan.'],
-        ['mdi:flask-outline', 'Urethane Lubrizol', 'Bahan dasar Lubrizol Mix Grade atau Estane Grade, tergantung tingkat yang dipilih.'],
+        ['mdi:flask-outline', 'Urethane Lubrizol', 'Bahan dasar Lubrizol Mix Grade pada ARMOR dan ARMOR PLUS, serta Lubrizol Estane USA pada AEGIS dan AEGIS MAX +.'],
         ['mdi:shield-check-outline', 'Garansi 5 sampai 8 tahun', 'ARMOR dan MATTE 5 tahun, ARMOR PLUS 7 tahun, AEGIS dan AEGIS MAX + 8 tahun.'],
         ['mdi:car-cog', 'Pemasangan profesional', 'Dipasang teknisi ACEGARD di workshop Cipondoh, Tangerang.'],
       ] as [$icon, $title, $desc])
@@ -142,29 +144,79 @@
 </section>
 
 {{-- ───────── Perbandingan ───────── --}}
-<section class="ag-section alt" id="tingkat" aria-labelledby="ag-ptier-title">
+@php
+  $four = collect($tiers)->filter(fn ($t) => $t['spec'])->values();
+  $specRows = [
+    ['Tipe produk',       fn ($t) => 'TPU'],
+    ['Warna',             fn ($t) => 'Transparan'],
+    ['Ketebalan produk',  fn ($t) => $t['mils']],
+    ['Urethane',          fn ($t) => $t['spec']['urethane_mils']],
+    ['Urethane original', fn ($t) => $t['urethane']],
+    ['Clear coating',     fn ($t) => $t['spec']['clear']],
+    ['Acrylic adhesive',  fn ($t) => $t['spec']['adhesive']],
+    ['Elongation',        fn ($t) => $t['spec']['elongation']],
+    ['Peel adhesion',     fn ($t) => $t['spec']['peel']],
+    ['Self healing',      fn ($t) => $heal[$t['heal']]],
+    ['Tear strength',     fn ($t) => $t['spec']['tear']],
+    ['Garansi',           fn ($t) => $t['warranty']],
+    ['Dibuat di',         fn ($t) => $t['spec']['made']],
+  ];
+  $featRows = [
+    ['Daya tahan', fn ($t) => $t['durability']],
+    ['Hydrophobic', 'hydrophobic'], ['Perlindungan UV', 'uv'], ['Self healing', 'healing'],
+    ['Tahan gores', 'scratch'], ['Fleksibilitas', 'flexibility'], ['Kejernihan', 'clarity'],
+    ['Cocok untuk', fn ($t) => $t['best']],
+  ];
+@endphp
+<section class="ag-section" id="tingkat" aria-labelledby="ag-ptier-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
-      <span class="ag-eyebrow">Tiers</span>
-      <h2 class="ag-h2" id="ag-ptier-title">Bandingkan <b>lima tingkat PPF</b></h2>
+      <span class="ag-eyebrow">Specification</span>
+      <h2 class="ag-h2" id="ag-ptier-title">Spesifikasi <b>tingkat PPF</b></h2>
       <p class="ag-lead">Harga bergantung pada tipe kendaraan dan cakupan pemasangan. Hubungi tim kami untuk penawaran.<span class="ag-hint"> Geser tabel ke samping untuk melihat semua kolom.</span></p>
     </div>
-    <div class="ag-spec-wrap ag-reveal" tabindex="0" role="region" aria-label="Perbandingan tingkat PPF">
-      <table class="ag-spec ag-compare">
-        <caption class="visually-hidden">Perbandingan lima tingkat PPF ACEGARD</caption>
-        <thead>
-          <tr><th scope="col">Tingkat</th><th scope="col">Finish</th><th scope="col">Self healing</th><th scope="col">Garansi</th><th scope="col">Urethane</th><th scope="col">Ketebalan</th></tr>
-        </thead>
+    <div class="ag-spec-wrap ag-reveal" tabindex="0" role="region" aria-label="Spesifikasi tingkat PPF">
+      <table class="ag-spec">
+        <caption class="visually-hidden">Spesifikasi empat tingkat PPF ACEGARD</caption>
+        <thead><tr><th scope="col">Spesifikasi</th>@foreach ($four as $t)<th scope="col">{{ $t['name'] }}</th>@endforeach</tr></thead>
         <tbody>
-          @foreach ($tiers as $t)
-            <tr>
-              <th scope="row">{{ $t['name'] }}</th>
-              <td>{{ $t['finish'] }}</td><td>{{ $heal[$t['heal']] }}</td><td>{{ $t['warranty'] }}</td><td>{{ $t['urethane'] }}</td><td>{{ $t['mils'] }}</td>
+          @foreach ($specRows as [$label, $fn])
+            <tr><th scope="row">{{ $label }}</th>@foreach ($four as $t)<td>{{ $fn($t) }}</td>@endforeach</tr>
+          @endforeach
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="ag-section alt" aria-labelledby="ag-pfeat-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">Features &amp; Structures</span>
+      <h2 class="ag-h2" id="ag-pfeat-title">Fitur dan <b>kualitas perlindungan</b></h2>
+      <p class="ag-lead">Penilaian bintang dari 1 sampai 5 menurut lembar fitur ACEGARD.</p>
+    </div>
+    <div class="ag-spec-wrap ag-reveal" tabindex="0" role="region" aria-label="Fitur tingkat PPF">
+      <table class="ag-spec">
+        <caption class="visually-hidden">Fitur empat tingkat PPF ACEGARD</caption>
+        <thead><tr><th scope="col">Fitur</th>@foreach ($four as $t)<th scope="col">{{ $t['name'] }}</th>@endforeach</tr></thead>
+        <tbody>
+          @foreach ($featRows as [$label, $key])
+            <tr><th scope="row">{{ $label }}</th>
+              @foreach ($four as $t)
+                @if (is_string($key))
+                  @php $n = $t['rate'][$key]; @endphp
+                  <td><span class="ag-stars" role="img" aria-label="{{ $n }} dari 5"><span class="on">{{ str_repeat('★', $n) }}</span><span class="off">{{ str_repeat('★', 5 - $n) }}</span></span></td>
+                @else
+                  <td>{{ $key($t) }}</td>
+                @endif
+              @endforeach
             </tr>
           @endforeach
         </tbody>
       </table>
     </div>
+    <p class="ag-note ag-center ag-reveal">Butuh PPF doff? Tingkat MATTE (garansi 5 tahun) tersedia. Hubungi tim kami untuk spesifikasi lengkapnya.</p>
   </div>
 </section>
 
@@ -178,9 +230,9 @@
     <div class="ag-faq ag-reveal">
       @foreach ([
         ['Apa bedanya Instan dan Heat Self Healing?', 'Instan Self Healing memulihkan goresan ringan tanpa bantuan panas. Heat Self Healing memulihkan goresan ringan setelah film terkena panas, misalnya dari sinar matahari atau air hangat. Simulator di atas menunjukkan perbedaannya.'],
-        ['Apa bedanya ARMOR, ARMOR PLUS, AEGIS, AEGIS MAX +, dan MATTE?', 'Perbedaan ada pada jenis self healing, garansi, bahan urethane, dan ketebalan film. ARMOR dan ARMOR PLUS memakai Heat Self Healing dengan garansi 5 dan 7 tahun. AEGIS dan AEGIS MAX + memakai Instan Self Healing dan urethane Estane Grade dengan garansi 8 tahun. MATTE memberi tampilan doff dengan garansi 5 tahun.'],
+        ['Apa bedanya ARMOR, ARMOR PLUS, AEGIS, AEGIS MAX +, dan MATTE?', 'Perbedaan ada pada jenis self healing, garansi, bahan urethane, dan ketebalan film. ARMOR dan ARMOR PLUS memakai Heat Self Healing dengan garansi 5 dan 7 tahun. AEGIS dan AEGIS MAX + memakai Instan Self Healing dan urethane Lubrizol Estane USA dengan garansi 8 tahun. AEGIS MAX + juga memiliki film paling tebal dan kekuatan sobek tertinggi. MATTE memberi tampilan doff dengan garansi 5 tahun.'],
         ['Apakah PPF mengubah warna cat?', 'PPF ACEGARD berupa film bening yang menjaga tampilan asli cat. Tingkat MATTE sengaja memberi hasil doff.'],
-        ['Berapa lama pemasangannya?', 'Bergantung cakupan pemasangan. Pemasangan full body umumnya memerlukan 2 sampai 3 hari kerja, sedangkan pemasangan parsial seperti kap mesin dan bumper dapat selesai dalam 1 hari.'],
+        ['Berapa lama pemasangannya?', 'Pemasangan full body umumnya memerlukan 5 sampai 7 hari kerja. Untuk pemasangan parsial seperti kap mesin dan bumper, tanyakan estimasinya kepada tim kami.'],
         ['Berapa harganya?', 'Harga bergantung pada tipe kendaraan, tingkat PPF, dan cakupan pemasangan. Hubungi kami lewat WhatsApp untuk penawaran.'],
       ] as $i => [$q, $a])
         <details class="ag-faq-item" @if($i === 0) open @endif>
@@ -238,7 +290,19 @@
     q('[data-i="warranty"]').textContent = cur.warranty;
     q('[data-i="urethane"]').textContent = cur.urethane;
     q('[data-i="mils"]').textContent = cur.mils;
-    q('[data-i="best"]').textContent = cur.best;
+    q('[data-i="best"]').textContent = 'Cocok untuk: ' + cur.best.toLowerCase();
+    q('[data-i="durability"]').textContent = cur.durability || 'Hubungi kami';
+    var L = { hydrophobic: 'Hydrophobic', uv: 'Perlindungan UV', healing: 'Self healing', scratch: 'Tahan gores', flexibility: 'Fleksibilitas', clarity: 'Kejernihan' };
+    var box = q('[data-rates]');
+    if (cur.rate) {
+      box.innerHTML = Object.keys(L).map(function (k) {
+        var n = cur.rate[k], dots = '';
+        for (var i = 1; i <= 5; i++) dots += '<i' + (i <= n ? ' class="on"' : '') + '></i>';
+        return '<div><span>' + L[k] + '</span><span class="dots" role="img" aria-label="' + n + ' dari 5">' + dots + '</span></div>';
+      }).join('');
+    } else {
+      box.innerHTML = '<p class="ag-note" style="margin:0">Spesifikasi lengkap ' + cur.name + ' dapat ditanyakan ke tim kami.</p>';
+    }
     q('[data-tier-tag]').textContent = cur.name;
     stage.classList.toggle('is-matte', cur.finish === 'Matte');
     [bare, film].forEach(function (p) { p.querySelector('.paint').setAttribute('fill', cur.finish === 'Matte' ? 'url(#ppfMatte)' : 'url(#ppfPaint)'); });

@@ -115,22 +115,28 @@ class FilmCatalog
     }
 
     /**
-     * Tingkat Paint Protection Film. Sumber: daftar paket PPF ACEGARD. Harga sengaja tidak dimuat.
-     * "heal" bernilai instant atau heat: menentukan perilaku di simulator goresan.
+     * Tingkat Paint Protection Film. Sumber: lembar Specification dan Features ACEGARD PPF.
+     * Harga sengaja tidak dimuat. "heal" bernilai instant atau heat (perilaku di simulator goresan).
+     * MATTE tidak ada di lembar spesifikasi, jadi "spec" dan "rate" bernilai null.
      *
      * @return array<int, array<string, mixed>>
      */
     public static function ppf(): array
     {
-        $t = fn ($name, $finish, $heal, $warranty, $urethane, $mils, $best) =>
-            compact('name', 'finish', 'heal', 'warranty', 'urethane', 'mils', 'best');
+        $t = fn ($name, $heal, $warranty, $urethane, $mils, $best, $durability = null, $spec = null, $rate = null, $finish = 'Glossy') =>
+            compact('name', 'finish', 'heal', 'warranty', 'urethane', 'mils', 'best', 'durability', 'spec', 'rate');
+
+        // [urethane (mils), clear coating, acrylic adhesive, elongation, peel adhesion, tear strength, made in]
+        $sp = fn (...$v) => array_combine(['urethane_mils', 'clear', 'adhesive', 'elongation', 'peel', 'tear', 'made'], $v);
+        // [hydrophobic, UV protection, self healing, scratch resistance, flexibility, clarity] skala 1-5
+        $rt = fn (...$v) => array_combine(['hydrophobic', 'uv', 'healing', 'scratch', 'flexibility', 'clarity'], $v);
 
         return [
-            $t('ARMOR',       'Glossy', 'heat',    '5 tahun', 'Lubrizol Mix Grade',    '7,5 mils', 'Perlindungan harian'),
-            $t('ARMOR PLUS',  'Glossy', 'heat',    '7 tahun', 'Lubrizol Mix Grade',    '8,5 mils', 'Perlindungan harian'),
-            $t('AEGIS',       'Glossy', 'instant', '8 tahun', 'Lubrizol Estane Grade', '7,5 mils', 'Perlindungan maksimal'),
-            $t('AEGIS MAX +', 'Glossy', 'instant', '8 tahun', 'Lubrizol Estane Grade', '8,5 mils', 'Perlindungan maksimal'),
-            $t('MATTE',       'Matte',  'heat',    '5 tahun', 'Lubrizol Mix Grade',    '7,5 mils', 'Perlindungan harian'),
+            $t('ARMOR',       'heat',    '5 tahun', 'Lubrizol Mix Grade',  '7,5 mils', 'Perlindungan harian',   '6 tahun',  $sp('6,5 mils', '0,5 mils', '1,3 mils', '>280%', '680 n/m', '3800 psi', 'Korea'), $rt(3, 5, 3, 3, 4, 5)),
+            $t('ARMOR PLUS',  'heat',    '7 tahun', 'Lubrizol Mix Grade',  '8,5 mils', 'Perlindungan harian',   '8 tahun',  $sp('7,5 mils', '0,5 mils', '1,4 mils', '>400%', '720 n/m', '4200 psi', 'Korea'), $rt(4, 5, 4, 4, 4, 4)),
+            $t('AEGIS',       'instant', '8 tahun', 'Lubrizol Estane USA', '7,5 mils', 'Perlindungan maksimal', '10 tahun', $sp('6,5 mils', '0,7 mils', '1,5 mils', '>380%', '710 n/m', '4000 psi', 'China'), $rt(5, 5, 5, 5, 5, 5)),
+            $t('AEGIS MAX +', 'instant', '8 tahun', 'Lubrizol Estane USA', '8,5 mils', 'Perlindungan maksimal', '10 tahun', $sp('7,5 mils', '0,8 mils', '1,5 mils', '>490%', '830 n/m', '5500 psi', 'China'), $rt(5, 5, 5, 5, 5, 5)),
+            $t('MATTE',       'heat',    '5 tahun', 'Lubrizol Mix Grade',  '7,5 mils', 'Perlindungan harian',   null, null, null, 'Matte'),
         ];
     }
 

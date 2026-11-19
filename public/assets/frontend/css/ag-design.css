@@ -380,3 +380,12 @@ a.ag-card:hover .ag-arrow { background: var(--ag-primary); border-color: var(--a
 .ag-ppf-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 4px 0; }
 @media (max-width: 575px) { .ag-ppf-stage { gap: 8px; } .ag-ppf-pane figcaption { font-size: .6875rem; padding: 4px 9px; } }
 @media (prefers-reduced-motion: reduce) { .ag-ppf-pane .sc, .ag-ppf-pane .heat { transition: none; } }
+
+.ag-stars { letter-spacing: 2px; white-space: nowrap; }
+.ag-stars .on { color: var(--ag-primary); }
+.ag-stars .off { color: #CBD5E1; }
+.ag-ppf-rate { display: grid; gap: 8px; }
+.ag-ppf-rate > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: .8125rem; color: var(--ag-muted-strong); }
+.ag-ppf-rate .dots { display: inline-flex; gap: 4px; }
+.ag-ppf-rate .dots i { width: 14px; height: 6px; border-radius: 99px; background: #DCE6F7; }
+.ag-ppf-rate .dots i.on { background: var(--ag-primary); }
