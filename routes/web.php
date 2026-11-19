@@ -103,6 +103,7 @@ Route::controller(FrontendController::class)->middleware('frontend.maintenance')
     Route::get('/', 'home')->name('frontend.home');
     Route::get('/service/car', 'serviceCar')->name('frontend.service.car');
     Route::get('/simulator-vlt', 'simulator')->name('frontend.simulator');
+    Route::get('/sitemap.xml', 'sitemap')->name('frontend.sitemap');
     Route::get('/service/building', 'serviceBuilding')->name('frontend.service.building');
     Route::get('/service/franchise', 'serviceFranchise')->name('frontend.service.franchise');
     Route::get('/about', 'about')->name('frontend.about');

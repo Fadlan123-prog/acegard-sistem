@@ -1,6 +1,7 @@
 @extends('frontend.layout.index')
 
 @section('title', 'Tentang Kami - Acegard Indonesia')
+@section('meta_description', 'Kenali ACEGARD Indonesia: kaca film Nano Ceramic untuk kendaraan dan bangunan, teknologi yang dipakai, dan pemasangan oleh teknisi kami di Tangerang.')
 
 @section('content')
 

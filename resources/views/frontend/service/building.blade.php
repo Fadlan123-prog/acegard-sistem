@@ -1,12 +1,25 @@
 @extends('frontend.layout.index')
 
 @php
+  // Pertanyaan dan jawaban: dipakai di halaman dan di data terstruktur FAQPage.
+  $faqs = [
+        ['Apa itu VLT, TSER, IRR, dan UVR?', 'VLT adalah persentase cahaya tampak yang menembus film, makin rendah makin gelap. TSER adalah total energi matahari yang ditolak. IRR adalah penolakan sinar inframerah, dan UVR adalah penolakan sinar ultraviolet. SHGC adalah koefisien panas matahari yang masuk, makin kecil makin sedikit panas masuk.'],
+        ['Seri mana yang cocok untuk jendela saya?', 'Untuk pandangan tetap terang, pilih varian VLT tinggi seperti Notch UV400 Sky Blue (71%) atau Soft Green (68%). Untuk privasi dan penolakan panas lebih besar, pilih varian lebih gelap seperti Black Master atau 4K Alpha Pro. Tim kami membantu mencocokkan seri dengan kebutuhan Anda.'],
+        ['Berapa lama garansinya?', 'Flex One Way 3 tahun, Black Master dan Notch UV400 5 tahun, 4K Alpha Pro 7 tahun, sesuai daftar produk ACEGARD.'],
+        ['Bagaimana cara menghitung harga?', 'Harga dihitung per meter persegi dan berbeda untuk tiap seri. Kirim luas atau jumlah kaca Anda lewat WhatsApp untuk mendapat penawaran.'],
+        ['Apakah simulator menunjukkan hasil yang persis?', 'Simulator adalah ilustrasi untuk membandingkan tingkat kegelapan, warna, dan panas yang masuk. Hasil nyata bergantung pada jenis kaca, arah matahari, dan pencahayaan ruangan.'],
+  ];
+@endphp
+
+@php
   use App\Support\FilmCatalog;
   use App\Support\Whatsapp;
 @endphp
 
 @section('title', 'Kaca Film Gedung dan Rumah - Acegard Indonesia')
-@section('meta_description', 'Kaca film arsitektural ACEGARD untuk gedung, kantor, dan rumah: FLEX ONE WAY, BLACK MASTER, NOTCH UV400, 4K ALPHA PRO. Lihat spesifikasi 19 varian dan coba simulator jendela.')
+@section('meta_description', 'Kaca film gedung dan rumah ACEGARD: Flex One Way, Black Master, Notch UV400, 4K Alpha Pro. Lihat 19 varian dan coba simulator jendela.')
+@section('og_image', asset('assets/frontend/ag/service-bangunan.webp'))
+@section('og_image_alt', 'Kaca film gedung ACEGARD')
 @section('body-class', 'ag-page')
 
 @section('content')
@@ -272,13 +285,7 @@
       <h2 class="ag-h2" id="ag-bfaq-title">Pertanyaan seputar <b>kaca film gedung</b></h2>
     </div>
     <div class="ag-faq ag-reveal">
-      @foreach ([
-        ['Apa itu VLT, TSER, IRR, dan UVR?', 'VLT adalah persentase cahaya tampak yang menembus film, makin rendah makin gelap. TSER adalah total energi matahari yang ditolak. IRR adalah penolakan sinar inframerah, dan UVR adalah penolakan sinar ultraviolet. SHGC adalah koefisien panas matahari yang masuk, makin kecil makin sedikit panas masuk.'],
-        ['Seri mana yang cocok untuk jendela saya?', 'Untuk pandangan tetap terang, pilih varian VLT tinggi seperti Notch UV400 Sky Blue (71%) atau Soft Green (68%). Untuk privasi dan penolakan panas lebih besar, pilih varian lebih gelap seperti Black Master atau 4K Alpha Pro. Tim kami membantu mencocokkan seri dengan kebutuhan Anda.'],
-        ['Berapa lama garansinya?', 'Flex One Way 3 tahun, Black Master dan Notch UV400 5 tahun, 4K Alpha Pro 7 tahun, sesuai daftar produk ACEGARD.'],
-        ['Bagaimana cara menghitung harga?', 'Harga dihitung per meter persegi dan berbeda untuk tiap seri. Kirim luas atau jumlah kaca Anda lewat WhatsApp untuk mendapat penawaran.'],
-        ['Apakah simulator menunjukkan hasil yang persis?', 'Simulator adalah ilustrasi untuk membandingkan tingkat kegelapan, warna, dan panas yang masuk. Hasil nyata bergantung pada jenis kaca, arah matahari, dan pencahayaan ruangan.'],
-      ] as $i => [$q, $a])
+      @foreach ($faqs as $i => [$q, $a])
         <details class="ag-faq-item" @if($i === 0) open @endif>
           <summary>{{ $q }}</summary>
           <p>{{ $a }}</p>
@@ -371,4 +378,9 @@
 </script>
 @endpush
 
+@endsection
+
+@section('jsonld')
+  {!! \App\Support\Seo::breadcrumbs([['Home', route('frontend.home')], ['Building Film', route('frontend.service.building')]]) !!}
+  {!! \App\Support\Seo::faq($faqs) !!}
 @endsection

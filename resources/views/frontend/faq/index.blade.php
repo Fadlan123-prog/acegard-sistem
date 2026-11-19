@@ -1,6 +1,7 @@
 @extends('frontend.layout.index')
 
 @section('title', 'FAQ - Acegard Indonesia')
+@section('meta_description', 'Pertanyaan yang sering diajukan seputar kaca film, PPF, pemasangan, dan garansi di ACEGARD Indonesia.')
 
 @section('content')
 

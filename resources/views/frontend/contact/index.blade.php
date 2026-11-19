@@ -1,5 +1,8 @@
 @extends('frontend.layout.index')
 
+@section('title', 'Kontak - Acegard Indonesia')
+@section('meta_description', 'Hubungi ACEGARD Indonesia lewat WhatsApp atau kunjungi workshop kami di Cipondoh, Tangerang untuk konsultasi kaca film dan PPF.')
+
 @once
     @push('styles')
         <link rel="stylesheet" href="{{asset('assets/frontend/css/bootstrap.min.css')}}">

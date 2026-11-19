@@ -1,6 +1,7 @@
 @extends('frontend.layout.index')
 
 @section('title', $article->title . ' - Acegard Indonesia')
+@section('meta_description', \Illuminate\Support\Str::limit(trim((string) ($article->excerpt ?: strip_tags((string) $article->body))), 155))
 
 @section('content')
 

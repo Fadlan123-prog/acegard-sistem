@@ -1,9 +1,22 @@
 @extends('frontend.layout.index')
 
+@php
+  // Pertanyaan dan jawaban: dipakai di halaman dan di data terstruktur FAQPage.
+  $faqs = [
+        ['Apa itu VLT dan TSER?', 'VLT (Visible Light Transmission) adalah persentase cahaya tampak yang menembus film, makin rendah makin gelap. TSER (Total Solar Energy Rejected) adalah persentase total energi matahari yang ditolak film, makin tinggi makin sejuk.'],
+        ['Seri mana yang cocok untuk saya?', 'NOTCH UV400 cocok bila Anda mengutamakan Night Vision dan proteksi UV. 4K ALPHA PRO menawarkan penolakan panas tinggi dengan Nano Ceramic Tungsten dan Tin. BLACK MASTER cocok untuk tampilan Charcoal Black. Tim kami membantu mencocokkan seri dengan kebutuhan Anda.'],
+        ['Apakah kaca film mengganggu sinyal?', 'Tidak. Lapisan Nano Ceramic ACEGARD bersifat non-metal sehingga sinyal seluler, WiFi, dan GPS tetap berfungsi.'],
+        ['Apakah aman dipakai berkendara malam hari?', 'Seri NOTCH UV400 dilengkapi Night Vision. Untuk kaca depan, pilih VLT yang lebih tinggi agar visibilitas tetap baik dan sesuai aturan setempat. Konsultasikan dengan tim kami.'],
+        ['Berapa harga dan di mana pemasangannya?', 'Harga bergantung pada tipe kendaraan dan varian film. Hubungi kami lewat WhatsApp untuk penawaran. Pemasangan dilakukan oleh teknisi ACEGARD di workshop kami di Cipondoh, Kota Tangerang, dan setiap pemasangan mendapat garansi.'],
+  ];
+@endphp
+
 @php use App\Support\Whatsapp; @endphp
 
 @section('title', 'Kaca Film Mobil - Acegard Indonesia')
-@section('meta_description', 'Kaca film mobil ACEGARD: BLACK MASTER, NOTCH UV400, dan 4K ALPHA PRO. Lihat spesifikasi VLT, TSER, dan penolakan UV tiap varian, lalu konsultasikan lewat WhatsApp.')
+@section('meta_description', 'Kaca film mobil ACEGARD: BLACK MASTER, NOTCH UV400, 4K ALPHA PRO. Lihat VLT, TSER, dan UV tiap varian, bandingkan, lalu konsultasi via WhatsApp.')
+@section('og_image', asset('assets/frontend/ag/service-otomotif.webp'))
+@section('og_image_alt', 'Kaca film mobil ACEGARD')
 @section('body-class', 'ag-page')
 
 @section('content')
@@ -184,13 +197,7 @@
       <h2 class="ag-h2" id="ag-carfaq-title">Pertanyaan seputar <b>kaca film mobil</b></h2>
     </div>
     <div class="ag-faq ag-reveal">
-      @foreach ([
-        ['Apa itu VLT dan TSER?', 'VLT (Visible Light Transmission) adalah persentase cahaya tampak yang menembus film, makin rendah makin gelap. TSER (Total Solar Energy Rejected) adalah persentase total energi matahari yang ditolak film, makin tinggi makin sejuk.'],
-        ['Seri mana yang cocok untuk saya?', 'NOTCH UV400 cocok bila Anda mengutamakan Night Vision dan proteksi UV. 4K ALPHA PRO menawarkan penolakan panas tinggi dengan Nano Ceramic Tungsten dan Tin. BLACK MASTER cocok untuk tampilan Charcoal Black. Tim kami membantu mencocokkan seri dengan kebutuhan Anda.'],
-        ['Apakah kaca film mengganggu sinyal?', 'Tidak. Lapisan Nano Ceramic ACEGARD bersifat non-metal sehingga sinyal seluler, WiFi, dan GPS tetap berfungsi.'],
-        ['Apakah aman dipakai berkendara malam hari?', 'Seri NOTCH UV400 dilengkapi Night Vision. Untuk kaca depan, pilih VLT yang lebih tinggi agar visibilitas tetap baik dan sesuai aturan setempat. Konsultasikan dengan tim kami.'],
-        ['Berapa harga dan di mana pemasangannya?', 'Harga bergantung pada tipe kendaraan dan varian film. Hubungi kami lewat WhatsApp untuk penawaran. Pemasangan dilakukan oleh teknisi ACEGARD di workshop kami di Cipondoh, Kota Tangerang, dan setiap pemasangan mendapat garansi.'],
-      ] as $i => [$q, $a])
+      @foreach ($faqs as $i => [$q, $a])
         <details class="ag-faq-item" @if($i === 0) open @endif>
           <summary>{{ $q }}</summary>
           <p>{{ $a }}</p>
@@ -231,3 +238,8 @@
   })();
 </script>
 @endpush
+
+@section('jsonld')
+  {!! \App\Support\Seo::breadcrumbs([['Home', route('frontend.home')], ['Automotive Film', route('frontend.service.car')]]) !!}
+  {!! \App\Support\Seo::faq($faqs) !!}
+@endsection

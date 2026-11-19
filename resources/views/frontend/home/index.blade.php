@@ -1,5 +1,17 @@
 @extends('frontend.layout.index')
 
+@php
+  // Pertanyaan dan jawaban: dipakai di halaman dan di data terstruktur FAQPage.
+  $faqs = [
+        ['Apa bedanya kaca film ACEGARD dengan kaca film biasa?', 'ACEGARD memakai teknologi Nano Ceramic Matrix Composite dengan lapisan Titanium dan Tungsten. Teknologi ini menolak panas inframerah dan sinar UV tanpa lapisan logam yang mengganggu sinyal seluler, WiFi, dan GPS.'],
+        ['Apakah kaca film ACEGARD mengganggu sinyal?', 'Tidak. ACEGARD memakai lapisan non-metal yang signal friendly, jadi sinyal seluler, WiFi, dan GPS tetap berfungsi normal.'],
+        ['Apa itu VLT?', 'VLT (Visible Light Transmission) adalah persentase cahaya tampak yang menembus kaca film. Semakin rendah angkanya, semakin gelap filmnya. Pilihan VLT sebaiknya disesuaikan dengan kebutuhan privasi, kenyamanan, dan aturan berkendara.'],
+        ['Apakah kaca film aman untuk berkendara malam hari?', 'Lapisan Nano Ceramic ACEGARD dirancang menjaga VLT tetap optimal dan mengurangi glare lampu kendaraan lain, sehingga detail jalan tetap terlihat. Tim kami dapat membantu memilih VLT yang sesuai untuk tiap kaca.'],
+        ['Di mana pemasangan dilakukan dan bagaimana garansinya?', 'Pemasangan dilakukan oleh teknisi ACEGARD di workshop kami di Cipondoh, Kota Tangerang. Setiap pemasangan mendapat garansi, dan Anda bisa memeriksanya di halaman Cek Garansi.'],
+        ['Berapa harga pemasangannya?', 'Harga bergantung pada jenis kendaraan atau luas bangunan dan tipe film. Hubungi kami lewat WhatsApp untuk mendapat penawaran yang sesuai.'],
+  ];
+@endphp
+
 @php use App\Support\Whatsapp; @endphp
 
 @section('title', 'Acegard Indonesia - Kaca Film Mobil, Kaca Film Gedung & PPF')
@@ -309,14 +321,7 @@
       <p class="ag-lead">Belum menemukan jawabannya? <a class="ag-link" href="{{ route('frontend.faq') }}">Lihat FAQ lengkap</a> atau tanyakan langsung lewat WhatsApp.</p>
     </div>
     <div class="ag-faq ag-reveal">
-      @foreach ([
-        ['Apa bedanya kaca film ACEGARD dengan kaca film biasa?', 'ACEGARD memakai teknologi Nano Ceramic Matrix Composite dengan lapisan Titanium dan Tungsten. Teknologi ini menolak panas inframerah dan sinar UV tanpa lapisan logam yang mengganggu sinyal seluler, WiFi, dan GPS.'],
-        ['Apakah kaca film ACEGARD mengganggu sinyal?', 'Tidak. ACEGARD memakai lapisan non-metal yang signal friendly, jadi sinyal seluler, WiFi, dan GPS tetap berfungsi normal.'],
-        ['Apa itu VLT?', 'VLT (Visible Light Transmission) adalah persentase cahaya tampak yang menembus kaca film. Semakin rendah angkanya, semakin gelap filmnya. Pilihan VLT sebaiknya disesuaikan dengan kebutuhan privasi, kenyamanan, dan aturan berkendara.'],
-        ['Apakah kaca film aman untuk berkendara malam hari?', 'Lapisan Nano Ceramic ACEGARD dirancang menjaga VLT tetap optimal dan mengurangi glare lampu kendaraan lain, sehingga detail jalan tetap terlihat. Tim kami dapat membantu memilih VLT yang sesuai untuk tiap kaca.'],
-        ['Di mana pemasangan dilakukan dan bagaimana garansinya?', 'Pemasangan dilakukan oleh teknisi ACEGARD di workshop kami di Cipondoh, Kota Tangerang. Setiap pemasangan mendapat garansi, dan Anda bisa memeriksanya di halaman Cek Garansi.'],
-        ['Berapa harga pemasangannya?', 'Harga bergantung pada jenis kendaraan atau luas bangunan dan tipe film. Hubungi kami lewat WhatsApp untuk mendapat penawaran yang sesuai.'],
-      ] as $i => [$q, $a])
+      @foreach ($faqs as $i => [$q, $a])
         <details class="ag-faq-item" @if($i === 0) open @endif>
           <summary>{{ $q }}</summary>
           <p>{{ $a }}</p>
@@ -390,3 +395,8 @@
   })();
 </script>
 @endpush
+
+@section('jsonld')
+  {!! \App\Support\Seo::organization() !!}
+  {!! \App\Support\Seo::faq($faqs) !!}
+@endsection

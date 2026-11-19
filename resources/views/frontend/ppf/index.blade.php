@@ -1,12 +1,25 @@
 @extends('frontend.layout.index')
 
 @php
+  // Pertanyaan dan jawaban: dipakai di halaman dan di data terstruktur FAQPage.
+  $faqs = [
+        ['Apa bedanya Instan dan Heat Self Healing?', 'Instan Self Healing memulihkan goresan ringan tanpa bantuan panas. Heat Self Healing memulihkan goresan ringan setelah film terkena panas, misalnya dari sinar matahari atau air hangat. Simulator di atas menunjukkan perbedaannya.'],
+        ['Apa bedanya ARMOR, ARMOR PLUS, AEGIS, AEGIS MAX +, dan MATTE?', 'Perbedaan ada pada jenis self healing, garansi, bahan urethane, dan ketebalan film. ARMOR dan ARMOR PLUS memakai Heat Self Healing dengan garansi 5 dan 7 tahun. AEGIS dan AEGIS MAX + memakai Instan Self Healing dan urethane Lubrizol Estane USA dengan garansi 8 tahun. AEGIS MAX + juga memiliki film paling tebal dan kekuatan sobek tertinggi. MATTE memiliki spesifikasi yang sama dengan ARMOR, hanya tampilan akhirnya doff.'],
+        ['Apakah PPF mengubah warna cat?', 'PPF ACEGARD berupa film bening yang menjaga tampilan asli cat. Tingkat MATTE sengaja memberi hasil doff.'],
+        ['Berapa lama pemasangannya?', 'Pemasangan full body umumnya memerlukan 5 sampai 7 hari kerja. Untuk pemasangan parsial seperti kap mesin dan bumper, tanyakan estimasinya kepada tim kami.'],
+        ['Berapa harganya?', 'Harga bergantung pada tipe kendaraan, tingkat PPF, dan cakupan pemasangan. Hubungi kami lewat WhatsApp untuk penawaran.'],
+  ];
+@endphp
+
+@php
   use App\Support\FilmCatalog;
   use App\Support\Whatsapp;
 @endphp
 
 @section('title', 'Paint Protection Film (PPF) - Acegard Indonesia')
-@section('meta_description', 'Paint Protection Film ACEGARD: ARMOR, ARMOR PLUS, AEGIS, AEGIS MAX + dan MATTE. Lihat jenis self healing, garansi 5 sampai 8 tahun, ketebalan, lalu coba simulator goresan.')
+@section('meta_description', 'PPF ACEGARD: ARMOR, ARMOR PLUS, AEGIS, AEGIS MAX + dan MATTE. Lihat spesifikasi, garansi 5 sampai 8 tahun, dan coba simulator goresan self healing.')
+@section('og_image', asset('assets/frontend/ag/service-ppf.webp'))
+@section('og_image_alt', 'Paint Protection Film ACEGARD')
 @section('body-class', 'ag-page')
 
 @section('content')
@@ -236,13 +249,7 @@
       <h2 class="ag-h2" id="ag-pfaq-title">Pertanyaan seputar <b>PPF</b></h2>
     </div>
     <div class="ag-faq ag-reveal">
-      @foreach ([
-        ['Apa bedanya Instan dan Heat Self Healing?', 'Instan Self Healing memulihkan goresan ringan tanpa bantuan panas. Heat Self Healing memulihkan goresan ringan setelah film terkena panas, misalnya dari sinar matahari atau air hangat. Simulator di atas menunjukkan perbedaannya.'],
-        ['Apa bedanya ARMOR, ARMOR PLUS, AEGIS, AEGIS MAX +, dan MATTE?', 'Perbedaan ada pada jenis self healing, garansi, bahan urethane, dan ketebalan film. ARMOR dan ARMOR PLUS memakai Heat Self Healing dengan garansi 5 dan 7 tahun. AEGIS dan AEGIS MAX + memakai Instan Self Healing dan urethane Lubrizol Estane USA dengan garansi 8 tahun. AEGIS MAX + juga memiliki film paling tebal dan kekuatan sobek tertinggi. MATTE memiliki spesifikasi yang sama dengan ARMOR, hanya tampilan akhirnya doff.'],
-        ['Apakah PPF mengubah warna cat?', 'PPF ACEGARD berupa film bening yang menjaga tampilan asli cat. Tingkat MATTE sengaja memberi hasil doff.'],
-        ['Berapa lama pemasangannya?', 'Pemasangan full body umumnya memerlukan 5 sampai 7 hari kerja. Untuk pemasangan parsial seperti kap mesin dan bumper, tanyakan estimasinya kepada tim kami.'],
-        ['Berapa harganya?', 'Harga bergantung pada tipe kendaraan, tingkat PPF, dan cakupan pemasangan. Hubungi kami lewat WhatsApp untuk penawaran.'],
-      ] as $i => [$q, $a])
+      @foreach ($faqs as $i => [$q, $a])
         <details class="ag-faq-item" @if($i === 0) open @endif>
           <summary>{{ $q }}</summary>
           <p>{{ $a }}</p>
@@ -393,4 +400,9 @@
 </script>
 @endpush
 
+@endsection
+
+@section('jsonld')
+  {!! \App\Support\Seo::breadcrumbs([['Home', route('frontend.home')], ['PPF', route('frontend.ppf.catalog')]]) !!}
+  {!! \App\Support\Seo::faq($faqs) !!}
 @endsection

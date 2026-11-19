@@ -6,7 +6,8 @@
 @endphp
 
 @section('title', 'Simulator Kaca Film Mobil - Acegard Indonesia')
-@section('meta_description', 'Coba tingkat kegelapan kaca film mobil ACEGARD. Pilih VLT 71% sampai 3% untuk kaca depan dan kaca samping, lihat varian yang cocok, lalu konsultasikan lewat WhatsApp.')
+@section('meta_description', 'Coba kegelapan kaca film mobil ACEGARD. Pilih VLT 71% sampai 3% untuk kaca depan dan samping, lihat varian yang cocok, lalu konsultasi via WhatsApp.')
+@section('og_image_alt', 'Simulator kaca film mobil ACEGARD')
 @section('body-class', 'ag-page')
 
 @section('content')
@@ -206,4 +207,8 @@
 </script>
 @endpush
 
+@endsection
+
+@section('jsonld')
+  {!! \App\Support\Seo::breadcrumbs([['Home', route('frontend.home')], ['Simulator VLT', route('frontend.simulator')]]) !!}
 @endsection

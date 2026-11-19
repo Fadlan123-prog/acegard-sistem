@@ -6,12 +6,21 @@
   <title>@yield('title', $title ?? 'Acegard Indonesia')</title>
   @hasSection('meta_description')
   <meta name="description" content="@yield('meta_description')">
+  <link rel="canonical" href="{{ url()->current() }}">
+  <meta property="og:site_name" content="ACEGARD Indonesia">
+  <meta property="og:locale" content="id_ID">
   <meta property="og:title" content="@yield('title', $title ?? 'Acegard Indonesia')">
   <meta property="og:description" content="@yield('meta_description')">
   <meta property="og:type" content="website">
   <meta property="og:url" content="{{ url()->current() }}">
   <meta property="og:image" content="@yield('og_image', asset('assets/frontend/ag/hero-car.webp'))">
+  <meta property="og:image:alt" content="@yield('og_image_alt', 'ACEGARD kaca film dan Paint Protection Film')">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="@yield('title', $title ?? 'Acegard Indonesia')">
+  <meta name="twitter:description" content="@yield('meta_description')">
+  <meta name="twitter:image" content="@yield('og_image', asset('assets/frontend/ag/hero-car.webp'))">
   @endif
+  @yield('jsonld')
   <script>document.documentElement.classList.add('js');</script>
 
   <link rel="icon" type="image/png" href="{{ asset('assets/images/favicon.png') }}">
@@ -23,6 +32,12 @@
   'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
   })(window,document,'script','dataLayer','GTM-5DH3T7FD');</script>
 
+  {{-- Koneksi awal ke CDN agar CSS, font, dan ikon dimuat lebih cepat --}}
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.iconify.design" crossorigin>
+
   {{-- Bootstrap 5 --}}
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -30,10 +45,10 @@
   <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js" async></script>
 
   {{-- Inter --}}
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Inter+Tight:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('assets/frontend/home/css/style.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/frontend/css/tokens.css') }}">
-  <link rel="stylesheet" href="{{ asset('assets/frontend/css/ag-design.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/frontend/css/ag-design.css') }}?v={{ @filemtime(public_path('assets/frontend/css/ag-design.css')) }}">
   @stack('styles')
 </head>
 <body class="@yield('body-class')">

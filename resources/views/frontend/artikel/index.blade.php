@@ -1,6 +1,7 @@
 @extends('frontend.layout.index')
 
 @section('title', 'Artikel - Acegard Indonesia')
+@section('meta_description', 'Artikel dan tips seputar kaca film mobil, kaca film gedung, dan Paint Protection Film dari ACEGARD Indonesia.')
 
 @section('content')
 

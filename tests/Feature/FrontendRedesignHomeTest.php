@@ -206,4 +206,64 @@ class FrontendRedesignHomeTest extends TestCase
         $this->get('/kaca-film-mobil')->assertOk()->assertDontSee('agWaPanel', false);
         $this->get('/promo/kaca-film-mobil')->assertOk()->assertDontSee('agWaPanel', false);
     }
+
+    public function test_seo_meta_canonical_dan_data_terstruktur(): void
+    {
+        foreach ([route('frontend.home'), route('frontend.service.car'), route('frontend.simulator'), route('frontend.service.building'), route('frontend.ppf.catalog'), route('frontend.about'), route('frontend.contact'), route('frontend.faq')] as $url) {
+            $res = $this->get($url)->assertOk()
+                ->assertSee('<link rel="canonical" href="' . $url . '">', false)
+                ->assertSee('property="og:site_name"', false)
+                ->assertSee('name="twitter:card"', false);
+
+            preg_match('/<meta name="description" content="([^"]*)"/', $res->getContent(), $m);
+            $this->assertArrayHasKey(1, $m, $url . ' tanpa meta description');
+            $this->assertLessThanOrEqual(160, mb_strlen(html_entity_decode($m[1])), $url . ' deskripsi terlalu panjang');
+        }
+
+        // JSON-LD: FAQPage dan BreadcrumbList valid dan memuat pertanyaan halaman
+        foreach ([route('frontend.service.car'), route('frontend.service.building'), route('frontend.ppf.catalog'), route('frontend.home')] as $url) {
+            preg_match_all('#<script type="application/ld\+json">(.*?)</script>#s', $this->get($url)->getContent(), $blocks);
+            $types = [];
+            foreach ($blocks[1] as $json) {
+                $data = json_decode($json, true);
+                $this->assertNotNull($data, 'JSON-LD tidak valid di ' . $url);
+                $types[] = $data['@type'] ?? 'graph';
+            }
+            $this->assertContains('FAQPage', $types, $url);
+        }
+
+        $home = $this->get(route('frontend.home'))->getContent();
+        $this->assertStringContainsString('LocalBusiness', $home);
+        $this->assertStringNotContainsString('aggregateRating', $home);
+        $this->assertStringNotContainsString('"price"', $home);
+    }
+
+    public function test_sitemap_dan_robots(): void
+    {
+        $xml = $this->get(route('frontend.sitemap'))->assertOk()->getContent();
+        foreach (['/service/car', '/service/building', '/ppf', '/simulator-vlt', '/faq'] as $path) {
+            $this->assertStringContainsString($path . '</loc>', $xml);
+        }
+        // halaman iklan tidak masuk sitemap
+        $this->assertStringNotContainsString('/kaca-film-mobil', $xml);
+        $this->assertStringNotContainsString('/promo/', $xml);
+        $this->assertStringNotContainsString('/ppf-mobil', $xml);
+
+        $this->assertStringContainsString('Sitemap: https://acegard.id/sitemap.xml', file_get_contents(public_path('robots.txt')));
+    }
+
+    public function test_artikel_punya_deskripsi_dan_masuk_sitemap(): void
+    {
+        $a = \App\Models\Article::create([
+            'title' => 'Tips merawat kaca film', 'slug' => 'tips-merawat-kaca-film', 'category' => 'Tips',
+            'excerpt' => null, 'body' => '<p>Bersihkan dengan kain mikrofiber dan cairan tanpa amonia.</p>',
+            'is_published' => true, 'published_at' => now(),
+        ]);
+
+        $this->get(route('frontend.artikel.show', $a))->assertOk()
+            ->assertSee('<meta name="description" content="Bersihkan dengan kain mikrofiber', false);
+        $this->assertStringContainsString('tips-merawat-kaca-film</loc>', $this->get(route('frontend.sitemap'))->getContent());
+
+        $a->delete();
+    }
 }
