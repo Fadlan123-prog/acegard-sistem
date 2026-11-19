@@ -182,4 +182,28 @@ class FrontendRedesignHomeTest extends TestCase
             }
         }
     }
+
+    public function test_panel_konsultasi_whatsapp_membawa_konteks_halaman(): void
+    {
+        config(['acegard.whatsapp' => '6281234567890']);
+
+        $cases = [
+            route('frontend.home') => ['Beranda', ''],
+            route('frontend.service.car') => ['Kaca Film Mobil', 'car'],
+            route('frontend.service.building') => ['Kaca Film Gedung', 'building'],
+            route('frontend.ppf.catalog') => ['PPF', 'ppf'],
+        ];
+        foreach ($cases as $url => [$page, $cat]) {
+            $this->get($url)->assertOk()
+                ->assertSee('id="agWaPanel"', false)
+                ->assertSee('data-page="' . $page . '"', false)
+                ->assertSee('data-cat="' . $cat . '"', false)
+                ->assertSee('id="agWaCity"', false)
+                ->assertSee('https://wa.me/6281234567890', false);
+        }
+
+        // halaman iklan tidak ikut memakai panel
+        $this->get('/kaca-film-mobil')->assertOk()->assertDontSee('agWaPanel', false);
+        $this->get('/promo/kaca-film-mobil')->assertOk()->assertDontSee('agWaPanel', false);
+    }
 }

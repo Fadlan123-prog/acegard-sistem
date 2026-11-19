@@ -67,7 +67,7 @@
     return Array.prototype.map.call(root.querySelectorAll('.ag-cmp-pick input:checked'), function (c) { return byId[c.value]; });
   }
 
-  function render() {
+  function render(ann) {
     var sel = selected();
     var boxes = root.querySelectorAll('.ag-cmp-pick input');
     boxes.forEach(function (b) {
@@ -104,9 +104,10 @@
     var names = sel.map(function (i) { return i.name; }).join(', ');
     root.querySelector('[data-cmp-wa]').href = root.getAttribute('data-wa') + '?text=' +
       encodeURIComponent(root.getAttribute('data-wa-prefix') + (names ? ' Saya ingin membandingkan: ' + names + '.' : ''));
+    if (ann && names) window.dispatchEvent(new CustomEvent('ag:selection', { detail: 'perbandingan ' + names }));
   }
 
-  root.addEventListener('change', render);
+  root.addEventListener('change', function () { render(true); });
   render();
 })();
 </script>

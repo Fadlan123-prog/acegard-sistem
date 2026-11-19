@@ -143,7 +143,7 @@
   var codes = function (v) { return (DATA[v] || []).map(function (x) { return x.code; }).join(' / '); };
   var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
 
-  function render() {
+  function render(ann) {
     root.style.setProperty('--tint-front', tint(state.front));
     root.style.setProperty('--tint-side', tint(state.side));
     q('[data-out="front"]').textContent = label(state.front);
@@ -172,6 +172,7 @@
     var part = function (name, v) { return name + ': ' + (v >= 100 ? 'tanpa film' : 'VLT ' + v + '% (' + codes(v) + ')'); };
     var msg = 'Halo ACEGARD, saya mencoba simulator VLT. ' + part('Kaca depan', state.front) + '; ' + part('kaca samping', state.side) + '. Mohon rekomendasinya.';
     wa.href = root.getAttribute('data-wa') + '?text=' + encodeURIComponent(msg);
+    if (ann) window.dispatchEvent(new CustomEvent('ag:selection', { detail: 'simulator VLT, ' + part('kaca depan', state.front) + '; ' + part('kaca samping', state.side) }));
   }
 
   function syncChips() {
@@ -197,7 +198,7 @@
       else if (state.target === 'side') state.side = v;
       else { state.front = v; state.side = v; }
     }
-    syncChips(); render();
+    syncChips(); render(true);
   });
 
   syncChips(); render();

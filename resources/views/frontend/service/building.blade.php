@@ -317,7 +317,7 @@
   var q = function (s) { return root.querySelector(s); };
   var setI = function (k, v) { q('[data-i="' + k + '"]').textContent = v; };
 
-  function render() {
+  function render(ann) {
     var a = Math.min(0.95, 1 - cur.vlt / 100).toFixed(2);
     root.style.setProperty('--film', cur.tone);
     root.style.setProperty('--film-a', a);
@@ -334,6 +334,7 @@
     q('[data-win-wa]').href = root.getAttribute('data-wa') + '?text=' + encodeURIComponent(msg);
     root.querySelectorAll('.ag-chip').forEach(function (c) { c.classList.toggle('is-on', c.querySelector('input').value === cur.id); });
     root.querySelectorAll('.ag-seg-opt').forEach(function (c) { c.classList.toggle('is-on', c.querySelector('input').checked); });
+    if (ann) window.dispatchEvent(new CustomEvent('ag:selection', { detail: cur.seriesName + ' ' + cur.label + ' (VLT ' + cur.vlt + '%, TSER ' + cur.tser + '%)' }));
   }
 
   root.addEventListener('change', function (e) {
@@ -349,7 +350,7 @@
     } else if (t.name === 'bvar') {
       cur = byId[t.value];
     }
-    render();
+    render(true);
   });
 
   // pembatas sebelum/sesudah: geser di gambar atau lewat slider

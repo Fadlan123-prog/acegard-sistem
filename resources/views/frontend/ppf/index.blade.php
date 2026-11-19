@@ -291,7 +291,7 @@
     q('[data-act="heat"]').hidden = cur.heal === 'instant';
   }
 
-  function render() {
+  function render(ann) {
     q('[data-i="title"]').textContent = cur.name + ' ' + (cur.finish === 'Matte' ? '(doff)' : '(glossy)');
     q('[data-i="finish"]').textContent = cur.finish;
     q('[data-i="heal"]').textContent = HEAL[cur.heal];
@@ -316,6 +316,7 @@
     [bare, film].forEach(function (p) { p.querySelector('.paint').setAttribute('fill', cur.finish === 'Matte' ? 'url(#ppfMatte)' : 'url(#ppfPaint)'); });
     q('[data-ppf-wa]').href = root.getAttribute('data-wa') + '?text=' + encodeURIComponent('Halo ACEGARD, saya mencoba simulator PPF dan tertarik dengan ' + cur.name + ' (' + HEAL[cur.heal] + ', garansi ' + cur.warranty + '). Mohon penawarannya.');
     hint();
+    if (ann) window.dispatchEvent(new CustomEvent('ag:selection', { detail: cur.name + ' (' + HEAL[cur.heal] + ', garansi ' + cur.warranty + ')' }));
   }
 
   function pathD(pts) { return pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' '); }
@@ -384,7 +385,7 @@
     cur = TIERS[Number(e.target.value)];
     root.querySelectorAll('.ag-chip').forEach(function (c) { c.classList.toggle('is-on', c.querySelector('input').checked); });
     bareG.innerHTML = ''; filmG.innerHTML = ''; strokes = [];
-    render();
+    render(true);
   });
 
   render();

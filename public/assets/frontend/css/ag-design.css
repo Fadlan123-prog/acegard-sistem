@@ -408,3 +408,20 @@ a.ag-card:hover .ag-arrow { background: var(--ag-primary); border-color: var(--a
 .ag-cmp-table td em { display: inline-block; margin-top: 4px; padding: 1px 8px; border-radius: 999px; background: var(--ag-primary); color: #fff; font-size: .625rem; font-style: normal; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
 @media (max-width: 575px) { .ag-cmp-table td { min-width: 96px; padding: 10px; } .ag-cmp-table tbody th { min-width: 110px; } }
 @media (prefers-reduced-motion: reduce) { .ag-cmp-table td .ag-bar i { transition: none; } }
+
+/* ---------- Tahap 7: panel konsultasi WhatsApp ---------- */
+.ag-wa-panel { position: fixed; right: 16px; bottom: 84px; z-index: 1041; width: min(380px, calc(100vw - 32px)); max-height: calc(100vh - 110px); overflow-y: auto; padding: 18px; display: grid; gap: 14px; background: #fff; border: 1px solid #C9DAF7; border-radius: 24px; box-shadow: 0 24px 60px rgba(18, 59, 115, .22); }
+.ag-wa-panel[hidden] { display: none; }
+.ag-wa-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.ag-wa-head strong { display: block; font-size: 1.0625rem; color: var(--ag-deep); }
+.ag-wa-head span { display: block; margin-top: 2px; font-size: .8125rem; color: var(--ag-muted-strong); }
+.ag-wa-close { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--ag-off); color: var(--ag-muted-strong); cursor: pointer; }
+.ag-wa-close:hover { background: var(--ag-light); color: var(--ag-primary); }
+.ag-wa-close:focus-visible, .ag-wa-form input:focus-visible, .ag-wa-form select:focus-visible { outline: 2px solid var(--ag-primary); outline-offset: 2px; }
+.ag-wa-context { margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--ag-light); font-size: .8125rem; color: var(--ag-deep); }
+.ag-wa-context[hidden] { display: none; }
+.ag-wa-form { display: grid; gap: 10px; }
+.ag-wa-form label { display: grid; gap: 4px; font-size: .75rem; font-weight: 600; color: var(--ag-muted-strong); }
+.ag-wa-form input, .ag-wa-form select { width: 100%; min-height: 44px; padding: 0 14px; border: 1.5px solid var(--ag-line); border-radius: 12px; background: #fff; font: inherit; font-size: .9375rem; font-weight: 400; color: var(--ag-text); }
+.ag-wa-panel .ag-btn { width: 100%; }
+@media (max-width: 575px) { .ag-wa-panel { right: 12px; bottom: 80px; width: calc(100vw - 24px); } }
