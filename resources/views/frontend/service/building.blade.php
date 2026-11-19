@@ -1,14 +1,8 @@
 @extends('frontend.layout.index')
 
 @php
-  // Pertanyaan dan jawaban: dipakai di halaman dan di data terstruktur FAQPage.
-  $faqs = [
-        ['Apa itu VLT, TSER, IRR, dan UVR?', 'VLT adalah persentase cahaya tampak yang menembus film, makin rendah makin gelap. TSER adalah total energi matahari yang ditolak. IRR adalah penolakan sinar inframerah, dan UVR adalah penolakan sinar ultraviolet. SHGC adalah koefisien panas matahari yang masuk, makin kecil makin sedikit panas masuk.'],
-        ['Seri mana yang cocok untuk jendela saya?', 'Untuk pandangan tetap terang, pilih varian VLT tinggi seperti Notch UV400 Sky Blue (71%) atau Soft Green (68%). Untuk privasi dan penolakan panas lebih besar, pilih varian lebih gelap seperti Black Master atau 4K Alpha Pro. Tim kami membantu mencocokkan seri dengan kebutuhan Anda.'],
-        ['Berapa lama garansinya?', 'Flex One Way 3 tahun, Black Master dan Notch UV400 5 tahun, 4K Alpha Pro 7 tahun, sesuai daftar produk ACEGARD.'],
-        ['Bagaimana cara menghitung harga?', 'Harga dihitung per meter persegi dan berbeda untuk tiap seri. Kirim luas atau jumlah kaca Anda lewat WhatsApp untuk mendapat penawaran.'],
-        ['Apakah simulator menunjukkan hasil yang persis?', 'Simulator adalah ilustrasi untuk membandingkan tingkat kegelapan, warna, dan panas yang masuk. Hasil nyata bergantung pada jenis kaca, arah matahari, dan pencahayaan ruangan.'],
-  ];
+  // Pertanyaan dan jawaban: satu sumber di FaqCatalog (dipakai juga di halaman FAQ dan data terstruktur).
+  $faqs = \App\Support\FaqCatalog::building();
 @endphp
 
 @php

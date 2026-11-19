@@ -41,6 +41,31 @@ class Seo
         ]);
     }
 
+    /** Artikel blog. Penulis dan penerbit adalah ACEGARD; tidak ada data pribadi. */
+    public static function article(\App\Models\Article $article): string
+    {
+        $data = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Article',
+            'headline' => $article->title,
+            'inLanguage' => 'id-ID',
+            'mainEntityOfPage' => route('frontend.artikel.show', $article),
+            'author' => ['@type' => 'Organization', 'name' => 'ACEGARD Indonesia'],
+            'publisher' => ['@type' => 'Organization', 'name' => 'ACEGARD Indonesia', 'logo' => ['@type' => 'ImageObject', 'url' => asset('assets/frontend/ag/logo-white.webp')]],
+        ];
+        if ($article->published_at) {
+            $data['datePublished'] = $article->published_at->toIso8601String();
+        }
+        if ($article->updated_at) {
+            $data['dateModified'] = $article->updated_at->toIso8601String();
+        }
+        if ($article->cover_image) {
+            $data['image'] = asset('storage/' . $article->cover_image);
+        }
+
+        return self::script($data);
+    }
+
     /** Organisasi dan situs, dipakai di beranda. */
     public static function organization(): string
     {

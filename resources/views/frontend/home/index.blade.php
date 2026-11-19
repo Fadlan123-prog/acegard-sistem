@@ -1,15 +1,8 @@
 @extends('frontend.layout.index')
 
 @php
-  // Pertanyaan dan jawaban: dipakai di halaman dan di data terstruktur FAQPage.
-  $faqs = [
-        ['Apa bedanya kaca film ACEGARD dengan kaca film biasa?', 'ACEGARD memakai teknologi Nano Ceramic Matrix Composite dengan lapisan Titanium dan Tungsten. Teknologi ini menolak panas inframerah dan sinar UV tanpa lapisan logam yang mengganggu sinyal seluler, WiFi, dan GPS.'],
-        ['Apakah kaca film ACEGARD mengganggu sinyal?', 'Tidak. ACEGARD memakai lapisan non-metal yang signal friendly, jadi sinyal seluler, WiFi, dan GPS tetap berfungsi normal.'],
-        ['Apa itu VLT?', 'VLT (Visible Light Transmission) adalah persentase cahaya tampak yang menembus kaca film. Semakin rendah angkanya, semakin gelap filmnya. Pilihan VLT sebaiknya disesuaikan dengan kebutuhan privasi, kenyamanan, dan aturan berkendara.'],
-        ['Apakah kaca film aman untuk berkendara malam hari?', 'Lapisan Nano Ceramic ACEGARD dirancang menjaga VLT tetap optimal dan mengurangi glare lampu kendaraan lain, sehingga detail jalan tetap terlihat. Tim kami dapat membantu memilih VLT yang sesuai untuk tiap kaca.'],
-        ['Di mana pemasangan dilakukan dan bagaimana garansinya?', 'Pemasangan dilakukan oleh teknisi ACEGARD di workshop kami di Cipondoh, Kota Tangerang. Setiap pemasangan mendapat garansi, dan Anda bisa memeriksanya di halaman Cek Garansi.'],
-        ['Berapa harga pemasangannya?', 'Harga bergantung pada jenis kendaraan atau luas bangunan dan tipe film. Hubungi kami lewat WhatsApp untuk mendapat penawaran yang sesuai.'],
-  ];
+  // Pertanyaan dan jawaban: satu sumber di FaqCatalog (dipakai juga di halaman FAQ dan data terstruktur).
+  $faqs = \App\Support\FaqCatalog::home();
 @endphp
 
 @php use App\Support\Whatsapp; @endphp
@@ -21,7 +14,7 @@
 @section('content')
 
 @php
-  $clients = ['BTN', 'Jasamarga', 'Kemenko Marves', 'Mercure Hotels', 'Cengkareng Heliport'];
+  $clients = \App\Support\SiteContent::clients();
   $img = fn ($f) => asset('assets/frontend/ag/' . $f);
 @endphp
 
@@ -295,11 +288,7 @@
       <h2 class="ag-h2" id="ag-testi-title">Kata mereka <b>tentang ACEGARD</b></h2>
     </div>
     <div class="ag-grid c3">
-      @foreach ([
-        ['Jessica Iskandar', 'Pelanggan', asset('assets/frontend/building/img/faces/1.jpg'), 'Suka banget sama kaca film nya bikin tampilan kaca rumah lebih elegan dan ruangan jadi lebih adem'],
-        ['Presdir Bank INA', 'Pelanggan korporasi', null, 'Ac jadi lebih cepat dingin dan kinerja listrik berkurang drastis, kualitas Acegard memang bukan kaleng-kaleng'],
-        ['Bos Daikin', 'Pelanggan', null, 'Awalnya hanya coba-coba, ternyata adem banget ac central saya jadi lebih dingin, siang pun tidak silau'],
-      ] as [$name, $role, $photo, $quote])
+      @foreach (\App\Support\SiteContent::testimonials() as [$name, $role, $photo, $quote])
         <figure class="ag-card ag-quote ag-reveal" style="margin:0">
           <blockquote style="margin:0"><q>{{ $quote }}</q></blockquote>
           <footer>

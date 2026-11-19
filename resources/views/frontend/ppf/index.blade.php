@@ -1,14 +1,8 @@
 @extends('frontend.layout.index')
 
 @php
-  // Pertanyaan dan jawaban: dipakai di halaman dan di data terstruktur FAQPage.
-  $faqs = [
-        ['Apa bedanya Instan dan Heat Self Healing?', 'Instan Self Healing memulihkan goresan ringan tanpa bantuan panas. Heat Self Healing memulihkan goresan ringan setelah film terkena panas, misalnya dari sinar matahari atau air hangat. Simulator di atas menunjukkan perbedaannya.'],
-        ['Apa bedanya ARMOR, ARMOR PLUS, AEGIS, AEGIS MAX +, dan MATTE?', 'Perbedaan ada pada jenis self healing, garansi, bahan urethane, dan ketebalan film. ARMOR dan ARMOR PLUS memakai Heat Self Healing dengan garansi 5 dan 7 tahun. AEGIS dan AEGIS MAX + memakai Instan Self Healing dan urethane Lubrizol Estane USA dengan garansi 8 tahun. AEGIS MAX + juga memiliki film paling tebal dan kekuatan sobek tertinggi. MATTE memiliki spesifikasi yang sama dengan ARMOR, hanya tampilan akhirnya doff.'],
-        ['Apakah PPF mengubah warna cat?', 'PPF ACEGARD berupa film bening yang menjaga tampilan asli cat. Tingkat MATTE sengaja memberi hasil doff.'],
-        ['Berapa lama pemasangannya?', 'Pemasangan full body umumnya memerlukan 5 sampai 7 hari kerja. Untuk pemasangan parsial seperti kap mesin dan bumper, tanyakan estimasinya kepada tim kami.'],
-        ['Berapa harganya?', 'Harga bergantung pada tipe kendaraan, tingkat PPF, dan cakupan pemasangan. Hubungi kami lewat WhatsApp untuk penawaran.'],
-  ];
+  // Pertanyaan dan jawaban: satu sumber di FaqCatalog (dipakai juga di halaman FAQ dan data terstruktur).
+  $faqs = \App\Support\FaqCatalog::ppf();
 @endphp
 
 @php

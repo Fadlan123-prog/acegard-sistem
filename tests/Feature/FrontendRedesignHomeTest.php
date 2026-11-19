@@ -266,4 +266,54 @@ class FrontendRedesignHomeTest extends TestCase
 
         $a->delete();
     }
+
+    public function test_halaman_lama_didesain_ulang_tanpa_teks_placeholder(): void
+    {
+        config(['acegard.whatsapp' => '6281234567890']);
+
+        foreach ([route('frontend.about'), route('frontend.contact'), route('frontend.faq'), route('frontend.artikel')] as $url) {
+            $res = $this->get($url)->assertOk()->assertSee('ag-nav', false);
+            $html = $res->getContent();
+
+            $this->assertSame(1, preg_match_all('/<h1\b/', $html), $url . ' harus punya tepat satu h1');
+            $this->assertStringNotContainsString('Lorem', $html, $url);
+            $this->assertStringNotContainsString('Lorem ipsum', $html);
+            $this->assertStringNotContainsString('index.html', $html);
+            $this->assertStringNotContainsString('class="ace-', $html, $url . ' masih memakai komponen lama');
+            $this->assertStringNotContainsString('Massage*', $html);
+        }
+
+        // About memakai angka lembar spesifikasi, bukan klaim lama
+        $about = $this->get(route('frontend.about'))->getContent();
+        $this->assertStringNotContainsString('88%', $about);
+        $this->assertStringNotContainsString('99,9% dengan TSER', $about);
+
+        // Contact: nomor dari konfigurasi dan formulir yang membuka WhatsApp
+        $this->get(route('frontend.contact'))
+            ->assertSee('id="agContactForm"', false)
+            ->assertSee('https://wa.me/6281234567890', false)
+            ->assertSee('0812 3456 7890')
+            ->assertSee(config('acegard.email'));
+    }
+
+    public function test_faq_berisi_empat_kategori_nyata_dan_data_terstruktur(): void
+    {
+        $cats = \App\Support\FaqCatalog::categories();
+        $this->assertSame(['umum', 'mobil', 'gedung', 'ppf'], array_keys($cats));
+
+        $res = $this->get(route('frontend.faq'))->assertOk()->assertSee('id="agFaqSearch"', false);
+        foreach ($cats as $cat) {
+            foreach ($cat['items'] as [$q, $a]) {
+                $res->assertSee(e($q), false);
+            }
+        }
+
+        // halaman kategori memakai sumber yang sama
+        $this->get(route('frontend.service.car'))->assertSee(e(\App\Support\FaqCatalog::car()[0][0]), false);
+
+        preg_match_all('#<script type="application/ld\+json">(.*?)</script>#s', $res->getContent(), $b);
+        $faq = collect($b[1])->map(fn ($j) => json_decode($j, true))->firstWhere('@type', 'FAQPage');
+        $this->assertNotNull($faq);
+        $this->assertGreaterThanOrEqual(15, count($faq['mainEntity']));
+    }
 }

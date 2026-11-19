@@ -1,142 +1,124 @@
 @extends('frontend.layout.index')
 
+@php
+  use App\Support\SiteContent;
+  use App\Support\Whatsapp;
+@endphp
+
 @section('title', 'Kontak - Acegard Indonesia')
 @section('meta_description', 'Hubungi ACEGARD Indonesia lewat WhatsApp atau kunjungi workshop kami di Cipondoh, Tangerang untuk konsultasi kaca film dan PPF.')
-
-@once
-    @push('styles')
-        <link rel="stylesheet" href="{{asset('assets/frontend/css/bootstrap.min.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/meanmenu.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/owl.theme.default.min.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/owl.carousel.min.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/icofont.min.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/font-awesome-pro.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/scrollcue.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/magnific-popup.min.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/style.css')}}">
-		<link rel="stylesheet" href="{{asset('assets/frontend/css/responsive.css')}}">
-		<!-- Favicon -->
-		<link rel="icon" type="image/png" href="{{asset('assets/frontend/images/acegard-favicon.png')}}">
-    @endpush
-@endonce
+@section('body-class', 'ag-page')
 
 @section('content')
-    <!--=== Start Page Banner Area ===-->
-<div class="page-banner-area bg-black bg-img" data-background="./assets/images/banner-bg-shape.png">
-  <div class="container mw-1680">
-    <div class="page-banner-content">
-      <h2>Kontak Kami</h2>
-      <ul class="ps-0 mb-0 list-unstyled justify-content-center page-breadcrumb d-flex flex-wrap gap-4">
-        <li>
-          <a href="{{ route('frontend.home') }}">Home</a>
-        </li>
-        <li>
-          <span class="active">Kontak</span>
-        </li>
-      </ul>
-    </div>
+
+@php
+  $address = config('acegard.address');
+  $email = config('acegard.email');
+  $mapSrc = 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d7932.866895562227!2d106.6881984!3d-6.2064166!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69ed2a0d3377ef%3A0x49dc44beb8c49b02!2sAcegard%20Indonesia!5e0!3m2!1sid!2sid!4v1755761775295!5m2!1sid!2s';
+@endphp
+
+{{-- ───────── Hero ───────── --}}
+<section class="ag-hero ag-hero-sub-page" aria-labelledby="ag-contact-title">
+  <div class="ag-container">
+    <nav class="ag-crumbs" aria-label="Breadcrumb">
+      <a href="{{ route('frontend.home') }}">Home</a><span aria-hidden="true">/</span><span aria-current="page">Kontak</span>
+    </nav>
+    <span class="ag-eyebrow ag-hero-tag">Contact</span>
+    <h1 class="ag-display" id="ag-contact-title">Hubungi <b>tim ACEGARD.</b></h1>
+    <p class="ag-hero-sub">Konsultasi gratis lewat WhatsApp, atau kunjungi workshop kami di Cipondoh, Tangerang.</p>
   </div>
-</div>
-<!--=== End Page Banner Area ===-->
+</section>
 
-<!--=== Start Contact Us Area ===-->
-<div class="contact-us-main-area ptb-100">
-  <div class="container">
-    <div class="contact-us-main-form">
-      <h3>Kirim Pesan</h3>
+{{-- ───────── Informasi dan formulir ───────── --}}
+<section class="ag-section" style="padding-top:24px" aria-label="Informasi kontak">
+  <div class="ag-container ag-cgrid">
 
-      <div class="row">
-        <div class="col-lg-8 col-xl-9">
-          <form>
-            <div class="row">
-              <div class="col-lg-6">
-                <div class="form-group mb-4">
-                  <input type="text" class="form-control" placeholder="Nama Depan">
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="form-group mb-4">
-                  <input type="text" class="form-control" placeholder="Nama Belakang">
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="form-group mb-4">
-                  <input type="email" class="form-control" placeholder="Email Anda">
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="form-group mb-4">
-                  <input type="text" class="form-control" placeholder="Subjek">
-                </div>
-              </div>
-              <div class="col-lg-12">
-                <div class="form-group mb-4">
-                  <textarea class="form-control" placeholder="Tulis pesan Anda..." cols="30" rows="5"></textarea>
-                </div>
-              </div>
-              <div class="col-lg-12">
-                <div class="form-group mb-0">
-                  <button class="main-btn" type="submit">Kirim Pesan</button>
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <!-- Info Kontak -->
-        <div class="col-lg-4 col-xl-3">
-          <div class="contact-info">
-            <h3>Hubungi Kami</h3>
-            <ul class="ps-0 mb-0 list-unstyled info-list">
-              <li>
-                <span>Alamat:</span>
-                Jl. KH. Hasyim Ashari, RT.007/RW.002, Nerogtog, Kec. Cipondoh, Kota Tangerang, Banten 15146
-              </li>
-              <li>
-                <span>Telepon / WhatsApp:</span>
-                <a href="https://wa.me/6282121212093" target="_blank" class="whatsapp-btn">0821-2121-2093</a>
-              </li>
-              <li>
-                <span>Email:</span>
-                <a href="mailto:acegardindonesia@gmail.com">acegardindonesia@gmail.com</a>
-              </li>
-            </ul>
-
-            <h3>Jam Operasional:</h3>
-            <p>Setiap Hari: 09.00 – 18.00</p>
-
-            <div class="social-link d-flex">
-              <span>Ikuti Kami:</span>
-              <div class="d-flex gap-3">
-                <a href="https://www.facebook.com/acegard" target="_blank">
-                  <i class="fa-brands fa-facebook-f"></i>
-                </a>
-                <a href="https://www.instagram.com/acegard.id" target="_blank">
-                  <i class="fa-brands fa-instagram"></i>
-                </a>
-                <a href="https://www.tiktok.com/@acegard" target="_blank">
-                  <i class="fa-brands fa-tiktok"></i>
-                </a>
-                <a href="https://www.youtube.com/@acegard" target="_blank">
-                  <i class="fa-brands fa-youtube"></i>
-                </a>
-              </div>
-            </div>
+    <div class="ag-cinfo ag-reveal">
+      <div class="ag-ccard">
+        <span class="ic"><iconify-icon icon="mdi:whatsapp" aria-hidden="true"></iconify-icon></span>
+        <div><h3>WhatsApp</h3>
+          <a class="whatsapp-btn" data-gtm-label="contact-whatsapp" target="_blank" rel="noopener" href="{{ Whatsapp::url('Halo ACEGARD, saya ingin berkonsultasi.') }}">{{ Whatsapp::display() }}</a></div>
+      </div>
+      <div class="ag-ccard">
+        <span class="ic"><iconify-icon icon="mdi:email-outline" aria-hidden="true"></iconify-icon></span>
+        <div><h3>Email</h3><a href="mailto:{{ $email }}">{{ $email }}</a></div>
+      </div>
+      <div class="ag-ccard">
+        <span class="ic"><iconify-icon icon="mdi:map-marker-outline" aria-hidden="true"></iconify-icon></span>
+        <div><h3>Workshop</h3><p>{{ $address }}</p></div>
+      </div>
+      <div class="ag-ccard">
+        <span class="ic"><iconify-icon icon="mdi:clock-outline" aria-hidden="true"></iconify-icon></span>
+        <div><h3>Jam operasional</h3><p>{{ SiteContent::HOURS }}.</p></div>
+      </div>
+      <div class="ag-ccard">
+        <span class="ic"><iconify-icon icon="mdi:account-group-outline" aria-hidden="true"></iconify-icon></span>
+        <div><h3>Ikuti kami</h3>
+          <div class="ag-social">
+            @foreach (SiteContent::social() as [$name, $url, $icon])
+              <a href="{{ $url }}" target="_blank" rel="noopener" aria-label="{{ $name }} ACEGARD"><iconify-icon icon="{{ $icon }}" aria-hidden="true"></iconify-icon></a>
+            @endforeach
           </div>
         </div>
-        <!-- End Info Kontak -->
       </div>
     </div>
-  </div>
-</div>
-<!--=== End Contact Us Area ===-->
 
-<!--=== Start Map Area ===-->
-<div class="map-area pb-100">
-  <div class="container">
-    <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d7932.866895562227!2d106.6881984!3d-6.2064166!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69ed2a0d3377ef%3A0x49dc44beb8c49b02!2sAcegard%20Indonesia!5e0!3m2!1sid!2sid!4v1755761775295!5m2!1sid!2sid" width="100%" height="600" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <form class="ag-form ag-reveal" id="agContactForm" onsubmit="return false">
+      <h2>Tulis pesan Anda</h2>
+      <p class="sub">Pesan akan terbuka di WhatsApp, lalu tim kami membalas langsung ke nomor Anda.</p>
+      <label>Nama<input type="text" id="cfName" autocomplete="name" placeholder="Nama Anda"></label>
+      <label>Kebutuhan
+        <select id="cfNeed">
+          <option value="kaca film mobil">Kaca film mobil</option>
+          <option value="kaca film gedung atau rumah">Kaca film gedung atau rumah</option>
+          <option value="PPF (Paint Protection Film)">PPF (Paint Protection Film)</option>
+          <option value="garansi atau layanan purna jual">Garansi atau layanan purna jual</option>
+          <option value="lainnya">Lainnya</option>
+        </select>
+      </label>
+      <label>Pesan<textarea id="cfMsg" placeholder="Tulis pertanyaan atau kebutuhan Anda"></textarea></label>
+      <a class="ag-btn ag-btn-primary whatsapp-btn" id="cfSend" data-gtm-label="contact-form-whatsapp" target="_blank" rel="noopener"
+         href="{{ Whatsapp::url('Halo ACEGARD, saya ingin berkonsultasi.') }}">
+        <iconify-icon icon="mdi:whatsapp" width="20" aria-hidden="true"></iconify-icon> Kirim lewat WhatsApp
+      </a>
+    </form>
   </div>
-</div>
-<!--=== End Map Area ===-->
+</section>
 
+{{-- ───────── Peta ───────── --}}
+<section class="ag-section alt" aria-labelledby="ag-map-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">Location</span>
+      <h2 class="ag-h2" id="ag-map-title">Kunjungi <b>workshop kami</b></h2>
+    </div>
+    <div class="ag-map ag-reveal">
+      <iframe src="{{ $mapSrc }}" title="Peta lokasi workshop ACEGARD Indonesia" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <p class="ag-map-band">{{ $address }}</p>
+    </div>
+  </div>
+</section>
+
+@push('scripts')
+<script>
+(function () {
+  var form = document.getElementById('agContactForm');
+  if (!form) return;
+  var name = document.getElementById('cfName'), need = document.getElementById('cfNeed'), msg = document.getElementById('cfMsg'), send = document.getElementById('cfSend');
+  var base = @json(Whatsapp::url());
+  function update() {
+    var n = name.value.trim(), m = msg.value.trim();
+    var text = 'Halo ACEGARD' + (n ? ', saya ' + n : '') + '. Saya ingin berkonsultasi soal ' + need.value + '.' + (m ? ' ' + m : '');
+    send.href = base + '?text=' + encodeURIComponent(text);
+  }
+  ['input', 'change'].forEach(function (e) { form.addEventListener(e, update); });
+  update();
+})();
+</script>
+@endpush
+
+@endsection
+
+@section('jsonld')
+  {!! \App\Support\Seo::breadcrumbs([['Home', route('frontend.home')], ['Kontak', route('frontend.contact')]]) !!}
 @endsection

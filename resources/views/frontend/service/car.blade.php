@@ -1,14 +1,8 @@
 @extends('frontend.layout.index')
 
 @php
-  // Pertanyaan dan jawaban: dipakai di halaman dan di data terstruktur FAQPage.
-  $faqs = [
-        ['Apa itu VLT dan TSER?', 'VLT (Visible Light Transmission) adalah persentase cahaya tampak yang menembus film, makin rendah makin gelap. TSER (Total Solar Energy Rejected) adalah persentase total energi matahari yang ditolak film, makin tinggi makin sejuk.'],
-        ['Seri mana yang cocok untuk saya?', 'NOTCH UV400 cocok bila Anda mengutamakan Night Vision dan proteksi UV. 4K ALPHA PRO menawarkan penolakan panas tinggi dengan Nano Ceramic Tungsten dan Tin. BLACK MASTER cocok untuk tampilan Charcoal Black. Tim kami membantu mencocokkan seri dengan kebutuhan Anda.'],
-        ['Apakah kaca film mengganggu sinyal?', 'Tidak. Lapisan Nano Ceramic ACEGARD bersifat non-metal sehingga sinyal seluler, WiFi, dan GPS tetap berfungsi.'],
-        ['Apakah aman dipakai berkendara malam hari?', 'Seri NOTCH UV400 dilengkapi Night Vision. Untuk kaca depan, pilih VLT yang lebih tinggi agar visibilitas tetap baik dan sesuai aturan setempat. Konsultasikan dengan tim kami.'],
-        ['Berapa harga dan di mana pemasangannya?', 'Harga bergantung pada tipe kendaraan dan varian film. Hubungi kami lewat WhatsApp untuk penawaran. Pemasangan dilakukan oleh teknisi ACEGARD di workshop kami di Cipondoh, Kota Tangerang, dan setiap pemasangan mendapat garansi.'],
-  ];
+  // Pertanyaan dan jawaban: satu sumber di FaqCatalog (dipakai juga di halaman FAQ dan data terstruktur).
+  $faqs = \App\Support\FaqCatalog::car();
 @endphp
 
 @php use App\Support\Whatsapp; @endphp
