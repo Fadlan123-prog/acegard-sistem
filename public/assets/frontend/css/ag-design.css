@@ -69,7 +69,7 @@ html { scroll-behavior: smooth; }
 .ag-nav-link:hover { background: var(--ag-off); }
 .ag-nav-link.is-active { background: var(--ag-light); color: var(--ag-primary); }
 .ag-nav-cta { display: flex; flex-direction: column; gap: 8px; padding: 8px 4px 4px; }
-@media (min-width: 992px) {
+@media (min-width: 1200px) {
   .ag-nav .ag-container { display: grid; grid-template-columns: 1fr auto 1fr; }
   .ag-nav-toggle { display: none; }
   .ag-nav-menu { position: static; display: contents; padding: 0; background: none; border: 0; box-shadow: none; }
@@ -425,3 +425,12 @@ a.ag-card:hover .ag-arrow { background: var(--ag-primary); border-color: var(--a
 .ag-wa-form input, .ag-wa-form select { width: 100%; min-height: 44px; padding: 0 14px; border: 1.5px solid var(--ag-line); border-radius: 12px; background: #fff; font: inherit; font-size: .9375rem; font-weight: 400; color: var(--ag-text); }
 .ag-wa-panel .ag-btn { width: 100%; }
 @media (max-width: 575px) { .ag-wa-panel { right: 12px; bottom: 80px; width: calc(100vw - 24px); } }
+
+/* ---------- Tahap 8: responsif dan area sentuh ---------- */
+.ag-nav-brand { display: inline-flex; align-items: center; min-height: 44px; }
+.ag-crumbs a { display: inline-flex; align-items: center; min-height: 36px; padding: 0 4px; }
+.ag-footer .big a { display: inline-block; padding-block: 5px; }
+.ag-footer p a { display: inline-block; padding-block: 8px; }
+.ag-win-range input { height: 32px; }
+.ag-link { display: inline-flex; align-items: center; min-height: 40px; }
+@media (max-width: 575px) { .ag-ppf-pane figcaption .pre { display: none; } .ag-ppf-pane figcaption b { margin-left: 0; } }

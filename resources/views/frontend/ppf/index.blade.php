@@ -70,7 +70,7 @@
                 <g class="strokes"></g>
                 @if ($key === 'film') <rect class="heat" width="400" height="320" fill="url(#ppfHeat)"/> @endif
               </svg>
-              <figcaption data-label="{{ $key }}">{{ $label }}@if ($key === 'film') <b data-tier-tag>{{ $tiers[$start]['name'] }}</b>@endif</figcaption>
+              <figcaption data-label="{{ $key }}">@if ($key === 'film')<span class="pre">{{ $label }}</span> <b data-tier-tag>{{ $tiers[$start]['name'] }}</b>@else{{ $label }}@endif</figcaption>
             </figure>
           @endforeach
         </div>

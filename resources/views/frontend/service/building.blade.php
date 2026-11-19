@@ -51,7 +51,7 @@
 </section>
 
 {{-- ───────── Simulator jendela ───────── --}}
-<section class="ag-section" id="simulator" style="padding-top:16px" aria-labelledby="ag-win-title">
+<section class="ag-section" id="simulator" style="padding-top:48px" aria-labelledby="ag-win-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Window Simulator</span>
