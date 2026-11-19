@@ -118,17 +118,8 @@
           </div>
         </article>
       @endforeach
-
-      <article class="ag-prod ag-prod-note ag-reveal">
-        <div class="ag-prod-info">
-          <h3>FLEX ONE WAY</h3>
-          <p>Pilihan untuk kaca samping dan belakang dengan tampilan satu arah. Hubungi tim kami untuk spesifikasi dan varian yang tersedia.</p>
-          <a class="ag-btn ag-btn-secondary ag-btn-sm whatsapp-btn" data-gtm-label="car-flex-one-way" target="_blank" rel="noopener"
-             href="{{ Whatsapp::url('Halo ACEGARD, saya tertarik dengan kaca film FLEX ONE WAY') }}">Tanya FLEX ONE WAY</a>
-        </div>
-      </article>
     </div>
-    <p class="ag-note ag-center ag-reveal">Angka bersumber dari lembar spesifikasi produk ACEGARD. Hasil di lapangan dapat berbeda menurut kendaraan dan kondisi cuaca.</p>
+    <p class="ag-note ag-center ag-reveal">Angka bersumber dari lembar spesifikasi produk ACEGARD. Hasil di lapangan dapat berbeda menurut kendaraan dan kondisi cuaca. Mencari film untuk rumah atau gedung? Lihat <a class="ag-link" href="{{ route('frontend.service.building') }}">Building Film</a>.</p>
   </div>
 </section>
 

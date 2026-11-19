@@ -86,13 +86,12 @@
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Our Products</span>
       <h2 class="ag-h2" id="ag-prod-title">Pilihan <b>kaca film mobil</b></h2>
-      <p class="ag-lead">Empat tipe film untuk kebutuhan berbeda. Spesifikasi lengkap dan harga dapat dikonsultasikan langsung dengan tim ACEGARD.</p>
+      <p class="ag-lead">Tiga seri film untuk kebutuhan berbeda. Spesifikasi lengkap dan harga dapat dikonsultasikan langsung dengan tim ACEGARD.</p>
     </div>
-    <div class="ag-grid c4 ag-film">
+    <div class="ag-grid c3 ag-film">
       @foreach ([
         ['film-notch-uv400.webp',   'NOTCH UV400',  'Jernih & tetap sejuk',            'Kejernihan maksimal dengan perlindungan panas yang efektif. Tampilan tetap natural.'],
         ['film-4k-alpha-pro.webp',  '4K ALPHA PRO', 'Nyaman dengan privasi yang pas',  'Perpaduan visibilitas, kenyamanan, dan privasi. Jernih dari dalam, stylish dari luar.'],
-        ['film-flex-one-way.webp',  'FLEX ONE WAY', 'Privasi untuk kaca samping',      'Pilihan untuk kaca samping dan belakang dengan tampilan satu arah.'],
         ['film-black-master.webp',  'BLACK MASTER', 'Tampilan gelap yang tegas',       'Pilihan untuk Anda yang mengutamakan privasi dan tampilan kabin yang lebih gelap.'],
       ] as [$file, $name, $tag, $desc])
         <article class="ag-card is-hover ag-reveal">

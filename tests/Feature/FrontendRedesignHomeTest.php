@@ -83,6 +83,10 @@ class FrontendRedesignHomeTest extends TestCase
             ->assertSee('Charcoal Black')->assertSee('Black Tungsten')
             ->assertSee('99,9%');
 
+        // Flex One Way khusus gedung
+        $this->get(route('frontend.service.car'))->assertDontSee('FLEX ONE WAY');
+        $this->get('/')->assertDontSee('FLEX ONE WAY');
+
         $this->get('/kaca-film-mobil')->assertOk()->assertDontSee('ag-nav', false);
         $this->get('/promo/kaca-film-mobil')->assertOk()->assertDontSee('ag-nav', false);
     }
