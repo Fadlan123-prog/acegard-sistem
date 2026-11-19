@@ -96,7 +96,7 @@
         </div>
 
         <div style="max-width: 820px;" class="mx-auto text-center">
-            <h2 class="fw-normal mb-3">Teknologi <span class="ace-gradient-text">Night Vision</span> Dengan Daya Tolak Panas 99,9%</h2>
+            <h2 class="fw-normal mb-3">Teknologi <span class="ace-gradient-text">Night Vision</span> Dengan Penolakan Inframerah 99%</h2>
             <p class="ace-muted">
                 Night Vision Pada Acegard Dirancang Melalui Optical-Grade Nano Ceramic Engineering Yang Bekerja Secara
                 Presisi Pada Spektrum Cahaya Tampak.
@@ -160,7 +160,7 @@
 <section class="ace-section-sm">
     <div class="container text-center">
         <x-frontend.section-heading title="Keunggulan Kaca Film" highlight="Acegard"
-            subtitle="Acegard satu-satunya di Indonesia yang berteknologi Nano Ceramic Matrix Composite yang diperkuat lapisan Titanium dan Tungsten, mampu menolak panas inframerah hingga 99,9% dengan TSER maksimal 88% untuk menjaga suhu tetap sejuk." />
+            subtitle="Acegard satu-satunya di Indonesia yang berteknologi Nano Ceramic Matrix Composite yang diperkuat lapisan Titanium dan Tungsten, mampu menolak panas inframerah hingga 99% dengan TSER hingga 95% untuk menjaga suhu tetap sejuk." />
 
         <div class="row g-4 justify-content-center">
             @foreach($timeline as $i => $label)
