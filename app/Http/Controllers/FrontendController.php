@@ -16,6 +16,10 @@ class FrontendController extends Controller
         return view('frontend.service.car');
     }
 
+    public function simulator(){
+        return view('frontend.simulator.index');
+    }
+
     public function serviceBuilding(){
         return view('frontend.service.building');
     }

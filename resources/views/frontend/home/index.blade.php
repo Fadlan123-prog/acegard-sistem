@@ -253,26 +253,25 @@
   </div>
 </section>
 
-{{-- ───────── Simulator (pratinjau) ───────── --}}
+{{-- ───────── Simulator ───────── --}}
 <section class="ag-section tint" aria-labelledby="ag-sim-title">
   <div class="ag-container ag-split">
     <div class="ag-reveal">
       <span class="ag-eyebrow">Interactive Experience</span>
       <h2 class="ag-h2" id="ag-sim-title" style="margin-top:16px">Coba tingkat <b>kegelapan kaca film</b></h2>
-      <p class="ag-lead">Simulator kaca film mobil akan membantu Anda membayangkan tampilan berbagai persentase VLT sebelum memilih. Semakin rendah angka VLT, semakin gelap kaca film.</p>
-      <a class="ag-btn ag-btn-primary" href="{{ route('frontend.service.car') }}">Lihat Kaca Film Mobil</a>
+      <p class="ag-lead">Simulator kaca film mobil membantu Anda melihat tampilan berbagai persentase VLT pada kaca depan dan kaca samping sebelum memilih. Semakin rendah angka VLT, semakin gelap kaca film.</p>
+      <a class="ag-btn ag-btn-primary" href="{{ route('frontend.simulator') }}">Coba Simulator</a>
     </div>
     <div class="ag-reveal">
       <div class="ag-sim-stage">
-        <span class="ag-soon">Segera hadir</span>
-        <img src="{{ $img('hero-car-clear.webp') }}" width="1334" height="889" loading="lazy" alt="Pratinjau simulator kaca film mobil">
+        <img src="{{ $img('hero-car-clear.webp') }}" width="1334" height="889" loading="lazy" alt="Mobil sedan untuk simulator kaca film">
         <div class="ag-chips" aria-hidden="true">
           @foreach ([5, 20, 35, 50, 70] as $v)
             <span class="ag-chip {{ $v === 35 ? 'is-on' : '' }}">{{ $v }}%</span>
           @endforeach
         </div>
       </div>
-      <p class="ag-note">Pratinjau tampilan. Simulator interaktif sedang disiapkan. Hasil simulator nantinya hanya ilustrasi visual, bukan pengukuran VLT.</p>
+      <p class="ag-note">Hasil simulator hanya ilustrasi visual, bukan pengukuran VLT.</p>
     </div>
   </div>
 </section>

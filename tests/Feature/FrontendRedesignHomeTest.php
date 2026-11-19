@@ -21,7 +21,7 @@ class FrontendRedesignHomeTest extends TestCase
         $res = $this->get('/')->assertOk();
         $res->assertSee('Kaca film premium', false)->assertSee('Cooler Cabins, Clearer Views', false)
             ->assertSee('Our Services')->assertSee('Why ACEGARD')->assertSee('Our Products')
-            ->assertSee('ag-design.css', false)->assertSee('Segera hadir');
+            ->assertSee('ag-design.css', false)->assertDontSee('Segera hadir');
 
         $html = $res->getContent();
         $this->assertStringContainsString('https://wa.me/6281234567890', $html);
@@ -85,5 +85,31 @@ class FrontendRedesignHomeTest extends TestCase
 
         $this->get('/kaca-film-mobil')->assertOk()->assertDontSee('ag-nav', false);
         $this->get('/promo/kaca-film-mobil')->assertOk()->assertDontSee('ag-nav', false);
+    }
+
+    public function test_simulator_vlt_menampilkan_pilihan_vlt_dan_varian(): void
+    {
+        $res = $this->get(route('frontend.simulator'))->assertOk()
+            ->assertSee('ag-nav', false)
+            ->assertSeeText('Coba kegelapan kaca film')
+            ->assertSee('agSim', false)
+            ->assertSee('Tanpa film');
+
+        // semua VLT unik dari lembar spesifikasi tersedia sebagai pilihan
+        foreach ([71, 68, 51, 34, 30, 25, 18, 16, 10, 6, 4] as $vlt) {
+            $res->assertSee('value="' . $vlt . '"', false);
+        }
+
+        // dua varian berbagi VLT 4%, keduanya harus ikut terkirim ke skrip
+        $res->assertSee('AP05')->assertSee('AP02')->assertSee('NV72');
+    }
+
+    public function test_katalog_film_konsisten_untuk_13_varian(): void
+    {
+        $variants = \App\Support\FilmCatalog::variants();
+
+        $this->assertCount(13, $variants);
+        $this->assertSame(71, (int) $variants->first()['vlt']);
+        $this->assertSame(4, (int) $variants->last()['vlt']);
     }
 }

@@ -18,6 +18,7 @@
         <h4>Layanan</h4>
         <ul class="big">
           <li><a href="{{ route('frontend.service.car') }}">Automotive Film</a></li>
+          <li><a href="{{ route('frontend.simulator') }}">Simulator VLT</a></li>
           <li><a href="{{ route('frontend.service.building') }}">Building Film</a></li>
           <li><a href="{{ route('frontend.ppf.catalog') }}">Paint Protection</a></li>
           <li><a href="{{ route('warranty.form') }}">Cek Garansi</a></li>
