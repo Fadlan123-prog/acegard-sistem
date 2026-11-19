@@ -81,6 +81,22 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   @stack('scripts')
 
+  {{-- Tampilkan bagian .ag-reveal saat masuk layar. Berlaku untuk semua halaman; pengaman memastikan konten tidak pernah tersembunyi. --}}
+  <script>
+  (function () {
+    var els = document.querySelectorAll('.ag-reveal');
+    if (!els.length) return;
+    var show = function (e) { e.classList.add('is-visible'); };
+    if (!('IntersectionObserver' in window)) { els.forEach(show); return; }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) { show(en.target); io.unobserve(en.target); } });
+    }, { threshold: 0.01, rootMargin: '0px 0px -4% 0px' });
+    els.forEach(function (e) { io.observe(e); });
+    // Pengaman: jika pengamat gagal, semua konten tetap tampil setelah 3 detik.
+    setTimeout(function () { els.forEach(show); }, 3000);
+  })();
+  </script>
+
   {{-- WhatsApp Click Tracking (GTM dataLayer) --}}
   <script>
   (function () {

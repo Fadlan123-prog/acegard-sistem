@@ -316,4 +316,18 @@ class FrontendRedesignHomeTest extends TestCase
         $this->assertNotNull($faq);
         $this->assertGreaterThanOrEqual(15, count($faq['mainEntity']));
     }
+
+    public function test_skrip_reveal_ada_sekali_di_setiap_halaman_yang_memakainya(): void
+    {
+        // Elemen .ag-reveal tersembunyi sampai skrip menampilkannya. Tanpa skrip, halaman tampak kosong.
+        foreach ([route('frontend.home'), route('frontend.service.car'), route('frontend.simulator'), route('frontend.service.building'),
+                  route('frontend.ppf.catalog'), route('frontend.about'), route('frontend.contact'), route('frontend.faq')] as $url) {
+            $html = $this->get($url)->assertOk()->getContent();
+
+            if (str_contains($html, 'ag-reveal')) {
+                $this->assertSame(1, substr_count($html, 'new IntersectionObserver'), $url . ' harus memuat skrip reveal tepat satu kali');
+                $this->assertStringContainsString('setTimeout(function () { els.forEach(show); }, 3000);', $html, $url . ' tanpa pengaman');
+            }
+        }
+    }
 }

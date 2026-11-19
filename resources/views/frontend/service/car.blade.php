@@ -220,19 +220,6 @@
 
 @endsection
 
-@push('scripts')
-<script>
-  (function () {
-    var els = document.querySelectorAll('.ag-reveal');
-    if (!('IntersectionObserver' in window)) { els.forEach(function (e) { e.classList.add('is-visible'); }); return; }
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('is-visible'); io.unobserve(en.target); } });
-    }, { threshold: .06, rootMargin: '0px 0px -4% 0px' });
-    els.forEach(function (e) { io.observe(e); });
-  })();
-</script>
-@endpush
-
 @section('jsonld')
   {!! \App\Support\Seo::breadcrumbs([['Home', route('frontend.home')], ['Automotive Film', route('frontend.service.car')]]) !!}
   {!! \App\Support\Seo::faq($faqs) !!}
