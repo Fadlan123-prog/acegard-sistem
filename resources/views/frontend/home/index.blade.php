@@ -263,11 +263,11 @@
       <a class="ag-btn ag-btn-primary" href="{{ route('frontend.simulator') }}">Coba Simulator</a>
     </div>
     <div class="ag-reveal">
-      <div class="ag-sim-stage">
-        <img src="{{ $img('hero-car-clear.webp') }}" width="1334" height="889" loading="lazy" alt="Mobil sedan untuk simulator kaca film">
-        <div class="ag-chips" aria-hidden="true">
-          @foreach ([5, 20, 35, 50, 70] as $v)
-            <span class="ag-chip {{ $v === 35 ? 'is-on' : '' }}">{{ $v }}%</span>
+      <div class="ag-sim-stage" id="agHomeSim" style="--tint-front: .70; --tint-side: .70;">
+        @include('frontend.partials.sim-car')
+        <div class="ag-chips is-live" role="radiogroup" aria-label="Pilih VLT kaca film">
+          @foreach ([71, 51, 30, 18, 6] as $v)
+            <label class="ag-chip {{ $v === 30 ? 'is-on' : '' }}"><input type="radio" name="homevlt" value="{{ $v }}" class="visually-hidden" {{ $v === 30 ? 'checked' : '' }}><span>{{ $v }}%</span></label>
           @endforeach
         </div>
       </div>
@@ -367,6 +367,19 @@
 @endsection
 
 @push('scripts')
+<script>
+(function () {
+  var stage = document.getElementById('agHomeSim');
+  if (!stage) return;
+  stage.addEventListener('change', function (e) {
+    if (e.target.name !== 'homevlt') return;
+    var t = Math.min(0.96, 1 - Number(e.target.value) / 100).toFixed(2);
+    stage.style.setProperty('--tint-front', t);
+    stage.style.setProperty('--tint-side', t);
+    stage.querySelectorAll('.ag-chip').forEach(function (c) { c.classList.toggle('is-on', c.querySelector('input').checked); });
+  });
+})();
+</script>
 <script>
   (function () {
     var els = document.querySelectorAll('.ag-reveal');
