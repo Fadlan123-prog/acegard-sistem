@@ -1,51 +1,323 @@
 @extends('frontend.layout.index')
 
+@php
+  use App\Support\FilmCatalog;
+  use App\Support\Whatsapp;
+@endphp
+
 @section('title', 'Paint Protection Film (PPF) - Acegard Indonesia')
+@section('meta_description', 'Paint Protection Film ACEGARD: ARMOR, ARMOR PLUS, AEGIS, AEGIS MAX + dan MATTE. Lihat jenis self healing, garansi 5 sampai 8 tahun, ketebalan, lalu coba simulator goresan.')
+@section('body-class', 'ag-page')
 
 @section('content')
 
 @php
-    $waLink = fn ($text) => 'https://wa.me/6282121212093?text=' . urlencode($text);
-
-    $tiers = [
-        ['name' => 'ARMOR', 'rowClass' => 'ace-tier-navy'],
-        ['name' => 'ARMOR PLUS', 'rowClass' => 'ace-tier-navy'],
-        ['name' => 'AEGIS', 'rowClass' => 'ace-tier-gold'],
-        ['name' => 'AEGIS MAX +', 'rowClass' => 'ace-tier-gold'],
-        ['name' => 'MATTE', 'rowClass' => 'ace-tier-dark'],
-    ];
-
-    $specCells = ['Heat Self Healing', '5 Tahun', 'Lubrizol Mix Grade', '8.5 Mils'];
+  $img = fn ($f) => asset('assets/frontend/ag/' . $f);
+  $tiers = FilmCatalog::ppf();
+  $heal = ['instant' => 'Instan Self Healing', 'heat' => 'Heat Self Healing'];
+  $start = 2; // AEGIS
 @endphp
 
-{{-- Hero --}}
-<section class="ace-section-sm text-center">
-    <div class="container" style="max-width: 760px;">
-        <h1 class="fw-normal mb-3">
-            <span class="ace-gradient-text">ACEGARD</span> Paint Protection Film
-        </h1>
-        <p class="ace-muted mb-4">
-            Mobil lebih aman, berkendara lebih tenang. Lindungi cat kendaraan Anda dengan teknologi terdepan ACEGARD.
-        </p>
-        <x-frontend.button variant="gradient" :href="$waLink('Halo Acegard, saya ingin konsultasi PPF')" class="whatsapp-btn" target="_blank">
-            Konsultasi Dengan Kami Gratis di Whatsapp
-        </x-frontend.button>
+{{-- ───────── Hero ───────── --}}
+<section class="ag-hero ag-hero-sub-page" aria-labelledby="ag-ppf-title">
+  <div class="ag-container">
+    <nav class="ag-crumbs" aria-label="Breadcrumb">
+      <a href="{{ route('frontend.home') }}">Home</a><span aria-hidden="true">/</span><span aria-current="page">PPF</span>
+    </nav>
+    <span class="ag-eyebrow ag-hero-tag">Paint Protection Film</span>
+    <h1 class="ag-display" id="ag-ppf-title">Lindungi cat mobil <b>dari goresan dan kerikil.</b></h1>
+    <p class="ag-hero-sub">Lima tingkat PPF dengan urethane Lubrizol, garansi 5 sampai 8 tahun, dan teknologi self healing. Coba sendiri bagaimana film memulihkan goresan.</p>
+    <div class="ag-hero-actions">
+      <a class="ag-btn ag-btn-primary" href="#simulator">Coba Simulator Goresan</a>
+      <a class="ag-btn ag-btn-secondary whatsapp-btn" data-gtm-label="ppf-hero-whatsapp" target="_blank" rel="noopener"
+         href="{{ Whatsapp::url('Halo ACEGARD, saya ingin berkonsultasi soal PPF.') }}">
+        <iconify-icon icon="mdi:whatsapp" width="20" aria-hidden="true"></iconify-icon> Konsultasi Gratis
+      </a>
     </div>
+    <div class="ag-hero-car is-compact">
+      <img src="{{ $img('hero-car-clear.webp') }}" width="1334" height="889" alt="Mobil sedan perak yang dilindungi PPF ACEGARD" fetchpriority="high">
+    </div>
+  </div>
 </section>
 
-{{-- Tier tables --}}
-@foreach($tiers as $tier)
-    <section class="ace-section-sm py-4">
-        <div class="container" style="max-width: 900px;">
-            <x-frontend.section-heading :highlight="$tier['name']" />
+{{-- ───────── Simulator goresan ───────── --}}
+<section class="ag-section alt" id="simulator" aria-labelledby="ag-scr-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">Scratch Simulator</span>
+      <h2 class="ag-h2" id="ag-scr-title">Gores catnya, <b>lihat filmnya pulih</b></h2>
+      <p class="ag-lead">Geser mouse atau jari di atas panel untuk menggores. Kiri adalah cat tanpa PPF, kanan adalah cat dengan PPF pilihan Anda.</p>
+    </div>
 
-            <x-frontend.spec-table
-                :headers="['Self Healing Rate', 'Garansi', 'Urethane Original', 'Produck Thickness']"
-                :rows="[['cells' => $specCells, 'class' => $tier['rowClass']]]"
-                :cta="['label' => 'Hubungi Kami', 'href' => $waLink('Halo Acegard, saya tertarik dengan PPF ' . $tier['name']), 'whatsapp' => true]"
-            />
+    <div class="ag-win ag-ppf" id="agPpf" data-wa="{{ Whatsapp::url() }}">
+      <div class="ag-win-view">
+        <div class="ag-ppf-stage" id="agPpfStage">
+          <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="ppfPaint" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D5DAE1"/><stop offset=".5" stop-color="#A9B0BB"/><stop offset="1" stop-color="#7E8795"/></linearGradient>
+              <linearGradient id="ppfMatte" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A4A9B1"/><stop offset="1" stop-color="#8A909A"/></linearGradient>
+              <linearGradient id="ppfGloss" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+              <radialGradient id="ppfHeat" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#FFB45A" stop-opacity=".9"/><stop offset="1" stop-color="#FF7A1A" stop-opacity="0"/></radialGradient>
+            </defs>
+          </svg>
+          @foreach (['bare' => 'Tanpa PPF', 'film' => 'Dengan PPF'] as $key => $label)
+            <figure class="ag-ppf-pane is-{{ $key }}" data-pane="{{ $key }}">
+              <svg viewBox="0 0 400 320" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+                <rect class="paint" width="400" height="320" fill="url(#ppfPaint)"/>
+                <path class="gloss" d="M-40 260 L120 -20 L190 -20 L30 330 Z" fill="url(#ppfGloss)"/>
+                <path class="gloss" d="M180 340 L330 40 L360 40 L230 340 Z" fill="url(#ppfGloss)" opacity=".5"/>
+                <path d="M0 214 Q200 186 400 214" fill="none" stroke="#6B7380" stroke-opacity=".35" stroke-width="2"/>
+                <g class="strokes"></g>
+                @if ($key === 'film') <rect class="heat" width="400" height="320" fill="url(#ppfHeat)"/> @endif
+              </svg>
+              <figcaption data-label="{{ $key }}">{{ $label }}@if ($key === 'film') <b data-tier-tag>{{ $tiers[$start]['name'] }}</b>@endif</figcaption>
+            </figure>
+          @endforeach
         </div>
-    </section>
-@endforeach
+        <div class="ag-ppf-actions">
+          <button type="button" class="ag-btn ag-btn-secondary ag-btn-sm" data-act="auto"><iconify-icon icon="mdi:draw" aria-hidden="true"></iconify-icon> Gores otomatis</button>
+          <button type="button" class="ag-btn ag-btn-secondary ag-btn-sm" data-act="heat"><iconify-icon icon="mdi:white-balance-sunny" aria-hidden="true"></iconify-icon> Beri panas</button>
+          <button type="button" class="ag-btn ag-btn-ghost-dark ag-btn-sm" data-act="reset"><iconify-icon icon="mdi:refresh" aria-hidden="true"></iconify-icon> Ulangi</button>
+        </div>
+        <p class="ag-win-legend" data-hint aria-live="polite"></p>
+      </div>
+
+      <div class="ag-sim-panel">
+        <fieldset class="ag-sim-group">
+          <legend>Pilih tingkat PPF</legend>
+          <div class="ag-chips is-live">
+            @foreach ($tiers as $i => $t)
+              <label class="ag-chip {{ $i === $start ? 'is-on' : '' }}"><input type="radio" name="tier" value="{{ $i }}" class="visually-hidden" {{ $i === $start ? 'checked' : '' }}><span>{{ $t['name'] }}</span></label>
+            @endforeach
+          </div>
+        </fieldset>
+
+        <div class="ag-sim-info" aria-live="polite">
+          <p class="ag-sim-info-title" data-i="title"></p>
+          <dl class="ag-win-stats">
+            <div><dt>Finish</dt><dd data-i="finish"></dd></div>
+            <div><dt>Self healing</dt><dd data-i="heal"></dd></div>
+            <div><dt>Garansi</dt><dd data-i="warranty"></dd></div>
+            <div><dt>Urethane</dt><dd data-i="urethane"></dd></div>
+            <div><dt>Ketebalan</dt><dd data-i="mils"></dd></div>
+            <div><dt>Cocok untuk</dt><dd data-i="best"></dd></div>
+          </dl>
+        </div>
+
+        <a class="ag-btn ag-btn-primary whatsapp-btn" data-gtm-label="ppf-simulator-whatsapp" target="_blank" rel="noopener"
+           href="{{ Whatsapp::url('Halo ACEGARD, saya ingin konsultasi PPF.') }}" data-ppf-wa>
+          <iconify-icon icon="mdi:whatsapp" width="20" aria-hidden="true"></iconify-icon> Konsultasikan tingkat ini
+        </a>
+      </div>
+    </div>
+
+    <p class="ag-note ag-center" style="margin-top:24px">Simulasi hanya ilustrasi untuk membandingkan perilaku self healing. Hasil nyata bergantung pada kedalaman goresan, suhu, dan kondisi film.</p>
+  </div>
+</section>
+
+{{-- ───────── Manfaat ───────── --}}
+<section class="ag-section" aria-labelledby="ag-pben-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">Benefits</span>
+      <h2 class="ag-h2" id="ag-pben-title">Manfaat PPF <b>untuk kendaraan Anda</b></h2>
+    </div>
+    <div class="ag-grid c3">
+      @foreach ([
+        ['mdi:shield-car', 'Lindungi dari kerikil dan goresan', 'Film urethane menjadi lapisan pertama yang menerima gesekan, debu, dan percikan kerikil di jalan.'],
+        ['mdi:auto-fix', 'Self healing', 'Goresan ringan memulihkan diri. Tingkat AEGIS dan AEGIS MAX + memakai Instan Self Healing, tingkat lainnya Heat Self Healing.'],
+        ['mdi:water-outline', 'Hydrophobic', 'Permukaan menolak air, debu, dan kotoran sehingga mobil lebih mudah dibersihkan.'],
+        ['mdi:flask-outline', 'Urethane Lubrizol', 'Bahan dasar Lubrizol Mix Grade atau Estane Grade, tergantung tingkat yang dipilih.'],
+        ['mdi:shield-check-outline', 'Garansi 5 sampai 8 tahun', 'ARMOR dan MATTE 5 tahun, ARMOR PLUS 7 tahun, AEGIS dan AEGIS MAX + 8 tahun.'],
+        ['mdi:car-cog', 'Pemasangan profesional', 'Dipasang teknisi ACEGARD di workshop Cipondoh, Tangerang.'],
+      ] as [$icon, $title, $desc])
+        <div class="ag-card ag-feature is-hover ag-reveal">
+          <span class="ic"><iconify-icon icon="{{ $icon }}" aria-hidden="true"></iconify-icon></span>
+          <h3>{{ $title }}</h3>
+          <p>{{ $desc }}</p>
+        </div>
+      @endforeach
+    </div>
+  </div>
+</section>
+
+{{-- ───────── Perbandingan ───────── --}}
+<section class="ag-section alt" id="tingkat" aria-labelledby="ag-ptier-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">Tiers</span>
+      <h2 class="ag-h2" id="ag-ptier-title">Bandingkan <b>lima tingkat PPF</b></h2>
+      <p class="ag-lead">Harga bergantung pada tipe kendaraan dan cakupan pemasangan. Hubungi tim kami untuk penawaran.<span class="ag-hint"> Geser tabel ke samping untuk melihat semua kolom.</span></p>
+    </div>
+    <div class="ag-spec-wrap ag-reveal" tabindex="0" role="region" aria-label="Perbandingan tingkat PPF">
+      <table class="ag-spec ag-compare">
+        <caption class="visually-hidden">Perbandingan lima tingkat PPF ACEGARD</caption>
+        <thead>
+          <tr><th scope="col">Tingkat</th><th scope="col">Finish</th><th scope="col">Self healing</th><th scope="col">Garansi</th><th scope="col">Urethane</th><th scope="col">Ketebalan</th></tr>
+        </thead>
+        <tbody>
+          @foreach ($tiers as $t)
+            <tr>
+              <th scope="row">{{ $t['name'] }}</th>
+              <td>{{ $t['finish'] }}</td><td>{{ $heal[$t['heal']] }}</td><td>{{ $t['warranty'] }}</td><td>{{ $t['urethane'] }}</td><td>{{ $t['mils'] }}</td>
+            </tr>
+          @endforeach
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+{{-- ───────── FAQ ───────── --}}
+<section class="ag-section" aria-labelledby="ag-pfaq-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">FAQ</span>
+      <h2 class="ag-h2" id="ag-pfaq-title">Pertanyaan seputar <b>PPF</b></h2>
+    </div>
+    <div class="ag-faq ag-reveal">
+      @foreach ([
+        ['Apa bedanya Instan dan Heat Self Healing?', 'Instan Self Healing memulihkan goresan ringan tanpa bantuan panas. Heat Self Healing memulihkan goresan ringan setelah film terkena panas, misalnya dari sinar matahari atau air hangat. Simulator di atas menunjukkan perbedaannya.'],
+        ['Apa bedanya ARMOR, ARMOR PLUS, AEGIS, AEGIS MAX +, dan MATTE?', 'Perbedaan ada pada jenis self healing, garansi, bahan urethane, dan ketebalan film. ARMOR dan ARMOR PLUS memakai Heat Self Healing dengan garansi 5 dan 7 tahun. AEGIS dan AEGIS MAX + memakai Instan Self Healing dan urethane Estane Grade dengan garansi 8 tahun. MATTE memberi tampilan doff dengan garansi 5 tahun.'],
+        ['Apakah PPF mengubah warna cat?', 'PPF ACEGARD berupa film bening yang menjaga tampilan asli cat. Tingkat MATTE sengaja memberi hasil doff.'],
+        ['Berapa lama pemasangannya?', 'Bergantung cakupan pemasangan. Pemasangan full body umumnya memerlukan 2 sampai 3 hari kerja, sedangkan pemasangan parsial seperti kap mesin dan bumper dapat selesai dalam 1 hari.'],
+        ['Berapa harganya?', 'Harga bergantung pada tipe kendaraan, tingkat PPF, dan cakupan pemasangan. Hubungi kami lewat WhatsApp untuk penawaran.'],
+      ] as $i => [$q, $a])
+        <details class="ag-faq-item" @if($i === 0) open @endif>
+          <summary>{{ $q }}</summary>
+          <p>{{ $a }}</p>
+        </details>
+      @endforeach
+    </div>
+  </div>
+</section>
+
+{{-- ───────── CTA ───────── --}}
+<section class="ag-section" style="padding-top:0" aria-labelledby="ag-pcta-title">
+  <div class="ag-container">
+    <div class="ag-cta-panel ag-reveal">
+      <h2 id="ag-pcta-title">Siap melindungi <b>cat mobil Anda?</b></h2>
+      <p>Sebutkan tipe mobil dan cakupan yang Anda inginkan. Tim ACEGARD akan merekomendasikan tingkat PPF yang sesuai.</p>
+      <div class="ag-cta-actions">
+        <a class="ag-btn ag-btn-light whatsapp-btn" data-gtm-label="ppf-cta-whatsapp" target="_blank" rel="noopener"
+           href="{{ Whatsapp::url('Halo ACEGARD, saya ingin konsultasi PPF.') }}">
+          <iconify-icon icon="mdi:whatsapp" width="20" aria-hidden="true"></iconify-icon> Konsultasi via WhatsApp
+        </a>
+        <a class="ag-btn ag-btn-ghost" href="{{ route('warranty.form') }}">Cek Garansi</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+@push('scripts')
+<script>
+(function () {
+  var root = document.getElementById('agPpf');
+  if (!root) return;
+  var TIERS = @json($tiers);
+  var HEAL = { instant: 'Instan Self Healing', heat: 'Heat Self Healing' };
+  var cur = TIERS[{{ $start }}];
+  var stage = document.getElementById('agPpfStage');
+  var bare = stage.querySelector('[data-pane="bare"]'), film = stage.querySelector('[data-pane="film"]');
+  var bareG = bare.querySelector('.strokes'), filmG = film.querySelector('.strokes');
+  var q = function (s) { return root.querySelector(s); };
+  var NS = 'http://www.w3.org/2000/svg';
+  var strokes = []; // { filmPath }
+
+  function hint() {
+    q('[data-hint]').textContent = cur.heal === 'instant'
+      ? 'Instan Self Healing: goresan ringan di sisi kanan pulih sendiri tanpa panas.'
+      : 'Heat Self Healing: goresan di sisi kanan pulih setelah film diberi panas. Tekan "Beri panas".';
+    q('[data-act="heat"]').hidden = cur.heal === 'instant';
+  }
+
+  function render() {
+    q('[data-i="title"]').textContent = cur.name + ' ' + (cur.finish === 'Matte' ? '(doff)' : '(glossy)');
+    q('[data-i="finish"]').textContent = cur.finish;
+    q('[data-i="heal"]').textContent = HEAL[cur.heal];
+    q('[data-i="warranty"]').textContent = cur.warranty;
+    q('[data-i="urethane"]').textContent = cur.urethane;
+    q('[data-i="mils"]').textContent = cur.mils;
+    q('[data-i="best"]').textContent = cur.best;
+    q('[data-tier-tag]').textContent = cur.name;
+    stage.classList.toggle('is-matte', cur.finish === 'Matte');
+    [bare, film].forEach(function (p) { p.querySelector('.paint').setAttribute('fill', cur.finish === 'Matte' ? 'url(#ppfMatte)' : 'url(#ppfPaint)'); });
+    q('[data-ppf-wa]').href = root.getAttribute('data-wa') + '?text=' + encodeURIComponent('Halo ACEGARD, saya mencoba simulator PPF dan tertarik dengan ' + cur.name + ' (' + HEAL[cur.heal] + ', garansi ' + cur.warranty + '). Mohon penawarannya.');
+    hint();
+  }
+
+  function pathD(pts) { return pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' '); }
+
+  function addStroke(pts) {
+    var d = pathD(pts), mk = function (g) {
+      var s = document.createElementNS(NS, 'path');
+      s.setAttribute('d', d); s.setAttribute('class', 'sc'); g.appendChild(s); return s;
+    };
+    mk(bareG);
+    var fp = mk(filmG);
+    var item = { el: fp, healed: false };
+    strokes.push(item);
+    if (cur.heal === 'instant') setTimeout(function () { heal(item); }, 700);
+    return item;
+  }
+  function heal(item) { if (!item.healed) { item.healed = true; item.el.classList.add('is-healed'); } }
+
+  function point(e, pane) {
+    var r = pane.getBoundingClientRect();
+    return [(e.clientX - r.left) / r.width * 400, (e.clientY - r.top) / r.height * 320];
+  }
+  var drawing = null;
+  stage.addEventListener('pointerdown', function (e) {
+    var pane = e.target.closest('.ag-ppf-pane'); if (!pane) return;
+    stage.setPointerCapture(e.pointerId);
+    drawing = { pane: pane, pts: [point(e, pane)] };
+  });
+  stage.addEventListener('pointermove', function (e) {
+    if (!drawing) return;
+    drawing.pts.push(point(e, drawing.pane));
+    if (drawing.live) { var d = pathD(drawing.pts); drawing.live[0].setAttribute('d', d); drawing.live[1].setAttribute('d', d); }
+    else {
+      var a = document.createElementNS(NS, 'path'), b = document.createElementNS(NS, 'path');
+      a.setAttribute('class', 'sc'); b.setAttribute('class', 'sc');
+      bareG.appendChild(a); filmG.appendChild(b); drawing.live = [a, b];
+    }
+  });
+  function end() {
+    if (!drawing) return;
+    if (drawing.live) {
+      var item = { el: drawing.live[1], healed: false };
+      strokes.push(item);
+      if (cur.heal === 'instant') setTimeout(function () { heal(item); }, 700);
+    }
+    drawing = null;
+  }
+  ['pointerup', 'pointercancel'].forEach(function (n) { stage.addEventListener(n, end); });
+
+  q('[data-act="auto"]').addEventListener('click', function () {
+    [[[40, 70], [180, 120], [330, 96]], [[60, 200], [210, 238], [350, 214]], [[120, 40], [150, 160], [130, 290]], [[250, 30], [290, 150], [330, 280]]].forEach(function (pts, i) {
+      setTimeout(function () { addStroke(pts); }, i * 180);
+    });
+  });
+  q('[data-act="heat"]').addEventListener('click', function () {
+    film.classList.add('is-warm');
+    setTimeout(function () { strokes.forEach(heal); }, 700);
+    setTimeout(function () { film.classList.remove('is-warm'); }, 1800);
+  });
+  q('[data-act="reset"]').addEventListener('click', function () {
+    bareG.innerHTML = ''; filmG.innerHTML = ''; strokes = []; film.classList.remove('is-warm');
+  });
+
+  root.addEventListener('change', function (e) {
+    if (e.target.name !== 'tier') return;
+    cur = TIERS[Number(e.target.value)];
+    root.querySelectorAll('.ag-chip').forEach(function (c) { c.classList.toggle('is-on', c.querySelector('input').checked); });
+    bareG.innerHTML = ''; filmG.innerHTML = ''; strokes = [];
+    render();
+  });
+
+  render();
+})();
+</script>
+@endpush
 
 @endsection

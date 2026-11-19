@@ -114,6 +114,26 @@ class FilmCatalog
         ];
     }
 
+    /**
+     * Tingkat Paint Protection Film. Sumber: daftar paket PPF ACEGARD. Harga sengaja tidak dimuat.
+     * "heal" bernilai instant atau heat: menentukan perilaku di simulator goresan.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function ppf(): array
+    {
+        $t = fn ($name, $finish, $heal, $warranty, $urethane, $mils, $best) =>
+            compact('name', 'finish', 'heal', 'warranty', 'urethane', 'mils', 'best');
+
+        return [
+            $t('ARMOR',       'Glossy', 'heat',    '5 tahun', 'Lubrizol Mix Grade',    '7,5 mils', 'Perlindungan harian'),
+            $t('ARMOR PLUS',  'Glossy', 'heat',    '7 tahun', 'Lubrizol Mix Grade',    '8,5 mils', 'Perlindungan harian'),
+            $t('AEGIS',       'Glossy', 'instant', '8 tahun', 'Lubrizol Estane Grade', '7,5 mils', 'Perlindungan maksimal'),
+            $t('AEGIS MAX +', 'Glossy', 'instant', '8 tahun', 'Lubrizol Estane Grade', '8,5 mils', 'Perlindungan maksimal'),
+            $t('MATTE',       'Matte',  'heat',    '5 tahun', 'Lubrizol Mix Grade',    '7,5 mils', 'Perlindungan harian'),
+        ];
+    }
+
     /** @return array<string, string> warna film => kode hex untuk titik warna */
     public static function swatch(): array
     {

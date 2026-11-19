@@ -133,4 +133,20 @@ class FrontendRedesignHomeTest extends TestCase
         $this->assertStringNotContainsString('Rp.', $res->getContent());
         $this->assertStringNotContainsString('230.000', $res->getContent());
     }
+
+    public function test_halaman_ppf_menampilkan_lima_tingkat_dan_simulator_goresan(): void
+    {
+        $res = $this->get(route('frontend.ppf.catalog'))->assertOk()
+            ->assertSee('ag-nav', false)
+            ->assertSee('agPpf', false)
+            ->assertSee('ARMOR PLUS')->assertSee('AEGIS MAX +')->assertSee('MATTE')
+            ->assertSee('Lubrizol Estane Grade')->assertSee('8,5 mils')
+            ->assertSee('Instan Self Healing');
+
+        // harga tidak ditampilkan; klaim garansi 6-8 tahun dari poster lama tidak dipakai
+        $this->assertStringNotContainsString('Rp.', $res->getContent());
+        $this->assertStringNotContainsString('Rp ', $res->getContent());
+        $this->assertStringNotContainsString('6 - 8 Tahun', $res->getContent());
+        $this->assertCount(5, \App\Support\FilmCatalog::ppf());
+    }
 }
