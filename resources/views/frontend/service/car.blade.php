@@ -62,7 +62,7 @@
         ['mdi:white-balance-sunny',  'Tolak panas', 'Penolakan inframerah 99% pada 900 nm dan 1400 nm. TSER mencapai 95% pada varian tergelap.'],
         ['mdi:shield-sun-outline',   'Tolak sinar UV', 'UV Rejection 99,9% pada semua varian, melindungi kulit dan interior dari pudar.'],
         ['mdi:weather-night',        'Night Vision', 'Seri NOTCH UV400 dilengkapi Night Vision untuk menjaga detail jalan di cahaya rendah.'],
-        ['mdi:eye-off-outline',      'Privasi kabin', 'Pilihan VLT dari 71% sampai 4% untuk mengatur seberapa terlihat kabin dari luar.'],
+        ['mdi:eye-off-outline',      'Privasi kabin', 'Pilihan VLT dari 71% sampai 3% untuk mengatur seberapa terlihat kabin dari luar.'],
         ['mdi:signal',               'Sinyal tetap lancar', 'Lapisan Nano Ceramic non-metal tidak mengganggu sinyal seluler, WiFi, dan GPS.'],
         ['mdi:car-cog',              'Pemasangan profesional', 'Dipasang teknisi ACEGARD di workshop Cipondoh, Tangerang, lengkap dengan garansi.'],
       ] as [$icon, $title, $desc])

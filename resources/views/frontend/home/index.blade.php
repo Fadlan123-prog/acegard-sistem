@@ -262,11 +262,11 @@
       <a class="ag-btn ag-btn-primary" href="{{ route('frontend.simulator') }}">Coba Simulator</a>
     </div>
     <div class="ag-reveal">
-      <div class="ag-sim-stage" id="agHomeSim" style="--tint-front: .70; --tint-side: .70;">
+      <div class="ag-sim-stage" id="agHomeSim" style="--tint-front: .68; --tint-side: .68;">
         @include('frontend.partials.sim-car')
         <div class="ag-chips is-live" role="radiogroup" aria-label="Pilih VLT kaca film">
-          @foreach ([71, 51, 30, 18, 6] as $v)
-            <label class="ag-chip {{ $v === 30 ? 'is-on' : '' }}"><input type="radio" name="homevlt" value="{{ $v }}" class="visually-hidden" {{ $v === 30 ? 'checked' : '' }}><span>{{ $v }}%</span></label>
+          @foreach ([71, 49, 32, 15, 6] as $v)
+            <label class="ag-chip {{ $v === 32 ? 'is-on' : '' }}"><input type="radio" name="homevlt" value="{{ $v }}" class="visually-hidden" {{ $v === 32 ? 'checked' : '' }}><span>{{ $v }}%</span></label>
           @endforeach
         </div>
       </div>

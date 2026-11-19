@@ -100,12 +100,12 @@ class FrontendRedesignHomeTest extends TestCase
             ->assertSee('Tanpa film');
 
         // semua VLT unik dari lembar spesifikasi tersedia sebagai pilihan
-        foreach ([71, 68, 51, 34, 30, 25, 18, 16, 10, 6, 4] as $vlt) {
+        foreach ([71, 68, 49, 34, 32, 25, 22, 15, 11, 6, 5, 3] as $vlt) {
             $res->assertSee('value="' . $vlt . '"', false);
         }
 
-        // dua varian berbagi VLT 4%, keduanya harus ikut terkirim ke skrip
-        $res->assertSee('AP05')->assertSee('AP02')->assertSee('NV72');
+        // varian dengan VLT 6% (BM05 dan NV05) berbagi satu pilihan, keduanya harus ikut terkirim ke skrip
+        $res->assertSee('BM05')->assertSee('NV05')->assertSee('AP02')->assertSee('NV70');
     }
 
     public function test_katalog_film_konsisten_untuk_13_varian(): void
@@ -114,7 +114,7 @@ class FrontendRedesignHomeTest extends TestCase
 
         $this->assertCount(13, $variants);
         $this->assertSame(71, (int) $variants->first()['vlt']);
-        $this->assertSame(4, (int) $variants->last()['vlt']);
+        $this->assertSame(3, (int) $variants->last()['vlt']);
     }
 
     public function test_halaman_gedung_menampilkan_19_varian_dan_simulator_jendela(): void

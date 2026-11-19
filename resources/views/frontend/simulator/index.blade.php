@@ -6,7 +6,7 @@
 @endphp
 
 @section('title', 'Simulator Kaca Film Mobil - Acegard Indonesia')
-@section('meta_description', 'Coba tingkat kegelapan kaca film mobil ACEGARD. Pilih VLT 71% sampai 4% untuk kaca depan dan kaca samping, lihat varian yang cocok, lalu konsultasikan lewat WhatsApp.')
+@section('meta_description', 'Coba tingkat kegelapan kaca film mobil ACEGARD. Pilih VLT 71% sampai 3% untuk kaca depan dan kaca samping, lihat varian yang cocok, lalu konsultasikan lewat WhatsApp.')
 @section('body-class', 'ag-page')
 
 @section('content')
@@ -25,7 +25,7 @@
     ->sortKeysDesc();
 
   $steps = $byVlt->keys()->all();      // 71, 68, 51, ... 4
-  $start = 30;                          // pilihan awal
+  $start = 32;                          // pilihan awal
   $tint  = fn ($vlt) => number_format(min(.96, 1 - $vlt / 100), 2, '.', '');
 
 @endphp
@@ -101,7 +101,7 @@
     <div class="ag-grid c3">
       @foreach ([
         ['mdi:brightness-6', 'VLT menunjukkan cahaya yang lolos', 'VLT 70% berarti 70% cahaya tampak menembus film. VLT 5% berarti hanya 5% yang menembus, sehingga kabin terlihat sangat gelap dari luar.'],
-        ['mdi:white-balance-sunny', 'Gelap tidak selalu lebih sejuk', 'Penolakan panas ditentukan teknologi filmnya. Varian terang seperti NV72 (VLT 71%) tetap menolak inframerah 99%. Lihat angka TSER di tiap varian.'],
+        ['mdi:white-balance-sunny', 'Gelap tidak selalu lebih sejuk', 'Penolakan panas ditentukan teknologi filmnya. Varian terang seperti NV70 (VLT 71%) tetap menolak inframerah 99%. Lihat angka TSER di tiap varian.'],
         ['mdi:scale-balance', 'Perhatikan aturan setempat', 'Tingkat kegelapan kaca depan dan kaca samping bisa diatur regulasi lokal. Tim kami membantu memilih VLT yang aman dan nyaman untuk mata Anda.'],
       ] as [$icon, $title, $desc])
         <div class="ag-card ag-feature ag-reveal">
