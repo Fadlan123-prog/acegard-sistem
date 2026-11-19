@@ -58,7 +58,7 @@
 </section>
 
 {{-- ───────── Manfaat ───────── --}}
-<section class="ag-section" aria-labelledby="ag-benefit-title">
+<section class="ag-section" id="manfaat" data-sec="Manfaat" aria-labelledby="ag-benefit-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Benefits</span>
@@ -84,7 +84,7 @@
 </section>
 
 {{-- ───────── Seri & spesifikasi ───────── --}}
-<section class="ag-section alt" id="seri" aria-labelledby="ag-series-title">
+<section class="ag-section alt" id="seri" data-sec="Seri" aria-labelledby="ag-series-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Series &amp; Specification</span>
@@ -184,7 +184,7 @@
 </section>
 
 {{-- ───────── FAQ ───────── --}}
-<section class="ag-section" aria-labelledby="ag-carfaq-title">
+<section class="ag-section" id="faq" data-sec="FAQ" aria-labelledby="ag-carfaq-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">FAQ</span>

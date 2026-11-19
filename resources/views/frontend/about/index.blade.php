@@ -51,7 +51,7 @@
 </section>
 
 {{-- ───────── Teknologi ───────── --}}
-<section class="ag-section" aria-labelledby="ag-tech-title">
+<section class="ag-section" id="teknologi" data-sec="Teknologi" aria-labelledby="ag-tech-title">
   <div class="ag-container ag-split">
     <div class="ag-reveal">
       <span class="ag-eyebrow">Technology</span>
@@ -88,7 +88,7 @@
 </section>
 
 {{-- ───────── Night Vision ───────── --}}
-<section class="ag-section" aria-labelledby="ag-night-title">
+<section class="ag-section" id="night-vision" data-sec="Night Vision" aria-labelledby="ag-night-title">
   <div class="ag-container">
     <div class="ag-grid c2 ag-reveal" style="margin-bottom:40px">
       <figure class="ag-shot" style="aspect-ratio:4/3"><img src="{{ $img('gallery-view.webp') }}" width="1000" height="700" loading="lazy" alt="Pemandangan dari balik kaca film ACEGARD"></figure>
@@ -118,7 +118,7 @@
 </section>
 
 {{-- ───────── Mengapa ACEGARD ───────── --}}
-<section class="ag-section" aria-labelledby="ag-why-title">
+<section class="ag-section" id="alasan" data-sec="Alasan" aria-labelledby="ag-why-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Why ACEGARD</span>
@@ -160,7 +160,7 @@
 </section>
 
 {{-- ───────── Klien dan mitra ───────── --}}
-<section class="ag-section" aria-labelledby="ag-client-title">
+<section class="ag-section" id="klien" data-sec="Klien" aria-labelledby="ag-client-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Clients</span>

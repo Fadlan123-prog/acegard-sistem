@@ -47,6 +47,7 @@
     <div class="ag-footer-bottom">
       <span>Copyright {{ date('Y') }} - ACEGARD, All Rights Reserved</span>
       <span>Tangerang, Indonesia</span>
+      <button type="button" class="ag-motion-toggle" data-motion-toggle aria-pressed="false">Animasi: nyala</button>
     </div>
   </div>
 </footer>

@@ -330,4 +330,59 @@ class FrontendRedesignHomeTest extends TestCase
             }
         }
     }
+
+    public function test_animasi_scroll_terpasang_dan_konten_tetap_ada_tanpa_js(): void
+    {
+        $home = $this->get(route('frontend.home'))->assertOk()->getContent();
+
+        // pustaka dengan SRI, berkas sendiri, dan penjaga kilatan (dipasang JS, bukan server)
+        $this->assertStringContainsString('gsap/3.12.5/gsap.min.js', $home);
+        $this->assertStringContainsString('gsap/3.12.5/ScrollTrigger.min.js', $home);
+        $this->assertSame(2, substr_count($home, 'integrity="sha384-'));
+        $this->assertStringContainsString('assets/frontend/js/ag-motion.js', $home);
+        $this->assertStringContainsString('assets/frontend/css/ag-motion.css', $home);
+        $this->assertStringContainsString("classList.add('ag-m-wait')", $home);
+        $this->assertStringNotContainsString('<html lang="id" class="ag-m-wait"', $home);
+
+        // pernyataan, layanan sticky (3 item + 3 visual), expertise horizontal (3 panel), dari katalog
+        $this->assertSame(3, substr_count($home, 'data-statement'));
+        $this->assertStringContainsString('data-ps', $home);
+        $this->assertSame(3, substr_count($home, 'class="ag-ps-item"'));
+        $this->assertSame(3, substr_count($home, 'class="ag-ps-img"'));
+        $this->assertStringContainsString('data-hs', $home);
+        $this->assertSame(3, substr_count($home, 'class="ag-hs-panel"'));
+        $this->assertStringContainsString('13 varian', $home);
+        $this->assertStringContainsString('19 varian', $home);
+        $this->assertStringContainsString('5 tingkat', $home);
+
+        // konten layanan tetap ada di HTML (tanpa JS): teks dan tautan
+        foreach (['Automotive', 'Building', 'Paint', route('frontend.service.car'), route('frontend.service.building'), route('frontend.ppf.catalog')] as $needle) {
+            $this->assertStringContainsString($needle, $home);
+        }
+
+        // tombol matikan animasi di footer
+        $this->assertStringContainsString('data-motion-toggle', $home);
+
+        // cerita PPF: 3 tahap, satu ilustrasi di panggung dan satu per tahap
+        $ppf = $this->get(route('frontend.ppf.catalog'))->getContent();
+        $this->assertStringContainsString('data-story', $ppf);
+        $this->assertSame(3, substr_count($ppf, 'class="ag-story-item"'));
+        $this->assertSame(4, substr_count($ppf, 'class="ag-story-art"'));
+        foreach (['Original', 'Protection', 'Final'] as $w) {
+            $this->assertStringContainsString($w, $ppf);
+        }
+
+        // simulator mobil: pembatas sebelum/sesudah
+        $sim = $this->get(route('frontend.simulator'))->getContent();
+        $this->assertStringContainsString('id="agSimRange"', $sim);
+        $this->assertStringContainsString('ag-sim-tint', $sim);
+        $this->assertStringContainsString('id="agSimCar"', $sim);
+
+        // halaman iklan tidak memuat animasi baru
+        foreach (['/kaca-film-mobil', '/promo/kaca-film-mobil'] as $url) {
+            $ad = $this->get($url)->assertOk()->getContent();
+            $this->assertStringNotContainsString('ag-motion', $ad, $url);
+            $this->assertStringNotContainsString('gsap', $ad, $url);
+        }
+    }
 }

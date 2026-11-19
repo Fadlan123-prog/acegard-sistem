@@ -45,48 +45,57 @@
   </div>
 </section>
 
-{{-- ───────── Layanan ───────── --}}
-<section class="ag-section" id="layanan" aria-labelledby="ag-services-title">
+{{-- ───────── Pernyataan ───────── --}}
+<section class="ag-statement" aria-label="Pernyataan ACEGARD">
+  <div class="ag-container">
+    <p data-statement>Beyond <b>protection.</b></p>
+    <p data-statement>Engineered for <b>clarity.</b></p>
+    <p data-statement>Comfort meets <b>performance.</b></p>
+    <small>Teknologi Nano Ceramic untuk kabin yang sejuk, ruangan yang hemat energi, dan cat yang terlindungi.</small>
+  </div>
+</section>
+
+{{-- ───────── Layanan: visual sticky, konten berganti mengikuti scroll (desktop) ───────── --}}
+@php
+  $services = [
+    ['Automotive <b>Window Film</b>', 'service-otomotif.webp', 'Kaca film mobil', 'Kaca depan, samping, belakang, dan sunroof. Menolak panas dan sinar UV, mengurangi silau, dan menjaga privasi kabin dengan pilihan VLT.', ['Tolak panas & UV', 'Anti silau', 'Privasi'], route('frontend.service.car'), 'Lihat kaca film mobil'],
+    ['Building <b>Window Film</b>', 'service-bangunan.webp', 'Kaca film gedung dan bangunan', 'Rumah, kantor, hotel, dan gedung komersial. Menurunkan panas dari jendela, meringankan kerja AC, dan melindungi interior dari pudar.', ['Hemat energi AC', 'Interior awet', 'Privasi'], route('frontend.service.building'), 'Lihat kaca film gedung'],
+    ['Paint <b>Protection Film</b>', 'service-ppf.webp', 'Paint Protection Film pada mobil', 'Lapisan transparan yang melindungi cat dari goresan halus, kotoran, dan paparan lingkungan. Pilihan tampilan Gloss dan Matte.', ['Perlindungan cat', 'Gloss & Matte', 'Beberapa seri'], route('frontend.ppf.catalog'), 'Lihat seri PPF'],
+  ];
+@endphp
+<section class="ag-section" id="layanan" data-sec="Layanan" data-ps aria-labelledby="ag-services-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Our Services</span>
       <h2 class="ag-h2" id="ag-services-title">Tiga layanan <b>utama ACEGARD</b></h2>
       <p class="ag-lead">Setiap layanan punya pilihan produk berbeda. Pilih sesuai kebutuhan, lalu konsultasikan tipe film yang paling cocok dengan tim kami.</p>
     </div>
-    <div class="ag-grid c3">
-      <a class="ag-card ag-reveal" href="{{ route('frontend.service.car') }}">
-        <span class="ag-card-media"><img src="{{ $img('service-otomotif.webp') }}" width="1100" height="488" loading="lazy" alt="Kaca film mobil"></span>
-        <span class="ag-card-body">
-          <h3>Automotive Window Film</h3>
-          <p>Kaca depan, samping, belakang, dan sunroof. Menolak panas dan sinar UV, mengurangi silau, dan menjaga privasi kabin dengan pilihan VLT.</p>
-          <ul class="ag-pills"><li class="ag-pill">Tolak panas &amp; UV</li><li class="ag-pill">Anti silau</li><li class="ag-pill">Privasi</li></ul>
-          <span class="ag-card-foot"><span class="ag-link">Lihat kaca film mobil</span><span class="ag-arrow" aria-hidden="true"><iconify-icon icon="mdi:arrow-right"></iconify-icon></span></span>
-        </span>
-      </a>
-      <a class="ag-card ag-reveal" href="{{ route('frontend.service.building') }}">
-        <span class="ag-card-media"><img src="{{ $img('service-bangunan.webp') }}" width="1100" height="488" loading="lazy" alt="Kaca film gedung dan bangunan"></span>
-        <span class="ag-card-body">
-          <h3>Building Window Film</h3>
-          <p>Rumah, kantor, hotel, dan gedung komersial. Menurunkan panas dari jendela, meringankan kerja AC, dan melindungi interior dari pudar.</p>
-          <ul class="ag-pills"><li class="ag-pill">Hemat energi AC</li><li class="ag-pill">Interior awet</li><li class="ag-pill">Privasi</li></ul>
-          <span class="ag-card-foot"><span class="ag-link">Lihat kaca film gedung</span><span class="ag-arrow" aria-hidden="true"><iconify-icon icon="mdi:arrow-right"></iconify-icon></span></span>
-        </span>
-      </a>
-      <a class="ag-card ag-reveal" href="{{ route('frontend.ppf.catalog') }}">
-        <span class="ag-card-media"><img src="{{ $img('service-ppf.webp') }}" width="1100" height="488" loading="lazy" alt="Paint Protection Film pada mobil"></span>
-        <span class="ag-card-body">
-          <h3>Paint Protection Film</h3>
-          <p>Lapisan transparan yang melindungi cat dari goresan halus, kotoran, dan paparan lingkungan. Pilihan tampilan Gloss dan Matte.</p>
-          <ul class="ag-pills"><li class="ag-pill">Perlindungan cat</li><li class="ag-pill">Gloss &amp; Matte</li><li class="ag-pill">Beberapa seri</li></ul>
-          <span class="ag-card-foot"><span class="ag-link">Lihat seri PPF</span><span class="ag-arrow" aria-hidden="true"><iconify-icon icon="mdi:arrow-right"></iconify-icon></span></span>
-        </span>
-      </a>
+    <div class="ag-ps-grid">
+      <div class="ag-ps-stage" aria-hidden="true">
+        @foreach ($services as [$title, $file, $alt])
+          <figure class="ag-ps-img"><img src="{{ $img($file) }}" width="1100" height="488" loading="lazy" alt=""></figure>
+        @endforeach
+        <div class="ag-ps-num"><span><b>01</b></span><i>/ {{ str_pad(count($services), 2, '0', STR_PAD_LEFT) }}</i></div>
+        <div class="ag-ps-bar"><i></i></div>
+      </div>
+      <ol class="ag-ps-list">
+        @foreach ($services as $i => [$title, $file, $alt, $desc, $pills, $href, $cta])
+          <li class="ag-ps-item">
+            <figure class="ag-ps-inline"><img src="{{ $img($file) }}" width="1100" height="488" loading="lazy" alt="{{ $alt }}"></figure>
+            <span class="ag-ps-no">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</span>
+            <h3>{!! $title !!}</h3>
+            <p>{{ $desc }}</p>
+            <ul class="ag-pills">@foreach ($pills as $p)<li class="ag-pill">{{ $p }}</li>@endforeach</ul>
+            <a class="ag-link" href="{{ $href }}">{{ $cta }} <iconify-icon icon="mdi:arrow-right" aria-hidden="true"></iconify-icon></a>
+          </li>
+        @endforeach
+      </ol>
     </div>
   </div>
 </section>
 
 {{-- ───────── Produk kaca film mobil ───────── --}}
-<section class="ag-section alt" id="produk" aria-labelledby="ag-prod-title">
+<section class="ag-section alt" id="produk" data-sec="Produk" aria-labelledby="ag-prod-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Our Products</span>
@@ -116,6 +125,44 @@
     </div>
     <p class="ag-center ag-reveal" style="margin-top:36px"><a class="ag-btn ag-btn-primary" href="{{ route('frontend.service.car') }}">Lihat Spesifikasi Lengkap</a></p>
   </div>
+</section>
+
+{{-- ───────── Expertise: geser horizontal (pin di desktop, swipe native di mobile) ───────── --}}
+@php
+  $nCar = \App\Support\FilmCatalog::variants()->count();
+  $nBld = collect(\App\Support\FilmCatalog::architectural())->sum(fn ($x) => count($x['variants']));
+  $nPpf = count(\App\Support\FilmCatalog::ppf());
+  $expertise = [
+    ['Automotive <b>Film</b>', 'gallery-install.webp', 'Teknisi memasang kaca film pada jendela mobil', 'Tiga seri film dengan teknologi Nano Ceramic, dari tampilan jernih sampai gelap.', ['3 seri', $nCar . ' varian', 'VLT 71% sampai 3%'], route('frontend.service.car')],
+    ['Building <b>Film</b>', 'gallery-gedung.webp', 'Gedung bertingkat dengan kaca film', 'Kaca film arsitektural untuk rumah, kantor, dan gedung dengan pilihan privasi dan penolakan panas.', ['4 seri', $nBld . ' varian', 'Garansi 3 sampai 7 tahun'], route('frontend.service.building')],
+    ['Paint Protection <b>Film</b>', 'service-ppf.webp', 'Mobil dengan Paint Protection Film', 'PPF dengan urethane Lubrizol dan teknologi self healing untuk melindungi cat kendaraan.', [$nPpf . ' tingkat', 'Garansi 5 sampai 8 tahun', 'Glossy dan Matte'], route('frontend.ppf.catalog')],
+  ];
+@endphp
+<section class="ag-hs" id="keahlian" data-sec="Keahlian" data-hs aria-labelledby="ag-exp-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">Our Expertise</span>
+      <h2 class="ag-h2" id="ag-exp-title">Keahlian ACEGARD <b>di tiga bidang</b></h2>
+      <p class="ag-lead">Geser untuk melihat semuanya. Setiap bidang punya seri, spesifikasi, dan garansinya sendiri.</p>
+    </div>
+  </div>
+  <div class="ag-hs-viewport" tabindex="0" role="region" aria-label="Keahlian ACEGARD, geser ke samping untuk melihat semua">
+    <div class="ag-hs-track">
+      @foreach ($expertise as $i => [$title, $file, $alt, $desc, $facts, $href])
+        <article class="ag-hs-panel">
+          <figure class="ag-hs-fig"><img src="{{ $img($file) }}" width="1000" height="700" loading="lazy" alt="{{ $alt }}"></figure>
+          <div>
+            <span class="ag-hs-no">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</span>
+            <h3 style="margin:6px 0 10px">{!! $title !!}</h3>
+            <p style="margin-bottom:14px">{{ $desc }}</p>
+            <ul class="ag-hs-facts" style="margin-bottom:18px">@foreach ($facts as $f)<li>{{ $f }}</li>@endforeach</ul>
+            <a class="ag-link" href="{{ $href }}">Lihat selengkapnya <iconify-icon icon="mdi:arrow-right" aria-hidden="true"></iconify-icon></a>
+          </div>
+        </article>
+      @endforeach
+    </div>
+  </div>
+  <div class="ag-hs-progress" aria-hidden="true"><i></i></div>
 </section>
 
 {{-- ───────── Why ACEGARD ───────── --}}
@@ -152,7 +199,7 @@
 </section>
 
 {{-- ───────── About ───────── --}}
-<section class="ag-section alt" id="tentang" aria-labelledby="ag-about-title">
+<section class="ag-section alt" id="tentang" data-sec="Tentang" aria-labelledby="ag-about-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal" style="margin-bottom:28px">
       <span class="ag-eyebrow">About ACEGARD</span>
@@ -174,7 +221,7 @@
 </section>
 
 {{-- ───────── Technology ───────── --}}
-<section class="ag-section" id="teknologi" aria-labelledby="ag-tech-title">
+<section class="ag-section" id="teknologi" data-sec="Teknologi" aria-labelledby="ag-tech-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Technology</span>
@@ -209,7 +256,7 @@
 </section>
 
 {{-- ───────── Galeri ───────── --}}
-<section class="ag-section alt" aria-labelledby="ag-gal-title">
+<section class="ag-section alt" id="galeri" data-sec="Galeri" aria-labelledby="ag-gal-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Gallery</span>
@@ -258,7 +305,7 @@
 </section>
 
 {{-- ───────── Simulator ───────── --}}
-<section class="ag-section tint" aria-labelledby="ag-sim-title">
+<section class="ag-section tint" id="simulator" data-sec="Simulator" aria-labelledby="ag-sim-title">
   <div class="ag-container ag-split">
     <div class="ag-reveal">
       <span class="ag-eyebrow">Interactive Experience</span>
@@ -302,7 +349,7 @@
 </section>
 
 {{-- ───────── FAQ ───────── --}}
-<section class="ag-section alt" id="faq" aria-labelledby="ag-faq-title">
+<section class="ag-section alt" id="faq" data-sec="FAQ" aria-labelledby="ag-faq-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">FAQ</span>

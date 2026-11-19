@@ -58,7 +58,7 @@
 </section>
 
 {{-- ───────── Simulator jendela ───────── --}}
-<section class="ag-section" id="simulator" style="padding-top:48px" aria-labelledby="ag-win-title">
+<section class="ag-section" id="simulator" data-sec="Simulator" style="padding-top:48px" aria-labelledby="ag-win-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Window Simulator</span>
@@ -181,7 +181,7 @@
 </section>
 
 {{-- ───────── Manfaat ───────── --}}
-<section class="ag-section alt" aria-labelledby="ag-bben-title">
+<section class="ag-section alt" id="manfaat" data-sec="Manfaat" aria-labelledby="ag-bben-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Benefits</span>
@@ -207,7 +207,7 @@
 </section>
 
 {{-- ───────── Seri & spesifikasi ───────── --}}
-<section class="ag-section" id="seri" aria-labelledby="ag-bser-title">
+<section class="ag-section" id="seri" data-sec="Seri" aria-labelledby="ag-bser-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Series &amp; Specification</span>
@@ -272,7 +272,7 @@
 </section>
 
 {{-- ───────── FAQ ───────── --}}
-<section class="ag-section" aria-labelledby="ag-bfaq-title">
+<section class="ag-section" id="faq" data-sec="FAQ" aria-labelledby="ag-bfaq-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">FAQ</span>

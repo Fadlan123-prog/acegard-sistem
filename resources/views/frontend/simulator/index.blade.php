@@ -46,10 +46,14 @@
 {{-- ───────── Simulator ───────── --}}
 <section class="ag-section" style="padding-top:24px" aria-label="Simulator VLT">
   <div class="ag-container">
-    <div class="ag-sim" id="agSim" data-wa="{{ Whatsapp::url() }}" style="--tint-front: {{ $tint($start) }}; --tint-side: {{ $tint($start) }};">
+    <div class="ag-sim" id="agSim" data-wa="{{ Whatsapp::url() }}" style="--tint-front: {{ $tint($start) }}; --tint-side: {{ $tint($start) }}; --split: 50%;">
 
       <div class="ag-sim-view">
-        @include('frontend.partials.sim-car')
+        @include('frontend.partials.sim-car', ['split' => true])
+        <label class="ag-win-range" style="margin-top:14px">
+          <span class="visually-hidden">Geser untuk membandingkan sebelum dan sesudah dipasang film</span>
+          <input type="range" id="agSimRange" min="0" max="100" value="50">
+        </label>
         <ul class="ag-sim-readout" aria-live="polite">
           <li><span>Kaca depan</span><b data-out="front">{{ $start }}%</b></li>
           <li><span>Kaca samping</span><b data-out="side">{{ $start }}%</b></li>
@@ -149,6 +153,7 @@
     root.style.setProperty('--tint-side', tint(state.side));
     q('[data-out="front"]').textContent = label(state.front);
     q('[data-out="side"]').textContent = label(state.side);
+    var stag = document.querySelector('[data-split-tag]'); if (stag) stag.textContent = state.side >= 100 ? 'Tanpa film' : 'Film ' + state.side + '%';
 
     // varian untuk kaca yang sedang dipilih (untuk "semua kaca" dipakai kaca samping)
     var active = state.target === 'front' ? state.front : state.side;
@@ -201,6 +206,18 @@
     }
     syncChips(); render(true);
   });
+
+  // Pembatas sebelum/sesudah: geser di gambar atau lewat slider
+  var car = document.getElementById('agSimCar'), range = document.getElementById('agSimRange');
+  function setSplit(p) { p = Math.max(0, Math.min(100, p)); root.style.setProperty('--split', p + '%'); if (range) range.value = p; }
+  if (range) range.addEventListener('input', function () { setSplit(Number(range.value)); });
+  if (car) {
+    var drag = false;
+    var pos = function (e) { var r = car.getBoundingClientRect(); setSplit((e.clientX - r.left) / r.width * 100); };
+    car.addEventListener('pointerdown', function (e) { drag = true; car.setPointerCapture(e.pointerId); pos(e); });
+    car.addEventListener('pointermove', function (e) { if (drag) pos(e); });
+    ['pointerup', 'pointercancel'].forEach(function (n) { car.addEventListener(n, function () { drag = false; }); });
+  }
 
   syncChips(); render();
 })();

@@ -48,7 +48,7 @@
 </section>
 
 {{-- ───────── Simulator goresan ───────── --}}
-<section class="ag-section alt" id="simulator" aria-labelledby="ag-scr-title">
+<section class="ag-section alt" id="simulator" data-sec="Simulator" aria-labelledby="ag-scr-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Scratch Simulator</span>
@@ -124,8 +124,42 @@
   </div>
 </section>
 
+{{-- ───────── Cerita produk: tiga tahap (sticky di desktop, bertahap di mobile) ───────── --}}
+@php
+  $story = [
+    ['Original <b>Paint</b>', 'Cat asli kendaraan menerima gesekan, debu, dan percikan kerikil setiap hari. Goresan halus dan bekas kerikil perlahan mengurangi kilap cat.'],
+    ['Protection <b>Layer</b>', 'PPF dipasang sebagai satu lapisan film bening di atas cat. Teknisi ACEGARD memasangnya dengan teliti mengikuti bentuk bodi.'],
+    ['Final <b>Result</b>', 'Cat tetap tampil seperti aslinya dan terlindungi oleh film. Goresan ringan dapat pulih sesuai jenis self healing pada tingkat PPF yang dipilih.'],
+  ];
+@endphp
+<section class="ag-section" id="cerita" data-sec="Cerita" data-story aria-labelledby="ag-story-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">How It Works</span>
+      <h2 class="ag-h2" id="ag-story-title">Dari cat asli <b>ke cat terlindungi</b></h2>
+      <p class="ag-lead">Tiga tahap perlindungan cat dengan PPF. Gambar hanya ilustrasi sederhana, bukan struktur material.</p>
+    </div>
+    <div class="ag-story-grid">
+      <div class="ag-story-stage" data-state="1">
+        @include('frontend.partials.ppf-story-art', ['state' => 1, 'uid' => 'psS'])
+        <div class="ag-story-tags" aria-hidden="true"><span class="t1">Cat asli</span><span class="t2">Lapisan film</span><span class="t3">Hasil akhir</span></div>
+      </div>
+      <ol class="ag-story-list">
+        @foreach ($story as $i => [$title, $desc])
+          <li class="ag-story-item">
+            @include('frontend.partials.ppf-story-art', ['state' => $i + 1, 'uid' => 'psI' . $i])
+            <span class="ag-story-no">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }} / 03</span>
+            <h3>{!! $title !!}</h3>
+            <p>{{ $desc }}</p>
+          </li>
+        @endforeach
+      </ol>
+    </div>
+  </div>
+</section>
+
 {{-- ───────── Manfaat ───────── --}}
-<section class="ag-section" aria-labelledby="ag-pben-title">
+<section class="ag-section alt" id="manfaat" data-sec="Manfaat" aria-labelledby="ag-pben-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Benefits</span>
@@ -176,7 +210,7 @@
     ['Cocok untuk', fn ($t) => $t['best']],
   ];
 @endphp
-<section class="ag-section" id="tingkat" aria-labelledby="ag-ptier-title">
+<section class="ag-section" id="tingkat" data-sec="Spesifikasi" aria-labelledby="ag-ptier-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Specification</span>
@@ -236,7 +270,7 @@
 ])
 
 {{-- ───────── FAQ ───────── --}}
-<section class="ag-section alt" aria-labelledby="ag-pfaq-title">
+<section class="ag-section alt" id="faq" data-sec="FAQ" aria-labelledby="ag-pfaq-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">FAQ</span>

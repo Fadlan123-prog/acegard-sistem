@@ -13,7 +13,7 @@
   $groups = collect($cmp['items'])->groupBy('group');
   $maxPick = 3;
 @endphp
-<section class="ag-section {{ !empty($cmpAlt) ? 'alt' : '' }}" id="bandingkan-{{ $cmpKey }}" aria-labelledby="{{ $uid }}-title">
+<section class="ag-section {{ !empty($cmpAlt) ? 'alt' : '' }}" id="bandingkan-{{ $cmpKey }}" data-sec="Bandingkan" aria-labelledby="{{ $uid }}-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Compare</span>

@@ -22,6 +22,10 @@
   @endif
   @yield('jsonld')
   <script>document.documentElement.classList.add('js');</script>
+  @if (! View::hasSection('hide-navbar'))
+  {{-- Penjaga kilatan animasi: judul disembunyikan sebentar sampai ag-motion.js siap (dilepas otomatis maksimal 2,5 detik) --}}
+  <script>(function(){var r=document.documentElement,off=false;try{off=localStorage.getItem('agMotion')==='off';}catch(e){}var rm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(!off&&!rm){r.classList.add('ag-m-wait');}})();</script>
+  @endif
 
   <link rel="icon" type="image/png" href="{{ asset('assets/images/favicon.png') }}">
 
@@ -49,6 +53,9 @@
   <link rel="stylesheet" href="{{ asset('assets/frontend/home/css/style.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/frontend/css/tokens.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/frontend/css/ag-design.css') }}?v={{ @filemtime(public_path('assets/frontend/css/ag-design.css')) }}">
+  @if (! View::hasSection('hide-navbar'))
+  <link rel="stylesheet" href="{{ asset('assets/frontend/css/ag-motion.css') }}?v={{ @filemtime(public_path('assets/frontend/css/ag-motion.css')) }}">
+  @endif
   @stack('styles')
 </head>
 <body class="@yield('body-class')">
@@ -96,6 +103,13 @@
     setTimeout(function () { els.forEach(show); }, 3000);
   })();
   </script>
+
+  @if (! View::hasSection('hide-navbar'))
+  {{-- Animasi scroll: GSAP + ScrollTrigger (cdnjs, dengan SRI) lalu ag-motion.js. Semua konten tetap tampil bila gagal dimuat. --}}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha384-g4NTh/Iv5PPU4xPyhEWqPcwtNXOvdaDI8LLnyYfyNZOjKJeYQyjzQ9X5275eBjpt" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" integrity="sha384-Z3REaz79l2IaAZqJsSABtTbhjgOUYyV3p90XNnAPCSHg3EMTz1fouunq9WZRtj3d" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+  <script src="{{ asset('assets/frontend/js/ag-motion.js') }}?v={{ @filemtime(public_path('assets/frontend/js/ag-motion.js')) }}" defer></script>
+  @endif
 
   {{-- WhatsApp Click Tracking (GTM dataLayer) --}}
   <script>

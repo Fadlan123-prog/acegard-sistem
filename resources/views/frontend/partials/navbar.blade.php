@@ -37,13 +37,18 @@
   (function () {
     var t = document.getElementById('agNavToggle'), m = document.getElementById('agNavMenu');
     if (!t || !m) return;
-    t.addEventListener('click', function () {
-      var open = m.classList.toggle('is-open');
+    var icon = t.querySelector('iconify-icon');
+    function set(open) {
+      m.classList.toggle('is-open', open);
       t.setAttribute('aria-expanded', open ? 'true' : 'false');
       t.setAttribute('aria-label', open ? 'Tutup menu' : 'Buka menu');
-    });
+      if (icon) icon.setAttribute('icon', open ? 'mdi:close' : 'mdi:menu');
+    }
+    t.addEventListener('click', function () { set(!m.classList.contains('is-open')); });
+    m.addEventListener('click', function (e) { if (e.target.closest('a')) set(false); });
+    document.addEventListener('click', function (e) { if (m.classList.contains('is-open') && !m.contains(e.target) && !t.contains(e.target)) set(false); });
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && m.classList.contains('is-open')) { t.click(); t.focus(); }
+      if (e.key === 'Escape' && m.classList.contains('is-open')) { set(false); t.focus(); }
     });
   })();
 </script>
