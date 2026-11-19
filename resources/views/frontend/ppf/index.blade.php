@@ -145,8 +145,9 @@
 
 {{-- ───────── Perbandingan ───────── --}}
 @php
-  $four = collect($tiers)->filter(fn ($t) => $t['spec'])->values();
+  $four = collect($tiers);
   $specRows = [
+    ['Finish',            fn ($t) => $t['finish']],
     ['Tipe produk',       fn ($t) => 'TPU'],
     ['Warna',             fn ($t) => 'Transparan'],
     ['Ketebalan produk',  fn ($t) => $t['mils']],
@@ -177,7 +178,7 @@
     </div>
     <div class="ag-spec-wrap ag-reveal" tabindex="0" role="region" aria-label="Spesifikasi tingkat PPF">
       <table class="ag-spec">
-        <caption class="visually-hidden">Spesifikasi empat tingkat PPF ACEGARD</caption>
+        <caption class="visually-hidden">Spesifikasi lima tingkat PPF ACEGARD</caption>
         <thead><tr><th scope="col">Spesifikasi</th>@foreach ($four as $t)<th scope="col">{{ $t['name'] }}</th>@endforeach</tr></thead>
         <tbody>
           @foreach ($specRows as [$label, $fn])
@@ -198,7 +199,7 @@
     </div>
     <div class="ag-spec-wrap ag-reveal" tabindex="0" role="region" aria-label="Fitur tingkat PPF">
       <table class="ag-spec">
-        <caption class="visually-hidden">Fitur empat tingkat PPF ACEGARD</caption>
+        <caption class="visually-hidden">Fitur lima tingkat PPF ACEGARD</caption>
         <thead><tr><th scope="col">Fitur</th>@foreach ($four as $t)<th scope="col">{{ $t['name'] }}</th>@endforeach</tr></thead>
         <tbody>
           @foreach ($featRows as [$label, $key])
@@ -216,7 +217,7 @@
         </tbody>
       </table>
     </div>
-    <p class="ag-note ag-center ag-reveal">Butuh PPF doff? Tingkat MATTE (garansi 5 tahun) tersedia. Hubungi tim kami untuk spesifikasi lengkapnya.</p>
+    <p class="ag-note ag-center ag-reveal">MATTE memiliki spesifikasi yang sama dengan ARMOR. Perbedaannya hanya pada tampilan akhir yang doff.</p>
   </div>
 </section>
 
@@ -230,7 +231,7 @@
     <div class="ag-faq ag-reveal">
       @foreach ([
         ['Apa bedanya Instan dan Heat Self Healing?', 'Instan Self Healing memulihkan goresan ringan tanpa bantuan panas. Heat Self Healing memulihkan goresan ringan setelah film terkena panas, misalnya dari sinar matahari atau air hangat. Simulator di atas menunjukkan perbedaannya.'],
-        ['Apa bedanya ARMOR, ARMOR PLUS, AEGIS, AEGIS MAX +, dan MATTE?', 'Perbedaan ada pada jenis self healing, garansi, bahan urethane, dan ketebalan film. ARMOR dan ARMOR PLUS memakai Heat Self Healing dengan garansi 5 dan 7 tahun. AEGIS dan AEGIS MAX + memakai Instan Self Healing dan urethane Lubrizol Estane USA dengan garansi 8 tahun. AEGIS MAX + juga memiliki film paling tebal dan kekuatan sobek tertinggi. MATTE memberi tampilan doff dengan garansi 5 tahun.'],
+        ['Apa bedanya ARMOR, ARMOR PLUS, AEGIS, AEGIS MAX +, dan MATTE?', 'Perbedaan ada pada jenis self healing, garansi, bahan urethane, dan ketebalan film. ARMOR dan ARMOR PLUS memakai Heat Self Healing dengan garansi 5 dan 7 tahun. AEGIS dan AEGIS MAX + memakai Instan Self Healing dan urethane Lubrizol Estane USA dengan garansi 8 tahun. AEGIS MAX + juga memiliki film paling tebal dan kekuatan sobek tertinggi. MATTE memiliki spesifikasi yang sama dengan ARMOR, hanya tampilan akhirnya doff.'],
         ['Apakah PPF mengubah warna cat?', 'PPF ACEGARD berupa film bening yang menjaga tampilan asli cat. Tingkat MATTE sengaja memberi hasil doff.'],
         ['Berapa lama pemasangannya?', 'Pemasangan full body umumnya memerlukan 5 sampai 7 hari kerja. Untuk pemasangan parsial seperti kap mesin dan bumper, tanyakan estimasinya kepada tim kami.'],
         ['Berapa harganya?', 'Harga bergantung pada tipe kendaraan, tingkat PPF, dan cakupan pemasangan. Hubungi kami lewat WhatsApp untuk penawaran.'],

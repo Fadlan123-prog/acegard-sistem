@@ -147,6 +147,13 @@ class FrontendRedesignHomeTest extends TestCase
         $this->assertStringNotContainsString('Rp.', $res->getContent());
         $this->assertStringNotContainsString('Rp ', $res->getContent());
         $this->assertStringNotContainsString('6 - 8 Tahun', $res->getContent());
-        $this->assertCount(5, \App\Support\FilmCatalog::ppf());
+        $tiers = collect(\App\Support\FilmCatalog::ppf())->keyBy('name');
+        $this->assertCount(5, $tiers);
+        // MATTE sama dengan ARMOR kecuali finish
+        $this->assertSame(
+            collect($tiers['ARMOR'])->except(['name', 'finish'])->all(),
+            collect($tiers['MATTE'])->except(['name', 'finish'])->all()
+        );
+        $this->assertSame('Matte', $tiers['MATTE']['finish']);
     }
 }
