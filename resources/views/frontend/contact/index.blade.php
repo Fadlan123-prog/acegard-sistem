@@ -28,7 +28,7 @@
       <h2>Kontak Kami</h2>
       <ul class="ps-0 mb-0 list-unstyled justify-content-center page-breadcrumb d-flex flex-wrap gap-4">
         <li>
-          <a href="index.html">Home</a>
+          <a href="{{ route('frontend.home') }}">Home</a>
         </li>
         <li>
           <span class="active">Kontak</span>
