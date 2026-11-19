@@ -141,6 +141,120 @@ class FilmCatalog
         ];
     }
 
+    /** Ambil angka dari teks spesifikasi, mis. ">280%" => 280, "0,143" => 0.143, "5 tahun" => 5. */
+    public static function num(?string $text): ?float
+    {
+        $n = preg_replace('/[^0-9,.]/', '', (string) $text);
+
+        return $n === '' ? null : (float) str_replace(',', '.', $n);
+    }
+
+    private static function cell(string $text, ?float $n = null): array
+    {
+        return ['t' => $text, 'n' => $n ?? self::num($text)];
+    }
+
+    /**
+     * Data alat perbandingan kaca film mobil.
+     *
+     * @return array{items: array, metrics: array, defaults: array}
+     */
+    public static function compareCar(): array
+    {
+        $items = self::variants()->map(fn ($x) => [
+            'id' => strtolower($x['code']), 'name' => $x['code'], 'group' => $x['series'],
+            'cells' => [
+                'color' => self::cell($x['color'], null),
+                'vlt' => self::cell($x['vlt']), 'dark' => self::cell($x['dark']), 'tser' => self::cell($x['tser']),
+                'ir' => self::cell($x['ir14']), 'uv' => self::cell($x['uv']), 'shgc' => self::cell($x['shgc']),
+            ],
+        ])->sortBy(fn ($i) => $i['group'])->values()->all();
+
+        return [
+            'items' => $items,
+            'metrics' => [
+                ['key' => 'color', 'label' => 'Warna film', 'better' => null, 'max' => null, 'text' => true],
+                ['key' => 'vlt',  'label' => 'VLT (cahaya tampak yang masuk)', 'better' => null, 'max' => 100],
+                ['key' => 'dark', 'label' => 'Darkness', 'better' => null, 'max' => 100],
+                ['key' => 'tser', 'label' => 'TSER (energi matahari ditolak)', 'better' => 'high', 'max' => 100],
+                ['key' => 'ir',   'label' => 'IR Rejection 1400 nm', 'better' => 'high', 'max' => 100],
+                ['key' => 'uv',   'label' => 'UV Rejection', 'better' => 'high', 'max' => 100],
+                ['key' => 'shgc', 'label' => 'SHGC (makin kecil makin sedikit panas masuk)', 'better' => 'low', 'max' => null],
+            ],
+            'defaults' => ['bm20', 'ap35'],
+        ];
+    }
+
+    /** Data alat perbandingan kaca film gedung. */
+    public static function compareBuilding(): array
+    {
+        $items = [];
+        foreach (self::architectural() as $si => $s) {
+            foreach ($s['variants'] as $vi => $x) {
+                $items[] = [
+                    'id' => $si . '-' . $vi, 'group' => $s['name'],
+                    'name' => $x['label'] . (str_starts_with($s['name'], 'FLEX') ? ' ' . $x['dark'] : ''),
+                    'cells' => [
+                        'dark' => self::cell($x['dark']), 'vlt' => self::cell($x['vlt']), 'tser' => self::cell($x['tser']),
+                        'irr' => self::cell($x['irr']), 'uvr' => self::cell($x['uvr']), 'shgc' => self::cell($x['shgc']),
+                        'warranty' => self::cell($s['warranty']),
+                    ],
+                ];
+            }
+        }
+
+        return [
+            'items' => $items,
+            'metrics' => [
+                ['key' => 'dark', 'label' => 'Darkness', 'better' => null, 'max' => 100],
+                ['key' => 'vlt',  'label' => 'VLT (cahaya tampak yang masuk)', 'better' => null, 'max' => 100],
+                ['key' => 'tser', 'label' => 'TSER (energi matahari ditolak)', 'better' => 'high', 'max' => 100],
+                ['key' => 'irr',  'label' => 'IRR (inframerah ditolak)', 'better' => 'high', 'max' => 100],
+                ['key' => 'uvr',  'label' => 'UVR (ultraviolet ditolak)', 'better' => 'high', 'max' => 100],
+                ['key' => 'shgc', 'label' => 'SHGC (makin kecil makin sedikit panas masuk)', 'better' => 'low', 'max' => null],
+                ['key' => 'warranty', 'label' => 'Garansi (tahun)', 'better' => 'high', 'max' => 10],
+            ],
+            'defaults' => ['1-0', '3-1'],
+        ];
+    }
+
+    /** Data alat perbandingan PPF. */
+    public static function comparePpf(): array
+    {
+        $heal = ['instant' => 'Instan Self Healing', 'heat' => 'Heat Self Healing'];
+        $items = collect(self::ppf())->map(function ($t) use ($heal) {
+            $stars = fn ($n) => self::cell(str_repeat('★', $n), (float) $n);
+            $cells = [
+                'finish' => self::cell($t['finish'], null), 'heal' => self::cell($heal[$t['heal']], null),
+                'warranty' => self::cell($t['warranty']), 'durability' => self::cell($t['durability']),
+                'mils' => self::cell($t['mils']), 'urethane' => self::cell($t['urethane'], null),
+                'elongation' => self::cell($t['spec']['elongation']), 'peel' => self::cell($t['spec']['peel']), 'tear' => self::cell($t['spec']['tear']),
+            ];
+            foreach ($t['rate'] as $k => $n) {
+                $cells['r_' . $k] = $stars($n);
+            }
+
+            return ['id' => strtolower(str_replace([' ', '+'], ['-', 'plus'], trim($t['name']))), 'name' => $t['name'], 'group' => 'Tingkat PPF', 'cells' => $cells];
+        })->all();
+
+        $metrics = [
+            ['key' => 'finish', 'label' => 'Finish', 'better' => null, 'max' => null, 'text' => true],
+            ['key' => 'heal', 'label' => 'Self healing', 'better' => null, 'max' => null, 'text' => true],
+            ['key' => 'urethane', 'label' => 'Urethane original', 'better' => null, 'max' => null, 'text' => true],
+            ['key' => 'warranty', 'label' => 'Garansi (tahun)', 'better' => 'high', 'max' => 10],
+            ['key' => 'durability', 'label' => 'Daya tahan (tahun)', 'better' => 'high', 'max' => 10],
+            ['key' => 'mils', 'label' => 'Ketebalan produk (mils)', 'better' => 'high', 'max' => null],
+            ['key' => 'elongation', 'label' => 'Elongation (%)', 'better' => 'high', 'max' => null],
+            ['key' => 'peel', 'label' => 'Peel adhesion (n/m)', 'better' => 'high', 'max' => null],
+            ['key' => 'tear', 'label' => 'Tear strength (psi)', 'better' => 'high', 'max' => null],
+        ];
+        foreach (['hydrophobic' => 'Hydrophobic', 'uv' => 'Perlindungan UV', 'healing' => 'Self healing', 'scratch' => 'Tahan gores', 'flexibility' => 'Fleksibilitas', 'clarity' => 'Kejernihan'] as $k => $label) {
+            $metrics[] = ['key' => 'r_' . $k, 'label' => $label . ' (bintang)', 'better' => 'high', 'max' => 5, 'stars' => true];
+        }
+
+        return ['items' => $items, 'metrics' => $metrics, 'defaults' => ['armor', 'aegis']];
+    }
+
     /** @return array<string, string> warna film => kode hex untuk titik warna */
     public static function swatch(): array
     {

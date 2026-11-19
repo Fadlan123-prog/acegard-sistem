@@ -242,8 +242,15 @@
   </div>
 </section>
 
+{{-- ───────── Bandingkan varian (interaktif) ───────── --}}
+@include('frontend.partials.compare', [
+  'cmp' => \App\Support\FilmCatalog::compareBuilding(), 'cmpKey' => 'building', 'cmpNoun' => 'varian', 'cmpAlt' => true,
+  'cmpTitle' => 'Bandingkan <b>varian kaca film gedung</b>',
+  'cmpWa' => 'Halo ACEGARD, saya sedang membandingkan kaca film gedung.',
+])
+
 {{-- ───────── Galeri ───────── --}}
-<section class="ag-section alt" aria-labelledby="ag-bgal-title">
+<section class="ag-section" aria-labelledby="ag-bgal-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Gallery</span>

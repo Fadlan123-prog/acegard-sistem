@@ -389,3 +389,22 @@ a.ag-card:hover .ag-arrow { background: var(--ag-primary); border-color: var(--a
 .ag-ppf-rate .dots { display: inline-flex; gap: 4px; }
 .ag-ppf-rate .dots i { width: 14px; height: 6px; border-radius: 99px; background: #DCE6F7; }
 .ag-ppf-rate .dots i.on { background: var(--ag-primary); }
+
+/* ---------- Tahap 6: perbandingan produk ---------- */
+.ag-cmp-pick { display: grid; gap: 16px; margin-bottom: 24px; }
+.ag-cmp-pick .ag-sim-group legend { margin-bottom: 8px; }
+.ag-cmp-count { margin: 0; font-size: .8125rem; color: var(--ag-muted-strong); }
+.ag-chips.is-live .ag-chip.is-off { opacity: .4; cursor: not-allowed; }
+.ag-chips.is-live .ag-chip.is-off:hover { border-color: var(--ag-line); color: var(--ag-muted-strong); }
+.ag-cmp-table { min-width: 0; }
+.ag-cmp-table thead th small { display: block; margin-top: 2px; font-size: .6875rem; font-weight: 500; color: var(--ag-muted); letter-spacing: 0; }
+.ag-cmp-table tbody th { min-width: 130px; max-width: 220px; font-size: .8125rem; }
+.ag-cmp-table td { min-width: 110px; padding: 12px 14px; }
+.ag-cmp-table td b { display: block; font-weight: 600; color: var(--ag-deep); }
+.ag-cmp-table td .ag-bar { display: block; width: 100%; margin: 8px 0 0; height: 6px; }
+.ag-cmp-table td .ag-bar i { transition: width .35s var(--ag-ease); }
+.ag-cmp-table td.is-best { background: #F0F6FF !important; }
+.ag-cmp-table td.is-best b { color: var(--ag-primary); }
+.ag-cmp-table td em { display: inline-block; margin-top: 4px; padding: 1px 8px; border-radius: 999px; background: var(--ag-primary); color: #fff; font-size: .625rem; font-style: normal; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+@media (max-width: 575px) { .ag-cmp-table td { min-width: 96px; padding: 10px; } .ag-cmp-table tbody th { min-width: 110px; } }
+@media (prefers-reduced-motion: reduce) { .ag-cmp-table td .ag-bar i { transition: none; } }

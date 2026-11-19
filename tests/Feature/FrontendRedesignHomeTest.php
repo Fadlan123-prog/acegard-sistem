@@ -156,4 +156,30 @@ class FrontendRedesignHomeTest extends TestCase
         );
         $this->assertSame('Matte', $tiers['MATTE']['finish']);
     }
+
+    public function test_perbandingan_produk_tersedia_di_tiap_kategori(): void
+    {
+        foreach (['car' => route('frontend.service.car'), 'building' => route('frontend.service.building'), 'ppf' => route('frontend.ppf.catalog')] as $key => $url) {
+            $this->get($url)->assertOk()->assertSee('agCmp-' . $key, false)->assertSeeText('Bandingkan');
+        }
+
+        $this->assertCount(13, \App\Support\FilmCatalog::compareCar()['items']);
+        $this->assertCount(19, \App\Support\FilmCatalog::compareBuilding()['items']);
+        $this->assertCount(5, \App\Support\FilmCatalog::comparePpf()['items']);
+
+        // angka diambil dari teks spesifikasi
+        $this->assertSame(280.0, \App\Support\FilmCatalog::num('>280%'));
+        $this->assertSame(0.143, \App\Support\FilmCatalog::num('0,143'));
+        $this->assertSame(5.0, \App\Support\FilmCatalog::num('5 tahun'));
+        $this->assertNull(\App\Support\FilmCatalog::num('Transparan'));
+
+        // semua id bawaan ada di daftar
+        foreach (['compareCar', 'compareBuilding', 'comparePpf'] as $m) {
+            $d = \App\Support\FilmCatalog::$m();
+            $ids = array_column($d['items'], 'id');
+            foreach ($d['defaults'] as $def) {
+                $this->assertContains($def, $ids);
+            }
+        }
+    }
 }

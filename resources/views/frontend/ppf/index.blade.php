@@ -221,8 +221,15 @@
   </div>
 </section>
 
+{{-- ───────── Bandingkan tingkat (interaktif) ───────── --}}
+@include('frontend.partials.compare', [
+  'cmp' => \App\Support\FilmCatalog::comparePpf(), 'cmpKey' => 'ppf', 'cmpNoun' => 'tingkat', 'cmpAlt' => false,
+  'cmpTitle' => 'Bandingkan <b>tingkat PPF</b>',
+  'cmpWa' => 'Halo ACEGARD, saya sedang membandingkan tingkat PPF.',
+])
+
 {{-- ───────── FAQ ───────── --}}
-<section class="ag-section" aria-labelledby="ag-pfaq-title">
+<section class="ag-section alt" aria-labelledby="ag-pfaq-title">
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">FAQ</span>
