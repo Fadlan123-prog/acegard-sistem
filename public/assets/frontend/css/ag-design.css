@@ -327,3 +327,37 @@ a.ag-card:hover .ag-arrow { background: var(--ag-primary); border-color: var(--a
   .ag-sim-variant dl { grid-template-columns: repeat(2, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) { .ag-glass .tint, .ag-seg-opt span, .ag-chips.is-live .ag-chip { transition: none; } }
+
+/* ---------- Tahap 4: simulator jendela (Building Film) ---------- */
+.ag-win { display: grid; gap: 24px; --split: 50%; --film: #15171A; --film-a: .66; --tser: .64; }
+@media (min-width: 992px) { .ag-win { grid-template-columns: 1.35fr 1fr; gap: 32px; align-items: start; } }
+.ag-win-view { padding: 16px; background: #fff; border: 1px solid #C9DAF7; border-radius: 28px; }
+.ag-win-stage { position: relative; overflow: hidden; aspect-ratio: 16 / 10; border-radius: 18px; cursor: ew-resize; touch-action: pan-y; user-select: none; background: #BFDDFF; }
+.ag-win-scene, .ag-win-frame { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.ag-win-film { position: absolute; inset: 0; background-color: var(--film); opacity: var(--film-a); clip-path: inset(0 0 0 var(--split)); transition: background-color .35s var(--ag-ease), opacity .35s var(--ag-ease); }
+.ag-win-film.is-sheen { background-image: linear-gradient(115deg, rgba(255,255,255,.38) 0%, rgba(255,255,255,0) 38%, rgba(255,255,255,.22) 70%, rgba(255,255,255,0) 100%); }
+.ag-win-glow { position: absolute; left: 0; right: 0; bottom: 0; height: 42%; pointer-events: none; background: radial-gradient(ellipse 62% 100% at 50% 100%, rgba(255,140,30,.7), rgba(255,140,30,0) 72%); }
+.ag-win-glow.is-before { opacity: .9; clip-path: inset(0 calc(100% - var(--split)) 0 0); }
+.ag-win-glow.is-after { opacity: calc((1 - var(--tser)) * .9); clip-path: inset(0 0 0 var(--split)); transition: opacity .35s var(--ag-ease); }
+.ag-win-divider { position: absolute; top: 0; bottom: 0; left: var(--split); width: 2px; margin-left: -1px; background: #fff; box-shadow: 0 0 0 1px rgba(23,43,77,.15); pointer-events: none; }
+.ag-win-divider span { position: absolute; top: 50%; left: 50%; display: grid; place-items: center; width: 42px; height: 42px; transform: translate(-50%, -50%); border-radius: 50%; background: #fff; color: var(--ag-primary); box-shadow: 0 4px 14px rgba(18,59,115,.25); }
+.ag-win-tag { position: absolute; top: 12px; z-index: 2; max-width: 46%; padding: 5px 12px; border-radius: 999px; background: rgba(255,255,255,.92); font-size: .75rem; font-weight: 600; color: var(--ag-deep); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+.ag-win-tag.is-l { left: 12px; }
+.ag-win-tag.is-r { right: 12px; background: var(--ag-primary); color: #fff; }
+.ag-win-range { display: block; margin: 14px 4px 0; }
+.ag-win-range input { width: 100%; accent-color: var(--ag-primary); cursor: pointer; }
+.ag-win-legend { display: flex; align-items: center; gap: 8px; margin: 10px 4px 0; font-size: .8125rem; color: var(--ag-muted-strong); }
+.ag-win-legend i { flex: none; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle, #FF8C1E, rgba(255,140,30,.25)); }
+
+.ag-seg.c2 { grid-template-columns: repeat(2, 1fr); border-radius: 24px; }
+.ag-win-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 8px; margin: 0 0 16px; }
+.ag-win-stats dt { font-size: .6875rem; font-weight: 500; color: var(--ag-muted); }
+.ag-win-stats dd { margin: 0; font-size: 1.0625rem; font-weight: 700; color: var(--ag-deep); font-variant-numeric: tabular-nums; }
+.ag-win-bars { display: grid; gap: 12px; font-size: .8125rem; color: var(--ag-muted-strong); }
+.ag-win-bars .ag-bar { display: block; width: 100%; height: 8px; margin: 6px 0 0; }
+.ag-win-bars .ag-bar i { transition: width .35s var(--ag-ease); }
+.ag-warranty { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 16px; font-size: .875rem; font-weight: 600; color: var(--ag-primary); }
+@media (prefers-reduced-motion: reduce) { .ag-win-film, .ag-win-glow.is-after, .ag-win-bars .ag-bar i { transition: none; } }
+
+.ag-tones { display: flex; gap: 8px; align-items: stretch; padding: 18px; aspect-ratio: 3 / 2; background: linear-gradient(180deg, #EAF2FF, #fff); }
+.ag-tones i { flex: 1; border-radius: 12px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.3), 0 2px 6px rgba(18,59,115,.15); }

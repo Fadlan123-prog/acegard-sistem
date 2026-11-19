@@ -51,6 +51,69 @@ class FilmCatalog
         return $series;
     }
 
+    /**
+     * Kaca film arsitektural (gedung, kantor, rumah). Sumber: daftar produk window film architectural ACEGARD.
+     * Harga sengaja tidak dimuat. "dark" adalah kolom % pada lembar (tingkat kegelapan).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function architectural(): array
+    {
+        // [label, dark, tser, irr, uvr, vlt, shgc, warna overlay, reflektif?]
+        $row = fn ($label, $dark, $tser, $irr, $uvr, $vlt, $shgc, $tone, $sheen = false) =>
+            compact('label', 'dark', 'tser', 'irr', 'uvr', 'vlt', 'shgc', 'tone', 'sheen');
+
+        return [
+            [
+                'name' => 'FLEX ONE WAY', 'image' => 'film-flex-one-way.webp', 'warranty' => '3 tahun',
+                'tag' => 'Privasi dengan tampilan satu arah',
+                'desc' => 'Film reflektif satu arah untuk jendela yang membutuhkan privasi. Tersedia dalam enam varian Silver dengan tingkat kegelapan 40% sampai 80%.',
+                'variants' => [
+                    $row('Black Silver', '60%', '65%', '74%', '99,9%', '14%', '0,213', '#3A3E45', true),
+                    $row('Black Silver', '80%', '77%', '90%', '99,9%', '3%',  '0,085', '#2B2E34', true),
+                    $row('Dark Gray Silver', '60%', '64%', '70%', '89,5%', '15%', '0,181', '#5A5E66', true),
+                    $row('Light Gray Silver', '40%', '55%', '54%', '70,1%', '36%', '0,411', '#A5ABB3', true),
+                    $row('Double Silver', '60%', '68%', '92%', '99,9%', '17%', '0,160', '#8C939C', true),
+                    $row('Double Silver', '80%', '84%', '99%', '99,9%', '6%',  '0,062', '#7A818B', true),
+                ],
+            ],
+            [
+                'name' => 'BLACK MASTER', 'image' => 'film-black-master.webp', 'warranty' => '5 tahun',
+                'tag' => 'Penyaringan panas dengan tampilan gelap',
+                'desc' => 'BLACK MASTER memakai teknologi penyaringan panas yang membantu mengurangi paparan panas matahari dan menjaga ruangan tetap nyaman, dengan tampilan Charcoal Black yang tegas.',
+                'variants' => [
+                    $row('BM20', '40%', '67%', '99%', '99,9%', '25%', '0,143', '#1B1D21'),
+                    $row('BM15', '60%', '70%', '99%', '99,9%', '15%', '0,093', '#1B1D21'),
+                    $row('BM05', '80%', '87%', '99%', '99,9%', '6%',  '0,000', '#1B1D21'),
+                ],
+            ],
+            [
+                'name' => 'NOTCH UV400', 'image' => 'film-notch-uv400.webp', 'warranty' => '5 tahun',
+                'tag' => 'Proteksi UV hingga 400 nm',
+                'desc' => 'NOTCH UV400 memakai Titanium dan Nano Ceramic dengan teknologi sputter pada PET Film berkualitas tinggi. Film ini menangkal UVA, UVB, dan UVC hingga 99,9% sampai 400 nm.',
+                'variants' => [
+                    $row('Sky Blue', '20%', '53%', '99%', '99,9%', '71%', '0,373', '#7DB8F0'),
+                    $row('Soft Green', '30%', '61%', '99%', '99,9%', '68%', '0,422', '#9FD3B4'),
+                    $row('NV40', '40%', '65%', '99%', '99,9%', '32%', '0,204', '#1E2024'),
+                    $row('NV20', '60%', '68%', '99%', '99,9%', '22%', '0,141', '#1E2024'),
+                    $row('NV05', '80%', '89%', '99%', '99,9%', '6%',  '0,000', '#1E2024'),
+                ],
+            ],
+            [
+                'name' => '4K ALPHA PRO', 'image' => 'film-4k-alpha-pro.webp', 'warranty' => '7 tahun',
+                'tag' => 'Nano Ceramic Tungsten & Tin hingga 2500 nm',
+                'desc' => '4K ALPHA PRO memakai teknologi Nano Ceramic berbahan Tungsten dan Tin dengan proses sputter. Film ini menolak panas dan spektrum sinar matahari hingga 2500 nm.',
+                'variants' => [
+                    $row('AP50', '30%', '60%', '99%', '99,9%', '49%', '0,276', '#15171A'),
+                    $row('AP35', '40%', '64%', '99%', '99,9%', '34%', '0,181', '#15171A'),
+                    $row('AP10', '60%', '82%', '99%', '99,9%', '11%', '0,071', '#15171A'),
+                    $row('AP05', '80%', '90%', '99%', '99,9%', '5%',  '0,000', '#15171A'),
+                    $row('AP02', '90%', '95%', '99%', '99,9%', '3%',  '0,000', '#15171A'),
+                ],
+            ],
+        ];
+    }
+
     /** @return array<string, string> warna film => kode hex untuk titik warna */
     public static function swatch(): array
     {

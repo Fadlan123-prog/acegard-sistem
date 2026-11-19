@@ -112,4 +112,21 @@ class FrontendRedesignHomeTest extends TestCase
         $this->assertSame(71, (int) $variants->first()['vlt']);
         $this->assertSame(4, (int) $variants->last()['vlt']);
     }
+
+    public function test_halaman_gedung_menampilkan_19_varian_dan_simulator_jendela(): void
+    {
+        $this->assertSame(19, collect(\App\Support\FilmCatalog::architectural())->sum(fn ($s) => count($s['variants'])));
+
+        $res = $this->get(route('frontend.service.building'))->assertOk()
+            ->assertSee('ag-nav', false)
+            ->assertSee('agWin', false)
+            ->assertSeeText('Spesifikasi 19 varian')
+            ->assertSee('Black Silver')->assertSee('Double Silver')->assertSee('BM20')
+            ->assertSee('Sky Blue')->assertSee('Soft Green')->assertSee('AP02')
+            ->assertSee('0,411')->assertSee('89,5%');
+
+        // harga tidak ditampilkan di situs
+        $this->assertStringNotContainsString('Rp.', $res->getContent());
+        $this->assertStringNotContainsString('230.000', $res->getContent());
+    }
 }
