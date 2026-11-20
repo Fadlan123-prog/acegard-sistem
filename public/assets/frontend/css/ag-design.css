@@ -85,8 +85,8 @@ html { scroll-behavior: smooth; }
 .ag-display { font-size: clamp(2.25rem, 6.2vw, 4.75rem) !important; line-height: 1.02 !important; letter-spacing: -.045em !important; font-weight: 300 !important; }
 .ag-display b { display: block; font-weight: 700 !important; color: var(--ag-primary); }
 .ag-hero-sub { max-width: 58ch; margin: 24px auto 0; font-size: clamp(1rem, 1.6vw, 1.1875rem); color: var(--ag-muted-strong); }
-.ag-hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 32px; }
-.ag-hero-car { position: relative; max-width: 1040px; margin: clamp(-120px, -7vw, -24px) auto 0; padding-bottom: 28px; }
+.ag-hero-actions { position: relative; z-index: 3; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 32px; }
+.ag-hero-car { pointer-events: none; position: relative; max-width: 1040px; margin: clamp(-120px, -7vw, -24px) auto 0; padding-bottom: 28px; }
 .ag-hero-car::before { content: ''; position: absolute; inset: -4% -10% 0; z-index: 0; background: radial-gradient(ellipse 52% 56% at 50% 54%, #DCE9FF 0%, rgba(234,242,255,.55) 45%, rgba(255,255,255,0) 72%); }
 .ag-hero-car::after { content: ''; position: absolute; left: 14%; right: 14%; bottom: 20px; height: 26px; z-index: 0; background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(18,59,115,.28), rgba(18,59,115,0) 72%); filter: blur(4px); }
 .ag-hero-car img { position: relative; z-index: 1; display: block; width: 100%; height: auto; }

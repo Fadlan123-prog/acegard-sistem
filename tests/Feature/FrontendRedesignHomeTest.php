@@ -395,4 +395,12 @@ class FrontendRedesignHomeTest extends TestCase
         $this->assertStringContainsString('immediateRender: false', $js);
         $this->assertStringNotContainsString('gsap.to(container.children', $js);
     }
+
+    public function test_tombol_hero_tidak_tertutup_gambar_mobil(): void
+    {
+        // Regresi: .ag-hero-car bermargin negatif dan position:relative menimpa tombol hero sehingga klik tidak masuk.
+        $css = file_get_contents(public_path('assets/frontend/css/ag-design.css'));
+        $this->assertMatchesRegularExpression('/\.ag-hero-actions\s*\{[^}]*position:\s*relative;[^}]*z-index:\s*3/', $css);
+        $this->assertMatchesRegularExpression('/\.ag-hero-car\s*\{[^}]*pointer-events:\s*none/', $css);
+    }
 }
