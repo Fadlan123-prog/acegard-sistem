@@ -19,8 +19,6 @@
   var root = document.documentElement;
   var $ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var userOff = false;
-  try { userOff = window.localStorage.getItem('agMotion') === 'off'; } catch (e) {}
 
   function release() { root.classList.remove('ag-m-wait'); }
 
@@ -55,7 +53,7 @@
       e.preventDefault();
       var offset = (nav ? nav.getBoundingClientRect().height : 0) + 12;
       var top = el.getBoundingClientRect().top + (window.pageYOffset || root.scrollTop) - offset;
-      window.scrollTo({ top: Math.max(0, top), behavior: reduce || userOff ? 'auto' : 'smooth' });
+      window.scrollTo({ top: Math.max(0, top), behavior: reduce ? 'auto' : 'smooth' });
       if (history.replaceState) history.replaceState(null, '', a.getAttribute('href'));
     });
 
@@ -451,24 +449,9 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { ScrollTrigger.refresh(); });
   }
 
-  /* ───────── Tombol matikan animasi ───────── */
-  function wireMotionToggle() {
-    $('[data-motion-toggle]').forEach(function (b) {
-      var offNow = reduce || userOff;
-      b.textContent = reduce ? 'Animasi mengikuti pengaturan perangkat' : (userOff ? 'Animasi: mati' : 'Animasi: nyala');
-      b.setAttribute('aria-pressed', offNow ? 'true' : 'false');
-      if (reduce) { b.disabled = true; return; }
-      b.addEventListener('click', function () {
-        try { window.localStorage.setItem('agMotion', userOff ? 'on' : 'off'); } catch (e) {}
-        window.location.reload();
-      });
-    });
-  }
-
   function start() {
     initBasics();
-    wireMotionToggle();
-    if (reduce || userOff || !window.gsap || !window.ScrollTrigger) { release(); return; }
+    if (reduce || !window.gsap || !window.ScrollTrigger) { release(); return; }
     try { init(); } catch (err) { release(); if (window.console) console.error('ag-motion', err); }
   }
 

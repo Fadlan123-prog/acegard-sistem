@@ -360,8 +360,8 @@ class FrontendRedesignHomeTest extends TestCase
             $this->assertStringContainsString($needle, $home);
         }
 
-        // tombol matikan animasi di footer
-        $this->assertStringContainsString('data-motion-toggle', $home);
+        // tidak ada lagi tombol matikan animasi: animasi selalu menyala
+        $this->assertStringNotContainsString('data-motion-toggle', $home);
 
         // cerita PPF: 3 tahap, satu ilustrasi di panggung dan satu per tahap
         $ppf = $this->get(route('frontend.ppf.catalog'))->getContent();

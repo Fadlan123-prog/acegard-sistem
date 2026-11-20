@@ -225,7 +225,6 @@ a.ag-card:hover .ag-arrow { background: var(--ag-primary); border-color: var(--a
 .ag-footer-social { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
 .ag-footer-social a { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.28); transition: background-color .25s, border-color .25s, transform .25s var(--ag-ease); }
 .ag-footer-social a:hover { background: #155EEF; border-color: #155EEF; transform: translateY(-2px); }
-.ag-footer .ag-footer-mark { position: relative; z-index: 0; margin: 0; padding: 0; text-align: center; font-family: var(--ag-display); font-weight: 700; letter-spacing: -.04em; line-height: .8; font-size: clamp(3.5rem, 20.6vw, 40rem); color: rgba(169,196,238,.09); user-select: none; pointer-events: none; white-space: nowrap; overflow: hidden; }
 .ag-footer-bottom { position: relative; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding: 22px 0 30px; border-top: 1px solid rgba(255,255,255,.16); font-size: .8125rem; color: #B7CAE8; }
 .ag-footer-bottom { padding-right: 76px; }
 @media (min-width: 768px) { .ag-footer-bottom { padding-right: 190px; } }

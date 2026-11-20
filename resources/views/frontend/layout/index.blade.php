@@ -24,7 +24,7 @@
   <script>document.documentElement.classList.add('js');</script>
   @if (! View::hasSection('hide-navbar'))
   {{-- Penjaga kilatan animasi: judul disembunyikan sebentar sampai ag-motion.js siap (dilepas otomatis maksimal 2,5 detik) --}}
-  <script>(function(){var r=document.documentElement,off=false;try{off=localStorage.getItem('agMotion')==='off';}catch(e){}var rm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(!off&&!rm){r.classList.add('ag-m-wait');}})();</script>
+  <script>(function(){var r=document.documentElement;var rm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(!rm){r.classList.add('ag-m-wait');}})();</script>
   @endif
 
   <link rel="icon" type="image/png" href="{{ asset('assets/images/favicon.png') }}">

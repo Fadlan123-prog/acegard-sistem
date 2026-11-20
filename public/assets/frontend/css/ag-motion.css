@@ -166,10 +166,6 @@ html.ag-m .ag-hero .ag-container > * { animation: none; opacity: 1; transform: n
 .ag-sim-variant:nth-child(2) { animation-delay: .07s; }
 
 /* ---------- Tombol matikan animasi di footer ---------- */
-.ag-motion-toggle { padding: 6px 14px; border: 1px solid rgba(255, 255, 255, .35); border-radius: 999px; background: transparent; color: #fff; font: inherit; font-size: .8125rem; cursor: pointer; }
-.ag-motion-toggle:hover:not(:disabled) { background: rgba(255, 255, 255, .12); }
-.ag-motion-toggle:disabled { opacity: .6; cursor: default; }
-.ag-motion-toggle:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 
 /* ---------- Reduced motion: semua tampil langsung ---------- */
 @media (prefers-reduced-motion: reduce) {
