@@ -91,7 +91,7 @@ class FrontendRedesignHomeTest extends TestCase
         $this->get('/promo/kaca-film-mobil')->assertOk()->assertDontSee('ag-nav', false);
     }
 
-    public function test_simulator_vlt_menampilkan_pilihan_vlt_dan_varian(): void
+    public function test_simulator_menampilkan_pilihan_kegelapan_dan_varian(): void
     {
         $res = $this->get(route('frontend.simulator'))->assertOk()
             ->assertSee('ag-nav', false)
@@ -99,12 +99,13 @@ class FrontendRedesignHomeTest extends TestCase
             ->assertSee('agSim', false)
             ->assertSee('Tanpa film');
 
-        // semua VLT unik dari lembar spesifikasi tersedia sebagai pilihan
-        foreach ([71, 68, 49, 34, 32, 25, 22, 15, 11, 6, 5, 3] as $vlt) {
-            $res->assertSee('value="' . $vlt . '"', false);
+        // semua persentase kegelapan unik dari lembar spesifikasi tersedia sebagai pilihan
+        foreach ([20, 30, 40, 60, 80, 90] as $dark) {
+            $res->assertSee('name="dark" value="' . $dark . '"', false);
         }
+        $res->assertDontSee('name="vlt"', false);
 
-        // varian dengan VLT 6% (BM05 dan NV05) berbagi satu pilihan, keduanya harus ikut terkirim ke skrip
+        // varian dengan kegelapan 80% (BM05, NV05, AP05) berbagi satu pilihan, semuanya harus ikut terkirim ke skrip
         $res->assertSee('BM05')->assertSee('NV05')->assertSee('AP02')->assertSee('NV70');
     }
 

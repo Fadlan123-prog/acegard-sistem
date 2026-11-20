@@ -310,19 +310,19 @@
     <div class="ag-reveal">
       <span class="ag-eyebrow">Interactive Experience</span>
       <h2 class="ag-h2" id="ag-sim-title" style="margin-top:16px">Coba tingkat <b>kegelapan kaca film</b></h2>
-      <p class="ag-lead">Simulator kaca film mobil membantu Anda melihat tampilan berbagai persentase VLT pada kaca depan dan kaca samping sebelum memilih. Semakin rendah angka VLT, semakin gelap kaca film.</p>
+      <p class="ag-lead">Simulator kaca film mobil membantu Anda melihat tampilan berbagai persentase kegelapan pada kaca depan dan kaca samping sebelum memilih. Semakin besar persentasenya, semakin gelap kaca film.</p>
       <a class="ag-btn ag-btn-primary" href="{{ route('frontend.simulator') }}">Coba Simulator</a>
     </div>
     <div class="ag-reveal">
-      <div class="ag-sim-stage" id="agHomeSim" style="--tint-front: .68; --tint-side: .68;">
+      <div class="ag-sim-stage" id="agHomeSim" style="--tint-front: .40; --tint-side: .40;">
         @include('frontend.partials.sim-car')
-        <div class="ag-chips is-live" role="radiogroup" aria-label="Pilih VLT kaca film">
-          @foreach ([71, 49, 32, 15, 6] as $v)
-            <label class="ag-chip {{ $v === 32 ? 'is-on' : '' }}"><input type="radio" name="homevlt" value="{{ $v }}" class="visually-hidden" {{ $v === 32 ? 'checked' : '' }}><span>{{ $v }}%</span></label>
+        <div class="ag-chips is-live" role="radiogroup" aria-label="Pilih kegelapan kaca film">
+          @foreach ([20, 40, 60, 80, 90] as $v)
+            <label class="ag-chip {{ $v === 40 ? 'is-on' : '' }}"><input type="radio" name="homevlt" value="{{ $v }}" class="visually-hidden" {{ $v === 40 ? 'checked' : '' }}><span>{{ $v }}%</span></label>
           @endforeach
         </div>
       </div>
-      <p class="ag-note">Hasil simulator hanya ilustrasi visual, bukan pengukuran VLT.</p>
+      <p class="ag-note">Hasil simulator hanya ilustrasi visual, bukan pengukuran VLT atau kegelapan sebenarnya.</p>
     </div>
   </div>
 </section>
@@ -413,7 +413,7 @@
   if (!stage) return;
   stage.addEventListener('change', function (e) {
     if (e.target.name !== 'homevlt') return;
-    var t = Math.min(0.96, 1 - Number(e.target.value) / 100).toFixed(2);
+    var t = Math.min(0.96, Number(e.target.value) / 100).toFixed(2);
     stage.style.setProperty('--tint-front', t);
     stage.style.setProperty('--tint-side', t);
     stage.querySelectorAll('.ag-chip').forEach(function (c) { c.classList.toggle('is-on', c.querySelector('input').checked); });

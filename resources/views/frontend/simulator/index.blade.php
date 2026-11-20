@@ -6,7 +6,7 @@
 @endphp
 
 @section('title', 'Simulator Kaca Film Mobil - Acegard Indonesia')
-@section('meta_description', 'Coba kegelapan kaca film mobil ACEGARD. Pilih VLT 71% sampai 3% untuk kaca depan dan samping, lihat varian yang cocok, lalu konsultasi via WhatsApp.')
+@section('meta_description', 'Coba kegelapan kaca film mobil ACEGARD. Pilih 20% sampai 90% untuk kaca depan dan samping, lihat varian yang cocok, lalu konsultasi via WhatsApp.')
 @section('og_image_alt', 'Simulator kaca film mobil ACEGARD')
 @section('body-class', 'ag-page')
 
@@ -16,18 +16,19 @@
   $img = fn ($f) => asset('assets/frontend/ag/' . $f);
   $swatch = FilmCatalog::swatch();
 
-  // Varian dikelompokkan per angka VLT. Dua varian bisa berbagi VLT yang sama (mis. AP05 dan AP02).
-  $byVlt = FilmCatalog::variants()
-    ->groupBy(fn ($x) => (int) $x['vlt'])
+  // Varian dikelompokkan per persentase kegelapan (kolom "Darkness" lembar spesifikasi).
+  // Beberapa varian berbagi kegelapan yang sama (mis. BM20, NV40, dan AP35 sama-sama 40%).
+  $byDark = FilmCatalog::variants()
+    ->groupBy(fn ($x) => (int) $x['dark'])
     ->map(fn ($group) => $group->map(fn ($x) => [
         'code' => $x['code'], 'series' => $x['series'], 'color' => $x['color'], 'swatch' => $swatch[$x['color']] ?? '#222',
-        'tser' => $x['tser'], 'uv' => $x['uv'], 'ir' => $x['ir14'], 'dark' => $x['dark'],
+        'tser' => $x['tser'], 'uv' => $x['uv'], 'vlt' => $x['vlt'], 'dark' => $x['dark'],
     ])->values())
-    ->sortKeysDesc();
+    ->sortKeys();
 
-  $steps = $byVlt->keys()->all();      // 71, 68, 51, ... 4
-  $start = 32;                          // pilihan awal
-  $tint  = fn ($vlt) => number_format(min(.96, 1 - $vlt / 100), 2, '.', '');
+  $steps = $byDark->keys()->all();     // 20, 30, 40, 60, 80, 90
+  $start = 40;                          // pilihan awal
+  $tint  = fn ($dark) => number_format(min(.96, $dark / 100), 2, '.', '');
 
 @endphp
 
@@ -39,12 +40,12 @@
     </nav>
     <span class="ag-eyebrow ag-hero-tag">Interactive Window Tint</span>
     <h1 class="ag-display" id="ag-sim-title">Coba kegelapan kaca film <b>sebelum memilih.</b></h1>
-    <p class="ag-hero-sub">Pilih angka VLT untuk kaca depan dan kaca samping, lihat tampilannya pada mobil, lalu cocokkan dengan varian ACEGARD yang tersedia.</p>
+    <p class="ag-hero-sub">Pilih persentase kegelapan untuk kaca depan dan kaca samping, lihat tampilannya pada mobil, lalu cocokkan dengan varian ACEGARD yang tersedia.</p>
   </div>
 </section>
 
 {{-- ───────── Simulator ───────── --}}
-<section class="ag-section" style="padding-top:24px" aria-label="Simulator VLT">
+<section class="ag-section" style="padding-top:24px" aria-label="Simulator kegelapan">
   <div class="ag-container">
     <div class="ag-sim" id="agSim" data-wa="{{ Whatsapp::url() }}" style="--tint-front: {{ $tint($start) }}; --tint-side: {{ $tint($start) }}; --split: 50%;">
 
@@ -71,11 +72,11 @@
         </fieldset>
 
         <fieldset class="ag-sim-group">
-          <legend>2. Pilih VLT <small>(makin kecil makin gelap)</small></legend>
+          <legend>2. Pilih kegelapan <small>(makin besar makin gelap)</small></legend>
           <div class="ag-chips is-live">
-            <label class="ag-chip"><input type="radio" name="vlt" value="100" class="visually-hidden"><span>Tanpa film</span></label>
-            @foreach ($steps as $vlt)
-              <label class="ag-chip"><input type="radio" name="vlt" value="{{ $vlt }}" class="visually-hidden" {{ $vlt === $start ? 'checked' : '' }}><span>{{ $vlt }}%</span></label>
+            <label class="ag-chip"><input type="radio" name="dark" value="0" class="visually-hidden"><span>Tanpa film</span></label>
+            @foreach ($steps as $dark)
+              <label class="ag-chip"><input type="radio" name="dark" value="{{ $dark }}" class="visually-hidden" {{ $dark === $start ? 'checked' : '' }}><span>{{ $dark }}%</span></label>
             @endforeach
           </div>
         </fieldset>
@@ -86,13 +87,13 @@
         </div>
 
         <a class="ag-btn ag-btn-primary whatsapp-btn" data-gtm-label="simulator-whatsapp" target="_blank" rel="noopener"
-           href="{{ Whatsapp::url('Halo ACEGARD, saya mencoba simulator VLT dan ingin berkonsultasi soal kaca film mobil.') }}" data-sim-wa>
+           href="{{ Whatsapp::url('Halo ACEGARD, saya mencoba simulator kegelapan kaca film dan ingin berkonsultasi soal kaca film mobil.') }}" data-sim-wa>
           <iconify-icon icon="mdi:whatsapp" width="20" aria-hidden="true"></iconify-icon> Konsultasikan pilihan ini
         </a>
       </div>
     </div>
 
-    <p class="ag-note ag-center" style="margin-top:24px">Simulasi hanya ilustrasi visual di layar. Tampilan nyata bergantung pada kaca asli mobil, pencahayaan, dan layar Anda. Angka VLT, TSER, dan UV berasal dari lembar spesifikasi produk.</p>
+    <p class="ag-note ag-center" style="margin-top:24px">Simulasi hanya ilustrasi visual di layar. Tampilan nyata bergantung pada kaca asli mobil, pencahayaan, dan layar Anda. Persentase kegelapan, VLT, TSER, dan UV berasal dari lembar spesifikasi produk.</p>
   </div>
 </section>
 
@@ -101,13 +102,13 @@
   <div class="ag-container">
     <div class="ag-head ag-reveal">
       <span class="ag-eyebrow">Panduan</span>
-      <h2 class="ag-h2" id="ag-sim-guide">Cara membaca <b>angka VLT</b></h2>
+      <h2 class="ag-h2" id="ag-sim-guide">Cara membaca <b>persentase kegelapan</b></h2>
     </div>
     <div class="ag-grid c3">
       @foreach ([
-        ['mdi:brightness-6', 'VLT menunjukkan cahaya yang lolos', 'VLT 70% berarti 70% cahaya tampak menembus film. VLT 5% berarti hanya 5% yang menembus, sehingga kabin terlihat sangat gelap dari luar.'],
-        ['mdi:white-balance-sunny', 'Gelap tidak selalu lebih sejuk', 'Penolakan panas ditentukan teknologi filmnya. Varian terang seperti NV70 (VLT 71%) tetap menolak inframerah 99%. Lihat angka TSER di tiap varian.'],
-        ['mdi:scale-balance', 'Perhatikan aturan setempat', 'Tingkat kegelapan kaca depan dan kaca samping bisa diatur regulasi lokal. Tim kami membantu memilih VLT yang aman dan nyaman untuk mata Anda.'],
+        ['mdi:brightness-6', 'Kegelapan makin besar, kabin makin tertutup', 'Kegelapan 20% terlihat terang dan jernih. Kegelapan 90% sangat pekat, sehingga kabin sulit terlihat dari luar. Tiap varian punya persentase kegelapannya sendiri di lembar spesifikasi.'],
+        ['mdi:white-balance-sunny', 'Gelap tidak selalu lebih sejuk', 'Penolakan panas ditentukan teknologi filmnya. Varian terang seperti NV70 (kegelapan 20%) tetap menolak inframerah 99%. Lihat angka TSER di tiap varian.'],
+        ['mdi:scale-balance', 'Perhatikan aturan setempat', 'Tingkat kegelapan kaca depan dan kaca samping bisa diatur regulasi lokal. Tim kami membantu memilih kegelapan yang aman dan nyaman untuk mata Anda.'],
       ] as [$icon, $title, $desc])
         <div class="ag-card ag-feature ag-reveal">
           <span class="ic"><iconify-icon icon="{{ $icon }}" aria-hidden="true"></iconify-icon></span>
@@ -124,10 +125,10 @@
 <section class="ag-section" aria-label="Konsultasi">
   <div class="ag-container">
     <div class="ag-cta-panel ag-reveal">
-      <h2>Bingung memilih VLT?</h2>
-      <p>Ceritakan jenis mobil dan kebutuhan Anda. Tim ACEGARD akan merekomendasikan seri dan VLT untuk tiap kaca.</p>
+      <h2>Bingung memilih kegelapan?</h2>
+      <p>Ceritakan jenis mobil dan kebutuhan Anda. Tim ACEGARD akan merekomendasikan seri dan tingkat kegelapan untuk tiap kaca.</p>
       <a class="ag-btn ag-btn-light whatsapp-btn" data-gtm-label="simulator-cta-whatsapp" target="_blank" rel="noopener"
-         href="{{ Whatsapp::url('Halo ACEGARD, saya ingin konsultasi memilih VLT kaca film mobil.') }}">
+         href="{{ Whatsapp::url('Halo ACEGARD, saya ingin konsultasi memilih kegelapan kaca film mobil.') }}">
         <iconify-icon icon="mdi:whatsapp" width="20" aria-hidden="true"></iconify-icon> Konsultasi Gratis
       </a>
     </div>
@@ -139,12 +140,12 @@
 (function () {
   var root = document.getElementById('agSim');
   if (!root) return;
-  var DATA = @json($byVlt);
+  var DATA = @json($byDark);
   var state = { front: {{ $start }}, side: {{ $start }}, target: 'all' };
 
-  var tint = function (v) { return Math.min(0.96, 1 - v / 100).toFixed(2); };
+  var tint = function (v) { return Math.min(0.96, v / 100).toFixed(2); };
   var q = function (s) { return root.querySelector(s); };
-  var label = function (v) { return v >= 100 ? 'Tanpa film' : v + '%'; };
+  var label = function (v) { return v <= 0 ? 'Tanpa film' : v + '%'; };
   var codes = function (v) { return (DATA[v] || []).map(function (x) { return x.code; }).join(' / '); };
   var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
 
@@ -153,37 +154,37 @@
     root.style.setProperty('--tint-side', tint(state.side));
     q('[data-out="front"]').textContent = label(state.front);
     q('[data-out="side"]').textContent = label(state.side);
-    var stag = document.querySelector('[data-split-tag]'); if (stag) stag.textContent = state.side >= 100 ? 'Tanpa film' : 'Film ' + state.side + '%';
+    var stag = document.querySelector('[data-split-tag]'); if (stag) stag.textContent = state.side <= 0 ? 'Tanpa film' : 'Film ' + state.side + '%';
 
     // varian untuk kaca yang sedang dipilih (untuk "semua kaca" dipakai kaca samping)
     var active = state.target === 'front' ? state.front : state.side;
     var title = q('[data-info-title]'), list = q('[data-info-list]');
     var where = state.target === 'front' ? 'kaca depan' : state.target === 'side' ? 'kaca samping' : 'semua kaca';
-    if (active >= 100) {
+    if (active <= 0) {
       title.textContent = 'Tanpa film pada ' + where + '. Ini tampilan kaca standar pabrik.';
       list.innerHTML = '';
     } else {
       var items = DATA[active] || [];
-      title.textContent = 'Varian dengan VLT ' + active + '% untuk ' + where + ':';
+      title.textContent = 'Varian dengan kegelapan ' + active + '% untuk ' + where + ':';
       list.innerHTML = items.map(function (x) {
         return '<div class="ag-sim-variant">' +
           '<div class="h"><span class="ag-swatch" style="background:' + x.swatch + '"></span><b>' + esc(x.code) + '</b><span>' + esc(x.series) + ' · ' + esc(x.color) + '</span></div>' +
-          '<dl><div><dt>TSER</dt><dd>' + esc(x.tser) + '</dd></div><div><dt>IR 1400 nm</dt><dd>' + esc(x.ir) + '</dd></div>' +
-          '<div><dt>UV</dt><dd>' + esc(x.uv) + '</dd></div><div><dt>Darkness</dt><dd>' + esc(x.dark) + '</dd></div></dl></div>';
+          '<dl><div><dt>Kegelapan</dt><dd>' + esc(x.dark) + '</dd></div><div><dt>TSER</dt><dd>' + esc(x.tser) + '</dd></div>' +
+          '<div><dt>UV</dt><dd>' + esc(x.uv) + '</dd></div><div><dt>VLT</dt><dd>' + esc(x.vlt) + '</dd></div></dl></div>';
       }).join('');
     }
 
     // pesan WhatsApp berisi pilihan terakhir
     var wa = q('[data-sim-wa]');
-    var part = function (name, v) { return name + ': ' + (v >= 100 ? 'tanpa film' : 'VLT ' + v + '% (' + codes(v) + ')'); };
-    var msg = 'Halo ACEGARD, saya mencoba simulator VLT. ' + part('Kaca depan', state.front) + '; ' + part('kaca samping', state.side) + '. Mohon rekomendasinya.';
+    var part = function (name, v) { return name + ': ' + (v <= 0 ? 'tanpa film' : 'kegelapan ' + v + '% (' + codes(v) + ')'); };
+    var msg = 'Halo ACEGARD, saya mencoba simulator kegelapan kaca film. ' + part('Kaca depan', state.front) + '; ' + part('kaca samping', state.side) + '. Mohon rekomendasinya.';
     wa.href = root.getAttribute('data-wa') + '?text=' + encodeURIComponent(msg);
-    if (ann) window.dispatchEvent(new CustomEvent('ag:selection', { detail: 'simulator VLT, ' + part('kaca depan', state.front) + '; ' + part('kaca samping', state.side) }));
+    if (ann) window.dispatchEvent(new CustomEvent('ag:selection', { detail: 'simulator kegelapan, ' + part('kaca depan', state.front) + '; ' + part('kaca samping', state.side) }));
   }
 
   function syncChips() {
     var active = state.target === 'front' ? state.front : state.side;
-    root.querySelectorAll('input[name="vlt"]').forEach(function (r) {
+    root.querySelectorAll('input[name="dark"]').forEach(function (r) {
       r.checked = Number(r.value) === active;
       r.closest('.ag-chip').classList.toggle('is-on', r.checked);
     });
@@ -198,7 +199,7 @@
       state.target = t.value;
       // "Semua kaca" menyamakan kaca depan dengan kaca samping
       if (state.target === 'all') state.front = state.side;
-    } else if (t.name === 'vlt') {
+    } else if (t.name === 'dark') {
       var v = Number(t.value);
       if (state.target === 'front') state.front = v;
       else if (state.target === 'side') state.side = v;
