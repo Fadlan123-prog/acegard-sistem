@@ -6,14 +6,16 @@ use Tests\TestCase;
 
 class FrontendMaintenanceTest extends TestCase
 {
-    public function test_home_shows_maintenance_and_navbar_pages_redirect_to_warranty(): void
+    public function test_halaman_publik_menampilkan_error_maintenance_kecuali_halaman_iklan(): void
     {
         config(['app.frontend_maintenance' => true]);
 
-        $this->get('/')->assertStatus(503)->assertSee('sedang dalam maintenance')->assertHeader('Retry-After');
+        foreach (['/', '/service/car', '/service/building', '/service/franchise', '/about', '/contact', '/lokasi-dealer', '/faq', '/artikel', '/ppf', '/simulator-vlt'] as $url) {
+            $this->get($url)->assertStatus(503)->assertSee('sedang dalam maintenance')->assertHeader('Retry-After');
+        }
 
-        foreach (['/service/car', '/service/building', '/service/franchise', '/about', '/contact', '/lokasi-dealer', '/faq', '/artikel', '/ppf', '/ppf-mobil', '/kaca-film-mobil', '/kaca-film-rumah', '/promo/kaca-film-mobil'] as $url) {
-            $this->get($url)->assertRedirect(route('warranty.form'));
+        foreach (['/kaca-film-mobil', '/kaca-film-rumah', '/ppf-mobil', '/promo/kaca-film-mobil'] as $url) {
+            $this->get($url)->assertOk()->assertDontSee('sedang dalam maintenance');
         }
     }
 
