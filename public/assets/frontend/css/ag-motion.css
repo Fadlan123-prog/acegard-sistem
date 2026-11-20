@@ -112,11 +112,14 @@ html.ag-m .ag-hero .ag-container > * { animation: none; opacity: 1; transform: n
 .ag-hs-progress { height: 3px; margin: 8px 20px 0; border-radius: 99px; background: var(--ag-line); overflow: hidden; }
 .ag-hs-progress i { display: block; height: 100%; background: var(--ag-primary); transform-origin: 0 50%; transform: scaleX(0); }
 
-.ag-hs-on { min-height: calc(100vh - 72px); display: flex; flex-direction: column; justify-content: center; padding-block: 40px 28px; }
-.ag-hs-on .ag-hs-viewport { overflow: hidden; scroll-snap-type: none; padding: 8px 0 24px; }
+.ag-hs-on { height: calc(100vh - 72px); height: calc(100svh - 72px); display: flex; flex-direction: column; justify-content: center; padding-block: clamp(12px, 3vh, 40px) clamp(10px, 2.5vh, 28px); overflow: hidden; }
+.ag-hs-on .ag-head { gap: clamp(8px, 1.6vh, 16px); margin-bottom: clamp(12px, 3vh, 40px); }
+.ag-hs-on .ag-h2 { font-size: clamp(1.75rem, 5.4vh, 3.5rem); }
+@media (max-height: 860px) { .ag-hs-on .ag-head .ag-lead { display: none; } }
+.ag-hs-on .ag-hs-viewport { overflow: hidden; scroll-snap-type: none; padding: 4px 0 clamp(8px, 2vh, 24px); margin-top: 0; }
 .ag-hs-on .ag-hs-track { gap: 28px; padding-left: var(--ag-pad); padding-right: 12vw; will-change: transform; }
 .ag-hs-on .ag-hs-panel { flex: 0 0 min(62vw, 860px); grid-template-columns: 1.25fr 1fr; align-items: center; gap: 32px; padding: 20px 32px 20px 20px; scroll-snap-align: none; }
-.ag-hs-on .ag-hs-fig { aspect-ratio: 4 / 4.2; height: min(52vh, 440px); }
+.ag-hs-on .ag-hs-fig { aspect-ratio: auto; width: 100%; height: clamp(180px, 42vh, 440px); }
 .ag-hs-on .ag-hs-fig img { width: 120%; max-width: none; margin-left: -10%; }
 .ag-hs-on .ag-hs-panel h3 { font-size: clamp(1.9rem, 2.8vw, 2.75rem); }
 .ag-hs-on .ag-hs-progress { margin-inline: var(--ag-pad); }
