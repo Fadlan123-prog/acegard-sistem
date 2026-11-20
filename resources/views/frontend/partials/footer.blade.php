@@ -1,4 +1,5 @@
 @php
+  use App\Support\SiteContent;
   use App\Support\Whatsapp;
   $faqHref     = Route::has('frontend.faq') ? route('frontend.faq') : null;
   $artikelHref = Route::has('frontend.artikel') ? route('frontend.artikel') : null;
@@ -7,14 +8,19 @@
 <footer class="ag-footer">
   <div class="ag-container">
     <div class="ag-footer-grid">
-      <div class="ag-footer-cell">
+      <div class="ag-footer-brand">
         <a href="{{ route('frontend.home') }}" aria-label="Acegard — beranda">
           <img src="{{ asset('assets/frontend/ag/logo-white.webp') }}" alt="Acegard" width="236" height="28">
         </a>
         <p>Solusi kaca film mobil, kaca film gedung, dan Paint Protection Film untuk kendaraan dan properti Anda.</p>
+        <div class="ag-footer-social">
+          @foreach (SiteContent::social() as [$label, $url, $icon])
+            <a href="{{ $url }}" target="_blank" rel="noopener" aria-label="{{ $label }}"><iconify-icon icon="{{ $icon }}" width="20" aria-hidden="true"></iconify-icon></a>
+          @endforeach
+        </div>
       </div>
 
-      <div class="ag-footer-cell">
+      <nav aria-label="Layanan">
         <h4 role="heading" aria-level="3">Layanan</h4>
         <ul class="big">
           <li><a href="{{ route('frontend.service.car') }}">Automotive Film</a></li>
@@ -23,9 +29,9 @@
           <li><a href="{{ route('frontend.ppf.catalog') }}">Paint Protection</a></li>
           <li><a href="{{ route('warranty.form') }}">Cek Garansi</a></li>
         </ul>
-      </div>
+      </nav>
 
-      <div class="ag-footer-cell">
+      <nav aria-label="Perusahaan">
         <h4 role="heading" aria-level="3">Perusahaan</h4>
         <ul class="big">
           <li><a href="{{ route('frontend.about') }}">About Us</a></li>
@@ -34,16 +40,25 @@
           @if ($artikelHref)<li><a href="{{ $artikelHref }}">Artikel</a></li>@endif
           @if ($dealersHref)<li><a href="{{ $dealersHref }}">Lokasi Dealer</a></li>@endif
         </ul>
-      </div>
+      </nav>
 
-      <div class="ag-footer-cell">
-        <h4 role="heading" aria-level="3">Kontak</h4>
-        <p>{{ config('acegard.address') }}</p>
-        <p><a href="mailto:{{ config('acegard.email') }}">{{ config('acegard.email') }}</a></p>
-        <p><a class="whatsapp-btn" data-gtm-label="footer-whatsapp" target="_blank" rel="noopener" href="{{ Whatsapp::url() }}">WhatsApp {{ Whatsapp::display() }}</a></p>
+      <div>
+        <h4 role="heading" aria-level="3">Hubungi Kami</h4>
+        <div class="ag-footer-contact">
+          <div><iconify-icon icon="mdi:map-marker-outline" width="20" aria-hidden="true"></iconify-icon><span>{{ config('acegard.address') }}</span></div>
+          <div><iconify-icon icon="mdi:email-outline" width="20" aria-hidden="true"></iconify-icon><a href="mailto:{{ config('acegard.email') }}">{{ config('acegard.email') }}</a></div>
+          <div><iconify-icon icon="mdi:clock-outline" width="20" aria-hidden="true"></iconify-icon><span>{{ SiteContent::HOURS }}</span></div>
+        </div>
+        <a class="ag-footer-wa whatsapp-btn" data-gtm-label="footer-whatsapp" target="_blank" rel="noopener" href="{{ Whatsapp::url() }}">
+          <iconify-icon icon="mdi:whatsapp" width="20" aria-hidden="true"></iconify-icon> WhatsApp {{ Whatsapp::display() }}
+        </a>
       </div>
     </div>
+  </div>
 
+  <p class="ag-footer-mark" aria-hidden="true">ACEGARD</p>
+
+  <div class="ag-container">
     <div class="ag-footer-bottom">
       <span>Copyright {{ date('Y') }} - ACEGARD, All Rights Reserved</span>
       <span>Tangerang, Indonesia</span>
