@@ -404,4 +404,16 @@ class FrontendRedesignHomeTest extends TestCase
         $this->assertMatchesRegularExpression('/\.ag-hero-actions\s*\{[^}]*position:\s*relative;[^}]*z-index:\s*3/', $css);
         $this->assertMatchesRegularExpression('/\.ag-hero-car\s*\{[^}]*pointer-events:\s*none/', $css);
     }
+
+    public function test_about_menyembunyikan_perjalanan_bila_kosong_dan_menampilkannya_bila_terisi(): void
+    {
+        if (\App\Support\SiteContent::history() === []) {
+            $this->get(route('frontend.about'))->assertOk()->assertDontSee('id="perjalanan"', false);
+        } else {
+            $res = $this->get(route('frontend.about'))->assertOk()->assertSee('id="perjalanan"', false);
+            foreach (\App\Support\SiteContent::history() as $h) {
+                $res->assertSee($h['year'])->assertSee($h['title']);
+            }
+        }
+    }
 }

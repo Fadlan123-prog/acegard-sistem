@@ -50,6 +50,37 @@
   </div>
 </section>
 
+{{-- ───────── Perjalanan ACEGARD (tampil hanya bila SiteContent::history() terisi) ───────── --}}
+@php $history = SiteContent::history(); @endphp
+@if (count($history))
+<section class="ag-section" id="perjalanan" data-sec="Perjalanan" aria-labelledby="ag-hist-title">
+  <div class="ag-container">
+    <div class="ag-head ag-reveal">
+      <span class="ag-eyebrow">Our Journey</span>
+      <h2 class="ag-h2" id="ag-hist-title">Perjalanan <b>ACEGARD</b></h2>
+      <p class="ag-lead">Dari awal berdiri sampai sekarang, tahun demi tahun.</p>
+    </div>
+    <ol class="ag-tl">
+      @foreach ($history as $h)
+        <li class="ag-tl-item ag-reveal">
+          <span class="ag-tl-year">{{ $h['year'] }}</span>
+          <div class="ag-tl-card">
+            @if (! empty($h['image']))
+              <figure class="ag-tl-fig"><img src="{{ $img($h['image']) }}" alt="{{ $h['title'] }}" width="800" height="500" loading="lazy"></figure>
+            @endif
+            <h3>{{ $h['title'] }}</h3>
+            <p>{{ $h['text'] }}</p>
+            @if (! empty($h['stat']))
+              <span class="ag-tl-stat"><b>{{ $h['stat'][1] }}</b> {{ $h['stat'][0] }}</span>
+            @endif
+          </div>
+        </li>
+      @endforeach
+    </ol>
+  </div>
+</section>
+@endif
+
 {{-- ───────── Teknologi ───────── --}}
 <section class="ag-section" id="teknologi" data-sec="Teknologi" aria-labelledby="ag-tech-title">
   <div class="ag-container ag-split">

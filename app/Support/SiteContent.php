@@ -7,6 +7,20 @@ class SiteContent
 {
     public const HOURS = 'Buka setiap hari pukul 09.00 sampai 18.00';
 
+    /**
+     * Perjalanan ACEGARD dari pendirian sampai sekarang, urut dari tahun terlama.
+     * Diisi dari informasi resmi pemilik. Selama kosong, bagian "Perjalanan" tidak ditampilkan di halaman About.
+     *
+     * Contoh isi satu baris (image dan stat opsional; gambar ada di public/assets/frontend/ag/):
+     *   ['year' => '20XX', 'title' => 'Judul tonggak', 'text' => 'Uraian singkat.', 'image' => 'nama-file.webp', 'stat' => ['Cabang', '3']]
+     *
+     * @return array<int, array{year:string,title:string,text:string,image?:string,stat?:array{0:string,1:string}}>
+     */
+    public static function history(): array
+    {
+        return [];
+    }
+
     /** @return array<int, array{0:string,1:string,2:?string,3:string}> [nama, peran, foto, kutipan] */
     public static function testimonials(): array
     {
