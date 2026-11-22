@@ -18,7 +18,29 @@ class SiteContent
      */
     public static function history(): array
     {
-        return [];
+        return [
+            [
+                'year' => '2023',
+                'title' => 'ACEGARD berdiri',
+                'text' => 'Hendy Tanpratama mendirikan ACEGARD. Gerai pertama resmi dibuka di Tanjung Barat.',
+            ],
+            [
+                'year' => '2023',
+                'title' => 'Masuk ke kaca film gedung',
+                'text' => 'Menjelang akhir tahun, ACEGARD mulai mengerjakan kaca film untuk gedung.',
+            ],
+            [
+                'year' => '2025',
+                'title' => 'Pindah ke Cipondoh, Tangerang',
+                'text' => 'Di awal tahun, ACEGARD pindah dari Tanjung Barat ke lokasi baru di Cipondoh, Tangerang.',
+            ],
+            [
+                'year' => '2025',
+                'title' => 'Layanan PPF resmi dibuka',
+                'text' => 'ACEGARD resmi membuka layanan PPF (Paint Protection Film) untuk perlindungan cat bodi mobil.',
+                'stat' => ['mobil dan 230 gedung sudah ditangani', '4.000'],
+            ],
+        ];
     }
 
     /** @return array<int, array{0:string,1:string,2:?string,3:string}> [nama, peran, foto, kutipan] */
