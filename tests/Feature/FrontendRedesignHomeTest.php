@@ -424,4 +424,9 @@ class FrontendRedesignHomeTest extends TestCase
             $res->assertSee('data-reel="' . $r['id'] . '"', false);
         }
     }
+
+    public function test_beranda_menampilkan_reel_artis_yang_dimuat_otomatis(): void
+    {
+        $this->get(route('frontend.home'))->assertOk()->assertSee('id="artis"', false)->assertSee('data-auto="1"', false);
+    }
 }

@@ -278,6 +278,8 @@
   </div>
 </section>
 
+@include('frontend.partials.reels', ['alt' => false, 'auto' => true])
+
 {{-- ───────── Proses ───────── --}}
 <section class="ag-section" id="proses" aria-labelledby="ag-process-title">
   <div class="ag-container">
