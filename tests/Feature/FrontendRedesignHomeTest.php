@@ -429,4 +429,10 @@ class FrontendRedesignHomeTest extends TestCase
     {
         $this->get(route('frontend.home'))->assertOk()->assertSee('id="artis"', false)->assertSee('data-auto="1"', false);
     }
+
+    public function test_reel_dengan_file_video_memakai_autoplay_bisu(): void
+    {
+        $src = file_get_contents(resource_path('views/frontend/partials/reels.blade.php'));
+        $this->assertStringContainsString('<video class="ag-reel-video" muted loop playsinline', $src);
+    }
 }

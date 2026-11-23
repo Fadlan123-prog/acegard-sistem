@@ -9,9 +9,10 @@ class SiteContent
 
     /**
      * Reel Instagram @acegard.id: pemasangan untuk artis. Isi 'id' dengan kode setelah /reel/ pada link.
-     * Judul dan nama artis diisi bila pemilik sudah mengizinkan.
+     * Opsional: 'video' => 'nama.mp4' (di public/assets/frontend/ag/video/, diputar otomatis tanpa suara) dan 'poster' => 'nama.webp' (di public/assets/frontend/ag/).
+     * Tanpa file video, reel dimuat lewat embed Instagram. Judul dan nama artis diisi bila pemilik sudah mengizinkan.
      *
-     * @return array<int, array{id:string,title:string}>
+     * @return array<int, array{id:string,title:string,video?:string,poster?:string}>
      */
     public static function celebrityReels(): array
     {
