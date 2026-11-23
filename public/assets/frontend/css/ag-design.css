@@ -539,3 +539,14 @@ a.ag-chip { text-decoration: none; }
   .ag-tl-item:nth-child(even) .ag-tl-year { grid-column: 2; justify-self: start; }
   .ag-tl-item:nth-child(even) .ag-tl-card { grid-column: 1; }
 }
+
+/* Reel Instagram (klik untuk memutar) */
+.ag-reels{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.ag-reel{aspect-ratio:9/16;max-height:640px;border-radius:var(--ag-r,16px);overflow:hidden;background:var(--ag-deep,#123B73);border:1px solid var(--ag-border,#E2E8F0)}
+.ag-reel iframe{width:100%;height:100%;border:0;background:#fff}
+.ag-reel-play{all:unset;box-sizing:border-box;cursor:pointer;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#fff;text-align:center;padding:24px;background:linear-gradient(160deg,#155EEF,#123B73)}
+.ag-reel-play:focus-visible{outline:3px solid #fff;outline-offset:-6px}
+.ag-reel-btn{width:64px;height:64px;border-radius:50%;background:#fff;color:#155EEF;display:grid;place-items:center;transition:transform .2s}
+.ag-reel-play:hover .ag-reel-btn{transform:scale(1.08)}
+.ag-reel-t{font-weight:600}
+.ag-reel-play small{opacity:.8}

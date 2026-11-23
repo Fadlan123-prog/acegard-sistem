@@ -416,4 +416,12 @@ class FrontendRedesignHomeTest extends TestCase
             }
         }
     }
+
+    public function test_about_menampilkan_reel_artis_dengan_embed_instagram(): void
+    {
+        $res = $this->get(route('frontend.about'))->assertOk()->assertSee('id="artis"', false);
+        foreach (\App\Support\SiteContent::celebrityReels() as $r) {
+            $res->assertSee('data-reel="' . $r['id'] . '"', false);
+        }
+    }
 }

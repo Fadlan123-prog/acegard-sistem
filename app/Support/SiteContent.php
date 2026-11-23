@@ -8,6 +8,22 @@ class SiteContent
     public const HOURS = 'Buka setiap hari pukul 09.00 sampai 18.00';
 
     /**
+     * Reel Instagram @acegard.id: pemasangan untuk artis. Isi 'id' dengan kode setelah /reel/ pada link.
+     * Judul dan nama artis diisi bila pemilik sudah mengizinkan.
+     *
+     * @return array<int, array{id:string,title:string}>
+     */
+    public static function celebrityReels(): array
+    {
+        return [
+            ['id' => 'C-7RwF8pkxr', 'title' => 'Pemasangan untuk artis'],
+            ['id' => 'DMMh6xuzF__', 'title' => 'Pemasangan untuk artis'],
+            ['id' => 'DdWLa64zWMT', 'title' => 'Pemasangan untuk artis'],
+            ['id' => 'DerA_R8u22C', 'title' => 'Pemasangan untuk artis'],
+        ];
+    }
+
+    /**
      * Perjalanan ACEGARD dari pendirian sampai sekarang, urut dari tahun terlama.
      * Diisi dari informasi resmi pemilik. Selama kosong, bagian "Perjalanan" tidak ditampilkan di halaman About.
      *
