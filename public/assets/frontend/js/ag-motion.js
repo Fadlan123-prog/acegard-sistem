@@ -308,7 +308,7 @@
           if (bar) gsap.to(bar, { scaleY: (i + 1) / total, duration: 0.8, ease: 'power3.out' });
         }
         items.forEach(function (it, i) {
-          ScrollTrigger.create({ trigger: it, start: 'top 58%', end: 'bottom 58%', onToggle: function (self) { if (self.isActive) go(i); } });
+          ScrollTrigger.create({ trigger: it, start: 'top center+=36', end: 'bottom center+=36', onToggle: function (self) { if (self.isActive) go(i); } });
         });
         go(0);
 

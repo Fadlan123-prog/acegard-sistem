@@ -79,7 +79,7 @@ html.ag-m .ag-hero .ag-container > * { animation: none; opacity: 1; transform: n
 .ag-ps-item .ag-pills { margin-bottom: 18px; }
 
 .ag-ps-on .ag-ps-grid { display: grid; grid-template-columns: 1.08fr 1fr; gap: clamp(40px, 5vw, 80px); align-items: start; }
-.ag-ps-on .ag-ps-stage { display: block; position: sticky; top: 104px; height: min(72vh, 600px); }
+.ag-ps-on .ag-ps-stage { display: block; --ps-h: min(72vh, 600px); position: sticky; top: calc(50vh + 36px - var(--ps-h) / 2); top: calc(50svh + 36px - var(--ps-h) / 2); height: var(--ps-h); }
 .ag-ps-on .ag-ps-img { position: absolute; inset: 0; margin: 0; border-radius: 28px; overflow: hidden; background: var(--ag-light); will-change: clip-path, transform; }
 .ag-ps-on .ag-ps-stage::after { content: ''; position: absolute; inset: 0; z-index: 4; border-radius: 28px; pointer-events: none; background: linear-gradient(180deg, rgba(18, 59, 115, 0) 55%, rgba(18, 59, 115, .5) 100%); }
 .ag-ps-num { position: absolute; left: 28px; bottom: 22px; z-index: 5; display: flex; align-items: baseline; gap: 10px; color: #fff; font-variant-numeric: tabular-nums; }
@@ -90,7 +90,7 @@ html.ag-m .ag-hero .ag-container > * { animation: none; opacity: 1; transform: n
 .ag-ps-bar i { display: block; width: 100%; height: 100%; background: #fff; transform-origin: 50% 0; transform: scaleY(.34); border-radius: 99px; }
 .ag-ps-on .ag-ps-inline { display: none; }
 .ag-ps-on .ag-ps-list { gap: 0; }
-.ag-ps-on .ag-ps-item { min-height: 82vh; align-content: center; padding: 0 0 0 8px; background: none; border: 0; opacity: .25; transition: opacity .6s var(--ag-ease); }
+.ag-ps-on .ag-ps-item { min-height: calc(100vh - 72px); min-height: calc(100svh - 72px); align-content: center; padding: 0 0 0 8px; background: none; border: 0; opacity: .25; transition: opacity .6s var(--ag-ease); }
 .ag-ps-on .ag-ps-item.is-active { opacity: 1; }
 .ag-ps-on .ag-ps-item h3 { font-size: clamp(2.2rem, 3.6vw, 3.5rem); }
 .ag-ps-on .ag-ps-item p { font-size: 1.125rem; max-width: 46ch; }
