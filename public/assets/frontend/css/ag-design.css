@@ -566,7 +566,6 @@ a.ag-chip { text-decoration: none; }
 }
 
 .ag-section, .ag-statement, .ag-hs { isolation: isolate; overflow: clip; }
-body { counter-reset: agsec; }
 
 /* 2. gradien halus; tepi atas dan bawah memudar ke putih agar peralihan antar section menyatu */
 .ag-section, .ag-statement, .ag-hs { background: linear-gradient(180deg, #fff 0%, #FAFCFF 50%, #fff 100%); }
@@ -624,17 +623,8 @@ body { counter-reset: agsec; }
     radial-gradient(40% 60% at 0% 100%, rgba(18, 59, 115, .35) 0%, transparent 70%);
 }
 
-/* 10. nomor besar transparan di belakang judul section */
-.ag-head { position: relative; }
-.ag-head::before {
-  counter-increment: agsec; content: counter(agsec, decimal-leading-zero);
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -52%); z-index: -1; pointer-events: none;
-  font-size: clamp(7rem, 20vw, 17rem); font-weight: 700; letter-spacing: -.06em; line-height: 1; white-space: nowrap;
-  color: transparent; -webkit-text-stroke: 1.5px rgba(21, 94, 239, .10);
-}
 @media (max-width: 640px) {
   :root { --ag-dot: rgba(21, 94, 239, .12); }
-  .ag-head::before { -webkit-text-stroke-width: 1px; }
 }
 
 /* Navbar transparan di atas hero; menjadi kaca putih setelah halaman digulir */

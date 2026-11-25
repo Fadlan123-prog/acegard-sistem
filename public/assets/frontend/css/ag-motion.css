@@ -45,7 +45,7 @@ html.ag-m .ag-hero .ag-container > * { animation: none; opacity: 1; transform: n
 .js .ag-reveal { transition-delay: calc(var(--i, 0) * 90ms); }
 
 /* ---------- Penomoran section dan indeks samping ---------- */
-.ag-eyebrow[data-num]::before { content: attr(data-num) ' /'; margin-right: 8px; opacity: .55; font-variant-numeric: tabular-nums; }
+.ag-eyebrow[data-num]::before { content: none; }
 .ag-index { position: fixed; left: 18px; top: 50%; z-index: 1020; display: none; transform: translate(-12px, -50%); opacity: 0; pointer-events: none; transition: opacity .4s var(--ag-ease), transform .5s var(--ag-ease); }
 .ag-hs-active .ag-index { opacity: 0 !important; pointer-events: none; }
 .ag-index.is-visible { opacity: 1; transform: translate(0, -50%); pointer-events: auto; }
