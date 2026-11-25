@@ -255,6 +255,16 @@
     void mm;
   }
 
+  /* ───────── Parallax lembut untuk glow dan kontur latar (variabel --ag-py) ───────── */
+  function initBgParallax() {
+    $('.ag-hero, .ag-section, .ag-statement, .ag-hs').forEach(function (sec) {
+      gsap.fromTo(sec, { '--ag-py': '-36px' }, {
+        '--ag-py': '36px', ease: 'none',
+        scrollTrigger: { trigger: sec, start: 'top bottom', end: 'bottom top', scrub: true, invalidateOnRefresh: true }
+      });
+    });
+  }
+
   /* ───────── Angka menghitung naik ───────── */
   function initCounters() {
     $('.ag-stats dd').forEach(function (dd) {
@@ -437,6 +447,7 @@
     initCounters();
     initImages(mm);
     initSections(mm);
+    initBgParallax();
     initServices(mm);
     initHorizontal(mm);
     initStory(mm);

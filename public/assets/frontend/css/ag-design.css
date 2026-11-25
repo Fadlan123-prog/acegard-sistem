@@ -555,3 +555,89 @@ a.ag-chip { text-decoration: none; }
 .ag-reel-sound{position:absolute;right:12px;bottom:12px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(18,59,115,.75);color:#fff;display:grid;place-items:center;cursor:pointer}
 .ag-reel-sound:focus-visible,.ag-reel-ig:focus-visible{outline:3px solid #fff;outline-offset:2px}
 .ag-reel-ig{position:absolute;left:12px;bottom:12px;display:inline-flex;gap:6px;align-items:center;padding:8px 12px;border-radius:999px;background:rgba(18,59,115,.75);color:#fff;font-size:.8rem;text-decoration:none}
+
+/* ───────── Aksen background (glow, gradien, titik, kontur, kilau, pemisah, watermark) ───────── */
+:root {
+  --ag-glow: rgba(21, 94, 239, .13);
+  --ag-glow-soft: rgba(120, 170, 255, .16);
+  --ag-dot: rgba(21, 94, 239, .16);
+  --ag-contour: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='700' viewBox='0 0 1400 700' fill='none' stroke='%23155EEF' stroke-width='1.2' stroke-opacity='.11'%3E%3Cpath d='M-60 470C220 330 430 580 720 450S1180 280 1460 400'/%3E%3Cpath d='M-60 500C220 360 430 610 720 480S1180 310 1460 430'/%3E%3Cpath d='M-60 530C220 390 430 640 720 510S1180 340 1460 460'/%3E%3Cpath d='M-60 560C220 420 430 670 720 540S1180 370 1460 490'/%3E%3Cpath d='M-60 590C220 450 430 700 720 570S1180 400 1460 520'/%3E%3Cpath d='M-60 440C220 300 430 550 720 420S1180 250 1460 370'/%3E%3C/svg%3E");
+  --ag-contour-w: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='700' viewBox='0 0 1400 700' fill='none' stroke='%23FFFFFF' stroke-width='1.2' stroke-opacity='.16'%3E%3Cpath d='M-60 470C220 330 430 580 720 450S1180 280 1460 400'/%3E%3Cpath d='M-60 510C220 370 430 620 720 490S1180 320 1460 440'/%3E%3Cpath d='M-60 550C220 410 430 660 720 530S1180 360 1460 480'/%3E%3Cpath d='M-60 430C220 290 430 540 720 410S1180 240 1460 360'/%3E%3C/svg%3E");
+}
+
+.ag-section, .ag-statement, .ag-hs { isolation: isolate; overflow: clip; }
+body { counter-reset: agsec; }
+
+/* 2. gradien halus + 8. garis pemisah bergradien di tepi atas */
+.ag-section, .ag-statement, .ag-hs {
+  background:
+    linear-gradient(90deg, transparent, rgba(21, 94, 239, .22) 50%, transparent) top / 100% 1px no-repeat,
+    linear-gradient(180deg, #fff 0%, #F8FAFF 100%);
+}
+.ag-section.alt { background: linear-gradient(90deg, transparent, rgba(21, 94, 239, .22) 50%, transparent) top / 100% 1px no-repeat, linear-gradient(180deg, #F7F9FC 0%, #EDF3FF 100%); }
+.ag-section.tint { background: linear-gradient(90deg, transparent, rgba(21, 94, 239, .25) 50%, transparent) top / 100% 1px no-repeat, linear-gradient(180deg, #EAF2FF 0%, #DCE9FF 100%); }
+
+/* 7. tepi atas membulat pada section berlatar */
+.ag-section.alt, .ag-section.tint { border-radius: clamp(28px, 4vw, 56px) clamp(28px, 4vw, 56px) 0 0; }
+
+/* 1. glow biru lembut + 6. kilau kaca diagonal (satu lapisan, ikut parallax) */
+.ag-section::before, .ag-statement::before, .ag-hs::before {
+  content: ''; position: absolute; inset: -60px 0; z-index: -1; pointer-events: none;
+  transform: translate3d(0, var(--ag-py, 0px), 0);
+  background:
+    radial-gradient(42% 46% at 8% 14%, var(--ag-glow) 0%, transparent 70%),
+    radial-gradient(36% 40% at 96% 92%, var(--ag-glow-soft) 0%, transparent 70%);
+}
+.ag-section:nth-of-type(even)::before, .ag-statement::before {
+  background:
+    radial-gradient(42% 46% at 92% 12%, var(--ag-glow) 0%, transparent 70%),
+    radial-gradient(36% 40% at 4% 90%, var(--ag-glow-soft) 0%, transparent 70%);
+}
+.ag-section.alt::before {
+  background:
+    linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, .6) 47%, rgba(255, 255, 255, 0) 54%, transparent 56%),
+    radial-gradient(42% 46% at 92% 12%, var(--ag-glow) 0%, transparent 70%),
+    radial-gradient(36% 40% at 4% 90%, var(--ag-glow-soft) 0%, transparent 70%);
+}
+
+/* 4. pola titik yang memudar ke tepi, di balik judul section */
+.ag-section::after, .ag-statement::after {
+  content: ''; position: absolute; left: 0; right: 0; top: 0; height: min(460px, 60%); z-index: -1; pointer-events: none;
+  background-image: radial-gradient(circle, var(--ag-dot) 1.1px, transparent 1.6px); background-size: 24px 24px;
+  -webkit-mask-image: radial-gradient(60% 90% at 50% 0%, #000 0%, transparent 100%);
+  mask-image: radial-gradient(60% 90% at 50% 0%, #000 0%, transparent 100%);
+  opacity: .7;
+}
+.ag-section[data-ps]::after, .ag-section[data-hs]::after { opacity: .5; }
+
+/* 5. garis kontur melengkung di hero dan panel CTA */
+.ag-hero { isolation: isolate; }
+.ag-hero::before {
+  content: ''; position: absolute; inset: -40px 0; z-index: 0; pointer-events: none; transform: translate3d(0, var(--ag-py, 0px), 0);
+  background:
+    var(--ag-contour) center bottom / min(1400px, 140%) auto no-repeat,
+    radial-gradient(38% 46% at 6% 10%, var(--ag-glow) 0%, transparent 70%),
+    radial-gradient(34% 40% at 96% 20%, var(--ag-glow-soft) 0%, transparent 70%);
+}
+.ag-hero > * { position: relative; z-index: 1; }
+.ag-cta-panel { position: relative; overflow: hidden; isolation: isolate; }
+.ag-cta-panel::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    var(--ag-contour-w) center bottom / cover no-repeat,
+    radial-gradient(50% 70% at 85% 0%, rgba(255, 255, 255, .18) 0%, transparent 70%),
+    radial-gradient(40% 60% at 0% 100%, rgba(18, 59, 115, .35) 0%, transparent 70%);
+}
+
+/* 10. nomor besar transparan di belakang judul section */
+.ag-head { position: relative; }
+.ag-head::before {
+  counter-increment: agsec; content: counter(agsec, decimal-leading-zero);
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -52%); z-index: -1; pointer-events: none;
+  font-size: clamp(7rem, 20vw, 17rem); font-weight: 700; letter-spacing: -.06em; line-height: 1; white-space: nowrap;
+  color: transparent; -webkit-text-stroke: 1.5px rgba(21, 94, 239, .10);
+}
+@media (max-width: 640px) {
+  :root { --ag-dot: rgba(21, 94, 239, .12); }
+  .ag-head::before { -webkit-text-stroke-width: 1px; }
+}
