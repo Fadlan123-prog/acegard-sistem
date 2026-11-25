@@ -646,3 +646,9 @@ main > .ag-hero:first-child .ag-container { padding-top: calc(var(--ag-nav-h, 76
 .ag-about-home .ag-shot img { width: 100%; height: 100%; object-fit: cover; }
 .ag-about-home .ag-stats > div { padding: 16px 18px; }
 .ag-about-home .ag-stats dd { margin-top: 8px; font-size: clamp(1.75rem, 2.6vw, 2.25rem); }
+
+/* Reel artis: kartu selebar embed Instagram (326-340px), baris geser bila tidak muat */
+.ag-reels { display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; justify-content: safe center; padding: 4px 4px 16px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+.ag-reel { flex: 0 0 min(340px, 86vw); aspect-ratio: auto; max-height: none; height: 700px; scroll-snap-align: center; background: #fff; border: 1px solid var(--ag-border); box-shadow: 0 18px 40px -26px rgba(18, 59, 115, .35); }
+.ag-reel:has(.ag-reel-video) { height: auto; aspect-ratio: 9 / 16; }
+@media (max-width: 380px) { .ag-reel { height: 720px; } }
