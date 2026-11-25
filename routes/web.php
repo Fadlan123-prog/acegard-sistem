@@ -795,6 +795,34 @@ Route::middleware(['auth', 'role:superadmin|admin|purchasing|finance|it_manager'
 
 /*
 |--------------------------------------------------------------------------
+| INVOICE ROLL ANTAR CABANG — penjualan roll utuh dari satu cabang ke cabang lain.
+| Akses per cabang dicek di controller (penjual / pembeli); superadmin dan owner lintas cabang.
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'branch.access', 'role:superadmin|owner|admin|manager_operasional|purchasing|finance|it_manager'])
+    ->prefix('branch-roll-invoices')->name('branch-roll-invoices.')->controller(\App\Http\Controllers\BranchRollInvoiceController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::get('/pools', 'pools')->name('pools');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{invoice}', 'show')->name('show');
+        Route::get('/{invoice}/pdf', 'pdf')->name('pdf');
+        Route::post('/{invoice}/receive', 'receive')->name('receive');
+        Route::post('/{invoice}/cancel', 'cancel')->name('cancel');
+        Route::patch('/{invoice}/mark-paid', 'markPaid')->name('mark-paid');
+    });
+
+Route::middleware(['auth', 'branch.access', 'role:superadmin|owner|finance'])
+    ->prefix('branch-roll-prices')->name('branch-roll-prices.')->controller(\App\Http\Controllers\BranchRollPriceController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::put('/', 'update')->name('update');
+    });
+
+/*
+|--------------------------------------------------------------------------
 | EXPORT & IMPORT — superadmin, export_import
 |--------------------------------------------------------------------------
 */
