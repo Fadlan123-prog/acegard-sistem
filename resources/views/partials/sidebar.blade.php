@@ -303,6 +303,16 @@
                     <span>Komisi</span>
                 </a>
             </li>
+            <li class="dropdown">
+                <a href="javascript:void(0)">
+                    <iconify-icon icon="mdi:swap-horizontal-bold" class="menu-icon"></iconify-icon>
+                    <span>Roll Antar Cabang</span>
+                </a>
+                <ul class="sidebar-submenu">
+                    <li><a href="{{ route('branch-roll-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Invoice Roll Antar Cabang</a></li>
+                    <li><a href="{{ route('branch-roll-prices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Harga Roll Antar Cabang</a></li>
+                </ul>
+            </li>
             <li>
                 <a href="{{ route('analytics.index') }}">
                     <iconify-icon icon="lucide:bar-chart-3" class="menu-icon"></iconify-icon>
@@ -467,6 +477,7 @@
                 </a>
                 <ul class="sidebar-submenu">
                     <li><a href="{{ route('film-stock.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Stock Pool</a></li>
+                    <li><a href="{{ route('branch-roll-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Invoice Roll Antar Cabang</a></li>
                     <li><a href="{{ route('film-stock.usages') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Laporan Pemakaian</a></li>
                 </ul>
             </li>
@@ -541,6 +552,8 @@
                     <li><a href="{{ route('customer.building.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Buildings</a></li>
                     <li><a href="{{ route('ppf-installations.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>PPF</a></li>
                     <li><a href="{{ route('mitra-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Mitra & Non-Franchise</a></li>
+                    <li><a href="{{ route('branch-roll-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Invoice Roll Antar Cabang</a></li>
+                    <li><a href="{{ route('branch-roll-prices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Harga Roll Antar Cabang</a></li>
                 </ul>
             </li>
             <li class="dropdown">
@@ -627,6 +640,7 @@
                 </a>
                 <ul class="sidebar-submenu">
                     <li><a href="{{ route('film-stock.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Stock Pool</a></li>
+                    <li><a href="{{ route('branch-roll-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Invoice Roll Antar Cabang</a></li>
                     <li><a href="{{ route('film-stock.create') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Roll Masuk / Import</a></li>
                 </ul>
             </li>
@@ -729,6 +743,10 @@
                 </a>
                 <ul class="sidebar-submenu">
                     <li><a href="{{ route('film-stock.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Stock Pool</a></li>
+                    <li><a href="{{ route('branch-roll-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Invoice Roll Antar Cabang</a></li>
+                    @if($isSuperadmin)
+                    <li><a href="{{ route('branch-roll-prices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Harga Roll Antar Cabang</a></li>
+                    @endif
                     <li><a href="{{ route('film-stock.create') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Roll Masuk / Import</a></li>
                     <li><a href="{{ route('film-stock.usages') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Laporan Pemakaian</a></li>
                 </ul>
