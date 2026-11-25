@@ -200,23 +200,29 @@
 
 {{-- ───────── About ───────── --}}
 <section class="ag-section alt" id="tentang" data-sec="Tentang" aria-labelledby="ag-about-title">
-  <div class="ag-container">
-    <div class="ag-head ag-reveal" style="margin-bottom:28px">
+  <div class="ag-container ag-split ag-about-home">
+    <div class="ag-reveal">
       <span class="ag-eyebrow">About ACEGARD</span>
-      <h2 class="ag-h2" id="ag-about-title">Kaca film Nano Ceramic <b>untuk kendaraan dan bangunan</b></h2>
+      <h2 class="ag-h2 ag-h2-left" id="ag-about-title" style="margin-top:16px">Kaca film Nano Ceramic <b>untuk kendaraan dan bangunan</b></h2>
+      <div class="ag-prose">
+        <p>ACEGARD Indonesia menyediakan kaca film mobil, kaca film gedung dan rumah, serta Paint Protection Film (PPF). Produk kami diproduksi di pabrik bersertifikat internasional di Korea, melewati kontrol kualitas berlapis, lalu didistribusikan secara resmi di Indonesia.</p>
+        <p>Kaca film ACEGARD memakai teknologi Nano Ceramic Matrix Composite: dual-layer Nano Ceramic yang diperkuat Tin, Titanium, dan Tungsten. Hasilnya tujuh lapisan yang stabil secara optik, tahan lama, dan tidak mengganggu sinyal seluler, WiFi, maupun GPS.</p>
+        <p>Pemasangan dikerjakan teknisi di workshop kami di Cipondoh, Kota Tangerang. Setiap pelanggan mendapat konsultasi sebelum pemasangan, garansi, dan layanan after sales.</p>
+      </div>
+      <a class="ag-link" href="{{ route('frontend.about') }}">Selengkapnya tentang ACEGARD <iconify-icon icon="mdi:arrow-right" aria-hidden="true"></iconify-icon></a>
     </div>
-    <div class="ag-prose ag-reveal">
-      <p>ACEGARD Indonesia menyediakan kaca film mobil, kaca film gedung dan rumah, serta Paint Protection Film (PPF). Produk kami diproduksi di pabrik bersertifikat internasional di Korea, melewati kontrol kualitas berlapis, lalu didistribusikan secara resmi di Indonesia.</p>
-      <p>Kaca film ACEGARD memakai teknologi Nano Ceramic Matrix Composite. Lapisan dasarnya berupa dual-layer Nano Ceramic yang diproses dengan teknologi sputtering dan diperkuat unsur logam Tin, Titanium, dan Tungsten. Hasilnya tujuh lapisan yang stabil secara optik, tahan lama, dan tidak mengganggu sinyal seluler, WiFi, maupun GPS.</p>
-      <p>Pemasangan dikerjakan oleh teknisi di workshop kami di Cipondoh, Kota Tangerang. Setiap pelanggan mendapat konsultasi sebelum pemasangan, garansi, dan layanan after sales.</p>
+    <div class="ag-reveal">
+      <figure class="ag-shot"><img src="{{ $img('gallery-install.webp') }}" width="1000" height="726" loading="lazy" alt="Teknisi ACEGARD memasang kaca film pada kaca pintu mobil"></figure>
+      <dl class="ag-stats ag-stats-2" style="margin-top:16px">
+        <div><dt>Tolak inframerah</dt><dd>99<small>%</small></dd></div>
+        <div><dt>TSER hingga</dt><dd>95<small>%</small></dd></div>
+        <div><dt>Tolak sinar UV</dt><dd>99,9<small>%</small></dd></div>
+        <div><dt>Penurunan suhu interior</dt><dd>&plusmn;5<small>&deg;C</small></dd></div>
+      </dl>
     </div>
-    <dl class="ag-stats ag-reveal">
-      <div><dt>Tolak inframerah</dt><dd>99<small>%</small></dd></div>
-      <div><dt>TSER hingga</dt><dd>95<small>%</small></dd></div>
-      <div><dt>Tolak sinar UV</dt><dd>99,9<small>%</small></dd></div>
-      <div><dt>Penurunan suhu interior</dt><dd>&plusmn;5<small>&deg;C</small></dd></div>
-    </dl>
-    <p class="ag-note ag-center ag-reveal">Angka bersumber dari lembar spesifikasi produk ACEGARD. Hasil di lapangan dapat berbeda menurut tipe film, kendaraan atau bangunan, dan kondisi cuaca.</p>
+  </div>
+  <div class="ag-container">
+    <p class="ag-note ag-center ag-reveal" style="margin-top:20px">Angka bersumber dari lembar spesifikasi produk ACEGARD. Hasil di lapangan dapat berbeda menurut tipe film, kendaraan atau bangunan, dan kondisi cuaca.</p>
   </div>
 </section>
 

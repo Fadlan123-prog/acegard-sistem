@@ -634,3 +634,10 @@ main > .ag-hero:first-child .ag-container { padding-top: calc(var(--ag-nav-h, 76
 @media (min-width: 992px) {
   .ag-nav-pill { background: rgba(255, 255, 255, .6); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 }
+
+/* Beranda: About dua kolom */
+.ag-about-home .ag-h2-left { text-align: left; }
+.ag-about-home .ag-shot { margin: 0; }
+.ag-about-home .ag-stats > div { padding: 20px 20px; }
+.ag-about-home .ag-stats dd { font-size: clamp(1.9rem, 3.2vw, 2.75rem); }
+.ag-about-home .ag-link { display: inline-flex; margin-top: 4px; }
