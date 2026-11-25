@@ -58,7 +58,7 @@ html { scroll-behavior: smooth; }
 .ag-link:hover { color: var(--ag-primary-hover); }
 
 /* ---------- Navbar (pil melayang) ---------- */
-.ag-nav { position: sticky; top: 0; z-index: 1030; padding-block: 14px; background: rgba(255,255,255,.88); -webkit-backdrop-filter: saturate(1.4) blur(12px); backdrop-filter: saturate(1.4) blur(12px); }
+.ag-nav { position: sticky; top: 0; z-index: 1030; padding-block: 14px; background: transparent; transition: background .3s, box-shadow .3s, padding .3s; }
 .ag-nav .ag-container { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .ag-nav-brand img { display: block; height: 26px; width: auto; }
 .ag-nav-toggle { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--ag-border); border-radius: 999px; background: #fff; color: var(--ag-deep); }
@@ -100,7 +100,7 @@ html { scroll-behavior: smooth; }
 @keyframes agUp { to { opacity: 1; transform: none; } }
 
 /* marquee klien */
-.ag-marquee { overflow: hidden; padding-block: 22px; border-top: 1px solid var(--ag-line); -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
+.ag-marquee { overflow: hidden; padding-block: 22px; -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
 .ag-marquee-track { display: flex; width: max-content; animation: agMarquee 38s linear infinite; }
 .ag-marquee ul { display: flex; align-items: center; gap: 56px; margin: 0; padding: 0 28px; list-style: none; }
 .ag-marquee li { white-space: nowrap; font-size: 1.25rem; font-weight: 700; letter-spacing: -.02em; color: #94A3B8; }
@@ -568,22 +568,17 @@ a.ag-chip { text-decoration: none; }
 .ag-section, .ag-statement, .ag-hs { isolation: isolate; overflow: clip; }
 body { counter-reset: agsec; }
 
-/* 2. gradien halus + 8. garis pemisah bergradien di tepi atas */
-.ag-section, .ag-statement, .ag-hs {
-  background:
-    linear-gradient(90deg, transparent, rgba(21, 94, 239, .22) 50%, transparent) top / 100% 1px no-repeat,
-    linear-gradient(180deg, #fff 0%, #F8FAFF 100%);
-}
-.ag-section.alt { background: linear-gradient(90deg, transparent, rgba(21, 94, 239, .22) 50%, transparent) top / 100% 1px no-repeat, linear-gradient(180deg, #F7F9FC 0%, #EDF3FF 100%); }
-.ag-section.tint { background: linear-gradient(90deg, transparent, rgba(21, 94, 239, .25) 50%, transparent) top / 100% 1px no-repeat, linear-gradient(180deg, #EAF2FF 0%, #DCE9FF 100%); }
-
-/* 7. tepi atas membulat pada section berlatar */
-.ag-section.alt, .ag-section.tint { border-radius: clamp(28px, 4vw, 56px) clamp(28px, 4vw, 56px) 0 0; }
+/* 2. gradien halus; tepi atas dan bawah memudar ke putih agar peralihan antar section menyatu */
+.ag-section, .ag-statement, .ag-hs { background: linear-gradient(180deg, #fff 0%, #FAFCFF 50%, #fff 100%); }
+.ag-section.alt { background: linear-gradient(180deg, #fff 0%, #F4F8FF 16%, #F1F6FF 84%, #fff 100%); }
+.ag-section.tint { background: linear-gradient(180deg, #fff 0%, #E8F0FF 16%, #E3EDFF 84%, #fff 100%); }
 
 /* 1. glow biru lembut + 6. kilau kaca diagonal (satu lapisan, ikut parallax) */
 .ag-section::before, .ag-statement::before, .ag-hs::before {
   content: ''; position: absolute; inset: -60px 0; z-index: -1; pointer-events: none;
   transform: translate3d(0, var(--ag-py, 0px), 0);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 18%, #000 82%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 18%, #000 82%, transparent 100%);
   background:
     radial-gradient(42% 46% at 8% 14%, var(--ag-glow) 0%, transparent 70%),
     radial-gradient(36% 40% at 96% 92%, var(--ag-glow-soft) 0%, transparent 70%);
@@ -614,8 +609,8 @@ body { counter-reset: agsec; }
 .ag-hero { isolation: isolate; }
 .ag-hero::before {
   content: ''; position: absolute; inset: -40px 0; z-index: 0; pointer-events: none; transform: translate3d(0, var(--ag-py, 0px), 0);
+  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 70%, transparent 100%); mask-image: linear-gradient(180deg, #000 0, #000 70%, transparent 100%);
   background:
-    var(--ag-contour) center bottom / min(1400px, 140%) auto no-repeat,
     radial-gradient(38% 46% at 6% 10%, var(--ag-glow) 0%, transparent 70%),
     radial-gradient(34% 40% at 96% 20%, var(--ag-glow-soft) 0%, transparent 70%);
 }
@@ -640,4 +635,12 @@ body { counter-reset: agsec; }
 @media (max-width: 640px) {
   :root { --ag-dot: rgba(21, 94, 239, .12); }
   .ag-head::before { -webkit-text-stroke-width: 1px; }
+}
+
+/* Navbar transparan di atas hero; menjadi kaca putih setelah halaman digulir */
+.ag-nav:has(~ main > .ag-hero:first-child) { margin-bottom: calc(var(--ag-nav-h, 76px) * -1); }
+main > .ag-hero:first-child .ag-container { padding-top: calc(var(--ag-nav-h, 76px) + clamp(24px, 4vw, 56px)); }
+.ag-nav.is-scrolled { -webkit-backdrop-filter: saturate(1.4) blur(12px); backdrop-filter: saturate(1.4) blur(12px); }
+@media (min-width: 992px) {
+  .ag-nav-pill { background: rgba(255, 255, 255, .6); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 }

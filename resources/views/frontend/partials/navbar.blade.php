@@ -52,3 +52,17 @@
     });
   })();
 </script>
+<script>
+  (function () {
+    var nav = document.querySelector('.ag-nav');
+    if (!nav) return;
+    function size() {
+      var h = nav.offsetHeight + (nav.classList.contains('is-scrolled') ? 12 : 0);
+      document.documentElement.style.setProperty('--ag-nav-h', h + 'px');
+    }
+    function scrolled() { nav.classList.toggle('is-scrolled', (window.pageYOffset || 0) > 24); }
+    size(); scrolled();
+    window.addEventListener('resize', size);
+    window.addEventListener('scroll', scrolled, { passive: true });
+  })();
+</script>
