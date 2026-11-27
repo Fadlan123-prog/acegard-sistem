@@ -247,11 +247,11 @@ class BranchRollInvoiceTest extends TestCase
 
     public function test_harga_mengikuti_kategori_kepemilikan_cabang_pembeli(): void
     {
-        foreach (['non_franchise_own' => 2000000, 'non_franchise_joint' => 2250000] as $type => $price) {
+        foreach (['non_franchise' => 2000000] as $type => $price) {
             BranchRollPrice::create(['ownership_type' => $type, 'film_key' => 'ARMOR', 'price' => $price, 'unit' => 'roll']);
         }
 
-        $expected = ['franchise' => 2500000, 'non_franchise_own' => 2000000, 'non_franchise_joint' => 2250000];
+        $expected = ['franchise' => 2500000, 'non_franchise' => 2000000];
 
         foreach ($expected as $type => $price) {
             BranchRollInvoice::query()->delete();
@@ -276,7 +276,7 @@ class BranchRollInvoiceTest extends TestCase
 
     public function test_harga_kategori_yang_belum_diatur_menolak_walau_kategori_lain_ada(): void
     {
-        $this->buyer->update(['ownership_type' => 'non_franchise_joint']); // hanya franchise yang punya harga
+        $this->buyer->update(['ownership_type' => 'non_franchise']); // hanya franchise yang punya harga
 
         $this->as('admin', $this->seller)->post(route('branch-roll-invoices.store'), $this->payload(1))->assertSessionHasErrors('items');
         $this->assertSame(0, BranchRollInvoice::count());
@@ -284,8 +284,8 @@ class BranchRollInvoiceTest extends TestCase
 
     public function test_endpoint_pools_menampilkan_harga_sesuai_pembeli(): void
     {
-        BranchRollPrice::create(['ownership_type' => 'non_franchise_own', 'film_key' => 'ARMOR', 'price' => 2000000, 'unit' => 'roll']);
-        $own = Branch::factory()->create(['ownership_type' => 'non_franchise_own']);
+        BranchRollPrice::create(['ownership_type' => 'non_franchise', 'film_key' => 'ARMOR', 'price' => 2000000, 'unit' => 'roll']);
+        $own = Branch::factory()->create(['ownership_type' => 'non_franchise']);
 
         $this->as('admin', $this->seller)->getJson(route('branch-roll-invoices.pools', ['to_branch_id' => $this->buyer->id]))
             ->assertOk()->assertJsonPath('0.price', 2500000);
@@ -319,10 +319,10 @@ class BranchRollInvoiceTest extends TestCase
 
         $this->as('owner', $this->seller)->get(route('branch-roll-prices.index'))
             ->assertOk()->assertSee('ARMOR')->assertSee('FLEX ONE WAY')->assertSee('Hanya gedung')
-            ->assertSee('Non-Franchise (Saham Gabungan)')->assertDontSee('Film Mobil');
+            ->assertSee('Non-Franchise')->assertDontSee('Film Mobil');
 
-        $this->as('owner', $this->seller)->put(route('branch-roll-prices.update'), ['prices' => ['non_franchise_joint' => ['FLEX ONE WAY' => 6000000, 'TIDAK ADA' => 1]]]);
-        $this->assertEquals(6000000, (float) BranchRollPrice::where('film_key', 'FLEX ONE WAY')->where('ownership_type', 'non_franchise_joint')->value('price'));
+        $this->as('owner', $this->seller)->put(route('branch-roll-prices.update'), ['prices' => ['non_franchise' => ['FLEX ONE WAY' => 6000000, 'TIDAK ADA' => 1]]]);
+        $this->assertEquals(6000000, (float) BranchRollPrice::where('film_key', 'FLEX ONE WAY')->where('ownership_type', 'non_franchise')->value('price'));
         $this->assertSame(0, BranchRollPrice::where('film_key', 'TIDAK ADA')->count());
     }
 }

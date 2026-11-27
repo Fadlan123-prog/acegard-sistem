@@ -229,7 +229,7 @@
 
             {{-- Kategori kepemilikan (menentukan harga roll antar cabang) --}}
             <div class="col-md-6">
-              <label for="ownership_type" class="form-label">Kategori Kepemilikan</label>
+              <label for="ownership_type" class="form-label">Kategori Cabang</label>
               <select name="ownership_type" id="ownership_type" class="form-select @error('ownership_type') is-invalid @enderror">
                 <option value="">— Belum diatur —</option>
                 @foreach(\App\Models\Branch::OWNERSHIP_TYPES as $v => $l)

@@ -7,12 +7,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    private const TYPES = ['franchise', 'non_franchise_own', 'non_franchise_joint'];
+    private const TYPES = ['franchise', 'non_franchise'];
 
     /**
      * Harga roll antar cabang: satu daftar per NAMA film (tidak dipisah mobil/gedung),
-     * per kategori kepemilikan cabang pembeli (franchise / non-franchise saham
-     * sendiri / saham gabungan). Kolom id kategori diganti film_key (nama film
+     * per kategori cabang pembeli (franchise / non-franchise). Kolom id kategori diganti film_key (nama film
      * huruf besar), karena roll fisiknya sama untuk mobil maupun gedung.
      */
     public function up(): void
@@ -42,7 +41,7 @@ return new class extends Migration
             DB::table('branch_roll_prices')->where('id', $row->id)->update(['film_key' => $key]);
         }
 
-        // Harga lama (satu harga per film) disalin ke ketiga kategori agar perilaku tidak berubah sampai diatur.
+        // Harga lama (satu harga per film) disalin ke kedua kategori agar perilaku tidak berubah sampai diatur.
         $now = now();
         foreach (DB::table('branch_roll_prices')->get() as $row) {
             foreach (array_slice(self::TYPES, 1) as $type) {

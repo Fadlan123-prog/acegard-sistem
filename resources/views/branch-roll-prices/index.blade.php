@@ -24,8 +24,8 @@
 
         <x-ui.alert type="info" class="mb-4">
             Satu daftar harga per nama film, berlaku untuk mobil maupun gedung. Harga per roll utuh, menurut kategori
-            kepemilikan <strong>cabang pembeli</strong> (atur kategori tiap cabang di menu Cabang). Harga yang kosong
-            berarti film itu tidak bisa dijual ke cabang dengan kepemilikan tersebut. Invoice yang sudah dibuat tidak
+            <strong>cabang pembeli</strong> (franchise atau non-franchise) (atur kategori tiap cabang di menu Cabang). Harga yang kosong
+            berarti film itu tidak bisa dijual ke cabang dengan kategori tersebut. Invoice yang sudah dibuat tidak
             berubah kalau harga diganti.
         </x-ui.alert>
 

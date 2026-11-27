@@ -34,11 +34,10 @@ class Branch extends Model
         'notes',
     ];
 
-    /** Kategori kepemilikan cabang; menentukan harga roll antar cabang. */
+    /** Kategori cabang (franchise / non-franchise); menentukan harga roll antar cabang. */
     public const OWNERSHIP_TYPES = [
-        'franchise'           => 'Franchise',
-        'non_franchise_own'   => 'Non-Franchise (Saham Sendiri)',
-        'non_franchise_joint' => 'Non-Franchise (Saham Gabungan)',
+        'franchise'     => 'Franchise',
+        'non_franchise' => 'Non-Franchise',
     ];
 
     public function getOwnershipLabelAttribute(): ?string

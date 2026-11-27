@@ -164,7 +164,7 @@
 
   function loadPools() {
     var own = toEl.options[toEl.selectedIndex] ? toEl.options[toEl.selectedIndex].getAttribute('data-own') : '';
-    ownHint.textContent = !toEl.value ? '' : (own ? 'Harga mengikuti kategori: ' + ownLabels[own] : 'Kategori kepemilikan cabang ini belum diatur (menu Cabang), invoice belum bisa dibuat.');
+    ownHint.textContent = !toEl.value ? '' : (own ? 'Harga mengikuti kategori: ' + ownLabels[own] : 'Kategori cabang ini belum diatur (menu Cabang), invoice belum bisa dibuat.');
     ownHint.className = 'form-text' + (toEl.value && !own ? ' text-danger' : '');
     var url = poolsUrl + '?branch_id=' + encodeURIComponent(fromEl.value) + '&to_branch_id=' + encodeURIComponent(toEl.value || '');
     fetch(url, { headers: { 'Accept': 'application/json' } })

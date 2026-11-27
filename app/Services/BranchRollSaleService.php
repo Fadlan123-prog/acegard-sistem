@@ -30,7 +30,7 @@ class BranchRollSaleService
 {
     public function __construct(private DocumentNumberService $docNumbers) {}
 
-    /** Kategori kepemilikan cabang (franchise / non-franchise saham sendiri / gabungan), null bila belum diatur. */
+    /** Kategori cabang (franchise / non-franchise), null bila belum diatur. */
     public function ownershipOf(?int $branchId): ?string
     {
         return $branchId ? Branch::whereKey($branchId)->value('ownership_type') : null;
@@ -95,7 +95,7 @@ class BranchRollSaleService
         $buyerOwnership = $this->ownershipOf((int) $data['to_branch_id']);
 
         if (!$buyerOwnership) {
-            throw ValidationException::withMessages(['to_branch_id' => 'Kategori kepemilikan cabang pembeli (franchise / non-franchise) belum diatur. Atur di menu Cabang.']);
+            throw ValidationException::withMessages(['to_branch_id' => 'Kategori cabang pembeli (franchise / non-franchise) belum diatur. Atur di menu Cabang.']);
         }
 
         return DB::transaction(function () use ($data, $userId, $buyerOwnership) {
