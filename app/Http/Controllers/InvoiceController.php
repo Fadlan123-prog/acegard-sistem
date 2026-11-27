@@ -308,7 +308,10 @@ class InvoiceController extends Controller
             return back()->with('error', 'Gagal mencatat pelunasan: ' . $e->getMessage());
         }
 
-        // Tahap 2: Potong stok kaca film — gagal tidak membatalkan pembayaran
+        // Tahap 2: Potong stok kaca film — gagal tidak membatalkan pembayaran.
+        // $stockOutcome dipakai untuk pesan akhir: done | none (tidak ada produk) | failed.
+        $stockOutcome = $invoice->isStockDeducted() ? 'done' : 'none';
+        $stockError = null;
         if (!$invoice->isStockDeducted()) {
             try {
                 $invoice->loadMissing('customer.customerProducts');
@@ -335,14 +338,17 @@ class InvoiceController extends Controller
                         ]);
                     }
                     DB::commit();
+                    $stockOutcome = 'done';
                 }
             } catch (\Throwable $e) {
                 DB::rollBack();
+                $stockOutcome = 'failed';
+                $stockError = $e->getMessage();
                 \Illuminate\Support\Facades\Log::warning('[recordPelunasan] Stok gagal dipotong', [
                     'invoice_id' => $invoice->id,
                     'error'      => $e->getMessage(),
                 ]);
-                // Pelunasan tetap berhasil — stok bisa dipotong manual nanti
+                // Pelunasan tetap berhasil — stok bisa dipotong ulang lewat tombol "Potong Stok Ulang"
             }
         }
 
@@ -372,6 +378,15 @@ class InvoiceController extends Controller
             );
         } catch (\Throwable) {
             // Notification failure must never cancel pelunasan
+        }
+
+        if ($stockOutcome === 'failed') {
+            return back()->with('warning', 'Pelunasan tercatat, tetapi STOK BELUM TERPOTONG: ' . $stockError
+                . ' Perbaiki stok lalu tekan "Potong Stok Ulang" di invoice ini.');
+        }
+
+        if ($stockOutcome === 'none') {
+            return back()->with('warning', 'Pelunasan tercatat. Stok tidak dipotong karena customer ini belum punya produk film terdaftar.');
         }
 
         return back()->with('success', 'Pelunasan berhasil dicatat dan stok terpotong. Silakan rilis komisi.');

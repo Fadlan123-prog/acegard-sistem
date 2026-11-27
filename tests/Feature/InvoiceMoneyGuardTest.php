@@ -72,4 +72,44 @@ class InvoiceMoneyGuardTest extends TestCase
 
         $this->assertDatabaseHas('commissions', ['id' => $id, 'status' => 'paid']);
     }
+    public function test_pelunasan_without_film_products_warns_that_stock_was_not_deducted(): void
+    {
+        $staff = $this->userWithRole('admin', $this->branch);
+
+        $this->actingAs($staff)
+            ->post(route('invoice.pelunasan', $this->invoice->id), ['payment_method' => 'cash'])
+            ->assertSessionHas('warning')
+            ->assertSessionMissing('success');
+
+        $this->assertNotNull($this->invoice->fresh()->pelunasan_at);
+        $this->assertNull($this->invoice->fresh()->stock_deducted_at);
+    }
+
+    public function test_pelunasan_keeps_payment_but_warns_when_stock_deduction_fails(): void
+    {
+        $now = now();
+        $catId  = DB::table('category_products')->insertGetId(['name' => 'C', 'duration' => 5, 'created_at' => $now, 'updated_at' => $now]);
+        $prodId = DB::table('products')->insertGetId(['category_id' => $catId, 'name' => 'SB20', 'description' => '20%', 'created_at' => $now, 'updated_at' => $now]);
+        $partId = DB::table('parts')->insertGetId(['name' => 'WINDSHIELD', 'created_at' => $now, 'updated_at' => $now]);
+        DB::table('customer_product')->insert([
+            'customer_id' => $this->customer->id, 'product_id' => $prodId,
+            'part_id' => $partId, 'category_product_id' => $catId,
+            'created_at' => $now, 'updated_at' => $now,
+        ]);
+
+        $this->mock(\App\Services\FilmStockPoolService::class, function ($m) {
+            $m->shouldReceive('consumeForCar')->andThrow(new \RuntimeException('Stok roll tidak cukup'));
+        });
+
+        $staff = $this->userWithRole('admin', $this->branch);
+
+        $this->actingAs($staff)
+            ->post(route('invoice.pelunasan', $this->invoice->id), ['payment_method' => 'cash'])
+            ->assertSessionHas('warning', fn ($m) => str_contains($m, 'STOK BELUM TERPOTONG') && str_contains($m, 'Stok roll tidak cukup'))
+            ->assertSessionMissing('success');
+
+        $fresh = $this->invoice->fresh();
+        $this->assertNotNull($fresh->pelunasan_at);
+        $this->assertNull($fresh->stock_deducted_at);
+    }
 }

@@ -124,8 +124,17 @@
                         Stok {{ $stockDone ? 'Terpotong' : 'Belum Terpotong' }}
                     </div>
                     <div class="text-muted" style="font-size:.75rem;">
-                        {{ $stockDone ? $invoice->stock_deducted_at?->isoFormat('D MMM Y, HH:mm') : 'Dipotong saat pelunasan' }}
+                        {{ $stockDone ? $invoice->stock_deducted_at?->isoFormat('D MMM Y, HH:mm') : 'Perlu diperiksa' }}
                     </div>
+                    @if(!$stockDone)
+                    <form method="POST" action="{{ route('invoice.pelunasan', $invoice->id) }}" class="mt-2"
+                          onsubmit="return confirm('Coba potong stok lagi untuk invoice ini?')">
+                        @csrf
+                        <x-ui.button type="submit" variant="secondary" size="sm">
+                            <iconify-icon icon="mdi:refresh" class="me-1"></iconify-icon>Potong Stok Ulang
+                        </x-ui.button>
+                    </form>
+                    @endif
                 </div>
             </div>
             @endif
