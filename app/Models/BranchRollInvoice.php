@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class BranchRollInvoice extends Model
 {
     protected $fillable = [
-        'invoice_number', 'from_branch_id', 'to_branch_id', 'invoice_date', 'due_date',
+        'invoice_number', 'from_branch_id', 'to_branch_id', 'buyer_ownership_type', 'invoice_date', 'due_date',
         'delivery_status', 'payment_status', 'paid_at', 'total_amount', 'notes',
         'created_by', 'received_by', 'received_at', 'cancelled_at',
     ];

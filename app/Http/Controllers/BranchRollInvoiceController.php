@@ -86,14 +86,14 @@ class BranchRollInvoiceController extends Controller
 
     public function create()
     {
-        $branches = Branch::orderBy('name')->get(['id', 'name']);
+        $branches = Branch::orderBy('name')->get(['id', 'name', 'ownership_type']);
         $fromId = $this->branch()->id();
 
         return view('branch-roll-invoices.create', [
             'branches'    => $branches,
             'fromId'      => $fromId,
             'crossBranch' => $this->crossBranch(),
-            'pools'       => $this->sales->availablePools($fromId),
+            'pools'       => $this->sales->availablePools($fromId, null),
         ]);
     }
 
@@ -101,12 +101,13 @@ class BranchRollInvoiceController extends Controller
     public function pools(Request $request)
     {
         $branchId = (int) $request->query('branch_id', $this->branch()->id());
+        $toId = (int) $request->query('to_branch_id', 0);
 
         if (!$this->crossBranch()) {
             abort_unless($branchId === $this->branch()->id(), 403);
         }
 
-        return response()->json($this->sales->availablePools($branchId)->map(fn ($p) => [
+        return response()->json($this->sales->availablePools($branchId, $this->sales->ownershipOf($toId ?: null))->map(fn ($p) => [
             'id'        => $p->id,
             'label'     => trim("{$p->film_type} {$p->darkness_code}"),
             'available' => $p->available_rolls,

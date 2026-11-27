@@ -41,10 +41,11 @@
                     <select name="to_branch_id" id="toBranch" class="form-select @error('to_branch_id') is-invalid @enderror" required>
                         <option value="">-- Pilih Cabang --</option>
                         @foreach($branches as $b)
-                            <option value="{{ $b->id }}" @selected(old('to_branch_id') == $b->id)>{{ $b->name }}</option>
+                            <option value="{{ $b->id }}" data-own="{{ $b->ownership_type }}" @selected(old('to_branch_id') == $b->id)>{{ $b->name }}</option>
                         @endforeach
                     </select>
                     @error('to_branch_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    <div class="form-text" id="ownHint"></div>
                 </x-ui.form-field>
             </div>
             <div class="col-md-3 mb-3">
@@ -116,11 +117,13 @@
   var pools = @json($poolData);
   var rows = document.getElementById('rows'), grand = document.getElementById('grand'), idx = 0;
   var fromEl = document.getElementById('fromBranch');
+  var toEl = document.getElementById('toBranch'), ownHint = document.getElementById('ownHint');
+  var ownLabels = @json(\App\Models\Branch::OWNERSHIP_TYPES);
   var rp = function (n) { return 'Rp' + Math.round(n).toLocaleString('id-ID'); };
 
   function options() {
     return '<option value="">-- Pilih film --</option>' + pools.map(function (p) {
-      var note = p.price === null ? ' (harga belum diatur)' : '';
+      var note = p.price === null ? (toEl.value ? ' (harga kategori ini belum diatur)' : ' (pilih cabang pembeli dulu)') : '';
       return '<option value="' + p.id + '"' + (p.price === null ? ' disabled' : '') + '>' + p.label + note + '</option>';
     }).join('');
   }
@@ -159,13 +162,19 @@
   });
   document.getElementById('addRow').addEventListener('click', addRow);
 
-  if (fromEl && fromEl.tagName === 'SELECT') {
-    fromEl.addEventListener('change', function () {
-      fetch(poolsUrl + '?branch_id=' + encodeURIComponent(fromEl.value), { headers: { 'Accept': 'application/json' } })
-        .then(function (r) { return r.json(); })
-        .then(function (data) { pools = data; rows.innerHTML = ''; addRow(); });
-    });
+  function loadPools() {
+    var own = toEl.options[toEl.selectedIndex] ? toEl.options[toEl.selectedIndex].getAttribute('data-own') : '';
+    ownHint.textContent = !toEl.value ? '' : (own ? 'Harga mengikuti kategori: ' + ownLabels[own] : 'Kategori kepemilikan cabang ini belum diatur (menu Cabang), invoice belum bisa dibuat.');
+    ownHint.className = 'form-text' + (toEl.value && !own ? ' text-danger' : '');
+    var url = poolsUrl + '?branch_id=' + encodeURIComponent(fromEl.value) + '&to_branch_id=' + encodeURIComponent(toEl.value || '');
+    fetch(url, { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.json(); })
+      .then(function (data) { pools = data; rows.innerHTML = ''; addRow(); });
   }
+
+  toEl.addEventListener('change', loadPools);
+  if (fromEl && fromEl.tagName === 'SELECT') fromEl.addEventListener('change', loadPools);
+  if (toEl.value) loadPools();
   addRow();
 })();
 </script>

@@ -53,7 +53,7 @@
         <div class="col-md-6">
             <table class="table table-borderless mb-0">
                 <tr><td class="text-muted" style="width:160px;">Cabang Penjual</td><td class="fw-semibold">{{ $invoice->fromBranch->name }}</td></tr>
-                <tr><td class="text-muted">Cabang Pembeli</td><td class="fw-semibold">{{ $invoice->toBranch->name }}</td></tr>
+                <tr><td class="text-muted">Cabang Pembeli</td><td class="fw-semibold">{{ $invoice->toBranch->name }}@if($invoice->buyer_ownership_type) <span class="text-muted fw-normal">({{ \App\Models\Branch::OWNERSHIP_TYPES[$invoice->buyer_ownership_type] ?? $invoice->buyer_ownership_type }})</span>@endif</td></tr>
                 <tr><td class="text-muted">Dibuat Oleh</td><td>{{ $invoice->creator->name ?? '-' }}</td></tr>
             </table>
         </div>

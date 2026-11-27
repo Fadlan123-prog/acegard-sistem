@@ -221,6 +221,7 @@ class BranchController extends Controller
                 'name'         => ['required', 'string', 'max:255'],
                 'code'         => ['nullable', 'string', 'max:30', Rule::unique('branches', 'code')->ignore($branchId)],
                 'type'         => ['nullable', Rule::in(['head_office', 'branch', 'warehouse', 'service_center'])],
+                'ownership_type' => ['nullable', Rule::in(array_keys(\App\Models\Branch::OWNERSHIP_TYPES))],
                 'status'       => ['required', Rule::in(['active', 'inactive'])],
                 'city'         => ['required', 'string', 'max:255'],
                 'province'     => ['nullable', 'string', 'max:150'],

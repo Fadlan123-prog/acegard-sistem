@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\Branch;
 use App\Models\BranchRollInvoice;
 use App\Models\BranchRollInvoiceItem;
 use App\Models\BranchRollInvoiceRoll;
 use App\Models\BranchRollPrice;
+use App\Models\CategoryProduct;
+use App\Models\CategoryProductBuilding;
 use App\Models\FilmRollEntry;
 use App\Models\FilmStockPool;
 use Illuminate\Support\Collection;
@@ -27,31 +30,50 @@ class BranchRollSaleService
 {
     public function __construct(private DocumentNumberService $docNumbers) {}
 
-    public function priceFor(FilmStockPool $pool): ?BranchRollPrice
+    /** Kategori kepemilikan cabang (franchise / non-franchise saham sendiri / gabungan), null bila belum diatur. */
+    public function ownershipOf(?int $branchId): ?string
     {
+        return $branchId ? Branch::whereKey($branchId)->value('ownership_type') : null;
+    }
+
+    /** Nama film pool (dari kategori katalog, cadangan film_type) dalam bentuk kunci harga. */
+    public function filmKeyOf(FilmStockPool $pool): string
+    {
+        $name = null;
+
         if ($pool->category_product_building_id) {
-            return BranchRollPrice::where('category_product_building_id', $pool->category_product_building_id)->first();
+            $name = CategoryProductBuilding::whereKey($pool->category_product_building_id)->value('name');
+        } elseif ($pool->category_product_id) {
+            $name = CategoryProduct::whereKey($pool->category_product_id)->value('name');
         }
 
-        if ($pool->category_product_id) {
-            return BranchRollPrice::where('category_product_id', $pool->category_product_id)->first();
+        return BranchRollPrice::keyFor($name ?: $pool->film_type);
+    }
+
+    /** Harga roll untuk pool ini menurut kategori kepemilikan cabang pembeli. */
+    public function priceFor(FilmStockPool $pool, ?string $ownershipType): ?BranchRollPrice
+    {
+        if (!$ownershipType) {
+            return null;
         }
 
-        return null;
+        return BranchRollPrice::where('ownership_type', $ownershipType)
+            ->where('film_key', $this->filmKeyOf($pool))
+            ->first();
     }
 
     /** Pool milik cabang yang masih punya roll utuh di gudang, lengkap dengan jumlah roll dan harga. */
-    public function availablePools(int $branchId): Collection
+    public function availablePools(int $branchId, ?string $buyerOwnership = null): Collection
     {
         return FilmStockPool::where('branch_id', $branchId)
             ->orderBy('film_type')->orderBy('darkness_code')
             ->get()
-            ->map(function (FilmStockPool $pool) {
+            ->map(function (FilmStockPool $pool) use ($buyerOwnership) {
                 $pool->available_rolls = FilmRollEntry::where('film_stock_pool_id', $pool->id)
                     ->where('branch_id', $pool->branch_id)
                     ->where('status', 'in_warehouse')
                     ->count();
-                $price = $this->priceFor($pool);
+                $price = $this->priceFor($pool, $buyerOwnership);
                 $pool->roll_price = $price ? (float) $price->price : null;
                 $pool->roll_unit = $price->unit ?? 'roll';
 
@@ -70,13 +92,20 @@ class BranchRollSaleService
             throw ValidationException::withMessages(['to_branch_id' => 'Cabang pembeli harus berbeda dari cabang penjual.']);
         }
 
-        return DB::transaction(function () use ($data, $userId) {
+        $buyerOwnership = $this->ownershipOf((int) $data['to_branch_id']);
+
+        if (!$buyerOwnership) {
+            throw ValidationException::withMessages(['to_branch_id' => 'Kategori kepemilikan cabang pembeli (franchise / non-franchise) belum diatur. Atur di menu Cabang.']);
+        }
+
+        return DB::transaction(function () use ($data, $userId, $buyerOwnership) {
             $number = $this->docNumbers->generate('branch_roll_invoices', 'invoice_number', 'BRINV');
 
             $invoice = BranchRollInvoice::create([
                 'invoice_number' => $number,
                 'from_branch_id' => $data['from_branch_id'],
                 'to_branch_id'   => $data['to_branch_id'],
+                'buyer_ownership_type' => $buyerOwnership,
                 'invoice_date'   => $data['invoice_date'],
                 'due_date'       => $data['due_date'] ?? null,
                 'delivery_status' => 'sent',
@@ -97,10 +126,11 @@ class BranchRollSaleService
 
                 $qty = (int) $row['qty'];
                 $label = trim("{$pool->film_type} {$pool->darkness_code}");
-                $price = $this->priceFor($pool);
+                $price = $this->priceFor($pool, $buyerOwnership);
 
                 if (!$price) {
-                    throw ValidationException::withMessages(['items' => "Harga roll antar cabang untuk {$pool->film_type} belum diatur."]);
+                    $ownLabel = Branch::OWNERSHIP_TYPES[$buyerOwnership] ?? $buyerOwnership;
+                    throw ValidationException::withMessages(['items' => "Harga roll {$pool->film_type} untuk kategori {$ownLabel} belum diatur."]);
                 }
 
                 $entries = FilmRollEntry::where('film_stock_pool_id', $pool->id)

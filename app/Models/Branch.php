@@ -15,6 +15,7 @@ class Branch extends Model
         'name',
         'code',
         'type',
+        'ownership_type',
         'status',
         'city',
         'province',
@@ -32,6 +33,18 @@ class Branch extends Model
         'opening_date',
         'notes',
     ];
+
+    /** Kategori kepemilikan cabang; menentukan harga roll antar cabang. */
+    public const OWNERSHIP_TYPES = [
+        'franchise'           => 'Franchise',
+        'non_franchise_own'   => 'Non-Franchise (Saham Sendiri)',
+        'non_franchise_joint' => 'Non-Franchise (Saham Gabungan)',
+    ];
+
+    public function getOwnershipLabelAttribute(): ?string
+    {
+        return self::OWNERSHIP_TYPES[$this->ownership_type] ?? null;
+    }
 
     protected $casts = [
         'working_days' => 'array',

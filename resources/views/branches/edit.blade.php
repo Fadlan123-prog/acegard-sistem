@@ -227,6 +227,19 @@
               @error('type')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
+            {{-- Kategori kepemilikan (menentukan harga roll antar cabang) --}}
+            <div class="col-md-6">
+              <label for="ownership_type" class="form-label">Kategori Kepemilikan</label>
+              <select name="ownership_type" id="ownership_type" class="form-select @error('ownership_type') is-invalid @enderror">
+                <option value="">— Belum diatur —</option>
+                @foreach(\App\Models\Branch::OWNERSHIP_TYPES as $v => $l)
+                  <option value="{{ $v }}" {{ old('ownership_type', $branch->ownership_type) === $v ? 'selected' : '' }}>{{ $l }}</option>
+                @endforeach
+              </select>
+              <div class="form-text">Dipakai untuk menentukan harga roll saat cabang ini membeli dari cabang lain.</div>
+              @error('ownership_type')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+
             {{-- Opening date --}}
             <div class="col-md-6">
               <label for="opening_date" class="form-label">Tanggal Berdiri</label>
