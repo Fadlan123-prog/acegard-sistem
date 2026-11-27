@@ -43,7 +43,7 @@
             <div class="col-md-6 mb-3">
                 <x-ui.form-field label="Tipe" name="type" :required="true">
                     <select name="type" class="form-select @error('type') is-invalid @enderror" required>
-                        <option value="mitra" @selected(old('type', $mitra->type) == 'mitra')>Mitra</option>
+                        <option value="mitra" @selected(old('type', $mitra->type) == 'mitra')>Franchise</option>
                         <option value="non_franchise" @selected(old('type', $mitra->type) == 'non_franchise')>Non-Franchise</option>
                     </select>
                 </x-ui.form-field>

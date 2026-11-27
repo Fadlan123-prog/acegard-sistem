@@ -6,6 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Mitra extends Model
 {
+    /** Satu kosakata kategori franchise/non-franchise, dipakai juga oleh Branch::ownership_type. */
+    public const TYPES = [
+        'mitra'         => 'Franchise',
+        'non_franchise' => 'Non-Franchise',
+    ];
+
     protected $fillable = [
         'name',
         'type',
@@ -25,10 +31,6 @@ class Mitra extends Model
 
     public function getTypeLabelAttribute(): string
     {
-        return match ($this->type) {
-            'mitra'         => 'Mitra',
-            'non_franchise' => 'Non-Franchise',
-            default         => '-',
-        };
+        return self::TYPES[$this->type] ?? '-';
     }
 }

@@ -2,80 +2,62 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Branch;
-use App\Models\BranchRollPrice;
 use App\Models\CategoryProduct;
 use App\Models\CategoryProductBuilding;
+use App\Models\Mitra;
+use App\Models\MitraRollPrice;
 use Illuminate\Http\Request;
 
 /**
- * Daftar harga jual roll antar cabang: satu harga per NAMA film (mobil dan gedung
- * memakai daftar yang sama) dan per kategori kepemilikan cabang pembeli.
+ * Daftar harga jual roll: satu daftar per nama film (mobil dan gedung sama), dua kolom
+ * menurut kategori pembeli (franchise / non-franchise). Daftar ini (mitra_roll_prices)
+ * dipakai Invoice Mitra dan Invoice Roll Antar Cabang, jadi harga tidak diisi dua kali.
  */
 class BranchRollPriceController extends Controller
 {
-    /** @return array<string,array{name:string,car:bool,building:bool}> kunci film => info */
-    private function films(): array
-    {
-        $films = [];
-
-        foreach (CategoryProduct::whereNotNull('name')->get(['name']) as $c) {
-            $films[BranchRollPrice::keyFor($c->name)] = ['name' => trim($c->name), 'car' => true, 'building' => false];
-        }
-
-        foreach (CategoryProductBuilding::whereNotNull('name')->get(['name']) as $c) {
-            $key = BranchRollPrice::keyFor($c->name);
-            $films[$key] = ['name' => $films[$key]['name'] ?? trim($c->name), 'car' => $films[$key]['car'] ?? false, 'building' => true];
-        }
-
-        ksort($films);
-
-        return $films;
-    }
-
     public function index()
     {
-        $prices = BranchRollPrice::all()->groupBy('ownership_type')->map(fn ($g) => $g->pluck('price', 'film_key'));
+        $carNames = CategoryProduct::whereNotNull('name')->pluck('name')
+            ->map(fn ($n) => strtoupper(trim($n)))->all();
+
+        $films = CategoryProductBuilding::whereNotNull('name')->orderBy('name')->get(['id', 'name']);
+        $prices = MitraRollPrice::whereIn('category_product_building_id', $films->pluck('id'))
+            ->get()->keyBy('category_product_building_id');
 
         return view('branch-roll-prices.index', [
-            'films'      => $this->films(),
+            'films'      => $films,
             'prices'     => $prices,
-            'ownerships' => Branch::OWNERSHIP_TYPES,
+            'carNames'   => $carNames,
+            'ownerships' => Mitra::TYPES,
         ]);
     }
 
     public function update(Request $request)
     {
         $data = $request->validate([
-            'prices'     => ['nullable', 'array'],
-            'prices.*'   => ['nullable', 'array'],
-            'prices.*.*' => ['nullable', 'numeric', 'min:0', 'max:999999999999'],
+            'prices'                 => ['nullable', 'array'],
+            'prices.*'               => ['nullable', 'array'],
+            'prices.*.mitra'         => ['nullable', 'numeric', 'min:0', 'max:999999999999'],
+            'prices.*.non_franchise' => ['nullable', 'numeric', 'min:0', 'max:999999999999'],
         ]);
 
-        $known = $this->films();
+        $valid = CategoryProductBuilding::whereNotNull('name')->pluck('id')->all();
 
-        foreach (($data['prices'] ?? []) as $ownership => $byFilm) {
-            if (!array_key_exists($ownership, Branch::OWNERSHIP_TYPES)) {
+        foreach (($data['prices'] ?? []) as $categoryId => $row) {
+            if (!in_array((int) $categoryId, $valid, true)) {
                 continue;
             }
 
-            foreach ($byFilm as $filmKey => $price) {
-                $filmKey = BranchRollPrice::keyFor($filmKey);
-                if (!isset($known[$filmKey])) {
-                    continue;
-                }
-
-                $where = ['ownership_type' => $ownership, 'film_key' => $filmKey];
-
-                if ($price === null || $price === '') {
-                    BranchRollPrice::where($where)->delete();
-                    continue;
-                }
-
-                BranchRollPrice::updateOrCreate($where, ['price' => $price, 'unit' => 'roll']);
-            }
+            // Kosong = 0 (belum diatur). Baris tidak dihapus karena dirujuk item Invoice Mitra lama.
+            MitraRollPrice::updateOrCreate(
+                ['category_product_building_id' => (int) $categoryId],
+                [
+                    'price_mitra'         => $row['mitra'] ?? 0,
+                    'price_non_franchise' => $row['non_franchise'] ?? 0,
+                ]
+            );
         }
 
-        return back()->with('success', 'Harga roll antar cabang disimpan.');
+        return back()->with('success', 'Harga roll disimpan. Daftar ini dipakai Invoice Mitra dan Invoice Roll Antar Cabang.');
     }
 }

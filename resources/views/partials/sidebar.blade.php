@@ -310,7 +310,7 @@
                 </a>
                 <ul class="sidebar-submenu">
                     <li><a href="{{ route('branch-roll-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Invoice Roll Antar Cabang</a></li>
-                    <li><a href="{{ route('branch-roll-prices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Harga Roll Antar Cabang</a></li>
+                    <li><a href="{{ route('branch-roll-prices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Harga Roll (Mitra & Antar Cabang)</a></li>
                 </ul>
             </li>
             <li>
@@ -553,7 +553,7 @@
                     <li><a href="{{ route('ppf-installations.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>PPF</a></li>
                     <li><a href="{{ route('mitra-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Mitra & Non-Franchise</a></li>
                     <li><a href="{{ route('branch-roll-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Invoice Roll Antar Cabang</a></li>
-                    <li><a href="{{ route('branch-roll-prices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Harga Roll Antar Cabang</a></li>
+                    <li><a href="{{ route('branch-roll-prices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Harga Roll (Mitra & Antar Cabang)</a></li>
                 </ul>
             </li>
             <li class="dropdown">
@@ -745,7 +745,7 @@
                     <li><a href="{{ route('film-stock.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Stock Pool</a></li>
                     <li><a href="{{ route('branch-roll-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Invoice Roll Antar Cabang</a></li>
                     @if($isSuperadmin)
-                    <li><a href="{{ route('branch-roll-prices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Harga Roll Antar Cabang</a></li>
+                    <li><a href="{{ route('branch-roll-prices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Harga Roll (Mitra & Antar Cabang)</a></li>
                     @endif
                     <li><a href="{{ route('film-stock.create') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Roll Masuk / Import</a></li>
                     <li><a href="{{ route('film-stock.usages') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Laporan Pemakaian</a></li>

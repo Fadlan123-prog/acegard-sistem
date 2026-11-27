@@ -6,11 +6,11 @@ use App\Models\Branch;
 use App\Models\BranchRollInvoice;
 use App\Models\BranchRollInvoiceItem;
 use App\Models\BranchRollInvoiceRoll;
-use App\Models\BranchRollPrice;
 use App\Models\CategoryProduct;
 use App\Models\CategoryProductBuilding;
 use App\Models\FilmRollEntry;
 use App\Models\FilmStockPool;
+use App\Models\MitraRollPrice;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -36,30 +36,38 @@ class BranchRollSaleService
         return $branchId ? Branch::whereKey($branchId)->value('ownership_type') : null;
     }
 
-    /** Nama film pool (dari kategori katalog, cadangan film_type) dalam bentuk kunci harga. */
-    public function filmKeyOf(FilmStockPool $pool): string
+    /**
+     * Baris daftar harga (mitra_roll_prices) untuk film pool ini. Daftar harga yang sama dipakai
+     * Invoice Mitra, dikunci ke katalog gedung; roll mobil dicocokkan lewat nama film.
+     */
+    public function rollPriceRowFor(FilmStockPool $pool): ?MitraRollPrice
     {
-        $name = null;
-
         if ($pool->category_product_building_id) {
-            $name = CategoryProductBuilding::whereKey($pool->category_product_building_id)->value('name');
-        } elseif ($pool->category_product_id) {
-            $name = CategoryProduct::whereKey($pool->category_product_id)->value('name');
+            return MitraRollPrice::where('category_product_building_id', $pool->category_product_building_id)->first();
         }
 
-        return BranchRollPrice::keyFor($name ?: $pool->film_type);
+        $name = $pool->category_product_id
+            ? CategoryProduct::whereKey($pool->category_product_id)->value('name')
+            : null;
+        $name = strtoupper(trim((string) ($name ?: $pool->film_type)));
+
+        $categoryId = CategoryProductBuilding::whereRaw('UPPER(TRIM(name)) = ?', [$name])->value('id');
+
+        return $categoryId ? MitraRollPrice::where('category_product_building_id', $categoryId)->first() : null;
     }
 
-    /** Harga roll untuk pool ini menurut kategori kepemilikan cabang pembeli. */
-    public function priceFor(FilmStockPool $pool, ?string $ownershipType): ?BranchRollPrice
+    /** Harga per roll menurut kategori cabang pembeli (mitra = franchise / non_franchise); null bila belum diatur. */
+    public function priceFor(FilmStockPool $pool, ?string $ownershipType): ?array
     {
         if (!$ownershipType) {
             return null;
         }
 
-        return BranchRollPrice::where('ownership_type', $ownershipType)
-            ->where('film_key', $this->filmKeyOf($pool))
-            ->first();
+        $row = $this->rollPriceRowFor($pool);
+        $price = $row ? $row->priceFor($ownershipType) : 0.0;
+
+        // Harga 0 berarti belum diisi; jangan menjual roll gratis.
+        return $price > 0 ? ['price' => $price, 'unit' => $row->unit ?: 'roll'] : null;
     }
 
     /** Pool milik cabang yang masih punya roll utuh di gudang, lengkap dengan jumlah roll dan harga. */
@@ -74,8 +82,8 @@ class BranchRollSaleService
                     ->where('status', 'in_warehouse')
                     ->count();
                 $price = $this->priceFor($pool, $buyerOwnership);
-                $pool->roll_price = $price ? (float) $price->price : null;
-                $pool->roll_unit = $price->unit ?? 'roll';
+                $pool->roll_price = $price ? $price['price'] : null;
+                $pool->roll_unit = $price['unit'] ?? 'roll';
 
                 return $pool;
             })
@@ -147,7 +155,7 @@ class BranchRollSaleService
                     ]);
                 }
 
-                $unitPrice = (float) $price->price;
+                $unitPrice = (float) $price['price'];
                 $lineTotal = $unitPrice * $qty;
                 $total += $lineTotal;
 
@@ -156,7 +164,7 @@ class BranchRollSaleService
                     'film_stock_pool_id'     => $pool->id,
                     'item_name'              => $label,
                     'qty'                    => $qty,
-                    'unit'                   => $price->unit ?: 'roll',
+                    'unit'                   => $price['unit'],
                     'unit_price'             => $unitPrice,
                     'total_price'            => $lineTotal,
                 ]);

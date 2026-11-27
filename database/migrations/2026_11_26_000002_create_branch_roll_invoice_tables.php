@@ -8,21 +8,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Harga jual roll antar cabang, per kategori film (mobil atau gedung).
-        Schema::create('branch_roll_prices', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('category_product_id')->nullable()->unique();
-            $table->unsignedBigInteger('category_product_building_id')->nullable()->unique();
-            $table->decimal('price', 15, 2);
-            $table->string('unit', 50)->default('roll');
-            $table->timestamps();
-        });
-
         Schema::create('branch_roll_invoices', function (Blueprint $table) {
             $table->id();
             $table->string('invoice_number')->unique();
             $table->foreignId('from_branch_id')->constrained('branches');
             $table->foreignId('to_branch_id')->constrained('branches');
+            // Kategori cabang pembeli saat invoice dibuat (mitra = franchise / non_franchise), mengikuti mitras.type.
+            $table->string('buyer_ownership_type', 30)->nullable();
             $table->date('invoice_date');
             $table->date('due_date')->nullable();
             // sent: roll keluar dari stok penjual, menunggu diterima pembeli
@@ -70,6 +62,5 @@ return new class extends Migration
         Schema::dropIfExists('branch_roll_invoice_rolls');
         Schema::dropIfExists('branch_roll_invoice_items');
         Schema::dropIfExists('branch_roll_invoices');
-        Schema::dropIfExists('branch_roll_prices');
-    }
+            }
 };

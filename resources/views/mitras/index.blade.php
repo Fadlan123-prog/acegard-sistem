@@ -29,7 +29,7 @@
             <label class="form-label">Tipe</label>
             <select name="type" class="form-select">
                 <option value="">Semua Tipe</option>
-                <option value="mitra" @selected(request('type') == 'mitra')>Mitra</option>
+                <option value="mitra" @selected(request('type') == 'mitra')>Franchise</option>
                 <option value="non_franchise" @selected(request('type') == 'non_franchise')>Non-Franchise</option>
             </select>
         </div>
