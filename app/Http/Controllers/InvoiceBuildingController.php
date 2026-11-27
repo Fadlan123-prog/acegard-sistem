@@ -427,6 +427,7 @@ class InvoiceBuildingController extends Controller
             app(\App\Services\BuildingCommissionService::class)->release($invoice->fresh());
 
             // Potong stok saat pelunasan
+            $stockDeducted = false;
             if ($customer && $customer->products->isNotEmpty()) {
                 $buildingProducts = $customer->products->map(fn ($p) => [
                     'customer_building_product' => $p,
@@ -443,9 +444,14 @@ class InvoiceBuildingController extends Controller
                     'stock_deducted_at' => $now,
                     'stock_deducted_by' => auth()->id(),
                 ]);
+                $stockDeducted = true;
             }
 
             DB::commit();
+
+            if (! $stockDeducted) {
+                return back()->with('warning', 'Pelunasan tercatat. Stok tidak dipotong karena customer ini belum punya produk gedung terdaftar.');
+            }
 
             return back()->with('success', 'Pelunasan berhasil dicatat dan stok bahan telah dikurangi.');
 
@@ -465,6 +471,13 @@ class InvoiceBuildingController extends Controller
     {
         $invoice = InvoiceBuilding::findOrFail($id);
         $this->authorizeBranchForInvoice($invoice);
+
+        // Invoice lunas sudah memotong stok dan merilis komisi teknisi; menghapusnya
+        // meninggalkan stok tak kembali dan komisi yatim (FK nullOnDelete).
+        if ($invoice->isStep2Done()) {
+            return back()->with('error',
+                'Invoice yang sudah lunas tidak dapat dihapus. Gunakan fitur koreksi atau hubungi superadmin.');
+        }
 
         DB::beginTransaction();
 
