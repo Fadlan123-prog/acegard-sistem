@@ -158,16 +158,6 @@
                     <li><a href="{{ route('suppliers.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Data Supplier</a></li>
                 </ul>
             </li>
-            <li class="dropdown">
-                <a href="javascript:void(0)">
-                    <iconify-icon icon="mdi:handshake-outline" class="menu-icon"></iconify-icon>
-                    <span>Mitra & Non-Franchise</span>
-                </a>
-                <ul class="sidebar-submenu">
-                    <li><a href="{{ route('mitras.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Data Mitra</a></li>
-                    <li><a href="{{ route('mitra-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Invoice Mitra</a></li>
-                </ul>
-            </li>
             <li>
                 <a href="{{ route('petty-cash.index') }}">
                     <iconify-icon icon="mdi:wallet-outline" class="menu-icon"></iconify-icon>
@@ -310,7 +300,7 @@
                 </a>
                 <ul class="sidebar-submenu">
                     <li><a href="{{ route('branch-roll-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Invoice Roll Antar Cabang</a></li>
-                    <li><a href="{{ route('branch-roll-prices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Harga Roll (Mitra & Antar Cabang)</a></li>
+                    <li><a href="{{ route('branch-roll-prices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Harga Roll</a></li>
                 </ul>
             </li>
             <li>
@@ -551,9 +541,8 @@
                     <li><a href="{{ route('customer.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Cars</a></li>
                     <li><a href="{{ route('customer.building.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Buildings</a></li>
                     <li><a href="{{ route('ppf-installations.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>PPF</a></li>
-                    <li><a href="{{ route('mitra-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Mitra & Non-Franchise</a></li>
                     <li><a href="{{ route('branch-roll-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Invoice Roll Antar Cabang</a></li>
-                    <li><a href="{{ route('branch-roll-prices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Harga Roll (Mitra & Antar Cabang)</a></li>
+                    <li><a href="{{ route('branch-roll-prices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Harga Roll</a></li>
                 </ul>
             </li>
             <li class="dropdown">
@@ -642,16 +631,6 @@
                     <li><a href="{{ route('film-stock.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Stock Pool</a></li>
                     <li><a href="{{ route('branch-roll-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Invoice Roll Antar Cabang</a></li>
                     <li><a href="{{ route('film-stock.create') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Roll Masuk / Import</a></li>
-                </ul>
-            </li>
-            <li class="dropdown">
-                <a href="javascript:void(0)">
-                    <iconify-icon icon="mdi:handshake-outline" class="menu-icon"></iconify-icon>
-                    <span>Mitra & Non-Franchise</span>
-                </a>
-                <ul class="sidebar-submenu">
-                    <li><a href="{{ route('mitras.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Data Mitra</a></li>
-                    <li><a href="{{ route('mitra-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Invoice Mitra</a></li>
                 </ul>
             </li>
             <li class="dropdown">
@@ -745,23 +724,13 @@
                     <li><a href="{{ route('film-stock.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Stock Pool</a></li>
                     <li><a href="{{ route('branch-roll-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Invoice Roll Antar Cabang</a></li>
                     @if($isSuperadmin)
-                    <li><a href="{{ route('branch-roll-prices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Harga Roll (Mitra & Antar Cabang)</a></li>
+                    <li><a href="{{ route('branch-roll-prices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Harga Roll</a></li>
                     @endif
                     <li><a href="{{ route('film-stock.create') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Roll Masuk / Import</a></li>
                     <li><a href="{{ route('film-stock.usages') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Laporan Pemakaian</a></li>
                 </ul>
             </li>
 
-            <li class="dropdown">
-                <a href="javascript:void(0)">
-                    <iconify-icon icon="mdi:handshake-outline" class="menu-icon"></iconify-icon>
-                    <span>Mitra & Non-Franchise</span>
-                </a>
-                <ul class="sidebar-submenu">
-                    <li><a href="{{ route('mitras.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Data Mitra</a></li>
-                    <li><a href="{{ route('mitra-invoices.index') }}"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>Invoice Mitra</a></li>
-                </ul>
-            </li>
 
             <li class="dropdown">
                 <a href="javascript:void(0)">

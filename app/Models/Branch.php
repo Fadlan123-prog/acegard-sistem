@@ -35,7 +35,10 @@ class Branch extends Model
     ];
 
     /** Kategori cabang (franchise / non-franchise); menentukan harga roll antar cabang. */
-    public const OWNERSHIP_TYPES = Mitra::TYPES;
+    public const OWNERSHIP_TYPES = [
+        'franchise'     => 'Franchise',
+        'non_franchise' => 'Non-Franchise',
+    ];
 
     public function getOwnershipLabelAttribute(): ?string
     {

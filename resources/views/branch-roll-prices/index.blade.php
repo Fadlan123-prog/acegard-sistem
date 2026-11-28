@@ -23,9 +23,8 @@
         @endslot
 
         <x-ui.alert type="info" class="mb-4">
-            Satu daftar harga untuk semua penjualan roll: Invoice Mitra (pusat ke mitra) dan Invoice Roll Antar Cabang.
-            Harga per roll utuh, per nama film (berlaku untuk mobil dan gedung), menurut kategori pembeli: Franchise atau
-            Non-Franchise. Untuk antar cabang, kategori diambil dari pengaturan cabang pembeli di menu Cabang.
+            Harga per roll utuh, per nama film (berlaku untuk mobil dan gedung), menurut kategori cabang pembeli:
+            Franchise atau Non-Franchise. Kategori diatur di data Cabang.
             Harga kosong atau 0 berarti belum diatur dan film itu tidak bisa dijual. Invoice yang sudah dibuat tidak
             berubah kalau harga diganti.
         </x-ui.alert>
@@ -35,7 +34,7 @@
                 <thead>
                     <tr>
                         <th>Film</th>
-                        <th style="min-width:200px;">{{ $ownerships['mitra'] }} (Rp)</th>
+                        <th style="min-width:200px;">{{ $ownerships['franchise'] }} (Rp)</th>
                         <th style="min-width:200px;">{{ $ownerships['non_franchise'] }} (Rp)</th>
                     </tr>
                 </thead>
@@ -47,8 +46,8 @@
                                 {{ $f->name }}
                                 @if(!in_array(strtoupper(trim($f->name)), $carNames, true))<x-ui.badge variant="info" size="sm" class="ms-1">Hanya gedung</x-ui.badge>@endif
                             </td>
-                            <td><input type="number" min="0" step="1000" name="prices[{{ $f->id }}][mitra]" class="form-control"
-                                       value="{{ $row && $row->price_mitra > 0 ? (int) $row->price_mitra : '' }}" placeholder="Belum diatur"></td>
+                            <td><input type="number" min="0" step="1000" name="prices[{{ $f->id }}][franchise]" class="form-control"
+                                       value="{{ $row && $row->price_franchise > 0 ? (int) $row->price_franchise : '' }}" placeholder="Belum diatur"></td>
                             <td><input type="number" min="0" step="1000" name="prices[{{ $f->id }}][non_franchise]" class="form-control"
                                        value="{{ $row && $row->price_non_franchise > 0 ? (int) $row->price_non_franchise : '' }}" placeholder="Belum diatur"></td>
                         </tr>

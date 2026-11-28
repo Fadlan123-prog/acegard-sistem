@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Branch;
 use App\Models\BranchRollInvoice;
-use App\Models\MitraRollPrice;
+use App\Models\FilmRollPrice;
 use App\Models\FilmRollEntry;
 use App\Models\FilmStockPool;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,7 +26,7 @@ class BranchRollInvoiceTest extends TestCase
         parent::setUp();
 
         $this->seller = Branch::factory()->create();
-        $this->buyer = Branch::factory()->create(['ownership_type' => 'mitra']);
+        $this->buyer = Branch::factory()->create(['ownership_type' => 'franchise']);
 
         $this->categoryId = DB::table('category_products')->insertGetId(['name' => 'ARMOR', 'duration' => 5, 'created_at' => now(), 'updated_at' => now()]);
         $productId = DB::table('products')->insertGetId(['name' => 'A40', 'category_id' => $this->categoryId, 'created_at' => now(), 'updated_at' => now()]);
@@ -54,9 +54,9 @@ class BranchRollInvoiceTest extends TestCase
             ]);
         }
 
-        // Daftar harga yang sama dengan Invoice Mitra: dikunci ke katalog gedung, dicocokkan lewat nama film.
+        // Daftar harga dikunci ke katalog gedung, roll mobil dicocokkan lewat nama film.
         $this->buildingCategoryId = DB::table('category_product_building')->insertGetId(['name' => 'ARMOR', 'duration' => 5, 'created_at' => now(), 'updated_at' => now()]);
-        MitraRollPrice::create(['category_product_building_id' => $this->buildingCategoryId, 'price_mitra' => 2500000, 'price_non_franchise' => 2000000, 'unit' => 'roll']);
+        FilmRollPrice::create(['category_product_building_id' => $this->buildingCategoryId, 'price_franchise' => 2500000, 'price_non_franchise' => 2000000, 'unit' => 'roll']);
     }
 
     private function as(string $role, Branch $branch)
@@ -109,7 +109,7 @@ class BranchRollInvoiceTest extends TestCase
         $this->assertSame(0, BranchRollInvoice::count());
         $this->assertSame(0, FilmRollEntry::where('status', 'in_transit')->count());
 
-        MitraRollPrice::query()->update(['price_mitra' => 0]);
+        FilmRollPrice::query()->update(['price_franchise' => 0]);
         $this->as('admin', $this->seller)->post(route('branch-roll-invoices.store'), $this->payload(1))->assertSessionHasErrors('items');
         $this->assertSame(0, BranchRollInvoice::count());
     }
@@ -229,17 +229,17 @@ class BranchRollInvoiceTest extends TestCase
     {
         $id = $this->buildingCategoryId;
         $this->as('admin', $this->seller)->get(route('branch-roll-prices.index'))->assertForbidden();
-        $this->as('admin', $this->seller)->put(route('branch-roll-prices.update'), ['prices' => [$id => ['mitra' => 1]]])->assertForbidden();
+        $this->as('admin', $this->seller)->put(route('branch-roll-prices.update'), ['prices' => [$id => ['franchise' => 1]]])->assertForbidden();
 
         $this->as('owner', $this->seller)->get(route('branch-roll-prices.index'))->assertOk()->assertSee('ARMOR')->assertSee('Franchise')->assertSee('Non-Franchise');
-        $this->as('finance', $this->seller)->put(route('branch-roll-prices.update'), ['prices' => [$id => ['mitra' => 3100000, 'non_franchise' => 3500000]]])->assertSessionHasNoErrors();
-        $row = MitraRollPrice::where('category_product_building_id', $id)->first();
-        $this->assertEquals(3100000, (float) $row->price_mitra);
+        $this->as('finance', $this->seller)->put(route('branch-roll-prices.update'), ['prices' => [$id => ['franchise' => 3100000, 'non_franchise' => 3500000]]])->assertSessionHasNoErrors();
+        $row = FilmRollPrice::where('category_product_building_id', $id)->first();
+        $this->assertEquals(3100000, (float) $row->price_franchise);
         $this->assertEquals(3500000, (float) $row->price_non_franchise);
 
         // Harga dikosongkan = 0 = tidak bisa dijual lagi (baris tetap ada karena dirujuk Invoice Mitra)
-        $this->as('owner', $this->seller)->put(route('branch-roll-prices.update'), ['prices' => [$id => ['mitra' => '', 'non_franchise' => '']]]);
-        $this->assertEquals(0, (float) MitraRollPrice::where('category_product_building_id', $id)->value('price_mitra'));
+        $this->as('owner', $this->seller)->put(route('branch-roll-prices.update'), ['prices' => [$id => ['franchise' => '', 'non_franchise' => '']]]);
+        $this->assertEquals(0, (float) FilmRollPrice::where('category_product_building_id', $id)->value('price_franchise'));
         $this->as('admin', $this->seller)->post(route('branch-roll-invoices.store'), $this->payload(1))->assertSessionHasErrors('items');
     }
 
@@ -247,14 +247,14 @@ class BranchRollInvoiceTest extends TestCase
     {
         $invoice = $this->createInvoice(1);
 
-        $this->as('owner', $this->seller)->put(route('branch-roll-prices.update'), ['prices' => [$this->buildingCategoryId => ['mitra' => 9000000]]]);
+        $this->as('owner', $this->seller)->put(route('branch-roll-prices.update'), ['prices' => [$this->buildingCategoryId => ['franchise' => 9000000]]]);
 
         $this->assertEquals(2500000, (float) $invoice->fresh()->total_amount);
     }
 
     public function test_harga_mengikuti_kategori_cabang_pembeli(): void
     {
-        foreach (['mitra' => 2500000, 'non_franchise' => 2000000] as $type => $price) {
+        foreach (['franchise' => 2500000, 'non_franchise' => 2000000] as $type => $price) {
             BranchRollInvoice::query()->delete();
             FilmRollEntry::query()->update(['status' => 'in_warehouse']);
             $this->buyer->update(['ownership_type' => $type]);
@@ -277,7 +277,7 @@ class BranchRollInvoiceTest extends TestCase
 
     public function test_harga_kategori_yang_belum_diatur_menolak_walau_kategori_lain_ada(): void
     {
-        MitraRollPrice::query()->update(['price_non_franchise' => 0]);
+        FilmRollPrice::query()->update(['price_non_franchise' => 0]);
         $this->buyer->update(['ownership_type' => 'non_franchise']);
 
         $this->as('admin', $this->seller)->post(route('branch-roll-invoices.store'), $this->payload(1))->assertSessionHasErrors('items');
@@ -294,7 +294,7 @@ class BranchRollInvoiceTest extends TestCase
             ->assertOk()->assertJsonPath('0.price', 2000000);
     }
 
-    public function test_daftar_harga_sama_dengan_invoice_mitra_dan_berlaku_untuk_roll_mobil_dan_gedung(): void
+    public function test_satu_daftar_harga_berlaku_untuk_roll_mobil_dan_gedung(): void
     {
         $buildingPool = FilmStockPool::create([
             'branch_id' => $this->seller->id, 'category_product_building_id' => $this->buildingCategoryId,
@@ -303,10 +303,8 @@ class BranchRollInvoiceTest extends TestCase
         ]);
         $service = app(\App\Services\BranchRollSaleService::class);
 
-        // Harga yang dipakai invoice mitra (MitraRollPrice::priceFor) sama persis dengan roll mobil dan gedung antar cabang.
-        $mitraPrice = MitraRollPrice::where('category_product_building_id', $this->buildingCategoryId)->first()->priceFor('mitra');
-        $this->assertSame($mitraPrice, $service->priceFor($this->pool, 'mitra')['price']);
-        $this->assertSame($mitraPrice, $service->priceFor($buildingPool, 'mitra')['price']);
+        $this->assertSame(2500000.0, $service->priceFor($this->pool, 'franchise')['price']);
+        $this->assertSame(2500000.0, $service->priceFor($buildingPool, 'franchise')['price']);
     }
 
     public function test_halaman_harga_menandai_film_hanya_gedung(): void
@@ -315,11 +313,5 @@ class BranchRollInvoiceTest extends TestCase
 
         $this->as('owner', $this->seller)->get(route('branch-roll-prices.index'))
             ->assertOk()->assertSee('FLEX ONE WAY')->assertSee('Hanya gedung');
-    }
-
-    public function test_kosakata_franchise_sama_antara_mitra_dan_cabang(): void
-    {
-        $this->assertSame(\App\Models\Mitra::TYPES, Branch::OWNERSHIP_TYPES);
-        $this->assertSame('Franchise', (new \App\Models\Mitra(['type' => 'mitra']))->type_label);
     }
 }

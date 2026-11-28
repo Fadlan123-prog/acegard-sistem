@@ -66,8 +66,6 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\PurchaseReceiptController;
 use App\Http\Controllers\PurchaseReportController;
 use App\Http\Controllers\SupplierController;
-use App\Http\Controllers\MitraController;
-use App\Http\Controllers\MitraInvoiceController;
 use App\Http\Controllers\DealerController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ShiftController;
@@ -772,25 +770,6 @@ Route::middleware(['auth', 'branch.access', 'role:superadmin|admin|purchasing|it
         });
         Route::get('/purchase-receipts/{receipt}', [PurchaseReceiptController::class, 'show'])->name('purchase-receipts.show');
         Route::resource('suppliers', SupplierController::class)->except(['show']);
-    });
-
-/*
-|--------------------------------------------------------------------------
-| MITRA & INVOICE MITRA — pembelian bahan dari pusat ke mitra/non-franchise.
-| Tidak pakai middleware branch.access: mitra bukan branch, ini transaksi
-| pusat (tidak terikat cabang aktif user).
-| superadmin, admin, purchasing, finance
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware(['auth', 'role:superadmin|admin|purchasing|finance|it_manager'])
-    ->group(function () {
-        Route::resource('mitras', MitraController::class)->except(['show']);
-
-        Route::resource('mitra-invoices', MitraInvoiceController::class)->only(['index', 'create', 'store', 'show']);
-        Route::patch('mitra-invoices/{mitraInvoice}/mark-paid', [MitraInvoiceController::class, 'markPaid'])->name('mitra-invoices.mark-paid');
-        Route::get('mitra-invoices/{mitraInvoice}/pdf', [MitraInvoiceController::class, 'download'])->name('mitra-invoices.pdf');
-        Route::get('mitra-invoices-available-stock', [MitraInvoiceController::class, 'availableStock'])->name('mitra-invoices.available-stock');
     });
 
 /*

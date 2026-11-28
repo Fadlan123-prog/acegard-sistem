@@ -20,7 +20,7 @@ class CatalogUsage
         'film_stock_pools'                     => 'stok roll',
         'film_stock_usages'                    => 'pemakaian roll',
         'film_complaint_items'                 => 'item komplain/replacement',
-        'mitra_roll_prices'                    => 'harga roll mitra',
+        'film_roll_prices'                     => 'harga roll',
         'mitra_invoice_items'                  => 'invoice mitra',
         'purchase_items'                       => 'item pembelian',
         'commissions'                          => 'komisi',

@@ -6,11 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Kategori cabang untuk harga roll antar cabang. Nilainya sama dengan mitras.type
-     * (mitra = franchise, non_franchise) supaya satu daftar harga (mitra_roll_prices)
-     * dipakai Invoice Mitra dan Invoice Roll Antar Cabang.
-     */
+    /** Kategori cabang (franchise / non_franchise) untuk menentukan harga roll antar cabang. */
     public function up(): void
     {
         Schema::table('branches', function (Blueprint $table) {

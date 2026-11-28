@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('invoice_number')->unique();
             $table->foreignId('from_branch_id')->constrained('branches');
             $table->foreignId('to_branch_id')->constrained('branches');
-            // Kategori cabang pembeli saat invoice dibuat (mitra = franchise / non_franchise), mengikuti mitras.type.
+            // Kategori cabang pembeli saat invoice dibuat (franchise / non_franchise).
             $table->string('buyer_ownership_type', 30)->nullable();
             $table->date('invoice_date');
             $table->date('due_date')->nullable();

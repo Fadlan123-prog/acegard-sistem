@@ -10,7 +10,7 @@ use App\Models\CategoryProduct;
 use App\Models\CategoryProductBuilding;
 use App\Models\FilmRollEntry;
 use App\Models\FilmStockPool;
-use App\Models\MitraRollPrice;
+use App\Models\FilmRollPrice;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -37,13 +37,13 @@ class BranchRollSaleService
     }
 
     /**
-     * Baris daftar harga (mitra_roll_prices) untuk film pool ini. Daftar harga yang sama dipakai
-     * Invoice Mitra, dikunci ke katalog gedung; roll mobil dicocokkan lewat nama film.
+     * Baris daftar harga (film_roll_prices) untuk film pool ini. Daftar harga yang sama dipakai
+     * katalog harga gedung; roll mobil dicocokkan lewat nama film.
      */
-    public function rollPriceRowFor(FilmStockPool $pool): ?MitraRollPrice
+    public function rollPriceRowFor(FilmStockPool $pool): ?FilmRollPrice
     {
         if ($pool->category_product_building_id) {
-            return MitraRollPrice::where('category_product_building_id', $pool->category_product_building_id)->first();
+            return FilmRollPrice::where('category_product_building_id', $pool->category_product_building_id)->first();
         }
 
         $name = $pool->category_product_id
@@ -53,10 +53,10 @@ class BranchRollSaleService
 
         $categoryId = CategoryProductBuilding::whereRaw('UPPER(TRIM(name)) = ?', [$name])->value('id');
 
-        return $categoryId ? MitraRollPrice::where('category_product_building_id', $categoryId)->first() : null;
+        return $categoryId ? FilmRollPrice::where('category_product_building_id', $categoryId)->first() : null;
     }
 
-    /** Harga per roll menurut kategori cabang pembeli (mitra = franchise / non_franchise); null bila belum diatur. */
+    /** Harga per roll menurut kategori cabang pembeli (franchise / non_franchise); null bila belum diatur. */
     public function priceFor(FilmStockPool $pool, ?string $ownershipType): ?array
     {
         if (!$ownershipType) {
