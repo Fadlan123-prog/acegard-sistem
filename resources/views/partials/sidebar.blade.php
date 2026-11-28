@@ -86,12 +86,14 @@
                     <span>Cuti &amp; Izin</span>
                 </a>
             </li>
+            @unlessrole('superadmin')
             <li>
                 <a href="{{ route('my-kasbon.index') }}">
                     <iconify-icon icon="solar:cash-outline" class="menu-icon"></iconify-icon>
                     <span>Kasbon</span>
                 </a>
             </li>
+            @endunlessrole
 
             {{-- ═══════════════════════════════════════════
                  TEKNISI & KENEK

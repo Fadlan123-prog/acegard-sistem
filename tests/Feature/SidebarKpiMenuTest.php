@@ -30,4 +30,16 @@ class SidebarKpiMenuTest extends TestCase
         $this->assertStringNotContainsString('Ringkasan Eksekutif', $html);
         $this->assertStringNotContainsString('Dashboard Advertising', $html);
     }
+
+    public function test_my_kasbon_menu_is_hidden_for_superadmin_but_shown_to_admin(): void
+    {
+        $link = 'href="' . route('my-kasbon.index') . '"';
+        $branch = Branch::factory()->create();
+
+        $super = $this->userWithRole('superadmin', $branch);
+        $this->assertStringNotContainsString($link, $this->actingAs($super)->get('/kpi/targets')->assertOk()->getContent());
+
+        $admin = $this->userWithRole('admin', $branch);
+        $this->assertStringContainsString($link, $this->actingAs($admin)->get('/kpi/targets')->assertOk()->getContent());
+    }
 }
